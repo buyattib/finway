@@ -1,5 +1,6 @@
 import compression from "compression";
 import express from "express";
+import helmet from "helmet";
 import morgan from "morgan";
 
 // Short-circuit the type-checking of the built output.
@@ -9,8 +10,26 @@ const PORT = Number.parseInt(process.env.PORT || "3000");
 
 const app = express();
 
-app.use(compression());
+// no ending slashes for SEO reasons: https://github.com/epicweb-dev/epic-stack/discussions/108
+app.get('/*splat', (req, res, next) => {
+	if (req.path.endsWith('/') && req.path.length > 1) {
+		const query = req.url.slice(req.path.length)
+    const safepath = req.path.slice(0, -1).replace(/\/+/g, '/')
+		res.redirect(302, safepath + query)
+	} else {
+		next()
+	}
+})
+
+// middleware to gzip responses and improve performance
+app.use(compression()); 
+
+// express config for security reasons: http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
 app.disable("x-powered-by");
+
+// Helmet is a middleware function that sets security-related HTTP response headers: https://expressjs.com/es/advanced/best-practice-security.html
+app.use(helmet())
+
 
 if (DEVELOPMENT) {
   console.log("Starting development server");
@@ -22,6 +41,7 @@ if (DEVELOPMENT) {
   app.use(viteDevServer.middlewares);
   app.use(async (req, res, next) => {
     try {
+      // app.ts is the actual "api", here its load on every request in middleware so we get hot reloads
       const source = await viteDevServer.ssrLoadModule("./server/app.ts");
       return await source.app(req, res, next);
     } catch (error) {
@@ -33,12 +53,19 @@ if (DEVELOPMENT) {
   });
 } else {
   console.log("Starting production server");
+
+	// RRv7 fingerprints (adds a hash to the name) its assets so we can cache forever.
   app.use(
     "/assets",
     express.static("build/client/assets", { immutable: true, maxAge: "1y" }),
   );
-  app.use(morgan("tiny"));
+
+  // Everything else is cached for an hour
   app.use(express.static("build/client", { maxAge: "1h" }));
+
+  // logger
+  app.use(morgan("tiny"));
+
   app.use(await import(BUILD_PATH).then((mod) => mod.app));
 }
 
