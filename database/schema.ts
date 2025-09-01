@@ -1,14 +1,27 @@
-// import { integer, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core'
-import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { sql } from 'drizzle-orm'
+import { sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { cuid2 } from 'drizzle-cuid2/sqlite'
 
-// const timestamps = {
-// 	createdAt: timestamp().defaultNow().notNull(),
-// 	updatedAt: timestamp(),
-// 	deletedAt: timestamp(),
-// }
+const base = {
+	createdAt: text()
+		.notNull()
+		.default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: text()
+		.notNull()
+		.default(sql`CURRENT_TIMESTAMP`)
+		.$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+	deletedAt: text().$type<string | null>().default(null),
+}
 
-export const users = sqliteTable('users', {
-	// ...timestamps,
-	id: int().primaryKey({ autoIncrement: true }),
-	email: text().notNull().unique(),
-})
+export const users = sqliteTable(
+	'users',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		email: text().notNull(),
+	},
+	table => [uniqueIndex('users_email_idx').on(table.email)],
+	// table => ({
+	// 	usersEmailIdx: uniqueIndex('users_email_idx').on(table.email),
+	// }),
+)

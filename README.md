@@ -1,8 +1,6 @@
-## Run docker compose to spin up the db
+## Install dependencies
 
--   docker compose --project-name finhub -f compose.yaml up
--   docker compose --project-name finhub -f compose.yaml up --build
--   docker compose --project-name finhub -f compose.yaml down
+-   pnpm install
 
 ## Run the local dev server
 

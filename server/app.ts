@@ -20,7 +20,7 @@ if (!process.env.DB_FILE_NAME) throw new Error('DB_FILE_NAME is required')
 
 // connect to db and add to context for loaders/actions to use
 const client = createClient({ url: process.env.DB_FILE_NAME })
-const db = drizzle(client, { schema })
+const db = drizzle(client, { schema, logger: true })
 app.use((_, __, next) => DatabaseContext.run(db, next))
 
 // RRv7 request handler (analogous to defining the endpoints in an express api)
