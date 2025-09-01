@@ -1,7 +1,7 @@
 import { createRequestHandler } from '@react-router/express'
-import { drizzle } from 'drizzle-orm/postgres-js'
+import { drizzle } from 'drizzle-orm/libsql'
+import { createClient } from '@libsql/client'
 import express from 'express'
-import postgres from 'postgres'
 import 'react-router'
 
 import { DatabaseContext } from '~/database/context'
@@ -16,10 +16,10 @@ declare module 'react-router' {
 // This express app is the one that handles all incoming requests through RRv7
 export const app = express()
 
-if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required')
+if (!process.env.DB_FILE_NAME) throw new Error('DB_FILE_NAME is required')
 
 // connect to db and add to context for loaders/actions to use
-const client = postgres(process.env.DATABASE_URL)
+const client = createClient({ url: process.env.DB_FILE_NAME })
 const db = drizzle(client, { schema })
 app.use((_, __, next) => DatabaseContext.run(db, next))
 

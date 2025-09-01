@@ -1,7 +1,14 @@
-import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
+// import { integer, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core'
+import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
-export const guestBook = pgTable("guestBook", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 255 }).notNull(),
-  email: varchar({ length: 255 }).notNull().unique(),
-});
+// const timestamps = {
+// 	createdAt: timestamp().defaultNow().notNull(),
+// 	updatedAt: timestamp(),
+// 	deletedAt: timestamp(),
+// }
+
+export const users = sqliteTable('users', {
+	// ...timestamps,
+	id: int().primaryKey({ autoIncrement: true }),
+	email: text().notNull().unique(),
+})

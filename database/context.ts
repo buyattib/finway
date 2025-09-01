@@ -1,17 +1,14 @@
-import { AsyncLocalStorage } from "node:async_hooks";
+import { AsyncLocalStorage } from 'node:async_hooks'
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
+import * as schema from './schema'
 
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+export const DatabaseContext = new AsyncLocalStorage<LibSQLDatabase<typeof schema>>()
 
-import * as schema from "./schema";
-
-export const DatabaseContext = new AsyncLocalStorage<
-  PostgresJsDatabase<typeof schema>
->();
-
+// in loaders/actions, db is accessed through this function
 export function database() {
-  const db = DatabaseContext.getStore();
-  if (!db) {
-    throw new Error("DatabaseContext not set");
-  }
-  return db;
+	const db = DatabaseContext.getStore()
+	if (!db) {
+		throw new Error('DatabaseContext not set')
+	}
+	return db
 }
