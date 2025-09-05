@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import compression from 'compression'
 import express from 'express'
 import helmet from 'helmet'
@@ -25,11 +26,22 @@ app.get('/*splat', (req, res, next) => {
 // middleware to gzip responses and improve performance
 app.use(compression())
 
-// express config for security reasons: http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
-app.disable('x-powered-by')
-
-// Helmet is a middleware function that sets security-related HTTP response headers: https://expressjs.com/es/advanced/best-practice-security.html
-app.use(helmet())
+// // Helmet is a middleware function that sets security-related HTTP response headers: https://expressjs.com/es/advanced/best-practice-security.html
+app.use((req, res, next) => {
+	const nonce = crypto.randomBytes(32).toString('base64')
+	res.locals.cspNonce = nonce
+	const _helmet = helmet({
+		contentSecurityPolicy:
+			process.env.NODE_MODE === 'production'
+				? {
+						directives: {
+							'script-src': ["'self'", `'nonce-${nonce}'`],
+						},
+				  }
+				: false,
+	})
+	_helmet(req, res, next)
+})
 
 // Add rate limiting to all requests
 const defaultLimiter = {
@@ -52,8 +64,32 @@ app.use((req, res, next) => {
 		}
 		return strongLimiter(req, res, next)
 	}
+
+	// the verify route is a special case because it's a GET route that
+	// can have a token in the query string
+	if (req.path.includes('/verify')) {
+		return strongestLimiter(req, res, next)
+	}
+
 	return generalLimiter(req, res, next)
 })
+
+// logger
+morgan.token('url', req => {
+	try {
+		return decodeURIComponent(req.url ?? '')
+	} catch {
+		return req.url ?? ''
+	}
+})
+app.use(
+	morgan('tiny', {
+		skip: (req, res) =>
+			res.statusCode === 200 &&
+			(req.url?.startsWith('/resources/images') ||
+				req.url?.startsWith('/resources/healthcheck')),
+	}),
+)
 
 if (DEVELOPMENT) {
 	console.log('Starting development server')
@@ -65,7 +101,7 @@ if (DEVELOPMENT) {
 	app.use(viteDevServer.middlewares)
 	app.use(async (req, res, next) => {
 		try {
-			// app.ts is the actual "api", here its load on every request in middleware so we get hot reloads
+			// app.ts is the actual "api", here it loads on every request in middleware so we get hot reloads
 			const source = await viteDevServer.ssrLoadModule('./server/app.ts')
 			return await source.app(req, res, next)
 		} catch (error) {
@@ -83,9 +119,6 @@ if (DEVELOPMENT) {
 
 	// Everything else is cached for an hour
 	app.use(express.static('build/client', { maxAge: '1h' }))
-
-	// logger
-	app.use(morgan('tiny'))
 
 	app.use(await import(BUILD_PATH).then(mod => mod.app))
 }
