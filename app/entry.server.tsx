@@ -1,8 +1,15 @@
 import { PassThrough } from 'node:stream'
 import { isbot } from 'isbot'
 import { createReadableStreamFromReadable } from '@react-router/node'
-import { ServerRouter, type AppLoadContext, type EntryContext } from 'react-router'
-import { renderToPipeableStream, type RenderToPipeableStreamOptions } from 'react-dom/server'
+import {
+	ServerRouter,
+	type AppLoadContext,
+	type EntryContext,
+} from 'react-router'
+import {
+	renderToPipeableStream,
+	type RenderToPipeableStreamOptions,
+} from 'react-dom/server'
 
 import { NonceProvider } from './utils/nonce-provider'
 

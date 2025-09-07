@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 						directives: {
 							'script-src': ["'self'", `'nonce-${nonce}'`],
 						},
-				  }
+					}
 				: false,
 	})
 	_helmet(req, res, next)
@@ -115,7 +115,13 @@ if (DEVELOPMENT) {
 	console.log('Starting production server')
 
 	// RRv7 fingerprints (adds a hash to the name) its assets so we can cache forever.
-	app.use('/assets', express.static('build/client/assets', { immutable: true, maxAge: '1y' }))
+	app.use(
+		'/assets',
+		express.static('build/client/assets', {
+			immutable: true,
+			maxAge: '1y',
+		}),
+	)
 
 	// Everything else is cached for an hour
 	app.use(express.static('build/client', { maxAge: '1h' }))

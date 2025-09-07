@@ -8,7 +8,7 @@ export default defineConfig(({ isSsrBuild }) => ({
 		rollupOptions: isSsrBuild
 			? {
 					input: './server/app.ts',
-			  }
+				}
 			: undefined,
 	},
 	plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],

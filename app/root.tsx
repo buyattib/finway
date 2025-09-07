@@ -1,4 +1,10 @@
-import { isRouteErrorResponse, Links, Outlet, Scripts, ScrollRestoration } from 'react-router'
+import {
+	isRouteErrorResponse,
+	Links,
+	Outlet,
+	Scripts,
+	ScrollRestoration,
+} from 'react-router'
 import type { Route } from './+types/root'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 
@@ -50,7 +56,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<meta name='description' content='The hub for your finances' />
 				<meta name='robots' content='noindex, nofollow' />
 				<meta charSet='utf-8' />
-				<meta name='viewport' content='width=device-width, initial-scale=1' />
+				<meta
+					name='viewport'
+					content='width=device-width, initial-scale=1'
+				/>
 				<Links />
 			</head>
 			<body className='min-h-svh flex flex-col w-full'>

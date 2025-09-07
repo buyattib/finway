@@ -32,7 +32,10 @@ export async function action({ request }: Route.ActionArgs) {
 	const formData = await request.formData()
 	await checkHoneypot(formData)
 
-	const submission = await parseWithZod(formData, { schema: LoginFormSchema, async: true })
+	const submission = await parseWithZod(formData, {
+		schema: LoginFormSchema,
+		async: true,
+	})
 	if (submission.status !== 'success') {
 		return data(
 			{
@@ -47,7 +50,8 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function Login({ actionData }: Route.ComponentProps) {
 	const navigation = useNavigation()
-	const isSubmitting = navigation.formAction === '/login' && navigation.state === 'submitting'
+	const isSubmitting =
+		navigation.formAction === '/login' && navigation.state === 'submitting'
 
 	const [form, fields] = useForm({
 		id: 'login-form',
@@ -77,7 +81,9 @@ export default function Login({ actionData }: Route.ComponentProps) {
 						<Field
 							labelProps={{ children: 'Email' }}
 							inputProps={{
-								...getInputProps(fields.email, { type: 'email' }),
+								...getInputProps(fields.email, {
+									type: 'email',
+								}),
 								autoFocus: true,
 								className: 'lowercase',
 								autoComplete: 'email',
@@ -89,8 +95,15 @@ export default function Login({ actionData }: Route.ComponentProps) {
 					</Form>
 				</CardContent>
 				<CardFooter>
-					<Button form={form.id} type='submit' width='full' disabled={isSubmitting}>
-						{isSubmitting && <LoaderCircleIcon className='animate-spin' />}
+					<Button
+						form={form.id}
+						type='submit'
+						width='full'
+						disabled={isSubmitting}
+					>
+						{isSubmitting && (
+							<LoaderCircleIcon className='animate-spin' />
+						)}
 						Submit
 					</Button>
 				</CardFooter>

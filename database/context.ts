@@ -3,7 +3,9 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 
 import * as schema from './schema'
 
-export const DatabaseContext = new AsyncLocalStorage<LibSQLDatabase<typeof schema>>()
+export const DatabaseContext = new AsyncLocalStorage<
+	LibSQLDatabase<typeof schema>
+>()
 
 // in loaders/actions, db is accessed through this function
 export function database() {

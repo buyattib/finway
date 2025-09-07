@@ -5,7 +5,10 @@ export default function PublicLayout() {
 	return (
 		<>
 			<header className='flex items-center p-6 border-b-2 border-b-secondary gap-2'>
-				<Link to='/' className='flex items-center gap-2 font-semibold text-primary text-lg'>
+				<Link
+					to='/'
+					className='flex items-center gap-2 font-semibold text-primary text-lg'
+				>
 					<FinhubIcon />
 					Finhub
 				</Link>
