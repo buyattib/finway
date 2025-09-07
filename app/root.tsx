@@ -1,16 +1,9 @@
-import {
-	isRouteErrorResponse,
-	Link,
-	Links,
-	Outlet,
-	Scripts,
-	ScrollRestoration,
-	useNavigation,
-} from 'react-router'
+import { isRouteErrorResponse, Links, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import type { Route } from './+types/root'
-import { database } from '~/database/context'
+import { HoneypotProvider } from 'remix-utils/honeypot/react'
 
 import { useNonce } from './utils/nonce-provider'
+import { honeypot } from './utils/honeypot'
 
 import './styles/fonts.css'
 import './styles/tailwind.css'
@@ -32,25 +25,22 @@ export const links: Route.LinksFunction = () => [
 ]
 
 export async function loader() {
-	const db = database()
-	const users = db.query.users.findMany({
-		columns: {
-			id: true,
-			email: true,
-		},
-	})
-	// console.log(users)
-	return {}
+	const honeyProps = await honeypot.getInputProps()
+	// check auth and redirect ?
+	return {
+		honeyProps,
+	}
 }
 
-export default function App() {
-	return <Outlet />
+export default function App({ loaderData }: Route.ComponentProps) {
+	return (
+		<HoneypotProvider {...loaderData.honeyProps}>
+			<Outlet />
+		</HoneypotProvider>
+	)
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-	const navigation = useNavigation()
-	const isNavigating = Boolean(navigation.location)
-
 	const nonce = useNonce()
 
 	return (
@@ -63,10 +53,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<meta name='viewport' content='width=device-width, initial-scale=1' />
 				<Links />
 			</head>
-			<body>
-				{isNavigating && 'Navigating...'}
-				<Link to='/accounts'>Accounts</Link>
-				<Link to='/'>Dashboard</Link>
+			<body className='min-h-svh flex flex-col w-full'>
 				{children}
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />

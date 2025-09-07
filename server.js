@@ -57,7 +57,7 @@ const strongLimiter = rateLimit({
 })
 const strongestLimiter = rateLimit({ ...defaultLimiter, limit: 10 })
 app.use((req, res, next) => {
-	const sensiblePaths = ['/signup']
+	const sensiblePaths = ['/login']
 	if (req.method !== 'GET' && req.method !== 'HEAD') {
 		if (sensiblePaths.some(sPath => req.path.includes(sPath))) {
 			return strongestLimiter(req, res, next)

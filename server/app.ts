@@ -9,7 +9,6 @@ import * as schema from '~/database/schema'
 
 declare module 'react-router' {
 	interface AppLoadContext {
-		VALUE_FROM_EXPRESS: string
 		cspNonce: string
 	}
 }
@@ -17,6 +16,8 @@ declare module 'react-router' {
 declare global {
 	var __libsql: ReturnType<typeof createClient> | undefined
 }
+
+// TODO: add zod validation for env variables
 
 // This express app is the one that handles all incoming requests through RRv7
 export const app = express()
@@ -37,7 +38,6 @@ app.use(
 		build: () => import('virtual:react-router/server-build'),
 		getLoadContext(_, res) {
 			return {
-				VALUE_FROM_EXPRESS: 'Hello from Express',
 				cspNonce: res.locals.cspNonce,
 			}
 		},
