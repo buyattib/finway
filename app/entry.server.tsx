@@ -10,6 +10,7 @@ import {
 	renderToPipeableStream,
 	type RenderToPipeableStreamOptions,
 } from 'react-dom/server'
+import './utils/env'
 
 import { NonceProvider } from './utils/nonce-provider'
 

@@ -39,9 +39,9 @@ export async function action({ request }: Route.ActionArgs) {
 	if (submission.status !== 'success') {
 		return data(
 			{
-				result: submission.reply(),
+				submission: submission.reply(),
 			},
-			{ status: submission.status === 'error' ? 400 : 200 },
+			{ status: 400 },
 		)
 	}
 
@@ -56,7 +56,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
 	const [form, fields] = useForm({
 		id: 'login-form',
 		constraint: getZodConstraint(LoginFormSchema),
-		lastResult: actionData?.result,
+		lastResult: actionData?.submission,
 		shouldRevalidate: 'onBlur',
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: LoginFormSchema })
@@ -67,7 +67,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
 		<>
 			<title>Login to Finhub</title>
 
-			<Card className='mx-auto w-full max-w-md gap-4'>
+			<Card className='mx-auto w-full max-w-lg gap-4'>
 				<CardHeader>
 					<CardTitle>Welcome!</CardTitle>
 					<CardDescription>

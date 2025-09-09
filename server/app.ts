@@ -17,8 +17,6 @@ declare global {
 	var __libsql: ReturnType<typeof createClient> | undefined
 }
 
-// TODO: add zod validation for env variables
-
 // This express app is the one that handles all incoming requests through RRv7
 export const app = express()
 

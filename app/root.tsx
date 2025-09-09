@@ -1,20 +1,41 @@
+import type { Route } from './+types/root'
 import {
+	data,
 	isRouteErrorResponse,
 	Links,
 	Outlet,
 	Scripts,
 	ScrollRestoration,
+	useLoaderData,
 } from 'react-router'
-import type { Route } from './+types/root'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import { parseWithZod } from '@conform-to/zod/v4'
 
 import { useNonce } from './utils/nonce-provider'
 import { honeypot } from './utils/honeypot'
+import { themeCookie, getTheme, ThemeFormSchema, useTheme } from './utils/theme'
 
-import './styles/fonts.css'
-import './styles/tailwind.css'
+import faviconAssetUrl from './assets/favicon.svg?url'
+import fontsCssHref from './styles/fonts.css?url'
+import tailwindCssHref from './styles/tailwind.css?url'
 
 export const links: Route.LinksFunction = () => [
+	{
+		rel: 'preload',
+		href: fontsCssHref,
+		as: 'style',
+	},
+	{
+		rel: 'preload',
+		href: tailwindCssHref,
+		as: 'style',
+	},
+
+	{
+		rel: 'icon',
+		type: 'image/svg+xml',
+		href: faviconAssetUrl,
+	},
 	{
 		rel: 'preconnect',
 		href: 'https://fonts.googleapis.com',
@@ -28,14 +49,57 @@ export const links: Route.LinksFunction = () => [
 		rel: 'stylesheet',
 		href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
 	},
+	{
+		rel: 'stylesheet',
+		href: fontsCssHref,
+	},
+	{
+		rel: 'stylesheet',
+		href: tailwindCssHref,
+	},
 ]
 
-export async function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
 	const honeyProps = await honeypot.getInputProps()
-	// check auth and redirect ?
-	return {
-		honeyProps,
+	const theme = await getTheme(request)
+	return data({ honeyProps, theme })
+}
+
+export async function action({ request }: Route.ActionArgs) {
+	const formData = await request.formData()
+
+	if (formData.get('intent') !== 'theme-toggle') {
+		return data({ status: 'error', submission: undefined }, { status: 400 })
 	}
+
+	const submission = await parseWithZod(formData, {
+		schema: ThemeFormSchema,
+		async: true,
+	})
+
+	if (submission.status !== 'success') {
+		return data(
+			{
+				status: 'error',
+				submission: submission.reply(),
+			},
+			{ status: 400 },
+		)
+	}
+
+	return data(
+		{
+			status: 'success',
+			submission: null,
+		},
+		{
+			headers: {
+				'Set-Cookie': await themeCookie.serialize(
+					submission.value.theme,
+				),
+			},
+		},
+	)
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
@@ -48,9 +112,11 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	const nonce = useNonce()
+	const loaderData = useLoaderData<typeof loader>()
+	const theme = useTheme(loaderData.theme)
 
 	return (
-		<html lang='en'>
+		<html lang='en' className={theme}>
 			<head>
 				<title>Finhub</title>
 				<meta name='description' content='The hub for your finances' />

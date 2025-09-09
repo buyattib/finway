@@ -1,9 +1,10 @@
 import { Honeypot, SpamError } from 'remix-utils/honeypot/server'
+import { env } from './env'
 
 export const honeypot = new Honeypot({
 	nameFieldName: 'name__confirm',
-	validFromFieldName: process.env.NODE_ENV === 'test' ? null : undefined,
-	encryptionSeed: process.env.HONEYPOT_SECRET,
+	validFromFieldName: env.NODE_ENV === 'test' ? null : undefined,
+	encryptionSeed: env.HONEYPOT_SECRET,
 })
 
 export async function checkHoneypot(formData: FormData) {
