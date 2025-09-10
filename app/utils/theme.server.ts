@@ -9,11 +9,10 @@ export const themeCookie = createCookie('theme', {
 	httpOnly: true,
 })
 
-export async function getTheme(request: Request) {
-	const cookieString = request.headers.get('Cookie')
-	if (!cookieString) return 'light'
+export async function getTheme(cookie: string | null) {
+	if (!cookie) return 'light'
 
-	const parsed = await themeCookie.parse(cookieString)
+	const parsed = await themeCookie.parse(cookie)
 
 	const result = ThemeFormSchema.safeParse({ theme: parsed })
 	if (!result.success) return 'light'

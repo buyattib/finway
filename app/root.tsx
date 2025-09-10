@@ -12,10 +12,13 @@ import { HoneypotProvider } from 'remix-utils/honeypot/react'
 
 import { Toaster } from './components/ui/sonner'
 import { useTheme } from './components/theme-toggle'
+import { ShowToast } from './components/show-toast'
 
+import { getTheme, themeAction } from './utils/theme.server'
 import { useNonce } from './utils/nonce-provider'
 import { honeypot } from './utils/honeypot.server'
-import { getTheme, themeAction } from './utils/theme.server'
+import { getToast } from './utils/toast.server'
+import { combineHeaders } from './utils/headers.server'
 
 import faviconAssetUrl from './assets/favicon.svg?url'
 import fontsCssHref from './styles/fonts.css?url'
@@ -62,10 +65,17 @@ export const links: Route.LinksFunction = () => [
 ]
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const honeyProps = await honeypot.getInputProps()
-	const theme = await getTheme(request)
+	const cookie = request.headers.get('Cookie')
+	const { toast, headers: toastHeaders } = await getToast(cookie)
 
-	return data({ honeyProps, theme })
+	return data(
+		{
+			honeyProps: await honeypot.getInputProps(),
+			theme: await getTheme(cookie),
+			toast,
+		},
+		{ headers: combineHeaders(toastHeaders) },
+	)
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -108,6 +118,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				{children}
 
 				<Toaster closeButton richColors position='bottom-right' />
+				{loaderData?.toast ? <ShowToast {...loaderData.toast} /> : null}
+
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
 			</body>

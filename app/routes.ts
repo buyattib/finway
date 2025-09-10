@@ -10,7 +10,7 @@ export default [
 	layout('layouts/public.tsx', [route('login', 'routes/login.tsx')]),
 
 	layout('layouts/private.tsx', [
-		index('routes/dashboard.tsx'),
+		route('dashboard', 'routes/dashboard.tsx'),
 
 		...prefix('accounts', [
 			index('routes/accounts.tsx'),
