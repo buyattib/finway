@@ -1,5 +1,5 @@
 import { Honeypot, SpamError } from 'remix-utils/honeypot/server'
-import { env } from './env'
+import { env } from './env.server'
 
 export const honeypot = new Honeypot({
 	nameFieldName: 'name__confirm',

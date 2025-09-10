@@ -1,12 +1,17 @@
 import type { action } from '~/root'
-import { useFetcher } from 'react-router'
+import { useFetcher, useFetchers } from 'react-router'
 import { getFormProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { MoonIcon, SunIcon } from 'lucide-react'
+import { z } from 'zod'
 
 import { Button } from '~/components/ui/button'
 
-import { type Theme, ThemeFormSchema } from '~/utils/theme'
+export const ThemeFormSchema = z.object({
+	theme: z.enum(['light', 'dark']),
+})
+
+export type Theme = z.infer<typeof ThemeFormSchema>['theme']
 
 export function ThemeToggle({ currentTheme }: { currentTheme: Theme }) {
 	const fetcher = useFetcher<typeof action>()
@@ -40,4 +45,19 @@ export function ThemeToggle({ currentTheme }: { currentTheme: Theme }) {
 			</Button>
 		</fetcher.Form>
 	)
+}
+
+export function useTheme(theme: Theme | undefined) {
+	const fetchers = useFetchers()
+	const fetcher = fetchers.find(
+		f => f.formData?.get('intent') === 'theme-toggle',
+	)
+
+	const _theme = fetcher?.formData?.get('theme')
+
+	const parsed = ThemeFormSchema.safeParse({ theme: _theme })
+
+	if (!parsed.success) return theme ?? 'light'
+
+	return parsed.data.theme
 }

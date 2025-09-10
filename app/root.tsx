@@ -6,14 +6,16 @@ import {
 	Outlet,
 	Scripts,
 	ScrollRestoration,
-	useLoaderData,
+	useRouteLoaderData,
 } from 'react-router'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
-import { parseWithZod } from '@conform-to/zod/v4'
+
+import { Toaster } from './components/ui/sonner'
+import { useTheme } from './components/theme-toggle'
 
 import { useNonce } from './utils/nonce-provider'
-import { honeypot } from './utils/honeypot'
-import { themeCookie, getTheme, ThemeFormSchema, useTheme } from './utils/theme'
+import { honeypot } from './utils/honeypot.server'
+import { getTheme, themeAction } from './utils/theme.server'
 
 import faviconAssetUrl from './assets/favicon.svg?url'
 import fontsCssHref from './styles/fonts.css?url'
@@ -62,6 +64,7 @@ export const links: Route.LinksFunction = () => [
 export async function loader({ request }: Route.LoaderArgs) {
 	const honeyProps = await honeypot.getInputProps()
 	const theme = await getTheme(request)
+
 	return data({ honeyProps, theme })
 }
 
@@ -72,34 +75,7 @@ export async function action({ request }: Route.ActionArgs) {
 		return data({ status: 'error', submission: undefined }, { status: 400 })
 	}
 
-	const submission = await parseWithZod(formData, {
-		schema: ThemeFormSchema,
-		async: true,
-	})
-
-	if (submission.status !== 'success') {
-		return data(
-			{
-				status: 'error',
-				submission: submission.reply(),
-			},
-			{ status: 400 },
-		)
-	}
-
-	return data(
-		{
-			status: 'success',
-			submission: null,
-		},
-		{
-			headers: {
-				'Set-Cookie': await themeCookie.serialize(
-					submission.value.theme,
-				),
-			},
-		},
-	)
+	return await themeAction(formData)
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
@@ -112,8 +88,8 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	const nonce = useNonce()
-	const loaderData = useLoaderData<typeof loader>()
-	const theme = useTheme(loaderData.theme)
+	const loaderData = useRouteLoaderData<typeof loader>('root')
+	const theme = useTheme(loaderData?.theme)
 
 	return (
 		<html lang='en' className={theme}>
@@ -130,6 +106,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className='min-h-svh flex flex-col w-full'>
 				{children}
+
+				<Toaster closeButton richColors position='bottom-right' />
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
 			</body>

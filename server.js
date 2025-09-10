@@ -74,23 +74,6 @@ app.use((req, res, next) => {
 	return generalLimiter(req, res, next)
 })
 
-// logger
-morgan.token('url', req => {
-	try {
-		return decodeURIComponent(req.url ?? '')
-	} catch {
-		return req.url ?? ''
-	}
-})
-app.use(
-	morgan('tiny', {
-		skip: (req, res) =>
-			res.statusCode === 200 &&
-			(req.url?.startsWith('/resources/images') ||
-				req.url?.startsWith('/resources/healthcheck')),
-	}),
-)
-
 if (DEVELOPMENT) {
 	console.log('Starting development server')
 	const viteDevServer = await import('vite').then(vite =>
@@ -125,6 +108,23 @@ if (DEVELOPMENT) {
 
 	// Everything else is cached for an hour
 	app.use(express.static('build/client', { maxAge: '1h' }))
+
+	// logger
+	morgan.token('url', req => {
+		try {
+			return decodeURIComponent(req.url ?? '')
+		} catch {
+			return req.url ?? ''
+		}
+	})
+	app.use(
+		morgan('tiny', {
+			skip: (req, res) =>
+				res.statusCode === 200 &&
+				(req.url?.startsWith('/resources/images') ||
+					req.url?.startsWith('/resources/healthcheck')),
+		}),
+	)
 
 	app.use(await import(BUILD_PATH).then(mod => mod.app))
 }

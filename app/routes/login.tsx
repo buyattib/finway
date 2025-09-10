@@ -7,7 +7,9 @@ import { LoaderCircleIcon } from 'lucide-react'
 
 import type { Route } from './+types/login'
 
-import { checkHoneypot } from '~/utils/honeypot'
+import { checkHoneypot } from '~/utils/honeypot.server'
+import { database } from '~/database/context'
+import * as schema from '~/database/schema'
 
 import {
 	Card,
@@ -29,6 +31,8 @@ const LoginFormSchema = z.object({
 })
 
 export async function action({ request }: Route.ActionArgs) {
+	const db = database()
+
 	const formData = await request.formData()
 	await checkHoneypot(formData)
 
@@ -44,6 +48,25 @@ export async function action({ request }: Route.ActionArgs) {
 			{ status: 400 },
 		)
 	}
+
+	const existingUser = await db.query.users.findFirst({
+		where: (users, { eq }) => eq(users.email, submission.value.email),
+	})
+
+	if (existingUser) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						email: ['A user with this email already exists'],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	await db.insert(schema.users).values({ email: submission.value.email })
 
 	return redirect('/')
 }

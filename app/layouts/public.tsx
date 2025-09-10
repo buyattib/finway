@@ -1,18 +1,13 @@
 import type { Route } from './+types/public'
-import { data, Link, Outlet } from 'react-router'
+import { Link, Outlet } from 'react-router'
 
-import { ThemeToggle } from '~/components/theme-toggle'
+import { ThemeToggle, useTheme } from '~/components/theme-toggle'
 import { FinhubIcon } from '~/components/ui/finhub-icon'
 
-import { getTheme, useTheme } from '~/utils/theme'
+export default function PublicLayout({ matches }: Route.ComponentProps) {
+	const rootLoader = matches[0].loaderData
+	const theme = useTheme(rootLoader.theme)
 
-export async function loader({ request }: Route.LoaderArgs) {
-	const theme = await getTheme(request)
-	return data({ theme })
-}
-
-export default function PublicLayout({ loaderData }: Route.ComponentProps) {
-	const theme = useTheme(loaderData.theme)
 	return (
 		<>
 			<header className='flex items-center justify-between p-6 border-b-2 border-b-secondary gap-2'>
