@@ -7,8 +7,10 @@ import { z } from 'zod'
 
 import type { Route } from './+types/login'
 
-import { checkHoneypot } from '~/utils/honeypot.server'
 import { database } from '~/database/context'
+import { checkHoneypot } from '~/utils/honeypot.server'
+import { createToastHeaders } from '~/utils/toast.server'
+import { getCurrentUser } from '~/utils/auth.server'
 
 import {
 	Card,
@@ -20,7 +22,6 @@ import {
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { ErrorList, Field } from '~/components/forms'
-import { createToastHeaders } from '~/utils/toast.server'
 
 const LoginFormSchema = z.object({
 	email: z
@@ -29,6 +30,13 @@ const LoginFormSchema = z.object({
 		.max(100, { message: 'Email is too long' })
 		.transform(value => value.toLowerCase()),
 })
+
+export async function loader({ request }: Route.LoaderArgs) {
+	const cookie = request.headers.get('Cookie')
+	const user = await getCurrentUser(cookie)
+
+	if (user) return redirect('/')
+}
 
 export async function action({ request }: Route.ActionArgs) {
 	const db = database()

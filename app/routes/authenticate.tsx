@@ -1,6 +1,6 @@
 import { redirect } from 'react-router'
 
-import type { Route } from './+types/auth'
+import type { Route } from './+types/authenticate'
 
 import { database } from '~/database/context'
 import {
