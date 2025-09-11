@@ -20,7 +20,7 @@ import {
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { ErrorList, Field } from '~/components/forms'
-import { createAuthSessionHeaders } from '~/utils/auth.server'
+import { createToastHeaders } from '~/utils/toast.server'
 
 const LoginFormSchema = z.object({
 	email: z
@@ -41,37 +41,22 @@ export async function action({ request }: Route.ActionArgs) {
 		async: true,
 	})
 	if (submission.status !== 'success') {
-		return data(
-			{
-				submission: submission.reply(),
-			},
-			{ status: 400 },
-		)
+		return data({ submission: submission.reply() }, { status: 400 })
 	}
 
 	const user = await db.query.users.findFirst({
 		where: (users, { eq }) => eq(users.email, submission.value.email),
 	})
 
-	if (!user) {
-		return data(
-			{
-				submission: submission.reply({
-					formErrors: ['Email or password is incorrect'],
-				}),
-			},
-			{ status: 400 },
-		)
-	}
-
 	// TODO: send email link and set toast with message
+	const cookie = request.headers.get('Cookie')
+	const toastHeaders = await createToastHeaders(cookie, {
+		type: 'success',
+		title: user ? 'Welcome back!' : 'Welcome to Finhub!',
+		description: 'We sent you an email with a link to log in',
+	})
 
-	const headers = await createAuthSessionHeaders(
-		request.headers.get('Cookie'),
-		user.id,
-	)
-
-	return redirect('/', { headers })
+	return data({ submission: submission.reply() }, { headers: toastHeaders })
 }
 
 export default function Login({ actionData }: Route.ComponentProps) {

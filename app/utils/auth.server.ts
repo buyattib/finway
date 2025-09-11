@@ -25,6 +25,12 @@ export async function createAuthSessionHeaders(
 	return new Headers({ 'Set-Cookie': authCookie })
 }
 
+export async function removeAuthSession(cookie: string | null) {
+	const authSession = await authSessionStorage.getSession(cookie)
+	const authCookie = await authSessionStorage.destroySession(authSession)
+	return new Headers({ 'Set-Cookie': authCookie })
+}
+
 export async function getCurrentUser(cookie: string | null) {
 	const db = database()
 
