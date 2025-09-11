@@ -14,6 +14,7 @@ import { Toaster } from './components/ui/sonner'
 import { useTheme } from './components/theme-toggle'
 import { ShowToast } from './components/show-toast'
 
+import { getCurrentUser } from './utils/auth.server'
 import { getTheme, themeAction } from './utils/theme.server'
 import { useNonce } from './utils/nonce-provider'
 import { honeypot } from './utils/honeypot.server'
@@ -66,6 +67,7 @@ export const links: Route.LinksFunction = () => [
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const cookie = request.headers.get('Cookie')
+	const user = getCurrentUser(cookie)
 	const { toast, headers: toastHeaders } = await getToast(cookie)
 
 	return data(
@@ -73,6 +75,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			honeyProps: await honeypot.getInputProps(),
 			theme: await getTheme(cookie),
 			toast,
+			user,
 		},
 		{ headers: combineHeaders(toastHeaders) },
 	)

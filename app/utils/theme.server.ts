@@ -3,7 +3,7 @@ import { parseWithZod } from '@conform-to/zod/v4'
 
 import { ThemeFormSchema, type Theme } from '~/components/theme-toggle'
 
-export const themeCookie = createCookie('theme', {
+export const themeCookie = createCookie('finhub_theme', {
 	path: '/',
 	sameSite: 'lax',
 	httpOnly: true,

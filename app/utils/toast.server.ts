@@ -4,9 +4,11 @@ import { type ToastSession, ToastSessionSchema } from '~/components/show-toast'
 import { env } from './env.server'
 import { combineHeaders } from './headers.server'
 
+const toastCookieKey = 'finhub_toast'
+
 export const toastSessionStorage = createCookieSessionStorage({
 	cookie: {
-		name: 'toast',
+		name: toastCookieKey,
 		sameSite: 'lax',
 		path: '/',
 		secure: env.NODE_ENV === 'production',
@@ -21,7 +23,7 @@ export async function createToastHeaders(
 ) {
 	const toastCookieSession = await toastSessionStorage.getSession(cookie)
 	const data = ToastSessionSchema.parse(toast)
-	toastCookieSession.flash('toast', data)
+	toastCookieSession.flash(toastCookieKey, data)
 	const toastCookie =
 		await toastSessionStorage.commitSession(toastCookieSession)
 
@@ -30,7 +32,7 @@ export async function createToastHeaders(
 
 export async function getToast(cookie: string | null) {
 	const toastCookieSession = await toastSessionStorage.getSession(cookie)
-	const toastData = toastCookieSession.get('toast')
+	const toastData = toastCookieSession.get(toastCookieKey)
 
 	const result = ToastSessionSchema.safeParse(toastData)
 

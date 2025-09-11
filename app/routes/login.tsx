@@ -2,14 +2,13 @@ import { data, Form, redirect, useNavigation } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
-import { z } from 'zod'
 import { LoaderCircleIcon } from 'lucide-react'
+import { z } from 'zod'
 
 import type { Route } from './+types/login'
 
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { database } from '~/database/context'
-import * as schema from '~/database/schema'
 
 import {
 	Card,
@@ -21,6 +20,7 @@ import {
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { ErrorList, Field } from '~/components/forms'
+import { createAuthSessionHeaders } from '~/utils/auth.server'
 
 const LoginFormSchema = z.object({
 	email: z
@@ -49,26 +49,29 @@ export async function action({ request }: Route.ActionArgs) {
 		)
 	}
 
-	const existingUser = await db.query.users.findFirst({
+	const user = await db.query.users.findFirst({
 		where: (users, { eq }) => eq(users.email, submission.value.email),
 	})
 
-	if (existingUser) {
+	if (!user) {
 		return data(
 			{
 				submission: submission.reply({
-					fieldErrors: {
-						email: ['A user with this email already exists'],
-					},
+					formErrors: ['Email or password is incorrect'],
 				}),
 			},
-			{ status: 422 },
+			{ status: 400 },
 		)
 	}
 
-	await db.insert(schema.users).values({ email: submission.value.email })
+	// TODO: send email link and set toast with message
 
-	return redirect('/')
+	const headers = await createAuthSessionHeaders(
+		request.headers.get('Cookie'),
+		user.id,
+	)
+
+	return redirect('/', { headers })
 }
 
 export default function Login({ actionData }: Route.ComponentProps) {

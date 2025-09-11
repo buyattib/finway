@@ -4,7 +4,7 @@ import { createCookie } from 'react-router'
 
 import { env } from './env.server'
 
-export const cookie = createCookie('csrf', {
+export const cookie = createCookie('finhub_csrf', {
 	path: '/',
 	httpOnly: true,
 	secure: env.NODE_ENV === 'production',
