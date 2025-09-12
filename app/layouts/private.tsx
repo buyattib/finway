@@ -13,6 +13,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 		return redirect('/login', { headers: authHeaders })
 	}
 
+	// NOTE: could refresh the session here if user is authenticated and has an expiration date
 	return { user }
 }
 

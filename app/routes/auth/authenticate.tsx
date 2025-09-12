@@ -46,7 +46,7 @@ export async function loader({ request, params: { token } }: Route.LoaderArgs) {
 	const authHeaders = await createAuthSessionHeaders(
 		cookie,
 		user.id,
-		remember ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : undefined,
+		remember,
 	)
 	return redirect('/', { headers: combineHeaders(authHeaders, toastHeaders) })
 }

@@ -57,9 +57,15 @@ export async function action({ request }: Route.ActionArgs) {
 		where: (users, { eq }) => eq(users.email, submission.value.email),
 	})
 
-	// TODO: send email link and set toast with message
-	// TODO: set remember as a query string in the link
-	// submission.value.remember
+	// TODO: hash the token
+	// TODO: send email link
+	const url = new URL(request.url)
+	const emailUrl = new URL(`${url.origin}/authenticate/${user?.id}`)
+	if (submission.value.remember) {
+		emailUrl.searchParams.set('remember', 'true')
+	}
+	console.log(emailUrl.href)
+
 	const cookie = request.headers.get('Cookie')
 	const toastHeaders = await createToastHeaders(cookie, {
 		type: 'success',
@@ -67,7 +73,10 @@ export async function action({ request }: Route.ActionArgs) {
 		description: 'We sent you an email with a link to log in',
 	})
 
-	return data({ submission: submission.reply() }, { headers: toastHeaders })
+	return data(
+		{ submission: submission.reply({ resetForm: true }) },
+		{ headers: toastHeaders },
+	)
 }
 
 export default function Login({ actionData }: Route.ComponentProps) {
