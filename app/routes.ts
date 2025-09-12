@@ -7,9 +7,10 @@ import {
 } from '@react-router/dev/routes'
 
 export default [
-	route('/authenticate/:token', 'routes/authenticate.tsx'),
+	route('/authenticate/:token', 'routes/auth/authenticate.tsx'),
+	route('/logout', 'routes/auth/logout.tsx'),
 
-	layout('layouts/public.tsx', [route('login', 'routes/login.tsx')]),
+	layout('layouts/public.tsx', [route('login', 'routes/auth/login.tsx')]),
 
 	layout('layouts/private.tsx', [
 		index('routes/dashboard.tsx'),

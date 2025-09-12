@@ -21,7 +21,7 @@ import {
 	CardTitle,
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
-import { ErrorList, Field } from '~/components/forms'
+import { CheckboxField, ErrorList, Field } from '~/components/forms'
 
 const LoginFormSchema = z.object({
 	email: z
@@ -29,6 +29,7 @@ const LoginFormSchema = z.object({
 		.min(3, { message: 'Email is too short' })
 		.max(100, { message: 'Email is too long' })
 		.transform(value => value.toLowerCase()),
+	remember: z.boolean().optional(),
 })
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -57,6 +58,8 @@ export async function action({ request }: Route.ActionArgs) {
 	})
 
 	// TODO: send email link and set toast with message
+	// TODO: set remember as a query string in the link
+	// submission.value.remember
 	const cookie = request.headers.get('Cookie')
 	const toastHeaders = await createToastHeaders(cookie, {
 		type: 'success',
@@ -108,6 +111,16 @@ export default function Login({ actionData }: Route.ComponentProps) {
 								autoComplete: 'email',
 							}}
 							errors={fields.email.errors}
+						/>
+
+						<CheckboxField
+							labelProps={{
+								children: 'Remember me',
+							}}
+							checkboxProps={getInputProps(fields.remember, {
+								type: 'checkbox',
+							})}
+							errors={fields.remember.errors}
 						/>
 
 						<ErrorList errors={form.errors} id={form.errorId} />

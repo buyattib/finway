@@ -16,11 +16,14 @@ export const authSessionStorage = createCookieSessionStorage({
 export async function createAuthSessionHeaders(
 	cookie: string | null,
 	userId: string,
+	expires?: Date,
 ) {
 	const authSession = await authSessionStorage.getSession(cookie)
 	authSession.set('userId', userId)
 
-	const authCookie = await authSessionStorage.commitSession(authSession)
+	const authCookie = await authSessionStorage.commitSession(authSession, {
+		expires,
+	})
 
 	return new Headers({ 'Set-Cookie': authCookie })
 }

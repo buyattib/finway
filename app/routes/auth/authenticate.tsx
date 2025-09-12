@@ -13,6 +13,9 @@ import { combineHeaders } from '~/utils/headers.server'
 export async function loader({ request, params: { token } }: Route.LoaderArgs) {
 	const db = database()
 
+	const searchParams = new URL(request.url).searchParams
+	const remember = searchParams.get('remember') === 'true'
+
 	const cookie = request.headers.get('Cookie')
 
 	// TODO: for now the token is the userId, need to hash it later
@@ -40,6 +43,10 @@ export async function loader({ request, params: { token } }: Route.LoaderArgs) {
 		title: 'Logged in!',
 		description: 'You were successfully logged in',
 	})
-	const authHeaders = await createAuthSessionHeaders(cookie, user.id)
+	const authHeaders = await createAuthSessionHeaders(
+		cookie,
+		user.id,
+		remember ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : undefined,
+	)
 	return redirect('/', { headers: combineHeaders(authHeaders, toastHeaders) })
 }
