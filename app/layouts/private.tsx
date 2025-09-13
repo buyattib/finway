@@ -4,6 +4,7 @@ import { LogOutIcon } from 'lucide-react'
 import type { Route } from './+types/private'
 
 import { requireAuthenticated } from '~/utils/auth.server'
+
 import { Button } from '~/components/ui/button'
 
 export async function loader({ request }: Route.LoaderArgs) {

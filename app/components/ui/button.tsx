@@ -28,6 +28,7 @@ const buttonVariants = cva(
 			},
 			width: {
 				full: 'w-full',
+				fit: 'w-fit',
 			},
 		},
 		defaultVariants: {

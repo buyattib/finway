@@ -2,7 +2,7 @@ import type { Route } from './+types/public'
 import { Link, Outlet } from 'react-router'
 
 import { ThemeToggle, useTheme } from '~/components/theme-toggle'
-import { FinhubIcon } from '~/components/ui/finhub-icon'
+import { FinhubIcon } from '~/components/finhub-icon'
 
 export default function PublicLayout({ matches }: Route.ComponentProps) {
 	const rootLoader = matches[0].loaderData

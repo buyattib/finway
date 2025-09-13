@@ -15,9 +15,8 @@ export default [
 	layout('layouts/private.tsx', [
 		index('routes/dashboard.tsx'),
 
-		...prefix('accounts', [
-			index('routes/accounts.tsx'),
-			route(':accountId', 'routes/account.tsx'),
+		route('accounts', 'routes/accounts/accounts.tsx', [
+			route(':accountId', 'routes/accounts/account.tsx'),
 		]),
 	]),
 ] satisfies RouteConfig
