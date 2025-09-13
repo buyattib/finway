@@ -1,5 +1,5 @@
 import { createCookieSessionStorage, redirect } from 'react-router'
-import { database } from '~/database/context'
+import type { DB } from '~/lib/types'
 import { env } from './env.server'
 
 export const authSessionStorage = createCookieSessionStorage({
@@ -41,9 +41,8 @@ export async function removeAuthSession(request: Request) {
 	return new Headers({ 'Set-Cookie': authCookie })
 }
 
-export async function getCurrentUser(request: Request) {
+export async function getCurrentUser(request: Request, db: DB) {
 	const cookie = request.headers.get('Cookie')
-	const db = database()
 
 	const authSession = await authSessionStorage.getSession(cookie)
 	const userId = authSession.get('userId') as string | undefined
@@ -60,17 +59,18 @@ export async function getCurrentUser(request: Request) {
 	return user ?? null
 }
 
-export async function requireAnonymous(request: Request) {
-	const user = await getCurrentUser(request)
+export async function requireAnonymous(request: Request, db: DB) {
+	const user = await getCurrentUser(request, db)
 
 	if (user) throw redirect('/')
 }
 
 export async function requireAuthenticated(
 	request: Request,
+	db: DB,
 	{ redirectTo: _redirectTo }: { redirectTo?: string | null } = {},
 ) {
-	const user = await getCurrentUser(request)
+	const user = await getCurrentUser(request, db)
 
 	if (!user) {
 		const authHeaders = await removeAuthSession(request)

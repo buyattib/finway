@@ -3,4 +3,7 @@ import type { Config } from '@react-router/dev/config'
 export default {
 	ssr: true,
 	// prerender: ['/some-static-route'],
+	future: {
+		v8_middleware: true,
+	},
 } satisfies Config

@@ -2,8 +2,8 @@ import { PassThrough } from 'node:stream'
 import { isbot } from 'isbot'
 import { createReadableStreamFromReadable } from '@react-router/node'
 import {
+	RouterContextProvider,
 	ServerRouter,
-	type AppLoadContext,
 	type EntryContext,
 } from 'react-router'
 import {
@@ -13,6 +13,7 @@ import {
 import './utils/env.server'
 
 import { NonceProvider } from './utils/nonce-provider'
+import { globalContext } from './lib/context'
 
 export const streamTimeout = 5_000
 
@@ -21,9 +22,7 @@ export default function handleRequest(
 	responseStatusCode: number,
 	responseHeaders: Headers,
 	routerContext: EntryContext,
-	loadContext: AppLoadContext,
-	// If you have middleware enabled:
-	// loadContext: unstable_RouterContextProvider
+	loadContext: RouterContextProvider,
 ) {
 	return new Promise((resolve, reject) => {
 		let shellRendered = false
@@ -43,10 +42,11 @@ export default function handleRequest(
 			streamTimeout + 1000,
 		)
 
+		const ctx = loadContext.get(globalContext)
 		const { pipe, abort } = renderToPipeableStream(
-			<NonceProvider value={loadContext.cspNonce}>
+			<NonceProvider value={ctx.cspNonce}>
 				<ServerRouter
-					nonce={loadContext.cspNonce}
+					nonce={ctx.cspNonce}
 					context={routerContext}
 					url={request.url}
 				/>
@@ -87,7 +87,7 @@ export default function handleRequest(
 						console.error(error)
 					}
 				},
-				nonce: loadContext.cspNonce,
+				nonce: ctx.cspNonce,
 			},
 		)
 	})

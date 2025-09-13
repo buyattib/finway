@@ -8,7 +8,7 @@ import { z } from 'zod'
 
 import type { Route } from './+types/login'
 
-import { database } from '~/database/context'
+import { dbContext } from '~/lib/context'
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { createToastHeaders } from '~/utils/toast.server'
 import { requireAnonymous } from '~/utils/auth.server'
@@ -34,14 +34,14 @@ const LoginFormSchema = z.object({
 	redirectTo: z.string().optional(),
 })
 
-export async function loader({ request }: Route.LoaderArgs) {
-	await requireAnonymous(request)
+export async function loader({ request, context }: Route.LoaderArgs) {
+	await requireAnonymous(request, context.get(dbContext))
 }
 
-export async function action({ request }: Route.ActionArgs) {
-	await requireAnonymous(request)
+export async function action({ request, context }: Route.ActionArgs) {
+	const db = context.get(dbContext)
 
-	const db = database()
+	await requireAnonymous(request, db)
 
 	const formData = await request.formData()
 	await checkHoneypot(formData)

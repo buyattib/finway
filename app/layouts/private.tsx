@@ -3,14 +3,24 @@ import { LogOutIcon } from 'lucide-react'
 
 import type { Route } from './+types/private'
 
+import { dbContext, userContext } from '~/lib/context'
 import { requireAuthenticated } from '~/utils/auth.server'
 
 import { Button } from '~/components/ui/button'
 
-export async function loader({ request }: Route.LoaderArgs) {
-	const user = await requireAuthenticated(request)
+// NOTE: could refresh the session here if user is authenticated and has an expiration date
+const authMiddleware: Route.MiddlewareFunction = async ({
+	request,
+	context,
+}) => {
+	const user = await requireAuthenticated(request, context.get(dbContext))
+	context.set(userContext, user)
+}
 
-	// NOTE: could refresh the session here if user is authenticated and has an expiration date
+export const middleware: Route.MiddlewareFunction[] = [authMiddleware]
+
+export async function loader({ context }: Route.LoaderArgs) {
+	const user = context.get(userContext)
 	return { user }
 }
 

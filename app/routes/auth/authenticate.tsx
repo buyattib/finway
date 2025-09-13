@@ -3,7 +3,7 @@ import { safeRedirect } from 'remix-utils/safe-redirect'
 
 import type { Route } from './+types/authenticate'
 
-import { database } from '~/database/context'
+import { dbContext } from '~/lib/context'
 import {
 	createAuthSessionHeaders,
 	removeAuthSession,
@@ -12,10 +12,14 @@ import {
 import { createToastHeaders } from '~/utils/toast.server'
 import { combineHeaders } from '~/utils/headers.server'
 
-export async function loader({ request, params: { token } }: Route.LoaderArgs) {
-	await requireAnonymous(request)
+export async function loader({
+	request,
+	params: { token },
+	context,
+}: Route.LoaderArgs) {
+	const db = context.get(dbContext)
 
-	const db = database()
+	await requireAnonymous(request, db)
 
 	// TODO: for now the token is the userId, need to hash it later
 	const user = await db.query.users.findFirst({

@@ -1,17 +1,11 @@
+import { RouterContextProvider } from 'react-router'
 import { createRequestHandler } from '@react-router/express'
 import { drizzle } from 'drizzle-orm/libsql'
 import { createClient } from '@libsql/client'
 import express from 'express'
-import 'react-router'
 
-import { DatabaseContext } from '~/database/context'
+import { dbContext, globalContext } from '~/lib/context'
 import * as schema from '~/database/schema'
-
-declare module 'react-router' {
-	interface AppLoadContext {
-		cspNonce: string
-	}
-}
 
 declare global {
 	var __libsql: ReturnType<typeof createClient> | undefined
@@ -32,16 +26,20 @@ const db = drizzle(client, {
 	schema,
 	logger: process.env.NODE_ENV === 'development',
 })
-app.use((_, __, next) => DatabaseContext.run(db, next))
 
 // RRv7 request handler (analogous to defining the endpoints in an express api)
 app.use(
 	createRequestHandler({
 		build: () => import('virtual:react-router/server-build'),
 		getLoadContext(_, res) {
-			return {
+			const context = new RouterContextProvider()
+			context.set(globalContext, {
 				cspNonce: res.locals.cspNonce,
-			}
+			})
+
+			context.set(dbContext, db)
+
+			return context
 		},
 	}),
 )
