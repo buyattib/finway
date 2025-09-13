@@ -16,7 +16,9 @@ const base = {
 export const users = sqliteTable(
 	'users',
 	{
-		...base,
+		createdAt: base.createdAt,
+		updatedAt: base.updatedAt,
+
 		id: cuid2().defaultRandom().primaryKey(),
 		email: text().notNull(),
 	},

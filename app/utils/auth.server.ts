@@ -1,4 +1,4 @@
-import { createCookieSessionStorage } from 'react-router'
+import { createCookieSessionStorage, redirect } from 'react-router'
 import { database } from '~/database/context'
 import { env } from './env.server'
 
@@ -14,10 +14,11 @@ export const authSessionStorage = createCookieSessionStorage({
 })
 
 export async function createAuthSessionHeaders(
-	cookie: string | null,
+	request: Request,
 	userId: string,
 	remember?: boolean,
 ) {
+	const cookie = request.headers.get('Cookie')
 	const authSession = await authSessionStorage.getSession(cookie)
 	authSession.set('userId', userId)
 
@@ -33,19 +34,21 @@ export async function createAuthSessionHeaders(
 	return new Headers({ 'Set-Cookie': authCookie })
 }
 
-export async function removeAuthSession(cookie: string | null) {
+export async function removeAuthSession(request: Request) {
+	const cookie = request.headers.get('Cookie')
 	const authSession = await authSessionStorage.getSession(cookie)
 	const authCookie = await authSessionStorage.destroySession(authSession)
 	return new Headers({ 'Set-Cookie': authCookie })
 }
 
-export async function getCurrentUser(cookie: string | null) {
+export async function getCurrentUser(request: Request) {
+	const cookie = request.headers.get('Cookie')
 	const db = database()
 
 	const authSession = await authSessionStorage.getSession(cookie)
 	const userId = authSession.get('userId') as string | undefined
 
-	if (!userId) return undefined
+	if (!userId) return null
 
 	const user = await db.query.users.findFirst({
 		columns: {
@@ -54,5 +57,39 @@ export async function getCurrentUser(cookie: string | null) {
 		},
 		where: (users, { eq }) => eq(users.id, userId),
 	})
+	return user ?? null
+}
+
+export async function requireAnonymous(request: Request) {
+	const user = await getCurrentUser(request)
+
+	if (user) throw redirect('/')
+}
+
+export async function requireAuthenticated(
+	request: Request,
+	{ redirectTo: _redirectTo }: { redirectTo?: string | null } = {},
+) {
+	const user = await getCurrentUser(request)
+
+	if (!user) {
+		const authHeaders = await removeAuthSession(request)
+
+		const requestUrl = new URL(request.url)
+		// If null we dont want to specify a redirectTo, if undefined we set it to current url otherwise we set it to what is coming
+		const redirectTo =
+			_redirectTo === null
+				? null
+				: (_redirectTo ?? `${requestUrl.pathname}${requestUrl.search}`)
+		const loginParams = redirectTo
+			? new URLSearchParams({ redirectTo })
+			: null
+		const loginRedirect = ['/login', loginParams?.toString()]
+			.filter(Boolean)
+			.join('?')
+
+		throw redirect(loginRedirect, { headers: authHeaders })
+	}
+
 	return user
 }

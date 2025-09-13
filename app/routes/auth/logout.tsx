@@ -7,6 +7,5 @@ export async function loader() {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-	const cookie = request.headers.get('Cookie')
-	return redirect('/login', { headers: await removeAuthSession(cookie) })
+	return redirect('/login', { headers: await removeAuthSession(request) })
 }

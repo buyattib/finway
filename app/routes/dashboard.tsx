@@ -6,8 +6,7 @@ import { Button } from '~/components/ui/button'
 import { createToastHeaders } from '~/utils/toast.server'
 
 export async function action({ request }: Route.ActionArgs) {
-	const cookie = request.headers.get('Cookie')
-	const toastHeaders = await createToastHeaders(cookie, {
+	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
 		title: 'Testing toasts from the dashboard',
 		description: 'Pretty cool aye?',

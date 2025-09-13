@@ -1,7 +1,7 @@
 import { createCookie, data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
 
-import { ThemeFormSchema, type Theme } from '~/components/theme-toggle'
+import { ThemeFormSchema } from '~/components/theme-toggle'
 
 export const themeCookie = createCookie('finhub_theme', {
 	path: '/',
@@ -9,19 +9,16 @@ export const themeCookie = createCookie('finhub_theme', {
 	httpOnly: true,
 })
 
-export async function getTheme(cookie: string | null) {
+export async function getTheme(request: Request) {
+	const cookie = request.headers.get('Cookie')
+
 	if (!cookie) return 'light'
 
 	const parsed = await themeCookie.parse(cookie)
-
 	const result = ThemeFormSchema.safeParse({ theme: parsed })
 	if (!result.success) return 'light'
 
 	return result.data.theme
-}
-
-export function setTheme(theme: Theme) {
-	return themeCookie.serialize(theme)
 }
 
 export async function themeAction(formData: FormData) {
@@ -47,7 +44,9 @@ export async function themeAction(formData: FormData) {
 		},
 		{
 			headers: {
-				'Set-Cookie': await setTheme(submission.value.theme),
+				'Set-Cookie': await themeCookie.serialize(
+					submission.value.theme,
+				),
 			},
 		},
 	)

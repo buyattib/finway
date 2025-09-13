@@ -1,17 +1,13 @@
-import { Form, Outlet, redirect } from 'react-router'
-import type { Route } from './+types/private'
-import { getCurrentUser, removeAuthSession } from '~/utils/auth.server'
+import { Form, Outlet } from 'react-router'
 import { LogOutIcon } from 'lucide-react'
+
+import type { Route } from './+types/private'
+
+import { requireAuthenticated } from '~/utils/auth.server'
 import { Button } from '~/components/ui/button'
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const cookie = request.headers.get('Cookie')
-	const user = await getCurrentUser(cookie)
-
-	if (!user) {
-		const authHeaders = await removeAuthSession(cookie)
-		return redirect('/login', { headers: authHeaders })
-	}
+	const user = await requireAuthenticated(request)
 
 	// NOTE: could refresh the session here if user is authenticated and has an expiration date
 	return { user }

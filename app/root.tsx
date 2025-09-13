@@ -66,13 +66,12 @@ export const links: Route.LinksFunction = () => [
 ]
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const cookie = request.headers.get('Cookie')
-	const { toast, headers: toastHeaders } = await getToast(cookie)
+	const { toast, headers: toastHeaders } = await getToast(request)
 
 	return data(
 		{
 			honeyProps: await honeypot.getInputProps(),
-			theme: await getTheme(cookie),
+			theme: await getTheme(request),
 			toast,
 		},
 		{ headers: combineHeaders(toastHeaders) },

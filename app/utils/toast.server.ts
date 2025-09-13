@@ -18,9 +18,10 @@ export const toastSessionStorage = createCookieSessionStorage({
 })
 
 export async function createToastHeaders(
-	cookie: string | null,
+	request: Request,
 	toast: ToastSession,
 ) {
+	const cookie = request.headers.get('Cookie')
 	const toastCookieSession = await toastSessionStorage.getSession(cookie)
 	const data = ToastSessionSchema.parse(toast)
 	toastCookieSession.flash(toastCookieKey, data)
@@ -30,7 +31,8 @@ export async function createToastHeaders(
 	return new Headers({ 'Set-Cookie': toastCookie })
 }
 
-export async function getToast(cookie: string | null) {
+export async function getToast(request: Request) {
+	const cookie = request.headers.get('Cookie')
 	const toastCookieSession = await toastSessionStorage.getSession(cookie)
 	const toastData = toastCookieSession.get(toastCookieKey)
 
@@ -51,7 +53,7 @@ export async function getToast(cookie: string | null) {
 
 export async function redirectWithToast(
 	url: string,
-	cookie: string | null,
+	request: Request,
 	toast: ToastSession,
 	init?: ResponseInit,
 ) {
@@ -59,7 +61,7 @@ export async function redirectWithToast(
 		...init,
 		headers: combineHeaders(
 			init?.headers,
-			await createToastHeaders(cookie, toast),
+			await createToastHeaders(request, toast),
 		),
 	})
 }

@@ -1,5 +1,6 @@
-import { data, Form, redirect, useNavigation } from 'react-router'
+import { data, Form, useNavigation, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
+import { safeRedirect } from 'remix-utils/safe-redirect'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { LoaderCircleIcon } from 'lucide-react'
@@ -10,7 +11,7 @@ import type { Route } from './+types/login'
 import { database } from '~/database/context'
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { createToastHeaders } from '~/utils/toast.server'
-import { getCurrentUser } from '~/utils/auth.server'
+import { requireAnonymous } from '~/utils/auth.server'
 
 import {
 	Card,
@@ -30,16 +31,16 @@ const LoginFormSchema = z.object({
 		.max(100, { message: 'Email is too long' })
 		.transform(value => value.toLowerCase()),
 	remember: z.boolean().optional(),
+	redirectTo: z.string().optional(),
 })
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const cookie = request.headers.get('Cookie')
-	const user = await getCurrentUser(cookie)
-
-	if (user) return redirect('/')
+	await requireAnonymous(request)
 }
 
 export async function action({ request }: Route.ActionArgs) {
+	await requireAnonymous(request)
+
 	const db = database()
 
 	const formData = await request.formData()
@@ -53,21 +54,28 @@ export async function action({ request }: Route.ActionArgs) {
 		return data({ submission: submission.reply() }, { status: 400 })
 	}
 
+	const { email, remember, redirectTo } = submission.value
+
 	const user = await db.query.users.findFirst({
-		where: (users, { eq }) => eq(users.email, submission.value.email),
+		where: (users, { eq }) => eq(users.email, email),
 	})
 
 	// TODO: hash the token
 	// TODO: send email link
 	const url = new URL(request.url)
 	const emailUrl = new URL(`${url.origin}/authenticate/${user?.id}`)
-	if (submission.value.remember) {
+	if (remember) {
 		emailUrl.searchParams.set('remember', 'true')
 	}
+
+	if (redirectTo) {
+		const safeRedirectTo = safeRedirect(redirectTo)
+		emailUrl.searchParams.set('redirectTo', safeRedirectTo)
+	}
+
 	console.log(emailUrl.href)
 
-	const cookie = request.headers.get('Cookie')
-	const toastHeaders = await createToastHeaders(cookie, {
+	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
 		title: user ? 'Welcome back!' : 'Welcome to Finhub!',
 		description: 'We sent you an email with a link to log in',
@@ -80,6 +88,9 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function Login({ actionData }: Route.ComponentProps) {
+	const [searchParams] = useSearchParams()
+	const redirectTo = searchParams.get('redirectTo')
+
 	const navigation = useNavigation()
 	const isSubmitting =
 		navigation.formAction === '/login' && navigation.state === 'submitting'
@@ -88,6 +99,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
 		id: 'login-form',
 		constraint: getZodConstraint(LoginFormSchema),
 		lastResult: actionData?.submission,
+		defaultValue: { redirectTo },
 		shouldRevalidate: 'onBlur',
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: LoginFormSchema })
@@ -130,6 +142,12 @@ export default function Login({ actionData }: Route.ComponentProps) {
 								type: 'checkbox',
 							})}
 							errors={fields.remember.errors}
+						/>
+
+						<input
+							{...getInputProps(fields.redirectTo, {
+								type: 'hidden',
+							})}
 						/>
 
 						<ErrorList errors={form.errors} id={form.errorId} />
