@@ -1,12 +1,34 @@
-import { Form, Outlet } from 'react-router'
-import { LogOutIcon } from 'lucide-react'
+import { NavLink, Outlet } from 'react-router'
+import {
+	ArrowRightLeftIcon,
+	BanknoteArrowDownIcon,
+	CalendarSyncIcon,
+	WalletIcon,
+} from 'lucide-react'
 
 import type { Route } from './+types/private'
 
 import { dbContext, userContext } from '~/lib/context'
 import { requireAuthenticated } from '~/utils/auth.server'
+import { cn } from '~/lib/utils'
 
-import { Button } from '~/components/ui/button'
+import { FinhubLink } from '~/components/finhub-link'
+import { LogoutButton } from '~/components/logout-button'
+import { ThemeToggle, useTheme, type Theme } from '~/components/theme-toggle'
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarProvider,
+	SidebarTrigger,
+	useSidebar,
+} from '~/components/ui/sidebar'
 
 // NOTE: could refresh the session here if user is authenticated and has an expiration date
 const authMiddleware: Route.MiddlewareFunction = async ({
@@ -26,20 +48,108 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 export default function PrivateLayout({
 	loaderData: { user },
+	matches,
 }: Route.ComponentProps) {
+	const rootLoader = matches[0].loaderData
+	const theme = useTheme(rootLoader.theme)
+
+	return (
+		<SidebarProvider>
+			<PrivateLayoutContent user={user} theme={theme} />
+		</SidebarProvider>
+	)
+}
+
+const links = [
+	{
+		to: '/accounts',
+		labelKey: 'accounts-label',
+		icon: <WalletIcon />,
+	},
+	{
+		to: '/transfers',
+		labelKey: 'transfers-label',
+		icon: <ArrowRightLeftIcon />,
+	},
+	{
+		to: '/transactions',
+		labelKey: 'transactions-label',
+		icon: <BanknoteArrowDownIcon />,
+	},
+	{
+		to: '/recurring-transactions',
+		labelKey: 'recurring-transactions-label',
+		icon: <CalendarSyncIcon />,
+	},
+]
+
+function PrivateLayoutContent({
+	user,
+	theme,
+}: {
+	user: Route.ComponentProps['loaderData']['user']
+	theme: Theme
+}) {
+	const { isMobile, toggleSidebar } = useSidebar()
+
 	return (
 		<>
-			<header className='flex items-center justify-between p-4 border-b border-b-border'>
-				<p>Hello {user.email}</p>
-				<Form method='post' action='/logout'>
-					<Button type='submit' variant='link'>
-						<LogOutIcon />
-					</Button>
-				</Form>
-			</header>
-			<main className='flex-1 flex flex-col container mx-auto py-6 sm:px-0 px-4'>
-				<Outlet />
-			</main>
+			<Sidebar>
+				<SidebarHeader className='p-4'>
+					<FinhubLink />
+				</SidebarHeader>
+				<SidebarContent>
+					<SidebarGroup>
+						<SidebarGroupContent>
+							<SidebarMenu>
+								{links.map(link => (
+									<SidebarMenuItem key={link.to}>
+										<SidebarMenuButton
+											asChild
+											size='lg'
+											onClick={() => {
+												if (isMobile) toggleSidebar()
+											}}
+										>
+											<NavLink
+												to={link.to}
+												className={({ isActive }) => {
+													// TODO: fix
+													return isActive
+														? 'bg-accent'
+														: ''
+												}}
+											>
+												{link.icon}
+												{link.labelKey}
+											</NavLink>
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								))}
+							</SidebarMenu>
+						</SidebarGroupContent>
+					</SidebarGroup>
+				</SidebarContent>
+			</Sidebar>
+			<div className='flex flex-col w-full'>
+				<header
+					className={cn(
+						'flex items-center gap-2 p-4 lg:px-12 border-b-2 border-b-secondary',
+						{
+							'justify-end': !isMobile,
+							'justify-between': isMobile,
+						},
+					)}
+				>
+					{isMobile && <SidebarTrigger />}
+					<p className='leading-7 font-semibold'>{user.email}</p>
+					<ThemeToggle currentTheme={theme} />
+					<LogoutButton />
+				</header>
+				<main className='flex-1 mx-auto w-full lg:max-w-6xl md:max-w-3xl py-6 lg:px-12 md:px-8 sm:px-6 px-4 overflow-auto'>
+					<Outlet />
+				</main>
+			</div>
 		</>
 	)
 }

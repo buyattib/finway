@@ -67,7 +67,7 @@ app.use((req, res, next) => {
 
 	// the verify route is a special case because it's a GET route that
 	// can have a token in the query string
-	if (req.path.includes('/verify')) {
+	if (req.path.includes('/authenticate')) {
 		return strongestLimiter(req, res, next)
 	}
 

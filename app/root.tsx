@@ -2,6 +2,7 @@ import {
 	data,
 	isRouteErrorResponse,
 	Links,
+	Meta,
 	Outlet,
 	Scripts,
 	ScrollRestoration,
@@ -65,6 +66,23 @@ export const links: Route.LinksFunction = () => [
 	},
 ]
 
+export function meta({ error }: Route.MetaArgs) {
+	return [
+		{ title: !error ? 'Finhub' : 'Error | Finhub' },
+		{
+			property: 'og:title',
+			content: 'Finhub',
+		},
+		{
+			name: 'description',
+			content: 'The hub for your finances',
+		},
+		{ name: 'robots', content: 'noindex, nofollow' },
+		{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
+		{ charSet: 'utf-8' },
+	]
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
 	const { toast, headers: toastHeaders } = await getToast(request)
 
@@ -104,14 +122,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang='en' className={theme}>
 			<head>
-				<title>Finhub</title>
-				<meta name='description' content='The hub for your finances' />
-				<meta name='robots' content='noindex, nofollow' />
-				<meta charSet='utf-8' />
-				<meta
-					name='viewport'
-					content='width=device-width, initial-scale=1'
-				/>
+				<Meta />
 				<Links />
 			</head>
 			<body className='min-h-svh flex flex-col w-full'>
