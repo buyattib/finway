@@ -5,6 +5,7 @@ const schema = z.object({
 	DB_FILE_NAME: z.string(),
 	SESSION_SECRET: z.string(),
 	HONEYPOT_SECRET: z.string(),
+	MAGIC_LINK_SECRET: z.string(),
 })
 
 declare global {

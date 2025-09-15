@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router'
+import { NavLink, Outlet, type MiddlewareFunction } from 'react-router'
 import {
 	ArrowRightLeftIcon,
 	BanknoteArrowDownIcon,
@@ -8,8 +8,8 @@ import {
 
 import type { Route } from './+types/private'
 
-import { dbContext, userContext } from '~/lib/context'
-import { requireAuthenticated } from '~/utils/auth.server'
+import { authMiddleware } from '~/middleware/auth'
+import { userContext } from '~/lib/context'
 import { cn } from '~/lib/utils'
 
 import { FinhubLink } from '~/components/finhub-link'
@@ -18,7 +18,6 @@ import { ThemeToggle } from '~/components/theme-toggle'
 import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarHeader,
@@ -31,15 +30,8 @@ import {
 } from '~/components/ui/sidebar'
 
 // NOTE: could refresh the session here if user is authenticated and has an expiration date
-const authMiddleware: Route.MiddlewareFunction = async ({
-	request,
-	context,
-}) => {
-	const user = await requireAuthenticated(request, context.get(dbContext))
-	context.set(userContext, user)
-}
 
-export const middleware: Route.MiddlewareFunction[] = [authMiddleware]
+export const middleware: MiddlewareFunction[] = [authMiddleware]
 
 export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)

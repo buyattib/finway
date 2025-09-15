@@ -3,6 +3,7 @@ import { safeRedirect } from 'remix-utils/safe-redirect'
 
 import type { Route } from './+types/authenticate'
 
+import * as schema from '~/database/schema'
 import { dbContext } from '~/lib/context'
 import {
 	createAuthSessionHeaders,
@@ -11,34 +12,40 @@ import {
 } from '~/utils/auth.server'
 import { createToastHeaders } from '~/utils/toast.server'
 import { combineHeaders } from '~/utils/headers.server'
+import { validateMagicLink } from '~/utils/magic-link.server'
 
-export async function loader({
-	request,
-	params: { token },
-	context,
-}: Route.LoaderArgs) {
+export async function loader({ request, context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 
 	await requireAnonymous(request, db)
 
-	// TODO: for now the token is the userId, need to hash it later
-	const user = await db.query.users.findFirst({
-		columns: { id: true, email: true },
-		where: (users, { eq }) => eq(users.id, token),
-	})
-
-	if (!user) {
+	let email
+	try {
+		email = await validateMagicLink(request.url)
+	} catch (err) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: 'Error logging in',
-			description:
-				'There was an error with your login, please try again.',
+			description: String(err),
 		})
 		const authHeaders = await removeAuthSession(request)
-
 		return redirect('/login', {
 			headers: combineHeaders(authHeaders, toastHeaders),
 		})
+	}
+
+	let user = await db.query.users.findFirst({
+		columns: { id: true, email: true },
+		where: (users, { eq }) => eq(users.email, email),
+	})
+
+	if (!user) {
+		const result = await db
+			.insert(schema.users)
+			.values({ email })
+			.returning({ id: schema.users.id, email: schema.users.email })
+
+		user = result[0]
 	}
 
 	const searchParams = new URL(request.url).searchParams

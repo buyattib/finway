@@ -12,6 +12,7 @@ import { dbContext } from '~/lib/context'
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { createToastHeaders } from '~/utils/toast.server'
 import { requireAnonymous } from '~/utils/auth.server'
+import { getDomainUrl } from '~/utils/misc'
 
 import {
 	Card,
@@ -23,6 +24,7 @@ import {
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { CheckboxField, ErrorList, Field } from '~/components/forms'
+import { createMagicLink } from '~/utils/magic-link.server'
 
 const LoginFormSchema = z.object({
 	email: z
@@ -60,20 +62,22 @@ export async function action({ request, context }: Route.ActionArgs) {
 		where: (users, { eq }) => eq(users.email, email),
 	})
 
-	// TODO: hash the token
-	// TODO: send email link
-	const url = new URL(request.url)
-	const emailUrl = new URL(`${url.origin}/authenticate/${user?.id}`)
+	const magicLink = createMagicLink({
+		emailAddress: email,
+		domainUrl: getDomainUrl(request),
+	})
+
 	if (remember) {
-		emailUrl.searchParams.set('remember', 'true')
+		magicLink.searchParams.set('remember', 'true')
 	}
 
 	if (redirectTo) {
 		const safeRedirectTo = safeRedirect(redirectTo)
-		emailUrl.searchParams.set('redirectTo', safeRedirectTo)
+		magicLink.searchParams.set('redirectTo', safeRedirectTo)
 	}
 
-	console.log(emailUrl.href)
+	// TODO: send email
+	console.log(magicLink.toString())
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
