@@ -4,7 +4,7 @@ import { FinhubIcon } from './finhub-icon'
 export function FinhubLink() {
 	return (
 		<Link
-			to='/'
+			to='/app'
 			className='flex items-center gap-2 font-semibold text-primary text-lg'
 		>
 			<FinhubIcon />

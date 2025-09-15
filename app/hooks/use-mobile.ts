@@ -1,10 +1,12 @@
 import * as React from 'react'
+import { useRootLoader } from './use-root-loader'
 
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
+	const rootLoaderData = useRootLoader()
 	const [isMobile, setIsMobile] = React.useState<boolean | undefined>(
-		undefined,
+		rootLoaderData?.hints.isMobile,
 	)
 
 	React.useEffect(() => {

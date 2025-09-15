@@ -55,7 +55,7 @@ export async function loader({
 		user.id,
 		remember,
 	)
-	return redirect(safeRedirect(redirectTo), {
+	return redirect(safeRedirect(redirectTo ?? '/app'), {
 		headers: combineHeaders(authHeaders, toastHeaders),
 	})
 }

@@ -12,11 +12,11 @@ export const themeCookie = createCookie('finhub_theme', {
 export async function getTheme(request: Request) {
 	const cookie = request.headers.get('Cookie')
 
-	if (!cookie) return 'light'
+	if (!cookie) return null
 
 	const parsed = await themeCookie.parse(cookie)
 	const result = ThemeFormSchema.safeParse({ theme: parsed })
-	if (!result.success) return 'light'
+	if (!result.success) return null
 
 	return result.data.theme
 }

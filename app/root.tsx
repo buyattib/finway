@@ -17,14 +17,15 @@ import { useTheme } from './components/theme-toggle'
 import { ShowToast } from './components/show-toast'
 
 import { getTheme, themeAction } from './utils/theme.server'
-import { useNonce } from './utils/nonce-provider'
 import { honeypot } from './utils/honeypot.server'
 import { getToast } from './utils/toast.server'
 import { combineHeaders } from './utils/headers.server'
+import { getHints, ClientHintCheck } from './utils/client-hints'
 
 import faviconAssetUrl from './assets/favicon.svg?url'
 import fontsCssHref from './styles/fonts.css?url'
 import tailwindCssHref from './styles/tailwind.css?url'
+import { globalContext } from './lib/context'
 
 export const links: Route.LinksFunction = () => [
 	{
@@ -77,20 +78,23 @@ export function meta({ error }: Route.MetaArgs) {
 			name: 'description',
 			content: 'The hub for your finances',
 		},
-		{ name: 'robots', content: 'noindex, nofollow' },
+		// { name: 'robots', content: 'noindex, nofollow' },
 		{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
 		{ charSet: 'utf-8' },
 	]
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, context }: Route.LoaderArgs) {
 	const { toast, headers: toastHeaders } = await getToast(request)
+	const { cspNonce } = context.get(globalContext)
 
 	return data(
 		{
 			honeyProps: await honeypot.getInputProps(),
-			theme: await getTheme(request),
 			toast,
+			theme: await getTheme(request),
+			hints: getHints(request),
+			cspNonce,
 		},
 		{ headers: combineHeaders(toastHeaders) },
 	)
@@ -115,13 +119,16 @@ export default function App({ loaderData }: Route.ComponentProps) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-	const nonce = useNonce()
 	const loaderData = useRouteLoaderData<typeof loader>('root')
-	const theme = useTheme(loaderData?.theme)
+	const nonce = loaderData?.cspNonce
+	const theme = useTheme()
+
+	console.log(loaderData?.hints)
 
 	return (
 		<html lang='en' className={theme}>
 			<head>
+				<ClientHintCheck nonce={nonce} />
 				<Meta />
 				<Links />
 			</head>

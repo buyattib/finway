@@ -6,6 +6,7 @@ import { MoonIcon, SunIcon } from 'lucide-react'
 import { z } from 'zod'
 
 import { Button } from '~/components/ui/button'
+import { useRootLoader } from '~/hooks/use-root-loader'
 
 export const ThemeFormSchema = z.object({
 	theme: z.enum(['light', 'dark']),
@@ -13,7 +14,8 @@ export const ThemeFormSchema = z.object({
 
 export type Theme = z.infer<typeof ThemeFormSchema>['theme']
 
-export function ThemeToggle({ currentTheme }: { currentTheme: Theme }) {
+export function ThemeToggle() {
+	const currentTheme = useTheme()
 	const fetcher = useFetcher<typeof action>()
 
 	const [form] = useForm({
@@ -47,17 +49,19 @@ export function ThemeToggle({ currentTheme }: { currentTheme: Theme }) {
 	)
 }
 
-export function useTheme(theme: Theme | undefined) {
+export function useTheme() {
+	const rootLoader = useRootLoader()
+
+	const cookieTheme = rootLoader?.theme
+	const hintTheme = rootLoader?.hints.theme
+
 	const fetchers = useFetchers()
 	const fetcher = fetchers.find(
 		f => f.formData?.get('intent') === 'theme-toggle',
 	)
-
 	const _theme = fetcher?.formData?.get('theme')
-
 	const parsed = ThemeFormSchema.safeParse({ theme: _theme })
-
-	if (!parsed.success) return theme ?? 'light'
+	if (!parsed.success) return cookieTheme ?? hintTheme ?? 'light'
 
 	return parsed.data.theme
 }

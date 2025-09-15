@@ -12,9 +12,8 @@ export default [
 
 	layout('layouts/public.tsx', [route('login', 'routes/auth/login.tsx')]),
 
-	layout('layouts/private.tsx', [
+	route('app', 'layouts/private.tsx', [
 		index('routes/dashboard.tsx'),
-
 		route('accounts', 'routes/accounts/accounts.tsx', [
 			route(':accountId', 'routes/accounts/account.tsx'),
 		]),

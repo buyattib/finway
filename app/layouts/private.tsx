@@ -14,7 +14,7 @@ import { cn } from '~/lib/utils'
 
 import { FinhubLink } from '~/components/finhub-link'
 import { LogoutButton } from '~/components/logout-button'
-import { ThemeToggle, useTheme, type Theme } from '~/components/theme-toggle'
+import { ThemeToggle } from '~/components/theme-toggle'
 import {
 	Sidebar,
 	SidebarContent,
@@ -48,36 +48,32 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 export default function PrivateLayout({
 	loaderData: { user },
-	matches,
 }: Route.ComponentProps) {
-	const rootLoader = matches[0].loaderData
-	const theme = useTheme(rootLoader.theme)
-
 	return (
 		<SidebarProvider>
-			<PrivateLayoutContent user={user} theme={theme} />
+			<PrivateLayoutContent user={user} />
 		</SidebarProvider>
 	)
 }
 
 const links = [
 	{
-		to: '/accounts',
+		to: '/app/accounts',
 		labelKey: 'accounts-label',
 		icon: <WalletIcon />,
 	},
 	{
-		to: '/transfers',
+		to: '/app/transfers',
 		labelKey: 'transfers-label',
 		icon: <ArrowRightLeftIcon />,
 	},
 	{
-		to: '/transactions',
+		to: '/app/transactions',
 		labelKey: 'transactions-label',
 		icon: <BanknoteArrowDownIcon />,
 	},
 	{
-		to: '/recurring-transactions',
+		to: '/app/recurring-transactions',
 		labelKey: 'recurring-transactions-label',
 		icon: <CalendarSyncIcon />,
 	},
@@ -85,10 +81,8 @@ const links = [
 
 function PrivateLayoutContent({
 	user,
-	theme,
 }: {
 	user: Route.ComponentProps['loaderData']['user']
-	theme: Theme
 }) {
 	const { isMobile, toggleSidebar } = useSidebar()
 
@@ -143,7 +137,7 @@ function PrivateLayoutContent({
 				>
 					{isMobile && <SidebarTrigger />}
 					<p className='leading-7 font-semibold'>{user.email}</p>
-					<ThemeToggle currentTheme={theme} />
+					<ThemeToggle />
 					<LogoutButton />
 				</header>
 				<main className='flex-1 mx-auto w-full lg:max-w-6xl md:max-w-3xl py-6 lg:px-12 md:px-8 sm:px-6 px-4 overflow-auto'>

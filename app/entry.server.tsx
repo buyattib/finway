@@ -12,7 +12,6 @@ import {
 } from 'react-dom/server'
 import './utils/env.server'
 
-import { NonceProvider } from './utils/nonce-provider'
 import { globalContext } from './lib/context'
 
 export const streamTimeout = 5_000
@@ -44,13 +43,11 @@ export default function handleRequest(
 
 		const ctx = loadContext.get(globalContext)
 		const { pipe, abort } = renderToPipeableStream(
-			<NonceProvider value={ctx.cspNonce}>
-				<ServerRouter
-					nonce={ctx.cspNonce}
-					context={routerContext}
-					url={request.url}
-				/>
-			</NonceProvider>,
+			<ServerRouter
+				nonce={ctx.cspNonce}
+				context={routerContext}
+				url={request.url}
+			/>,
 			{
 				[readyOption]() {
 					shellRendered = true
