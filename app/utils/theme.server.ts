@@ -7,6 +7,7 @@ export const themeCookie = createCookie('finhub_theme', {
 	path: '/',
 	sameSite: 'lax',
 	httpOnly: true,
+	expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
 })
 
 export async function getTheme(request: Request) {
