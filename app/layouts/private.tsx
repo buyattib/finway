@@ -46,16 +46,6 @@ export async function loader({ context }: Route.LoaderArgs) {
 	return { user }
 }
 
-export default function PrivateLayout({
-	loaderData: { user },
-}: Route.ComponentProps) {
-	return (
-		<SidebarProvider>
-			<PrivateLayoutContent user={user} />
-		</SidebarProvider>
-	)
-}
-
 const links = [
 	{
 		to: '/app/accounts',
@@ -79,13 +69,43 @@ const links = [
 	},
 ]
 
+export default function PrivateLayout({
+	loaderData: { user },
+}: Route.ComponentProps) {
+	return (
+		<SidebarProvider>
+			<PrivateLayoutContent user={user} />
+		</SidebarProvider>
+	)
+}
+
+function SidebarLink({ link }: { link: (typeof links)[number] }) {
+	const { isMobile, toggleSidebar } = useSidebar()
+	return (
+		<SidebarMenuItem key={link.to}>
+			<NavLink to={link.to}>
+				{({ isActive }) => (
+					<SidebarMenuButton
+						size='lg'
+						isActive={isActive}
+						onClick={() => {
+							if (isMobile) toggleSidebar()
+						}}
+					>
+						{link.icon}
+						{link.labelKey}
+					</SidebarMenuButton>
+				)}
+			</NavLink>
+		</SidebarMenuItem>
+	)
+}
+
 function PrivateLayoutContent({
 	user,
 }: {
 	user: Route.ComponentProps['loaderData']['user']
 }) {
-	const { isMobile, toggleSidebar } = useSidebar()
-
 	return (
 		<>
 			<Sidebar>
@@ -97,28 +117,7 @@ function PrivateLayoutContent({
 						<SidebarGroupContent>
 							<SidebarMenu>
 								{links.map(link => (
-									<SidebarMenuItem key={link.to}>
-										<SidebarMenuButton
-											asChild
-											size='lg'
-											onClick={() => {
-												if (isMobile) toggleSidebar()
-											}}
-										>
-											<NavLink
-												to={link.to}
-												className={({ isActive }) => {
-													// TODO: fix
-													return isActive
-														? 'bg-accent'
-														: ''
-												}}
-											>
-												{link.icon}
-												{link.labelKey}
-											</NavLink>
-										</SidebarMenuButton>
-									</SidebarMenuItem>
+									<SidebarLink link={link} key={link.to} />
 								))}
 							</SidebarMenu>
 						</SidebarGroupContent>
@@ -128,14 +127,10 @@ function PrivateLayoutContent({
 			<div className='flex flex-col w-full'>
 				<header
 					className={cn(
-						'flex items-center gap-2 p-4 lg:px-12 border-b-2 border-b-secondary',
-						{
-							'justify-end': !isMobile,
-							'justify-between': isMobile,
-						},
+						'flex items-center justify-between sm:justify-end gap-2 p-4 lg:px-12 border-b-2 border-b-secondary',
 					)}
 				>
-					{isMobile && <SidebarTrigger />}
+					<SidebarTrigger className='md:hidden' />
 					<p className='leading-7 font-semibold'>{user.email}</p>
 					<ThemeToggle />
 					<LogoutButton />
