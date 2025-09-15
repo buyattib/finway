@@ -123,8 +123,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	const nonce = loaderData?.cspNonce
 	const theme = useTheme()
 
-	console.log(loaderData?.hints)
-
 	return (
 		<html lang='en' className={theme}>
 			<head>
