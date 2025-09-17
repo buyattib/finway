@@ -62,7 +62,7 @@ export async function getCurrentUser(request: Request, db: DB) {
 export async function requireAnonymous(request: Request, db: DB) {
 	const user = await getCurrentUser(request, db)
 
-	if (user) throw redirect('/')
+	if (user) throw redirect('/app')
 }
 
 export async function requireAuthenticated(

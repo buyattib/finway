@@ -1,0 +1,11 @@
+import { redirect } from 'react-router'
+
+import { dbContext } from '~/lib/context'
+import { requireAuthenticated } from '~/utils/auth.server'
+
+import type { Route } from './+types'
+
+export async function loader({ request, context }: Route.LoaderArgs) {
+	requireAuthenticated(request, context.get(dbContext), { redirectTo: null })
+	return redirect('/app')
+}

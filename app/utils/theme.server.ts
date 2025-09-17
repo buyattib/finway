@@ -3,11 +3,12 @@ import { parseWithZod } from '@conform-to/zod/v4'
 
 import { ThemeFormSchema } from '~/components/theme-toggle'
 
+const expireDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
 export const themeCookie = createCookie('finhub_theme', {
 	path: '/',
 	sameSite: 'lax',
 	httpOnly: true,
-	expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+	expires: expireDate,
 })
 
 export async function getTheme(request: Request) {
@@ -47,6 +48,7 @@ export async function themeAction(formData: FormData) {
 			headers: {
 				'Set-Cookie': await themeCookie.serialize(
 					submission.value.theme,
+					{ expires: expireDate },
 				),
 			},
 		},

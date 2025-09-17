@@ -13,6 +13,8 @@ import { checkHoneypot } from '~/utils/honeypot.server'
 import { createToastHeaders } from '~/utils/toast.server'
 import { requireAnonymous } from '~/utils/auth.server'
 import { getDomainUrl } from '~/utils/misc'
+import { createMagicLink } from '~/utils/magic-link.server'
+import { sendEmail } from '~/utils/email.server'
 
 import {
 	Card,
@@ -24,7 +26,6 @@ import {
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { CheckboxField, ErrorList, Field } from '~/components/forms'
-import { createMagicLink } from '~/utils/magic-link.server'
 
 const LoginFormSchema = z.object({
 	email: z
@@ -62,6 +63,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 		where: (users, { eq }) => eq(users.email, email),
 	})
 
+	// TODO: add an exta validation to check if an email was sent in the last 15 minutes to prevent sending more than one email to the same address
+	// For logouts and logins inside the 15 minutes expiration window, just show a toast saying that the latest email link is still valid.
+
 	const magicLink = createMagicLink({
 		emailAddress: email,
 		domainUrl: getDomainUrl(request),
@@ -76,8 +80,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 		magicLink.searchParams.set('redirectTo', safeRedirectTo)
 	}
 
-	// TODO: send email
-	console.log(magicLink.toString())
+	const result = await sendEmail({
+		to: email,
+		subject: 'Testing',
+		text: magicLink.toString(),
+	})
+	if (result.status === 'error') {
+		console.error(result.error)
+	}
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
