@@ -4,6 +4,7 @@ import { safeRedirect } from 'remix-utils/safe-redirect'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { LoaderCircleIcon } from 'lucide-react'
+import { render } from '@react-email/components'
 import { z } from 'zod'
 
 import type { Route } from './+types/login'
@@ -26,6 +27,8 @@ import {
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { CheckboxField, ErrorList, Field } from '~/components/forms'
+
+import { LoginEmail } from '~/emails/login'
 
 const LoginFormSchema = z.object({
 	email: z
@@ -84,6 +87,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		to: email,
 		subject: 'Testing',
 		text: magicLink.toString(),
+		html: await render(<LoginEmail url={magicLink.toString()} />),
 	})
 	if (result.status === 'error') {
 		console.error(result.error)

@@ -7,11 +7,11 @@ const successResponse = { status: 'success' } as const
 export async function sendEmail(options: {
 	to: string
 	subject: string
-	html?: string
+	html: string
 	text: string
 }) {
-	if (env.NODE_ENV === 'production') {
-		console.log(options.text)
+	if (env.NODE_ENV !== 'production') {
+		console.log(options)
 		return successResponse
 	}
 
