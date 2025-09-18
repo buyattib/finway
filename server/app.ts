@@ -17,11 +17,15 @@ export const app = express()
 if (!process.env.DB_FILE_NAME) throw new Error('DB_FILE_NAME is required')
 
 // connect to db and add to context for loaders/actions to use
-const client =
-	globalThis.__libsql ?? createClient({ url: process.env.DB_FILE_NAME })
-if (process.env.NODE_ENV === 'development') {
+let client
+if (process.env.NODE_ENV === 'production') {
+	client = createClient({ url: process.env.DB_FILE_NAME })
+} else {
+	client =
+		globalThis.__libsql ?? createClient({ url: process.env.DB_FILE_NAME })
 	globalThis.__libsql = client
 }
+
 const db = drizzle(client, {
 	schema,
 	logger: process.env.NODE_ENV === 'development',
