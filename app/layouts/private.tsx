@@ -44,21 +44,21 @@ const links = [
 		labelKey: 'accounts-label',
 		icon: <WalletIcon />,
 	},
-	{
-		to: '/app/transfers',
-		labelKey: 'transfers-label',
-		icon: <ArrowRightLeftIcon />,
-	},
-	{
-		to: '/app/transactions',
-		labelKey: 'transactions-label',
-		icon: <BanknoteArrowDownIcon />,
-	},
-	{
-		to: '/app/recurring-transactions',
-		labelKey: 'recurring-transactions-label',
-		icon: <CalendarSyncIcon />,
-	},
+	// {
+	// 	to: '/app/transfers',
+	// 	labelKey: 'transfers-label',
+	// 	icon: <ArrowRightLeftIcon />,
+	// },
+	// {
+	// 	to: '/app/transactions',
+	// 	labelKey: 'transactions-label',
+	// 	icon: <BanknoteArrowDownIcon />,
+	// },
+	// {
+	// 	to: '/app/recurring-transactions',
+	// 	labelKey: 'recurring-transactions-label',
+	// 	icon: <CalendarSyncIcon />,
+	// },
 ]
 
 export default function PrivateLayout({
@@ -71,8 +71,13 @@ export default function PrivateLayout({
 	)
 }
 
-function SidebarLink({ link }: { link: (typeof links)[number] }) {
-	const { isMobile, toggleSidebar } = useSidebar()
+function SidebarLink({
+	link,
+	onClick,
+}: {
+	link: (typeof links)[number]
+	onClick: () => void
+}) {
 	return (
 		<SidebarMenuItem key={link.to}>
 			<NavLink to={link.to}>
@@ -80,9 +85,7 @@ function SidebarLink({ link }: { link: (typeof links)[number] }) {
 					<SidebarMenuButton
 						size='lg'
 						isActive={isActive}
-						onClick={() => {
-							if (isMobile) toggleSidebar()
-						}}
+						onClick={onClick}
 					>
 						{link.icon}
 						{link.labelKey}
@@ -98,18 +101,27 @@ function PrivateLayoutContent({
 }: {
 	user: Route.ComponentProps['loaderData']['user']
 }) {
+	const { isMobile, toggleSidebar } = useSidebar()
+	const closeSidebar = () => {
+		if (isMobile) toggleSidebar()
+	}
+
 	return (
 		<>
 			<Sidebar>
 				<SidebarHeader className='p-4'>
-					<FinhubLink />
+					<FinhubLink onClick={closeSidebar} />
 				</SidebarHeader>
 				<SidebarContent>
 					<SidebarGroup>
 						<SidebarGroupContent>
 							<SidebarMenu>
 								{links.map(link => (
-									<SidebarLink link={link} key={link.to} />
+									<SidebarLink
+										link={link}
+										key={link.to}
+										onClick={closeSidebar}
+									/>
 								))}
 							</SidebarMenu>
 						</SidebarGroupContent>

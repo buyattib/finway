@@ -40,9 +40,12 @@ const LoginFormSchema = z.object({
 	redirectTo: z.string().optional(),
 })
 
-// export function meta({ error }: Route.MetaArgs) {
-// 	return [{ title: 'Login to Finhub' }]
-// }
+export function meta() {
+	return [
+		{ title: 'Login to Finhub' },
+		{ property: 'og:title', content: 'Login to Finhub' },
+	]
+}
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	await requireAnonymous(request, context.get(dbContext))
