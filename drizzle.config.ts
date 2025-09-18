@@ -5,7 +5,7 @@ if (!process.env.DB_FILE_NAME) {
 }
 
 export default defineConfig({
-	out: './drizzle',
+	out: './drizzle/',
 	schema: './database/schema.ts',
 	dialect: 'sqlite',
 	dbCredentials: {
