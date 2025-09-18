@@ -6,7 +6,7 @@ export const MOBILE_BREAKPOINT = 768
 export function useIsMobile() {
 	const rootLoaderData = useRootLoader()
 	const [isMobile, setIsMobile] = React.useState<boolean | undefined>(
-		rootLoaderData?.hints.isMobileHint,
+		rootLoaderData?.hints.isMobile,
 	)
 
 	React.useEffect(() => {

@@ -10,15 +10,6 @@ import { clientHint as timeZoneHint } from '@epic-web/client-hints/time-zone'
 
 import { MOBILE_BREAKPOINT } from '~/hooks/use-mobile'
 
-const languageHint = {
-	cookieName: 'CH-language',
-	getValueCode: `navigator.language || navigator.languages?.[0]`,
-	fallback: 'en-US',
-	transform(value: string) {
-		return value.toLowerCase().split('-')[0]
-	},
-} as const satisfies ClientHint<string>
-
 const isMobileHint = {
 	cookieName: 'CH-mobile',
 	// getValueCode: `(/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/).test(navigator.userAgent).toString()`,
@@ -32,8 +23,7 @@ const isMobileHint = {
 const hintsUtils = getHintUtils({
 	theme: colorSchemeHint,
 	timeZone: timeZoneHint,
-	languageHint,
-	isMobileHint,
+	isMobile: isMobileHint,
 })
 
 export const { getHints } = hintsUtils

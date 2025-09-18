@@ -40,6 +40,10 @@ const LoginFormSchema = z.object({
 	redirectTo: z.string().optional(),
 })
 
+// export function meta({ error }: Route.MetaArgs) {
+// 	return [{ title: 'Login to Finhub' }]
+// }
+
 export async function loader({ request, context }: Route.LoaderArgs) {
 	await requireAnonymous(request, context.get(dbContext))
 }
@@ -125,66 +129,62 @@ export default function Login({ actionData }: Route.ComponentProps) {
 	})
 
 	return (
-		<>
-			<title>Login to Finhub</title>
+		<Card className='mx-auto w-full max-w-lg gap-4'>
+			<CardHeader>
+				<CardTitle>Welcome!</CardTitle>
+				<CardDescription>
+					We are going to send you an email with a login link
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Form method='post' {...getFormProps(form)}>
+					<HoneypotInputs label='Please leave this field blank' />
 
-			<Card className='mx-auto w-full max-w-lg gap-4'>
-				<CardHeader>
-					<CardTitle>Welcome!</CardTitle>
-					<CardDescription>
-						We are going to send you an email with a login link
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<Form method='post' {...getFormProps(form)}>
-						<HoneypotInputs label='Please leave this field blank' />
+					<Field
+						labelProps={{ children: 'Email' }}
+						inputProps={{
+							...getInputProps(fields.email, {
+								type: 'email',
+							}),
+							autoFocus: true,
+							className: 'lowercase',
+							autoComplete: 'email',
+						}}
+						errors={fields.email.errors}
+					/>
 
-						<Field
-							labelProps={{ children: 'Email' }}
-							inputProps={{
-								...getInputProps(fields.email, {
-									type: 'email',
-								}),
-								autoFocus: true,
-								className: 'lowercase',
-								autoComplete: 'email',
-							}}
-							errors={fields.email.errors}
-						/>
+					<CheckboxField
+						labelProps={{
+							children: 'Remember me',
+						}}
+						checkboxProps={getInputProps(fields.remember, {
+							type: 'checkbox',
+						})}
+						errors={fields.remember.errors}
+					/>
 
-						<CheckboxField
-							labelProps={{
-								children: 'Remember me',
-							}}
-							checkboxProps={getInputProps(fields.remember, {
-								type: 'checkbox',
-							})}
-							errors={fields.remember.errors}
-						/>
+					<input
+						{...getInputProps(fields.redirectTo, {
+							type: 'hidden',
+						})}
+					/>
 
-						<input
-							{...getInputProps(fields.redirectTo, {
-								type: 'hidden',
-							})}
-						/>
-
-						<ErrorList errors={form.errors} id={form.errorId} />
-					</Form>
-				</CardContent>
-				<CardFooter>
-					<Button
-						form={form.id}
-						type='submit'
-						width='full'
-						disabled={isSubmitting}
-					>
-						{isSubmitting && (
-							<LoaderCircleIcon className='animate-spin' />
-						)}
-						Submit
-					</Button>
-				</CardFooter>
-			</Card>
-		</>
+					<ErrorList errors={form.errors} id={form.errorId} />
+				</Form>
+			</CardContent>
+			<CardFooter>
+				<Button
+					form={form.id}
+					type='submit'
+					width='full'
+					disabled={isSubmitting}
+				>
+					{isSubmitting && (
+						<LoaderCircleIcon className='animate-spin' />
+					)}
+					Submit
+				</Button>
+			</CardFooter>
+		</Card>
 	)
 }

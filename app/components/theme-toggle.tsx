@@ -1,4 +1,3 @@
-import type { action } from '~/root'
 import { useFetcher, useFetchers } from 'react-router'
 import { getFormProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod/v4'
@@ -7,6 +6,8 @@ import { z } from 'zod'
 
 import { Button } from '~/components/ui/button'
 import { useRootLoader } from '~/hooks/use-root-loader'
+
+import type { action } from '~/routes/index'
 
 export const ThemeFormSchema = z.object({
 	theme: z.enum(['light', 'dark']),
@@ -33,7 +34,7 @@ export function ThemeToggle() {
 		}[currentTheme] ?? 'light'
 
 	return (
-		<fetcher.Form method='post' {...getFormProps(form)}>
+		<fetcher.Form method='post' {...getFormProps(form)} action='/'>
 			<input type='hidden' name='theme' value={nextTheme} />
 			<Button
 				variant='ghost'
@@ -41,8 +42,8 @@ export function ThemeToggle() {
 				name='intent'
 				value='theme-toggle'
 			>
-				<SunIcon className='h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90' />
-				<MoonIcon className='absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0' />
+				<SunIcon className='scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90' />
+				<MoonIcon className='absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0' />
 				<span className='sr-only'>Theme toggle</span>
 			</Button>
 		</fetcher.Form>

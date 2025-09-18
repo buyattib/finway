@@ -16,7 +16,8 @@ import { Toaster } from './components/ui/sonner'
 import { useTheme } from './components/theme-toggle'
 import { ShowToast } from './components/show-toast'
 
-import { getTheme, themeAction } from './utils/theme.server'
+import { globalContext } from './lib/context'
+import { getTheme } from './utils/theme.server'
 import { honeypot } from './utils/honeypot.server'
 import { getToast } from './utils/toast.server'
 import { combineHeaders } from './utils/headers.server'
@@ -25,7 +26,6 @@ import { getHints, ClientHintCheck } from './utils/client-hints'
 import faviconAssetUrl from './assets/favicon.svg?url'
 import fontsCssHref from './styles/fonts.css?url'
 import tailwindCssHref from './styles/tailwind.css?url'
-import { globalContext } from './lib/context'
 
 export const links: Route.LinksFunction = () => [
 	{
@@ -90,24 +90,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 	return data(
 		{
+			cspNonce,
 			honeyProps: await honeypot.getInputProps(),
 			toast,
+			hints: getHints(),
 			theme: await getTheme(request),
-			hints: getHints(request),
-			cspNonce,
 		},
 		{ headers: combineHeaders(toastHeaders) },
 	)
-}
-
-export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
-
-	if (formData.get('intent') !== 'theme-toggle') {
-		return data({ status: 'error', submission: undefined }, { status: 400 })
-	}
-
-	return await themeAction(formData)
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {

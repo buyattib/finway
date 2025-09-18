@@ -8,7 +8,6 @@ export const themeCookie = createCookie('finhub_theme', {
 	path: '/',
 	sameSite: 'lax',
 	httpOnly: true,
-	expires: expireDate,
 })
 
 export async function getTheme(request: Request) {
