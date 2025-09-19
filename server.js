@@ -43,36 +43,38 @@ app.use((req, res, next) => {
 	_helmet(req, res, next)
 })
 
-// Add rate limiting to all requests
-const defaultLimiter = {
-	windowMs: 15 * 60 * 1000, // 15 minutes
-	limit: 1000,
-	standardHeaders: true, // Use standard draft-6 headers of `RateLimit-Policy` `RateLimit-Limit`, and `RateLimit-Remaining`
-	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-}
-const generalLimiter = rateLimit(defaultLimiter)
-const strongLimiter = rateLimit({
-	...defaultLimiter,
-	limit: 100,
-})
-const strongestLimiter = rateLimit({ ...defaultLimiter, limit: 10 })
-app.use((req, res, next) => {
-	const sensiblePaths = ['/login']
-	if (req.method !== 'GET' && req.method !== 'HEAD') {
-		if (sensiblePaths.some(sPath => req.path.includes(sPath))) {
+if (!DEVELOPMENT) {
+	// Add rate limiting to all requests
+	const defaultLimiter = {
+		windowMs: 15 * 60 * 1000, // 15 minutes
+		limit: 1000,
+		standardHeaders: true, // Use standard draft-6 headers of `RateLimit-Policy` `RateLimit-Limit`, and `RateLimit-Remaining`
+		legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+	}
+	const generalLimiter = rateLimit(defaultLimiter)
+	const strongLimiter = rateLimit({
+		...defaultLimiter,
+		limit: 100,
+	})
+	const strongestLimiter = rateLimit({ ...defaultLimiter, limit: 10 })
+	app.use((req, res, next) => {
+		const sensiblePaths = ['/login']
+		if (req.method !== 'GET' && req.method !== 'HEAD') {
+			if (sensiblePaths.some(sPath => req.path.includes(sPath))) {
+				return strongestLimiter(req, res, next)
+			}
+			return strongLimiter(req, res, next)
+		}
+
+		// the verify route is a special case because it's a GET route that
+		// can have a token in the query string
+		if (req.path.includes('/authenticate')) {
 			return strongestLimiter(req, res, next)
 		}
-		return strongLimiter(req, res, next)
-	}
 
-	// the verify route is a special case because it's a GET route that
-	// can have a token in the query string
-	if (req.path.includes('/authenticate')) {
-		return strongestLimiter(req, res, next)
-	}
-
-	return generalLimiter(req, res, next)
-})
+		return generalLimiter(req, res, next)
+	})
+}
 
 if (DEVELOPMENT) {
 	console.log('Starting development server')
