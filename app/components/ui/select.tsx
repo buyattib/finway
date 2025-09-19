@@ -4,9 +4,8 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 
 import { cn } from '~/lib/utils'
 
-function Select({
-	...props
-}: React.ComponentProps<typeof SelectPrimitive.Root>) {
+export type SelectProps = React.ComponentProps<typeof SelectPrimitive.Root>
+function Select({ ...props }: SelectProps) {
 	return <SelectPrimitive.Root data-slot='select' {...props} />
 }
 
@@ -22,14 +21,17 @@ function SelectValue({
 	return <SelectPrimitive.Value data-slot='select-value' {...props} />
 }
 
+export type SelectTriggerProps = React.ComponentProps<
+	typeof SelectPrimitive.Trigger
+> & {
+	size?: 'sm' | 'default'
+}
 function SelectTrigger({
 	className,
 	size = 'default',
 	children,
 	...props
-}: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
-	size?: 'sm' | 'default'
-}) {
+}: SelectTriggerProps) {
 	return (
 		<SelectPrimitive.Trigger
 			data-slot='select-trigger'

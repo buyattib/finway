@@ -6,6 +6,14 @@ import { cn } from '~/lib/utils'
 import { Label } from './ui/label'
 import { Input } from './ui/input'
 import { Checkbox, type CheckboxProps } from './ui/checkbox'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	type SelectTriggerProps,
+} from './ui/select'
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined
 
@@ -124,6 +132,78 @@ export function CheckboxField({
 					className='self-center text-sm text-muted-foreground'
 				/>
 			</div>
+			<div className='min-h-6 py-1 px-1'>
+				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+			</div>
+		</div>
+	)
+}
+
+export function SelectField({
+	labelProps,
+	selectProps,
+	errors,
+	className,
+}: {
+	labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
+	selectProps: SelectTriggerProps & {
+		name: string
+		form: string
+		items: Array<{ label: string; value: string }>
+		placeholder?: string
+	}
+	errors?: ListOfErrors
+	className?: string
+}) {
+	const fallbackId = useId()
+	const id = selectProps.id ?? fallbackId
+	const errorId = errors?.length ? `${id}-error` : undefined
+
+	const { name, form, defaultValue, placeholder, items, ...triggerProps } =
+		selectProps
+
+	const control = useInputControl({
+		key: triggerProps.key,
+		name: name,
+		formId: form,
+		initialValue: defaultValue ? String(defaultValue) : undefined,
+	})
+
+	return (
+		<div className={cn('flex flex-col gap-1 w-full', className)}>
+			<Label
+				htmlFor={id}
+				aria-invalid={errorId ? true : undefined}
+				{...labelProps}
+			/>
+			<Select
+				value={control.value}
+				onValueChange={value => control.change(value)}
+				onOpenChange={open => {
+					if (!open) control.blur()
+				}}
+				disabled={triggerProps.disabled}
+			>
+				<SelectTrigger
+					{...triggerProps}
+					id={id}
+					aria-invalid={errorId ? true : undefined}
+					aria-describedby={errorId}
+					onFocus={control.focus}
+					onBlur={control.blur}
+					className='w-full'
+				>
+					<SelectValue placeholder={placeholder} />
+				</SelectTrigger>
+				<SelectContent id={id}>
+					{items.map(item => (
+						<SelectItem key={item.value} value={item.value}>
+							{item.label}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
 			</div>
