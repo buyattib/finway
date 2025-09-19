@@ -6,16 +6,24 @@
 
 - pnpm dev
 
-## Database (scripts)
+## Database view
 
-There are scripts in the package.json defined to push, generate and migrate
+- Browse the db with drizzle studio: pnpm run db:studio (spins a server in localhost:6001)
 
-## Database (manually)
+## Database migrations
 
-- Push changes directly to the db (for testing): npx drizzle-kit push
-- Generate migrations: npx drizzle-kit generate
-- Migrate (apply the migrations): npx drizzle-kit migrate
+There are scripts in the package.json defined to:
 
-## Run db scripts
+- push: applies changes to the db
+- generate: generates a .sql migration file
+- migrate: applies the migrations in the generated .sql file
 
-- With 'script' script: pnpm run script -- database/scripts/test.ts
+## Run scripts
+
+- With 'script' script: pnpm run script -- database/seed/new-user.ts
+
+## Emails
+
+- Resend + react-email is used
+- Emails are found in app/emails/ dir
+- To preview emails run: pnpm run email (spins server to preview emails in localhost:6000)

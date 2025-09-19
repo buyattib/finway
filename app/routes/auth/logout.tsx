@@ -3,7 +3,7 @@ import type { Route } from './+types/logout'
 import { removeAuthSession } from '~/utils/auth.server'
 
 export async function loader() {
-	redirect('/')
+	return redirect('/')
 }
 
 export async function action({ request }: Route.ActionArgs) {

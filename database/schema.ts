@@ -22,7 +22,6 @@ export const users = sqliteTable(
 		id: cuid2().defaultRandom().primaryKey(),
 		email: text().notNull(),
 	},
-	// table => [uniqueIndex('users_email_idx').on(table.email)],
 	table => ({
 		usersEmailIdx: uniqueIndex('users_email_idx').on(table.email),
 	}),

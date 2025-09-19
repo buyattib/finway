@@ -16,8 +16,12 @@ export default [
 
 	route('app', 'layouts/private.tsx', [
 		index('routes/dashboard.tsx'),
-		route('accounts', 'routes/accounts/accounts.tsx', [
+
+		// accounts
+		...prefix('accounts', [
+			index('routes/accounts/index.tsx'),
 			route(':accountId', 'routes/accounts/account.tsx'),
+			route('create', 'routes/accounts/create.tsx'),
 		]),
 	]),
 ] satisfies RouteConfig
