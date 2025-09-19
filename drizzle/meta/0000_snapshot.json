@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "7b6be221-e099-466e-93ae-84c108a51ad2",
+  "id": "af7dad10-68e6-4849-890a-85149d607d7b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "users": {
@@ -12,16 +12,14 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "autoincrement": false
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "autoincrement": false
         },
         "id": {
           "name": "id",
@@ -35,6 +33,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "lastLoginEmail": {
+          "name": "lastLoginEmail",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         }
       },

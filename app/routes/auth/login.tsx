@@ -6,15 +6,20 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { LoaderCircleIcon } from 'lucide-react'
 import { render } from '@react-email/components'
 import { z } from 'zod'
+import { eq } from 'drizzle-orm'
 
 import type { Route } from './+types/login'
 
+import * as schema from '~/database/schema'
 import { dbContext } from '~/lib/context'
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { createToastHeaders } from '~/utils/toast.server'
 import { requireAnonymous } from '~/utils/auth.server'
 import { getDomainUrl } from '~/utils/misc'
-import { createMagicLink } from '~/utils/magic-link.server'
+import {
+	createMagicLink,
+	magicLinkExpirationTime,
+} from '~/utils/magic-link.server'
 import { sendEmail } from '~/utils/email.server'
 
 import {
@@ -73,8 +78,24 @@ export async function action({ request, context }: Route.ActionArgs) {
 		where: (users, { eq }) => eq(users.email, email),
 	})
 
-	// TODO: add an exta validation to check if an email was sent in the last 15 minutes to prevent sending more than one email to the same address
-	// For logouts and logins inside the 15 minutes expiration window, just show a toast saying that the latest email link is still valid.
+	const expiration = new Date(Date.now() - magicLinkExpirationTime)
+	if (
+		user &&
+		user.lastLoginEmail &&
+		new Date(user.lastLoginEmail) >= expiration
+	) {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'success',
+			title: 'Welcome back!',
+			description:
+				'The link that we sent you in the last email is still valid',
+		})
+
+		return data(
+			{ submission: submission.reply({ resetForm: true }) },
+			{ headers: toastHeaders },
+		)
+	}
 
 	const magicLink = createMagicLink({
 		emailAddress: email,
@@ -98,6 +119,23 @@ export async function action({ request, context }: Route.ActionArgs) {
 	})
 	if (result.status === 'error') {
 		console.error(result.error)
+
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: 'There was an error sending the login link',
+			description: 'Please try again',
+		})
+		return data(
+			{ submission: submission.reply() },
+			{ headers: toastHeaders },
+		)
+	}
+
+	if (user) {
+		await db
+			.update(schema.users)
+			.set({ lastLoginEmail: new Date().toISOString() })
+			.where(eq(schema.users.id, user.id))
 	}
 
 	const toastHeaders = await createToastHeaders(request, {

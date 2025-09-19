@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import { encrypt, decrypt } from './encryption.server'
 
+const tokenKey = 'token'
+export const magicLinkExpirationTime = 1000 * 60 * 15 // 15 minutes
+
 const MagicLinkPayloadSchema = z.object({
 	emailAddress: z.string(
 		'Sign in link invalid (email is not a string). Please request a new one.',
@@ -13,7 +16,7 @@ const MagicLinkPayloadSchema = z.object({
 			val => {
 				const linkCreationDate = new Date(val)
 				const expirationTime =
-					linkCreationDate.getTime() + linkExpirationTime
+					linkCreationDate.getTime() + magicLinkExpirationTime
 				return Date.now() < expirationTime
 			},
 			{ error: 'Magic link expired. Please request a new one.' },
@@ -21,9 +24,6 @@ const MagicLinkPayloadSchema = z.object({
 })
 
 type MagicLinkPayload = z.infer<typeof MagicLinkPayloadSchema>
-
-const tokenKey = 'token'
-const linkExpirationTime = 1000 * 60 * 15 // 15 minutes
 
 export function createMagicLink({
 	emailAddress,
