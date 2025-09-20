@@ -49,12 +49,12 @@ export async function getCurrentUser(request: Request, db: DB) {
 
 	if (!userId) return null
 
-	const user = await db.query.users.findFirst({
+	const user = await db.query.user.findFirst({
 		columns: {
 			id: true,
 			email: true,
 		},
-		where: (users, { eq }) => eq(users.id, userId),
+		where: (user, { eq }) => eq(user.id, userId),
 	})
 	return user ?? null
 }

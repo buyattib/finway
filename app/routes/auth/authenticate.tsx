@@ -36,16 +36,16 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		)
 	}
 
-	let user = await db.query.users.findFirst({
+	let user = await db.query.user.findFirst({
 		columns: { id: true, email: true },
-		where: (users, { eq }) => eq(users.email, email),
+		where: (user, { eq }) => eq(user.email, email),
 	})
 
 	if (!user) {
 		const result = await db
-			.insert(schema.users)
+			.insert(schema.user)
 			.values({ email })
-			.returning({ id: schema.users.id, email: schema.users.email })
+			.returning({ id: schema.user.id, email: schema.user.email })
 
 		user = result[0]
 	}

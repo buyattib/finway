@@ -74,8 +74,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const { email, remember, redirectTo } = submission.value
 
-	const user = await db.query.users.findFirst({
-		where: (users, { eq }) => eq(users.email, email),
+	const user = await db.query.user.findFirst({
+		where: (user, { eq }) => eq(user.email, email),
 	})
 
 	const expiration = new Date(Date.now() - magicLinkExpirationTime)
@@ -132,9 +132,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	if (user) {
 		await db
-			.update(schema.users)
+			.update(schema.user)
 			.set({ lastLoginEmail: new Date().toISOString() })
-			.where(eq(schema.users.id, user.id))
+			.where(eq(schema.user.id, user.id))
 	}
 
 	const toastHeaders = await createToastHeaders(request, {
