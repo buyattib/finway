@@ -114,8 +114,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const result = await sendEmail({
 		to: email,
 		subject: 'Testing',
-		text: magicLink.toString(),
-		html: await render(<LoginEmail url={magicLink.toString()} />),
+		react: <LoginEmail url={magicLink.toString()} />,
 	})
 	if (result.status === 'error') {
 		console.error(result.error)

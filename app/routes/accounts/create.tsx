@@ -5,7 +5,7 @@ import {
 	useForm,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
-import { Form } from 'react-router'
+import { Form, Link } from 'react-router'
 import { z } from 'zod'
 
 import type { Route } from './+types/create'
@@ -19,6 +19,23 @@ import {
 	CardTitle,
 } from '~/components/ui/card'
 import { ErrorList, Field, SelectField } from '~/components/forms'
+import { Button } from '~/components/ui/button'
+import { ArrowLeftIcon } from 'lucide-react'
+
+export function meta() {
+	return [
+		{ title: 'Create Accounts | Finhub' },
+
+		{
+			property: 'og:title',
+			content: 'Create Accounts | Finhub',
+		},
+		{
+			name: 'description',
+			content: 'Create accounts to track your expenses',
+		},
+	]
+}
 
 // export const accountFormSchema = v.object({
 // 	name: v.pipe(v.string(), v.nonEmpty(t('name-required-msg')), v.trim()),
@@ -65,53 +82,63 @@ export default function CreateAccount({ actionData }: Route.ComponentProps) {
 	})
 
 	return (
-		<Card className='mx-auto md:max-w-xl'>
-			<CardHeader>
-				<CardTitle>Create an account</CardTitle>
-				<CardDescription>
-					Accounts hold your balance and are used to create
-					transactions
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<Form method='post' {...getFormProps(form)}>
-					<Field
-						labelProps={{ children: 'name-input-label' }}
-						inputProps={{
-							...getInputProps(fields.name, { type: 'text' }),
-							autoFocus: true,
-						}}
-						errors={fields.name.errors}
-					/>
+		<>
+			<Button asChild variant='link'>
+				<Link to='..' relative='path'>
+					<ArrowLeftIcon />
+					Back
+				</Link>
+			</Button>
+			<Card className='mx-auto md:max-w-2xl'>
+				<CardHeader>
+					<CardTitle>Create an account</CardTitle>
+					<CardDescription>
+						Accounts hold your balance and are used to create
+						transactions
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<Form method='post' {...getFormProps(form)}>
+						<Field
+							labelProps={{ children: 'name-input-label' }}
+							inputProps={{
+								...getInputProps(fields.name, { type: 'text' }),
+								autoFocus: true,
+							}}
+							errors={fields.name.errors}
+						/>
 
-					<Field
-						labelProps={{ children: 'description-input-label' }}
-						inputProps={{
-							...getInputProps(fields.description, {
-								type: 'text',
-							}),
-							autoFocus: true,
-						}}
-						errors={fields.description.errors}
-					/>
+						<Field
+							labelProps={{ children: 'description-input-label' }}
+							inputProps={{
+								...getInputProps(fields.description, {
+									type: 'text',
+								}),
+								autoFocus: true,
+							}}
+							errors={fields.description.errors}
+						/>
 
-					<SelectField
-						labelProps={{ children: 'account-type-input-label' }}
-						selectProps={{
-							...getSelectProps(fields.accountType),
-							defaultValue: '',
-							placeholder: 'account-type-placeholder',
-							items: ACCOUNT_TYPES.map(i => ({
-								value: i,
-								label: `${i}-label`,
-							})),
-						}}
-					/>
+						<SelectField
+							labelProps={{
+								children: 'account-type-input-label',
+							}}
+							selectProps={{
+								...getSelectProps(fields.accountType),
+								defaultValue: '',
+								placeholder: 'account-type-placeholder',
+								items: ACCOUNT_TYPES.map(i => ({
+									value: i,
+									label: `${i}-label`,
+								})),
+							}}
+						/>
 
-					<ErrorList errors={form.errors} id={form.errorId} />
-				</Form>
-			</CardContent>
-			<CardFooter></CardFooter>
-		</Card>
+						<ErrorList errors={form.errors} id={form.errorId} />
+					</Form>
+				</CardContent>
+				<CardFooter></CardFooter>
+			</Card>
+		</>
 	)
 }

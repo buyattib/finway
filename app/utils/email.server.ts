@@ -1,23 +1,38 @@
+import { render, toPlainText } from '@react-email/components'
 import { env } from './env.server'
 
 const RESEND_BASE_URL = 'https://api.resend.com'
 
 const successResponse = { status: 'success' } as const
 
-export async function sendEmail(options: {
+export async function sendEmail({
+	to,
+	subject,
+	react,
+	text,
+	html: _html,
+}: {
 	to: string
 	subject: string
-	html: string
-	text: string
-}) {
+} & (
+	| { html: string; text: string; react?: never }
+	| { react: React.ReactElement; html?: never; text?: never }
+)) {
+	const html = react ? await render(react) : _html
+
 	if (env.NODE_ENV !== 'production') {
-		console.log(options)
+		console.log(text)
+		console.log(html)
+
 		return successResponse
 	}
 
 	const email = {
 		from: 'finhub.team@gmail.app',
-		...options,
+		to,
+		subject,
+		html,
+		text,
 	}
 
 	const url = RESEND_BASE_URL + '/emails'

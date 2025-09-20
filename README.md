@@ -14,9 +14,9 @@
 
 There are scripts in the package.json defined to:
 
-- push: applies changes to the db
-- generate: generates a .sql migration file
-- migrate: applies the migrations in the generated .sql file
+- pnpm run db:push: applies changes to the db
+- pnpm run db:generate migration_name: generates a .sql migration file
+- pnpm run db:migrate: applies the migrations in the generated .sql file
 
 ## Run scripts
 

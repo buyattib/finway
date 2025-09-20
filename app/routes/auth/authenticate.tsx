@@ -10,7 +10,7 @@ import {
 	removeAuthSession,
 	requireAnonymous,
 } from '~/utils/auth.server'
-import { createToastHeaders } from '~/utils/toast.server'
+import { createToastHeaders, redirectWithToast } from '~/utils/toast.server'
 import { combineHeaders } from '~/utils/headers.server'
 import { validateMagicLink } from '~/utils/magic-link.server'
 
@@ -23,15 +23,17 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	try {
 		email = await validateMagicLink(request.url)
 	} catch (err) {
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'error',
-			title: 'Error logging in',
-			description: String(err),
-		})
 		const authHeaders = await removeAuthSession(request)
-		return redirect('/login', {
-			headers: combineHeaders(authHeaders, toastHeaders),
-		})
+		return await redirectWithToast(
+			'/login',
+			request,
+			{
+				type: 'error',
+				title: 'Error logging in',
+				description: String(err),
+			},
+			{ headers: authHeaders },
+		)
 	}
 
 	let user = await db.query.users.findFirst({
@@ -52,17 +54,20 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const remember = searchParams.get('remember') === 'true'
 	const redirectTo = searchParams.get('redirectTo')
 
-	const toastHeaders = await createToastHeaders(request, {
-		type: 'success',
-		title: 'Logged in!',
-		description: 'You were successfully logged in',
-	})
 	const authHeaders = await createAuthSessionHeaders(
 		request,
 		user.id,
 		remember,
 	)
-	return redirect(safeRedirect(redirectTo ?? '/app'), {
-		headers: combineHeaders(authHeaders, toastHeaders),
-	})
+
+	return await redirectWithToast(
+		safeRedirect(redirectTo ?? '/app'),
+		request,
+		{
+			type: 'success',
+			title: 'Logged in!',
+			description: 'You were successfully logged in',
+		},
+		{ headers: authHeaders },
+	)
 }

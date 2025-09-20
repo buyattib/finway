@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"db:generate": "dotenv -- drizzle-kit generate",
+		"db:generate": "dotenv -- drizzle-kit generate --name",
 		"db:migrate": "dotenv -- drizzle-kit migrate",
 		"db:push": "dotenv -- drizzle-kit push",
 		"db:studio": "dotenv -- drizzle-kit studio --port 6001 --verbose",
