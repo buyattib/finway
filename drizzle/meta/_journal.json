@@ -1,19 +1,19 @@
 {
-  "version": "7",
+  "version": "1",
   "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
       "version": "6",
-      "when": 1758328223787,
+      "when": 1758411972546,
       "tag": "0000_create_user_table",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "6",
-      "when": 1758390066593,
-      "tag": "0001_create_accounts_table",
+      "when": 1758411996728,
+      "tag": "0001_create_accounts_tables",
       "breakpoints": true
     }
   ]

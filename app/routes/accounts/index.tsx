@@ -27,14 +27,11 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const _user = await db.query.user.findFirst({
-		where: eq(schema.user.id, user.id),
-		// with: {
-		// 	accounts: true,
-		// },
+	const accounts = await db.query.account.findMany({
+		where: eq(schema.account.ownerId, user.id),
 	})
 
-	console.log(user)
+	console.log(accounts)
 
 	return {}
 }

@@ -5,7 +5,6 @@ import {
 	text,
 	integer,
 	uniqueIndex,
-	foreignKey,
 } from 'drizzle-orm/sqlite-core'
 
 const base = {
@@ -56,26 +55,26 @@ export const accountCurrency = sqliteTable('account_currencies', {
 		.references(() => account.id, { onDelete: 'cascade' }),
 })
 
-// // ORM Relations
+// ORM Relations
 
 export const userRelations = relations(user, ({ many }) => ({
 	accounts: many(account),
 }))
 
-// export const accountRelations = relations(account, ({ one, many }) => ({
-// 	owner: one(user, {
-// 		fields: [account.ownerId],
-// 		references: [user.id],
-// 	}),
-// 	accountCurrencies: many(accountCurrency),
-// }))
+export const accountRelations = relations(account, ({ one, many }) => ({
+	owner: one(user, {
+		fields: [account.ownerId],
+		references: [user.id],
+	}),
+	accountCurrencies: many(accountCurrency),
+}))
 
-// export const accountCurrencyRelations = relations(
-// 	accountCurrency,
-// 	({ one }) => ({
-// 		account: one(account, {
-// 			fields: [accountCurrency.accountId],
-// 			references: [account.id],
-// 		}),
-// 	}),
-// )
+export const accountCurrencyRelations = relations(
+	accountCurrency,
+	({ one }) => ({
+		account: one(account, {
+			fields: [accountCurrency.accountId],
+			references: [account.id],
+		}),
+	}),
+)
