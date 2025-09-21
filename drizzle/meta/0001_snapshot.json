@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4eaf1486-f7d8-4ae9-82c1-6b1ea3942c64",
-  "prevId": "c82a0c20-ea20-410a-84ae-c3ee8ba96a4a",
+  "id": "61f59131-f077-44fe-875b-2539a60f4ba8",
+  "prevId": "c484fbbe-bbda-4fd8-b8cf-538181c4cbb7",
   "tables": {
     "accounts": {
       "name": "accounts",
@@ -67,8 +67,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "accounts_ownerId_users_id_fk": {
-          "name": "accounts_ownerId_users_id_fk",
+        "accounts_owner_fk": {
+          "name": "accounts_owner_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
           "columnsFrom": [
@@ -141,8 +141,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "account_currencies_accountId_accounts_id_fk": {
-          "name": "account_currencies_accountId_accounts_id_fk",
+        "account_fk": {
+          "name": "account_fk",
           "tableFrom": "account_currencies",
           "tableTo": "accounts",
           "columnsFrom": [

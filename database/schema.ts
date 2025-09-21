@@ -5,6 +5,7 @@ import {
 	text,
 	integer,
 	uniqueIndex,
+	foreignKey,
 } from 'drizzle-orm/sqlite-core'
 
 const base = {
@@ -32,28 +33,44 @@ export const user = sqliteTable(
 	}),
 )
 
-export const account = sqliteTable('accounts', {
-	...base,
-	id: cuid2().defaultRandom().primaryKey(),
-	name: text().notNull(),
-	description: text(),
-	accountType: text().notNull(),
+export const account = sqliteTable(
+	'accounts',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		name: text().notNull(),
+		description: text(),
+		accountType: text().notNull(),
 
-	ownerId: text()
-		.notNull()
-		.references(() => user.id, { onDelete: 'cascade' }),
-})
+		ownerId: text().notNull(),
+	},
+	table => ({
+		accountOwnerFk: foreignKey({
+			name: 'accounts_owner_fk',
+			columns: [table.ownerId],
+			foreignColumns: [user.id],
+		}).onDelete('cascade'),
+	}),
+)
 
-export const accountCurrency = sqliteTable('account_currencies', {
-	...base,
-	id: cuid2().defaultRandom().primaryKey(),
-	balance: integer().notNull(),
-	currency: text().notNull(),
+export const accountCurrency = sqliteTable(
+	'account_currencies',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		balance: integer().notNull(),
+		currency: text().notNull(),
 
-	accountId: text()
-		.notNull()
-		.references(() => account.id, { onDelete: 'cascade' }),
-})
+		accountId: text().notNull(),
+	},
+	table => ({
+		accountFk: foreignKey({
+			name: 'account_fk',
+			columns: [table.accountId],
+			foreignColumns: [account.id],
+		}).onDelete('cascade'),
+	}),
+)
 
 // ORM Relations
 

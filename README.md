@@ -17,6 +17,7 @@ There are scripts in the package.json defined to:
 - pnpm run db:push: applies changes to the db
 - pnpm run db:generate migration_name: generates a .sql migration file
 - pnpm run db:migrate: applies the migrations in the generated .sql file
+- pnpm run db:drop: prompts you to select a migration to remove (does not apply changes on the db)
 
 ## Run scripts
 
