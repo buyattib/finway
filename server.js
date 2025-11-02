@@ -57,6 +57,7 @@ if (!DEVELOPMENT) {
 		limit: 100,
 	})
 	const strongestLimiter = rateLimit({ ...defaultLimiter, limit: 10 })
+
 	app.use((req, res, next) => {
 		const sensiblePaths = ['/login']
 		if (req.method !== 'GET' && req.method !== 'HEAD') {

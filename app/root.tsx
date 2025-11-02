@@ -82,8 +82,8 @@ export function meta({ error }: Route.MetaArgs) {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-	const { toast, headers: toastHeaders } = await getToast(request)
 	const { cspNonce } = context.get(globalContext)
+	const { toast, headers: toastHeaders } = await getToast(request)
 
 	return data(
 		{

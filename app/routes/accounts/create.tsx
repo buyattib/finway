@@ -1,26 +1,17 @@
-import {
-	getFormProps,
-	getInputProps,
-	getSelectProps,
-	useForm,
-} from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
-import { Form, Link } from 'react-router'
-import { z } from 'zod'
+import { parseWithZod } from '@conform-to/zod/v4'
+import { data, redirect, Link } from 'react-router'
+import { ArrowLeftIcon } from 'lucide-react'
+import { and, eq } from 'drizzle-orm'
 
 import type { Route } from './+types/create'
 
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '~/components/ui/card'
-import { ErrorList, Field, SelectField } from '~/components/forms'
+import { account, subAccount } from '~/database/schema'
+import { dbContext, userContext } from '~/lib/context'
+
 import { Button } from '~/components/ui/button'
-import { ArrowLeftIcon } from 'lucide-react'
+
+import { AccountForm } from './components/form'
+import { AccountFormSchema } from './lib/schemas'
 
 export function meta() {
 	return [
@@ -37,50 +28,62 @@ export function meta() {
 	]
 }
 
-// export const accountFormSchema = v.object({
-// 	name: v.pipe(v.string(), v.nonEmpty(t('name-required-msg')), v.trim()),
-// 	accountType: v.picklist(ACCOUNT_TYPES, t('account-type-required-msg')),
-// 	description: v.pipe(v.string(), v.trim()),
-// 	subAccounts: v.pipe(
-// 		v.array(subAccountFormSchema),
-// 		v.minLength(1, t('sub-accounts-required-msg')),
-// 		v.check(input => {
-// 			const currencies = input.map(item => item.currencyId)
-// 			const setLength = [...new Set(currencies)].length
-// 			return input.length === setLength
-// 		}, t('currency-repeated-msg')),
-// 	),
-// })
+export async function action({ request, context }: Route.ActionArgs) {
+	const user = context.get(userContext)
+	const db = context.get(dbContext)
 
-export const ACCOUNT_TYPES = [
-	'cash',
-	'bank',
-	'digital-wallet',
-	'crypto-wallet',
-	'crypto-exchange',
-	'broker',
-] as const
-
-const AccountFormSchema = z.object({
-	name: z.string('name-required-msg').transform(value => value.trim()),
-	accountType: z.enum(ACCOUNT_TYPES, 'account-type-required-msg'),
-	description: z
-		.string()
-		.optional()
-		.transform(value => value?.trim()),
-})
-
-export default function CreateAccount({ actionData }: Route.ComponentProps) {
-	const [form, fields] = useForm({
-		id: 'create-account-form',
-		constraint: getZodConstraint(AccountFormSchema),
-		// lastResult: actionData?.submission,
-		shouldRevalidate: 'onBlur',
-		onValidate({ formData }) {
-			return parseWithZod(formData, { schema: AccountFormSchema })
-		},
+	const formData = await request.formData()
+	const submission = await parseWithZod(formData, {
+		schema: AccountFormSchema,
+		async: true,
 	})
 
+	if (submission.status !== 'success') {
+		return data({ submission: submission.reply() }, { status: 422 })
+	}
+
+	const body = submission.value
+	const existingAccounts = await db.$count(
+		account,
+		and(
+			eq(account.ownerId, user.id),
+			eq(account.name, body.name),
+			eq(account.accountType, body.accountType),
+		),
+	)
+	if (existingAccounts > 0) {
+		return data(
+			{
+				submission: submission.reply({
+					formErrors: [
+						'An account with this name and type already exists',
+					],
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const { subAccounts, ...accountData } = body
+
+	const accountId = (
+		await db
+			.insert(account)
+			.values({ ...accountData, ownerId: user.id })
+			.returning({ id: account.id })
+	)[0].id
+
+	const subAccountsData = subAccounts.map(sa => ({
+		...sa,
+		balance: Number(sa.balance) * 100,
+		accountId,
+	}))
+	await db.insert(subAccount).values(subAccountsData)
+
+	return redirect('/app/accounts')
+}
+
+export default function CreateAccount({ actionData }: Route.ComponentProps) {
 	return (
 		<>
 			<Button asChild variant='link'>
@@ -89,56 +92,9 @@ export default function CreateAccount({ actionData }: Route.ComponentProps) {
 					Back
 				</Link>
 			</Button>
-			<Card className='mx-auto md:max-w-2xl'>
-				<CardHeader>
-					<CardTitle>Create an account</CardTitle>
-					<CardDescription>
-						Accounts hold your balance and are used to create
-						transactions
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<Form method='post' {...getFormProps(form)}>
-						<Field
-							labelProps={{ children: 'name-input-label' }}
-							inputProps={{
-								...getInputProps(fields.name, { type: 'text' }),
-								autoFocus: true,
-							}}
-							errors={fields.name.errors}
-						/>
-
-						<Field
-							labelProps={{ children: 'description-input-label' }}
-							inputProps={{
-								...getInputProps(fields.description, {
-									type: 'text',
-								}),
-								autoFocus: true,
-							}}
-							errors={fields.description.errors}
-						/>
-
-						<SelectField
-							labelProps={{
-								children: 'account-type-input-label',
-							}}
-							selectProps={{
-								...getSelectProps(fields.accountType),
-								defaultValue: '',
-								placeholder: 'account-type-placeholder',
-								items: ACCOUNT_TYPES.map(i => ({
-									value: i,
-									label: `${i}-label`,
-								})),
-							}}
-						/>
-
-						<ErrorList errors={form.errors} id={form.errorId} />
-					</Form>
-				</CardContent>
-				<CardFooter></CardFooter>
-			</Card>
+			<div className='flex justify-center'>
+				<AccountForm lastResult={actionData?.submission} />
+			</div>
 		</>
 	)
 }

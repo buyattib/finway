@@ -1,4 +1,3 @@
-import { redirect } from 'react-router'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 
 import type { Route } from './+types/authenticate'
@@ -10,8 +9,7 @@ import {
 	removeAuthSession,
 	requireAnonymous,
 } from '~/utils/auth.server'
-import { createToastHeaders, redirectWithToast } from '~/utils/toast.server'
-import { combineHeaders } from '~/utils/headers.server'
+import { redirectWithToast } from '~/utils/toast.server'
 import { validateMagicLink } from '~/utils/magic-link.server'
 
 export async function loader({ request, context }: Route.LoaderArgs) {

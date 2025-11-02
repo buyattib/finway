@@ -8,6 +8,8 @@ import {
 	foreignKey,
 } from 'drizzle-orm/sqlite-core'
 
+import { CURRENCIES, ACCOUNT_TYPES } from '~/routes/accounts/lib/constants'
+
 const base = {
 	createdAt: text()
 		.notNull()
@@ -40,32 +42,32 @@ export const account = sqliteTable(
 		id: cuid2().defaultRandom().primaryKey(),
 		name: text().notNull(),
 		description: text(),
-		accountType: text().notNull(),
+		accountType: text({ enum: ACCOUNT_TYPES }).notNull(),
 
 		ownerId: text().notNull(),
 	},
 	table => ({
-		accountOwnerFk: foreignKey({
-			name: 'accounts_owner_fk',
+		accountOwnerIdFk: foreignKey({
+			name: 'accounts_ownerId_fk',
 			columns: [table.ownerId],
 			foreignColumns: [user.id],
 		}).onDelete('cascade'),
 	}),
 )
 
-export const accountCurrency = sqliteTable(
-	'account_currencies',
+export const subAccount = sqliteTable(
+	'sub_accounts',
 	{
 		...base,
 		id: cuid2().defaultRandom().primaryKey(),
-		balance: integer().notNull(),
-		currency: text().notNull(),
+		currency: text({ enum: CURRENCIES }).notNull(),
+		balance: integer().notNull(), // store in base units (i.e. cents)
 
 		accountId: text().notNull(),
 	},
 	table => ({
-		accountFk: foreignKey({
-			name: 'account_fk',
+		accountIdFk: foreignKey({
+			name: 'accountId_fk',
 			columns: [table.accountId],
 			foreignColumns: [account.id],
 		}).onDelete('cascade'),
@@ -83,15 +85,12 @@ export const accountRelations = relations(account, ({ one, many }) => ({
 		fields: [account.ownerId],
 		references: [user.id],
 	}),
-	accountCurrencies: many(accountCurrency),
+	subAccounts: many(subAccount),
 }))
 
-export const accountCurrencyRelations = relations(
-	accountCurrency,
-	({ one }) => ({
-		account: one(account, {
-			fields: [accountCurrency.accountId],
-			references: [account.id],
-		}),
+export const subAccountRelations = relations(subAccount, ({ one }) => ({
+	account: one(account, {
+		fields: [subAccount.accountId],
+		references: [account.id],
 	}),
-)
+}))

@@ -1,5 +1,10 @@
 import { useId } from 'react'
-import { useInputControl } from '@conform-to/react'
+import {
+	useInputControl,
+	getInputProps,
+	getSelectProps,
+	type FieldMetadata,
+} from '@conform-to/react'
 
 import { cn } from '~/lib/utils'
 
@@ -20,9 +25,11 @@ export type ListOfErrors = Array<string | null | undefined> | null | undefined
 export function ErrorList({
 	id,
 	errors,
+	size = 'xs',
 }: {
 	errors?: ListOfErrors
 	id?: string
+	size?: 'xs' | 'sm' | 'md' | 'lg'
 }) {
 	const errorsToRender = errors?.filter(Boolean)
 	if (!errorsToRender?.length) return null
@@ -30,7 +37,15 @@ export function ErrorList({
 	return (
 		<ul id={id} className='flex flex-col gap-1'>
 			{errorsToRender.map(e => (
-				<li key={e} className='text-destructive/80 text-xs'>
+				<li
+					key={e}
+					className={cn('text-destructive/80', {
+						'text-xs': size === 'xs',
+						'text-sm': size === 'sm',
+						'text-base': size === 'md',
+						'text-lg': size === 'lg',
+					})}
+				>
 					{e}
 				</li>
 			))}
@@ -38,33 +53,36 @@ export function ErrorList({
 	)
 }
 
-export function Field({
-	labelProps,
-	inputProps,
-	errors,
+export function TextField({
+	field,
+	label,
 	className,
+	type = 'text',
+	...inputProps
 }: {
-	labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
-	inputProps: React.InputHTMLAttributes<HTMLInputElement>
-	errors?: ListOfErrors
+	field: FieldMetadata<string>
+	label?: string
 	className?: string
-}) {
+	type?: 'text' | 'email' | 'password'
+} & React.InputHTMLAttributes<HTMLInputElement>) {
 	const fallbackId = useId()
-	const id = inputProps.id ?? fallbackId
+	const fieldProps = getInputProps(field, { type })
+	const errors = field.errors as ListOfErrors
+
+	const id = fieldProps.id ?? fallbackId
 	const errorId = errors?.length ? `${id}-error` : undefined
+
+	const props = { ...inputProps, ...fieldProps, id }
 
 	return (
 		<div className={cn('flex flex-col gap-1 w-full', className)}>
-			<Label
-				htmlFor={id}
-				aria-invalid={errorId ? true : undefined}
-				{...labelProps}
-			/>
+			<Label htmlFor={id} aria-invalid={errorId ? true : undefined}>
+				{label}
+			</Label>
 			<Input
-				id={id}
 				aria-invalid={errorId ? true : undefined}
 				aria-describedby={errorId}
-				{...inputProps}
+				{...props}
 			/>
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
@@ -74,40 +92,38 @@ export function Field({
 }
 
 export function CheckboxField({
-	labelProps,
-	checkboxProps,
-	errors,
+	label,
+	field,
 	className,
+	...checkboxProps
 }: {
-	labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
-	checkboxProps: Omit<CheckboxProps, 'type'> & {
-		type?: string
-		name: string
-		form: string
-		value?: string
-	}
-	errors?: ListOfErrors
+	label?: string
+	field: FieldMetadata<boolean>
 	className?: string
-}) {
+} & Omit<CheckboxProps, 'type'>) {
 	const fallbackId = useId()
-	const id = checkboxProps.id ?? fallbackId
+	const fieldProps = getInputProps(field, { type: 'checkbox' })
+	const errors = field.errors as ListOfErrors
+
+	const id = fieldProps.id ?? fallbackId
 	const errorId = errors?.length ? `${id}-error` : undefined
 
-	const checkedValue = checkboxProps.value ?? 'on'
+	const checkedValue = fieldProps.value ?? 'on'
 
 	const control = useInputControl({
-		key: checkboxProps.key,
-		name: checkboxProps.name,
-		formId: checkboxProps.form,
-		initialValue: checkboxProps.defaultChecked ? checkedValue : undefined,
+		key: fieldProps.key,
+		name: fieldProps.name,
+		formId: fieldProps.form,
+		initialValue: fieldProps.defaultChecked ? checkedValue : undefined,
 	})
+
+	const props = { ...checkboxProps, ...fieldProps, id }
 
 	return (
 		<div className={cn('flex flex-col w-full', className)}>
 			<div className='flex items-center gap-2'>
 				<Checkbox
-					{...checkboxProps}
-					id={id}
+					{...props}
 					aria-invalid={errorId ? true : undefined}
 					aria-describedby={errorId}
 					checked={control.value === checkedValue}
@@ -128,9 +144,10 @@ export function CheckboxField({
 				<Label
 					htmlFor={id}
 					aria-invalid={errorId ? true : undefined}
-					{...labelProps}
 					className='self-center text-sm text-muted-foreground'
-				/>
+				>
+					{label}
+				</Label>
 			</div>
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
@@ -140,49 +157,47 @@ export function CheckboxField({
 }
 
 export function SelectField({
-	labelProps,
-	selectProps,
-	errors,
+	label,
+	field,
+	items,
+	placeholder,
 	className,
+	...triggerProps
 }: {
-	labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
-	selectProps: SelectTriggerProps & {
-		name: string
-		form: string
-		items: Array<{ label: string; value: string }>
-		placeholder?: string
-	}
-	errors?: ListOfErrors
+	label?: string
+	field: FieldMetadata<string>
+	items: Array<{ label: string; value: string }>
+	placeholder?: string
 	className?: string
-}) {
+} & SelectTriggerProps) {
 	const fallbackId = useId()
-	const id = selectProps.id ?? fallbackId
+	const fieldProps = getSelectProps(field)
+	const errors = field.errors as ListOfErrors
+
+	const id = fieldProps.id ?? fallbackId
 	const errorId = errors?.length ? `${id}-error` : undefined
 
-	const { name, form, defaultValue, placeholder, items, ...triggerProps } =
-		selectProps
-
 	const control = useInputControl({
-		key: triggerProps.key,
-		name: name,
-		formId: form,
-		initialValue: defaultValue ? String(defaultValue) : undefined,
+		key: fieldProps.key,
+		name: fieldProps.name,
+		formId: fieldProps.form,
+		initialValue: fieldProps.defaultValue
+			? String(fieldProps.defaultValue)
+			: '',
 	})
 
 	return (
 		<div className={cn('flex flex-col gap-1 w-full', className)}>
-			<Label
-				htmlFor={id}
-				aria-invalid={errorId ? true : undefined}
-				{...labelProps}
-			/>
+			<Label htmlFor={id} aria-invalid={errorId ? true : undefined}>
+				{label}
+			</Label>
 			<Select
+				disabled={triggerProps.disabled}
 				value={control.value}
 				onValueChange={value => control.change(value)}
 				onOpenChange={open => {
 					if (!open) control.blur()
 				}}
-				disabled={triggerProps.disabled}
 			>
 				<SelectTrigger
 					{...triggerProps}
@@ -204,6 +219,83 @@ export function SelectField({
 				</SelectContent>
 			</Select>
 
+			<div className='min-h-6 py-1 px-1'>
+				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+			</div>
+		</div>
+	)
+}
+
+export function NumberField({
+	label,
+	field,
+	className,
+	...inputProps
+}: {
+	label?: string
+	field: FieldMetadata<string>
+	className?: string
+} & React.InputHTMLAttributes<HTMLInputElement>) {
+	const fallbackId = useId()
+	const fieldProps = getInputProps(field, { type: 'text' })
+	const errors = field.errors as ListOfErrors
+
+	const id = fieldProps.id ?? fallbackId
+	const errorId = errors?.length ? `${id}-error` : undefined
+
+	const { defaultValue, ...rest } = fieldProps
+	const props = { ...inputProps, ...rest, id }
+
+	const control = useInputControl<string>({
+		key: fieldProps.key,
+		name: fieldProps.name,
+		formId: fieldProps.form,
+		initialValue: defaultValue,
+	})
+
+	function formatNumberWithCommas(value: string | undefined) {
+		if (!value) return ''
+
+		const [integerPart, decimalPart] = value.split('.')
+
+		const formattedInteger = integerPart.replace(
+			/\B(?=(\d{3})+(?!\d))/g,
+			',',
+		)
+
+		return decimalPart !== undefined
+			? `${formattedInteger}.${decimalPart}`
+			: formattedInteger
+	}
+
+	const NUMERIC_PATTERN = /^$|^\d+\.?\d*$/
+
+	return (
+		<div className={cn('flex flex-col gap-1 w-full', className)}>
+			<Label htmlFor={id} aria-invalid={errorId ? true : undefined}>
+				{label}
+			</Label>
+			<Input
+				aria-invalid={errorId ? true : undefined}
+				aria-describedby={errorId}
+				inputMode='numeric'
+				{...props}
+				value={formatNumberWithCommas(control.value)}
+				onChange={e => {
+					const value = e.target.value.replace(/,/g, '').trim()
+
+					if (!NUMERIC_PATTERN.test(value)) return
+					if (
+						value.length > 1 &&
+						value[0] === '0' &&
+						value[1] !== '.'
+					) {
+						return
+					}
+
+					control.change(value)
+				}}
+			/>
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
 			</div>

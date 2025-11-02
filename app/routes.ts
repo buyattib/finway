@@ -21,6 +21,7 @@ export default [
 		...prefix('accounts', [
 			index('routes/accounts/index.tsx'),
 			route(':accountId', 'routes/accounts/account.tsx'),
+			route(':accountId/edit', 'routes/accounts/edit.tsx'),
 			route('create', 'routes/accounts/create.tsx'),
 		]),
 	]),

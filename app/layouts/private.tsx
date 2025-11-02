@@ -41,7 +41,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 const links = [
 	{
 		to: '/app/accounts',
-		labelKey: 'accounts-label',
+		labelKey: 'Accounts',
 		icon: <WalletIcon />,
 	},
 	// {

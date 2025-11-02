@@ -3,8 +3,6 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
-import { LoaderCircleIcon } from 'lucide-react'
-import { render } from '@react-email/components'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 
@@ -31,7 +29,7 @@ import {
 	CardTitle,
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
-import { CheckboxField, ErrorList, Field } from '~/components/forms'
+import { CheckboxField, ErrorList, TextField } from '~/components/forms'
 
 import { LoginEmail } from '~/emails/login'
 
@@ -113,7 +111,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const result = await sendEmail({
 		to: email,
-		subject: 'Testing',
+		subject: 'Welcome to Finhub - Your Login Link',
 		react: <LoginEmail url={magicLink.toString()} />,
 	})
 	if (result.status === 'error') {
@@ -180,27 +178,18 @@ export default function Login({ actionData }: Route.ComponentProps) {
 				<Form method='post' {...getFormProps(form)}>
 					<HoneypotInputs label='Please leave this field blank' />
 
-					<Field
-						labelProps={{ children: 'Email' }}
-						inputProps={{
-							...getInputProps(fields.email, {
-								type: 'email',
-							}),
-							autoFocus: true,
-							className: 'lowercase',
-							autoComplete: 'email',
-						}}
-						errors={fields.email.errors}
+					<TextField
+						label={'Email'}
+						field={fields.email}
+						autoFocus
+						autoComplete='email'
+						type='email'
+						className='lowercase'
 					/>
 
 					<CheckboxField
-						labelProps={{
-							children: 'Remember me',
-						}}
-						checkboxProps={getInputProps(fields.remember, {
-							type: 'checkbox',
-						})}
-						errors={fields.remember.errors}
+						label={'Remember me'}
+						field={fields.remember}
 					/>
 
 					<input
@@ -218,10 +207,8 @@ export default function Login({ actionData }: Route.ComponentProps) {
 					type='submit'
 					width='full'
 					disabled={isSubmitting}
+					loading={isSubmitting}
 				>
-					{isSubmitting && (
-						<LoaderCircleIcon className='animate-spin' />
-					)}
 					Submit
 				</Button>
 			</CardFooter>
