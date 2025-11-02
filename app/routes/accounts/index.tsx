@@ -7,6 +7,7 @@ import { dbContext, userContext } from '~/lib/context'
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
+import { PlusIcon } from 'lucide-react'
 
 export function meta() {
 	return [
@@ -58,11 +59,22 @@ export default function Accounts({ loaderData }: Route.ComponentProps) {
 	const { accounts } = loaderData
 
 	return (
-		<div className='flex flex-col gap-4'>
+		<section
+			className='flex flex-col gap-4'
+			aria-labelledby='accounts-section'
+		>
 			<div className='flex items-center justify-between'>
-				<Title level='h3'>Accounts</Title>
-				<Button asChild variant='default'>
-					<Link to='create'>Create</Link>
+				<Title id='accounts-section' level='h3'>
+					Accounts
+				</Title>
+				<Button asChild variant='default' autoFocus>
+					<Link to='create'>
+						<PlusIcon aria-hidden />
+						<span aria-hidden className='sm:inline hidden'>
+							Account
+						</span>
+						<span className='sr-only'>Create Account</span>
+					</Link>
 				</Button>
 			</div>
 
@@ -74,42 +86,62 @@ export default function Accounts({ loaderData }: Route.ComponentProps) {
 				</div>
 			)}
 
-			<ul className='flex flex-col gap-2'>
+			<ul
+				className='flex flex-col gap-2'
+				aria-labelledby='accounts-section'
+			>
 				{accounts.map(account => {
-					const { name, description, accountType, subAccounts } =
+					const { id, name, description, accountType, subAccounts } =
 						account
 					return (
-						<li
-							key={account.id}
-							className='flex items-center justify-between border rounded-xl p-4'
-						>
-							<div className='flex flex-col gap-2'>
-								<div className='flex items-center gap-2'>
-									<Title level='h5'>{name}</Title>
-									<Text size='sm' theme='primary'>
-										{`${accountType}-label`}
+						<li key={id}>
+							<Link
+								to={id}
+								prefetch='intent'
+								className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border rounded-xl p-4 hover:border-primary transition-all'
+							>
+								<div className='flex flex-col gap-2'>
+									<div className='flex items-center gap-2'>
+										<span className='sr-only'>
+											Account {name}
+										</span>
+										<Title id={id} level='h5'>
+											{name}
+										</Title>
+										<Text size='sm' theme='primary'>
+											{`${accountType}-label`}
+										</Text>
+									</div>
+									<Text size='sm' theme='muted'>
+										{description}
 									</Text>
 								</div>
-								<Text size='sm' theme='muted'>
-									{description}
-								</Text>
-							</div>
-							<ul className='flex flex-col gap-2 min-w-7xs'>
-								{subAccounts.map(subAccount => {
-									const { balance, currency } = subAccount
-									return (
-										<li key={subAccount.id}>
-											<Text alignment='left'>
-												{currency} {balance}
-											</Text>
-										</li>
-									)
-								})}
-							</ul>
+								<ul
+									className='flex flex-col gap-2 min-w-7xs'
+									aria-labelledby={id}
+								>
+									{subAccounts.map(subAccount => {
+										const { balance, currency } = subAccount
+										return (
+											<li
+												key={subAccount.id}
+												className='flex items-center justify-start gap-2'
+											>
+												<Text>{currency}</Text>
+												<Text>{balance}</Text>
+												<span className='sr-only'>
+													{`${currency}-label`}{' '}
+													{balance}
+												</span>
+											</li>
+										)
+									})}
+								</ul>
+							</Link>
 						</li>
 					)
 				})}
 			</ul>
-		</div>
+		</section>
 	)
 }
