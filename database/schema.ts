@@ -3,6 +3,7 @@ import { relations, sql } from 'drizzle-orm'
 import {
 	sqliteTable,
 	text,
+	blob,
 	integer,
 	uniqueIndex,
 	foreignKey,
@@ -26,6 +27,7 @@ export const user = sqliteTable(
 	{
 		createdAt: base.createdAt,
 		updatedAt: base.updatedAt,
+
 		id: cuid2().defaultRandom().primaryKey(),
 		email: text().notNull(),
 		lastLoginEmail: text(),
@@ -41,7 +43,7 @@ export const account = sqliteTable(
 		...base,
 		id: cuid2().defaultRandom().primaryKey(),
 		name: text().notNull(),
-		description: text(),
+		description: text().default(''),
 		accountType: text({ enum: ACCOUNT_TYPES }).notNull(),
 
 		ownerId: text().notNull(),
@@ -51,6 +53,25 @@ export const account = sqliteTable(
 			name: 'accounts_ownerId_fk',
 			columns: [table.ownerId],
 			foreignColumns: [user.id],
+		}).onDelete('cascade'),
+	}),
+)
+
+export const accountImages = sqliteTable(
+	'account_images',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		altText: text(),
+		blob: blob().notNull(),
+
+		accountId: text().notNull(),
+	},
+	table => ({
+		accountImagesAccountIdFk: foreignKey({
+			name: 'account_images_accountId_fk',
+			columns: [table.accountId],
+			foreignColumns: [account.id],
 		}).onDelete('cascade'),
 	}),
 )
@@ -66,8 +87,8 @@ export const subAccount = sqliteTable(
 		accountId: text().notNull(),
 	},
 	table => ({
-		accountIdFk: foreignKey({
-			name: 'accountId_fk',
+		subAccountsAccountIdFk: foreignKey({
+			name: 'sub_accounts_accountId_fk',
 			columns: [table.accountId],
 			foreignColumns: [account.id],
 		}).onDelete('cascade'),

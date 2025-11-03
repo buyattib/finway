@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { ACCOUNT_TYPES, CURRENCIES } from './constants'
 
 export const AccountFormSchema = z.object({
+	id: z.string().optional(),
 	name: z.string('name-required-msg').transform(value => value.trim()),
 	accountType: z.enum(ACCOUNT_TYPES, 'account-type-required-msg'),
 	description: z
@@ -11,6 +12,7 @@ export const AccountFormSchema = z.object({
 	subAccounts: z
 		.array(
 			z.object({
+				id: z.string().optional(),
 				currency: z.enum(CURRENCIES, 'currency-required-msg'),
 				balance: z
 					.string({ message: 'balance-required-msg' })

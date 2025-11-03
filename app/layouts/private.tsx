@@ -1,4 +1,9 @@
-import { NavLink, Outlet, type MiddlewareFunction } from 'react-router'
+import {
+	NavLink,
+	Outlet,
+	useNavigation,
+	type MiddlewareFunction,
+} from 'react-router'
 import {
 	ArrowRightLeftIcon,
 	BanknoteArrowDownIcon,
@@ -28,6 +33,7 @@ import {
 	SidebarTrigger,
 	useSidebar,
 } from '~/components/ui/sidebar'
+import { Spinner } from '~/components/ui/spinner'
 
 // NOTE: could refresh the session here if user is authenticated and has an expiration date
 
@@ -71,36 +77,13 @@ export default function PrivateLayout({
 	)
 }
 
-function SidebarLink({
-	link,
-	onClick,
-}: {
-	link: (typeof links)[number]
-	onClick: () => void
-}) {
-	return (
-		<SidebarMenuItem key={link.to}>
-			<NavLink to={link.to}>
-				{({ isActive }) => (
-					<SidebarMenuButton
-						size='lg'
-						isActive={isActive}
-						onClick={onClick}
-					>
-						{link.icon}
-						{link.labelKey}
-					</SidebarMenuButton>
-				)}
-			</NavLink>
-		</SidebarMenuItem>
-	)
-}
-
 function PrivateLayoutContent({
 	user,
 }: {
 	user: Route.ComponentProps['loaderData']['user']
 }) {
+	const navigation = useNavigation()
+
 	const { isMobile, toggleSidebar } = useSidebar()
 	const closeSidebar = () => {
 		if (isMobile) toggleSidebar()
@@ -139,10 +122,46 @@ function PrivateLayoutContent({
 					<ThemeToggle />
 					<LogoutButton />
 				</header>
-				<main className='flex-1 mx-auto w-full lg:max-w-6xl md:max-w-3xl py-6 lg:px-12 md:px-8 sm:px-6 px-4 overflow-auto'>
+				<main
+					className={cn(
+						'flex-1 mx-auto w-full lg:max-w-6xl md:max-w-3xl py-6 lg:px-12 md:px-8 sm:px-6 px-4 overflow-auto',
+						{
+							'opacity-50 pointer-events-none':
+								navigation.state === 'loading',
+						},
+					)}
+				>
+					{navigation.state === 'loading' && (
+						<Spinner size='md' className='mx-auto' />
+					)}
 					<Outlet />
 				</main>
 			</div>
 		</>
+	)
+}
+
+function SidebarLink({
+	link,
+	onClick,
+}: {
+	link: (typeof links)[number]
+	onClick: () => void
+}) {
+	return (
+		<SidebarMenuItem key={link.to}>
+			<NavLink to={link.to}>
+				{({ isActive }) => (
+					<SidebarMenuButton
+						size='lg'
+						isActive={isActive}
+						onClick={onClick}
+					>
+						{link.icon}
+						{link.labelKey}
+					</SidebarMenuButton>
+				)}
+			</NavLink>
+		</SidebarMenuItem>
 	)
 }

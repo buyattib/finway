@@ -1,12 +1,15 @@
 import {
 	getFieldsetProps,
 	getFormProps,
+	getInputProps,
 	useForm,
 	type SubmissionResult,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { Form, useNavigation } from 'react-router'
+
+import type { Route } from '../+types/edit'
 
 import {
 	Card,
@@ -18,6 +21,7 @@ import {
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Title } from '~/components/ui/title'
+import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
 	TextField,
@@ -29,8 +33,10 @@ import { AccountFormSchema } from '../lib/schemas'
 import { ACCOUNT_TYPES, CURRENCIES } from '../lib/constants'
 
 export function AccountForm({
+	account,
 	lastResult,
 }: {
+	account?: Route.ComponentProps['loaderData']['account']
 	lastResult: SubmissionResult | undefined
 }) {
 	const navigation = useNavigation()
@@ -39,10 +45,14 @@ export function AccountForm({
 			navigation.formAction === '/app/accounts/edit') &&
 		navigation.state === 'submitting'
 
+	const isEditing = Boolean(account)
+
 	const [form, fields] = useForm({
+		lastResult,
 		id: 'create-account-form',
 		constraint: getZodConstraint(AccountFormSchema),
-		defaultValue: {
+		shouldValidate: 'onInput',
+		defaultValue: account ?? {
 			name: '',
 			accountType: '',
 			description: '',
@@ -51,8 +61,6 @@ export function AccountForm({
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: AccountFormSchema })
 		},
-		shouldValidate: 'onInput',
-		lastResult,
 	})
 
 	const subAccounts = fields.subAccounts.getFieldList()
@@ -76,9 +84,9 @@ export function AccountForm({
 					<button type='submit' className='hidden' />
 
 					{/* Add the account id to the form if there is one  */}
-					{/* {account && (
-							<input type='hidden' name='id' value={account.id} />
-						)} */}
+					{account && (
+						<input type='hidden' name='id' value={account.id} />
+					)}
 
 					<ErrorList
 						size='md'
@@ -132,7 +140,7 @@ export function AccountForm({
 						/>
 						<ul className='flex flex-col gap-2'>
 							{subAccounts.map((subAccount, index) => {
-								const { currency, balance } =
+								const { currency, balance, id } =
 									subAccount.getFieldset()
 
 								return (
@@ -140,21 +148,39 @@ export function AccountForm({
 										key={subAccount.key}
 										className='flex items-center justify-between gap-2'
 									>
+										{isEditing && (
+											<input
+												{...getInputProps(id, {
+													type: 'hidden',
+												})}
+											/>
+										)}
 										<SelectField
 											label={'currency-input-label'}
 											field={currency}
 											placeholder={'currency-placeholder'}
+											disabled={isEditing && !!id.value}
 											items={CURRENCIES.map(i => ({
 												value: i,
 												label: `${i}-label`,
 											}))}
 										/>
+
+										{/* Disabled inputs are not included in forms, add hidden one for edition */}
+										{isEditing && id.value && (
+											<input
+												{...getInputProps(balance, {
+													type: 'hidden',
+												})}
+											/>
+										)}
 										<NumberField
 											label={'balance-input-label'}
 											placeholder={
 												'balance-input-placeholder'
 											}
 											field={balance}
+											disabled={isEditing && !!id.value}
 										/>
 										<div className='flex flex-col gap-1'>
 											<div className='h-3.5' />
@@ -188,13 +214,15 @@ export function AccountForm({
 				</Form>
 			</CardContent>
 			<CardFooter className='gap-2'>
-				<Button
-					width='full'
-					variant='outline'
-					{...form.reset.getButtonProps()}
-				>
-					Reset
-				</Button>
+				{!isEditing && (
+					<Button
+						width='full'
+						variant='outline'
+						{...form.reset.getButtonProps()}
+					>
+						Reset
+					</Button>
+				)}
 				<Button
 					width='full'
 					form={form.id}
@@ -202,7 +230,7 @@ export function AccountForm({
 					disabled={isSubmitting}
 					loading={isSubmitting}
 				>
-					Create
+					{isEditing ? 'Update' : 'Create'}
 				</Button>
 			</CardFooter>
 		</Card>

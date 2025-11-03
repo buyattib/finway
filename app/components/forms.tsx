@@ -60,7 +60,7 @@ export function TextField({
 	type = 'text',
 	...inputProps
 }: {
-	field: FieldMetadata<string>
+	field: FieldMetadata<string | null>
 	label?: string
 	className?: string
 	type?: 'text' | 'email' | 'password'
