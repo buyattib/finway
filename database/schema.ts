@@ -40,7 +40,9 @@ export const user = sqliteTable(
 export const account = sqliteTable(
 	'accounts',
 	{
-		...base,
+		createdAt: base.createdAt,
+		updatedAt: base.updatedAt,
+
 		id: cuid2().defaultRandom().primaryKey(),
 		name: text().notNull(),
 		description: text().default(''),
@@ -60,7 +62,9 @@ export const account = sqliteTable(
 export const accountImages = sqliteTable(
 	'account_images',
 	{
-		...base,
+		createdAt: base.createdAt,
+		updatedAt: base.updatedAt,
+
 		id: cuid2().defaultRandom().primaryKey(),
 		altText: text(),
 		blob: blob().notNull(),
@@ -79,7 +83,9 @@ export const accountImages = sqliteTable(
 export const subAccount = sqliteTable(
 	'sub_accounts',
 	{
-		...base,
+		createdAt: base.createdAt,
+		updatedAt: base.updatedAt,
+
 		id: cuid2().defaultRandom().primaryKey(),
 		currency: text({ enum: CURRENCIES }).notNull(),
 		balance: integer().notNull(), // store in base units (i.e. cents)

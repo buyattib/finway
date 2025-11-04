@@ -56,7 +56,12 @@ export function AccountForm({
 			name: '',
 			accountType: '',
 			description: '',
-			subAccounts: [{}],
+			subAccounts: [
+				{
+					currency: '',
+					balance: '0',
+				},
+			],
 		},
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: AccountFormSchema })
@@ -124,7 +129,10 @@ export function AccountForm({
 								}
 								{...form.insert.getButtonProps({
 									name: fields.subAccounts.name,
-									defaultValue: {},
+									defaultValue: {
+										currency: '',
+										balance: '0',
+									},
 								})}
 							>
 								<span aria-hidden>
@@ -146,7 +154,7 @@ export function AccountForm({
 								return (
 									<li
 										key={subAccount.key}
-										className='flex items-center justify-between gap-2'
+										className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 pt-6 border rounded-xl relative'
 									>
 										{isEditing && (
 											<input
@@ -155,6 +163,7 @@ export function AccountForm({
 												})}
 											/>
 										)}
+
 										<SelectField
 											label={'currency-input-label'}
 											field={currency}
@@ -182,11 +191,11 @@ export function AccountForm({
 											field={balance}
 											disabled={isEditing && !!id.value}
 										/>
-										<div className='flex flex-col gap-1'>
-											<div className='h-3.5' />
+
+										<div className='absolute right-2 top-2'>
 											<Button
-												variant='ghost'
-												size='icon'
+												variant='destructive-outline'
+												size='icon-sm'
 												disabled={
 													subAccounts.length === 1
 												}
@@ -204,7 +213,6 @@ export function AccountForm({
 													{`${currency.value}-label`}
 												</span>
 											</Button>
-											<div className='h-6' />
 										</div>
 									</li>
 								)

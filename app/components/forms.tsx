@@ -65,18 +65,19 @@ export function TextField({
 	className?: string
 	type?: 'text' | 'email' | 'password'
 } & React.InputHTMLAttributes<HTMLInputElement>) {
-	const fallbackId = useId()
-	const fieldProps = getInputProps(field, { type })
 	const errors = field.errors as ListOfErrors
+	const fieldProps = getInputProps(field, { type })
 
-	const id = fieldProps.id ?? fallbackId
-	const errorId = errors?.length ? `${id}-error` : undefined
+	const errorId = errors?.length ? `${fieldProps.id}-error` : undefined
 
-	const props = { ...inputProps, ...fieldProps, id }
+	const props = { ...inputProps, ...fieldProps }
 
 	return (
 		<div className={cn('flex flex-col gap-1 w-full', className)}>
-			<Label htmlFor={id} aria-invalid={errorId ? true : undefined}>
+			<Label
+				htmlFor={fieldProps.id}
+				aria-invalid={errorId ? true : undefined}
+			>
 				{label}
 			</Label>
 			<Input

@@ -34,7 +34,13 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
-		schema: AccountFormSchema,
+		schema: AccountFormSchema.transform(data => ({
+			...data,
+			subAccounts: data.subAccounts.map(sa => ({
+				...sa,
+				balance: Number(sa.balance) * 100,
+			})),
+		})),
 		async: true,
 	})
 
@@ -66,21 +72,24 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const { subAccounts, ...accountData } = body
 
-	const accountId = (
-		await db
+	const accountId = await db.transaction(async tx => {
+		const [newAccount] = await tx
 			.insert(account)
 			.values({ ...accountData, ownerId: user.id })
 			.returning({ id: account.id })
-	)[0].id
 
-	const subAccountsData = subAccounts.map(sa => ({
-		...sa,
-		balance: Number(sa.balance) * 100,
-		accountId,
-	}))
-	await db.insert(subAccount).values(subAccountsData)
+		const accountId = newAccount.id
+		await tx.insert(subAccount).values(
+			subAccounts.map(sa => ({
+				...sa,
+				accountId,
+			})),
+		)
 
-	return redirect('/app/accounts')
+		return accountId
+	})
+
+	return redirect(`/app/accounts/${accountId}`)
 }
 
 export default function CreateAccount({ actionData }: Route.ComponentProps) {

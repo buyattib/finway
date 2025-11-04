@@ -94,6 +94,9 @@ function PrivateLayoutContent({
 			<Sidebar>
 				<SidebarHeader className='p-4'>
 					<FinhubLink onClick={closeSidebar} />
+					<p className='leading-7 font-semibold sm:hidden'>
+						{user.email}
+					</p>
 				</SidebarHeader>
 				<SidebarContent>
 					<SidebarGroup>
@@ -118,9 +121,13 @@ function PrivateLayoutContent({
 					)}
 				>
 					<SidebarTrigger className='md:hidden' />
-					<p className='leading-7 font-semibold'>{user.email}</p>
-					<ThemeToggle />
-					<LogoutButton />
+					<p className='leading-7 font-semibold sm:block hidden'>
+						{user.email}
+					</p>
+					<div className='flex items-center gap-2'>
+						<ThemeToggle />
+						<LogoutButton />
+					</div>
 				</header>
 				<main
 					className={cn(

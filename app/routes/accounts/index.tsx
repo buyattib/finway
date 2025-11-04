@@ -30,13 +30,11 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 	const result = await db.query.account.findMany({
 		orderBy: (account, { desc }) => [desc(account.createdAt)],
-		where: (account, { eq, isNull, and }) =>
-			and(eq(account.ownerId, user.id), isNull(account.deletedAt)),
+		where: (account, { eq }) => eq(account.ownerId, user.id),
 		columns: { id: true, name: true, description: true, accountType: true },
 		with: {
 			subAccounts: {
 				orderBy: (subAccount, { desc }) => [desc(subAccount.balance)],
-				where: (subAccount, { isNull }) => isNull(subAccount.deletedAt),
 				columns: { id: true, currency: true, balance: true },
 			},
 		},
