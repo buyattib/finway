@@ -8,6 +8,10 @@ import { dbContext, userContext } from '~/lib/context'
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
+import { AccountTypeIcon } from '~/components/account-type-icon'
+import { CurrencyIcon } from '~/components/currency-icon'
+
+import { ACCOUNT_TYPE_LABEL } from './lib/constants'
 
 export function meta() {
 	return [
@@ -74,57 +78,73 @@ export default function Accounts({ loaderData }: Route.ComponentProps) {
 			{accounts.length === 0 && (
 				<div className='my-2'>
 					<Text size='md' weight='medium' alignment='center'>
-						{'no-accounts-msg'}
+						You have not created any accounts yet.
 					</Text>
 				</div>
 			)}
 
 			<ul className='flex flex-col gap-2'>
-				{accounts.map(account => (
-					<li key={account.id}>
-						<AccountLink account={account} />
-					</li>
-				))}
+				{accounts.map(
+					({ id, name, description, accountType, subAccounts }) => (
+						<li key={id}>
+							<Link
+								to={`${id}`}
+								prefetch='intent'
+								className='flex flex-col gap-6 sm:flex-row sm:justify-between border rounded-xl p-4 hover:border-primary transition-all min-h-[90px]'
+							>
+								<div className='flex items-center gap-4'>
+									<AccountTypeIcon
+										accountType={accountType}
+									/>
+									<div className='flex flex-col sm:gap-2 gap-4'>
+										<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
+											<Title id={id} level='h5'>
+												{name}
+											</Title>
+											<Text size='sm' theme='primary'>
+												{
+													ACCOUNT_TYPE_LABEL[
+														accountType
+													]
+												}
+											</Text>
+										</div>
+										<Text size='sm' theme='muted'>
+											{description}
+										</Text>
+									</div>
+								</div>
+								<ul
+									className='flex flex-col justify-center gap-2 min-w-7xs'
+									aria-labelledby={id}
+								>
+									{subAccounts.map(
+										({
+											id: subAccId,
+											balance,
+											currency,
+										}) => (
+											<li
+												key={subAccId}
+												className='flex items-center justify-start gap-2'
+											>
+												<Text className='flex items-center gap-1'>
+													<CurrencyIcon
+														currency={currency}
+														size='sm'
+													/>
+													{currency}
+												</Text>
+												<Text>{balance}</Text>
+											</li>
+										),
+									)}
+								</ul>
+							</Link>
+						</li>
+					),
+				)}
 			</ul>
 		</section>
-	)
-}
-
-function AccountLink({
-	account: { id, name, description, accountType, subAccounts },
-}: {
-	account: Route.ComponentProps['loaderData']['accounts'][number]
-}) {
-	return (
-		<Link
-			to={`${id}/edit`}
-			prefetch='intent'
-			className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border rounded-xl p-4 hover:border-primary transition-all'
-		>
-			<div className='flex flex-col gap-2'>
-				<div className='flex items-center gap-2'>
-					<Title id={id} level='h5'>
-						{name}
-					</Title>
-					<Text size='sm' theme='primary'>
-						{`${accountType}-label`}
-					</Text>
-				</div>
-				<Text size='sm' theme='muted'>
-					{description}
-				</Text>
-			</div>
-			<ul className='flex flex-col gap-2 min-w-7xs' aria-labelledby={id}>
-				{subAccounts.map(({ id: subAccId, balance, currency }) => (
-					<li
-						key={subAccId}
-						className='flex items-center justify-start gap-2'
-					>
-						<Text>{currency}</Text>
-						<Text>{balance}</Text>
-					</li>
-				))}
-			</ul>
-		</Link>
 	)
 }

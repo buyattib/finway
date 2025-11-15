@@ -2,7 +2,7 @@ import React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '~/lib/utils'
 
-const titleVariants = cva('scroll-m-20 tracking-tight', {
+const titleVariants = cva('scroll-m-20 tracking-tight text-black/70', {
 	variants: {
 		variant: {
 			h1: 'text-4xl font-extrabold text-balance',

@@ -1,12 +1,13 @@
 import { data, Link, redirect } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { ArrowLeftIcon } from 'lucide-react'
-import { eq, inArray } from 'drizzle-orm'
+import { eq, ne, and, inArray } from 'drizzle-orm'
 
 import type { Route } from './+types/edit'
 
 import { account, subAccount } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
+import { formatNumberWithoutCommas } from '~/lib/utils'
 
 import { GeneralErrorBoundary } from '~/components/general-error-boundary'
 import { Button } from '~/components/ui/button'
@@ -57,7 +58,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 			...data,
 			subAccounts: data.subAccounts.map(sa => ({
 				...sa,
-				balance: Number(sa.balance) * 100,
+				balance: Number(formatNumberWithoutCommas(sa.balance)) * 100,
 			})),
 		})),
 	})
@@ -77,6 +78,28 @@ export async function action({ context, request }: Route.ActionArgs) {
 				}),
 			},
 			{ status: 400 },
+		)
+	}
+
+	const existingAccounts = await db.$count(
+		account,
+		and(
+			eq(account.ownerId, user.id),
+			eq(account.name, body.name),
+			eq(account.accountType, body.accountType),
+			ne(account.id, accountId),
+		),
+	)
+	if (existingAccounts > 0) {
+		return data(
+			{
+				submission: submission.reply({
+					formErrors: [
+						'Another account with this name and type already exists',
+					],
+				}),
+			},
+			{ status: 422 },
 		)
 	}
 

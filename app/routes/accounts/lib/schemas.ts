@@ -1,10 +1,11 @@
 import { z } from 'zod'
+import { formatNumberWithoutCommas } from '~/lib/utils'
 import { ACCOUNT_TYPES, CURRENCIES } from './constants'
 
 export const AccountFormSchema = z.object({
 	id: z.string().optional(),
-	name: z.string('name-required-msg').transform(value => value.trim()),
-	accountType: z.enum(ACCOUNT_TYPES, 'account-type-required-msg'),
+	name: z.string('Name is required').transform(value => value.trim()),
+	accountType: z.enum(ACCOUNT_TYPES, 'Account type is required'),
 	description: z
 		.string()
 		.optional()
@@ -13,20 +14,32 @@ export const AccountFormSchema = z.object({
 		.array(
 			z.object({
 				id: z.string().optional(),
-				currency: z.enum(CURRENCIES, 'currency-required-msg'),
+				currency: z.enum(CURRENCIES, 'Currency is required'),
 				balance: z
-					.string({ message: 'balance-required-msg' })
-					.refine(value => !isNaN(Number(value)), {
-						message: 'balance-numeric-msg',
-					})
-					.refine(value => Number(value) >= 0, {
-						message: 'balance-non-negative-msg',
-					}),
+					.string({ message: 'Balance is required' })
+					.refine(
+						value => {
+							const formatted = formatNumberWithoutCommas(value)
+							return !isNaN(Number(formatted))
+						},
+						{
+							message: 'Balance must be a valid number',
+						},
+					)
+					.refine(
+						value => {
+							const formatted = formatNumberWithoutCommas(value)
+							return Number(formatted) >= 0
+						},
+						{
+							message: 'Balance cannot be negative',
+						},
+					),
 			}),
 		)
-		.min(1, 'supported-currency-required-msg')
+		.min(1, 'At least one supported currency is required')
 		.refine(subAccounts => {
 			const currencies = subAccounts.map(sa => sa.currency)
 			return new Set(currencies).size === currencies.length
-		}, 'duplicate-currency-msg'),
+		}, 'An account cannot have duplicate currencies'),
 })

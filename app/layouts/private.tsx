@@ -52,17 +52,17 @@ const links = [
 	},
 	// {
 	// 	to: '/app/transfers',
-	// 	labelKey: 'transfers-label',
+	// 	labelKey: 'Transfers',
 	// 	icon: <ArrowRightLeftIcon />,
 	// },
 	// {
 	// 	to: '/app/transactions',
-	// 	labelKey: 'transactions-label',
+	// 	labelKey: 'Transactions',
 	// 	icon: <BanknoteArrowDownIcon />,
 	// },
 	// {
 	// 	to: '/app/recurring-transactions',
-	// 	labelKey: 'recurring-transactions-label',
+	// 	labelKey: 'Recurring Transactions',
 	// 	icon: <CalendarSyncIcon />,
 	// },
 ]
@@ -103,11 +103,20 @@ function PrivateLayoutContent({
 						<SidebarGroupContent>
 							<SidebarMenu>
 								{links.map(link => (
-									<SidebarLink
-										link={link}
-										key={link.to}
-										onClick={closeSidebar}
-									/>
+									<SidebarMenuItem key={link.to}>
+										<NavLink to={link.to}>
+											{({ isActive }) => (
+												<SidebarMenuButton
+													size='lg'
+													isActive={isActive}
+													onClick={closeSidebar}
+												>
+													{link.icon}
+													{link.labelKey}
+												</SidebarMenuButton>
+											)}
+										</NavLink>
+									</SidebarMenuItem>
 								))}
 							</SidebarMenu>
 						</SidebarGroupContent>
@@ -145,30 +154,5 @@ function PrivateLayoutContent({
 				</main>
 			</div>
 		</>
-	)
-}
-
-function SidebarLink({
-	link,
-	onClick,
-}: {
-	link: (typeof links)[number]
-	onClick: () => void
-}) {
-	return (
-		<SidebarMenuItem key={link.to}>
-			<NavLink to={link.to}>
-				{({ isActive }) => (
-					<SidebarMenuButton
-						size='lg'
-						isActive={isActive}
-						onClick={onClick}
-					>
-						{link.icon}
-						{link.labelKey}
-					</SidebarMenuButton>
-				)}
-			</NavLink>
-		</SidebarMenuItem>
 	)
 }

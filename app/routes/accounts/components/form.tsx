@@ -21,16 +21,22 @@ import {
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Title } from '~/components/ui/title'
-import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
 	TextField,
 	SelectField,
 	NumberField,
 } from '~/components/forms'
+import { AccountTypeIcon } from '~/components/account-type-icon'
+import { CurrencyIcon } from '~/components/currency-icon'
 
 import { AccountFormSchema } from '../lib/schemas'
-import { ACCOUNT_TYPES, CURRENCIES } from '../lib/constants'
+import {
+	ACCOUNT_TYPES,
+	ACCOUNT_TYPE_LABEL,
+	CURRENCIES,
+	CURRENCY_DISPLAY,
+} from '../lib/constants'
 
 export function AccountForm({
 	account,
@@ -98,22 +104,16 @@ export function AccountForm({
 						errors={form.errors}
 						id={form.errorId}
 					/>
-					<TextField
-						autoFocus
-						label={'name-input-label'}
-						field={fields.name}
-					/>
-					<TextField
-						label={'description-input-label'}
-						field={fields.description}
-					/>
+					<TextField autoFocus label='Name' field={fields.name} />
+					<TextField label='Description' field={fields.description} />
 					<SelectField
-						label={'account-type-input-label'}
+						label='Account Type'
 						field={fields.accountType}
-						placeholder={'account-type-placeholder'}
+						placeholder='Select an option'
 						items={ACCOUNT_TYPES.map(i => ({
+							icon: <AccountTypeIcon size='sm' accountType={i} />,
 							value: i,
-							label: `${i}-label`,
+							label: ACCOUNT_TYPE_LABEL[i],
 						}))}
 					/>
 					<fieldset
@@ -165,13 +165,20 @@ export function AccountForm({
 										)}
 
 										<SelectField
-											label={'currency-input-label'}
+											label='Currency'
 											field={currency}
-											placeholder={'currency-placeholder'}
+											placeholder='Select currency'
 											disabled={isEditing && !!id.value}
 											items={CURRENCIES.map(i => ({
 												value: i,
-												label: `${i}-label`,
+												label: CURRENCY_DISPLAY[i]
+													.label,
+												icon: (
+													<CurrencyIcon
+														currency={i}
+														size='sm'
+													/>
+												),
 											}))}
 										/>
 
@@ -184,10 +191,8 @@ export function AccountForm({
 											/>
 										)}
 										<NumberField
-											label={'balance-input-label'}
-											placeholder={
-												'balance-input-placeholder'
-											}
+											label='Balance'
+											placeholder='Current balance'
 											field={balance}
 											disabled={isEditing && !!id.value}
 										/>
@@ -209,8 +214,7 @@ export function AccountForm({
 													<XIcon />
 												</span>
 												<span className='sr-only'>
-													Remove currency{' '}
-													{`${currency.value}-label`}
+													Remove currency
 												</span>
 											</Button>
 										</div>

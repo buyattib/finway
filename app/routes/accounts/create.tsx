@@ -7,6 +7,7 @@ import type { Route } from './+types/create'
 
 import { account, subAccount } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
+import { formatNumberWithoutCommas } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 
@@ -38,7 +39,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			...data,
 			subAccounts: data.subAccounts.map(sa => ({
 				...sa,
-				balance: Number(sa.balance) * 100,
+				balance: Number(formatNumberWithoutCommas(sa.balance)) * 100,
 			})),
 		})),
 		async: true,

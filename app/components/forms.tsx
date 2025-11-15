@@ -6,7 +6,7 @@ import {
 	type FieldMetadata,
 } from '@conform-to/react'
 
-import { cn } from '~/lib/utils'
+import { cn, formatNumberWithoutCommas, isValueNumeric } from '~/lib/utils'
 
 import { Label } from './ui/label'
 import { Input } from './ui/input'
@@ -167,7 +167,7 @@ export function SelectField({
 }: {
 	label?: string
 	field: FieldMetadata<string>
-	items: Array<{ label: string; value: string }>
+	items: Array<{ label: string; value: string; icon?: React.ReactNode }>
 	placeholder?: string
 	className?: string
 } & SelectTriggerProps) {
@@ -214,7 +214,7 @@ export function SelectField({
 				<SelectContent id={id}>
 					{items.map(item => (
 						<SelectItem key={item.value} value={item.value}>
-							{item.label}
+							{item.icon} {item.label}
 						</SelectItem>
 					))}
 				</SelectContent>
@@ -269,8 +269,6 @@ export function NumberField({
 			: formattedInteger
 	}
 
-	const NUMERIC_PATTERN = /^$|^\d+\.?\d*$/
-
 	return (
 		<div className={cn('flex flex-col gap-1 w-full', className)}>
 			<Label htmlFor={id} aria-invalid={errorId ? true : undefined}>
@@ -283,9 +281,11 @@ export function NumberField({
 				{...props}
 				value={formatNumberWithCommas(control.value)}
 				onChange={e => {
-					const value = e.target.value.replace(/,/g, '').trim()
+					const value = formatNumberWithoutCommas(
+						e.target.value,
+					).trim()
 
-					if (!NUMERIC_PATTERN.test(value)) return
+					if (!isValueNumeric(value)) return
 					if (
 						value.length > 1 &&
 						value[0] === '0' &&
