@@ -4,6 +4,7 @@ import { PlusIcon } from 'lucide-react'
 import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
+import { formatNumber } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -11,7 +12,7 @@ import { Title } from '~/components/ui/title'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { ACCOUNT_TYPE_LABEL } from './lib/constants'
+import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
 
 export function meta() {
 	return [
@@ -48,7 +49,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		...account,
 		subAccounts: account.subAccounts.map(sub => ({
 			...sub,
-			balance: String(sub.balance / 100),
+			balance: sub.balance / 100,
 		})),
 	}))
 
@@ -109,13 +110,15 @@ export default function Accounts({ loaderData }: Route.ComponentProps) {
 												}
 											</Text>
 										</div>
-										<Text size='sm' theme='muted'>
-											{description}
-										</Text>
+										{description && (
+											<Text size='sm' theme='muted'>
+												{description}
+											</Text>
+										)}
 									</div>
 								</div>
 								<ul
-									className='flex flex-col justify-center gap-2 min-w-7xs'
+									className='flex flex-col justify-center gap-2 min-w-5xs'
 									aria-labelledby={id}
 								>
 									{subAccounts.map(
@@ -123,21 +126,28 @@ export default function Accounts({ loaderData }: Route.ComponentProps) {
 											id: subAccId,
 											balance,
 											currency,
-										}) => (
-											<li
-												key={subAccId}
-												className='flex items-center justify-start gap-2'
-											>
-												<Text className='flex items-center gap-1'>
-													<CurrencyIcon
-														currency={currency}
-														size='sm'
-													/>
-													{currency}
-												</Text>
-												<Text>{balance}</Text>
-											</li>
-										),
+										}) => {
+											const currencyDisplay =
+												CURRENCY_DISPLAY[currency]
+											return (
+												<li
+													key={subAccId}
+													className='flex items-center justify-between gap-2 min-w-6xs'
+												>
+													<Text className='flex items-center gap-1'>
+														<CurrencyIcon
+															currency={currency}
+															size='sm'
+														/>
+														{currency}
+													</Text>
+													<Text>
+														{currencyDisplay.symbol}{' '}
+														{formatNumber(balance)}
+													</Text>
+												</li>
+											)
+										},
 									)}
 								</ul>
 							</Link>
