@@ -1,18 +1,15 @@
 import { parseWithZod } from '@conform-to/zod/v4'
 import { data, redirect, Link } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
-import { and, eq } from 'drizzle-orm'
-
 import type { Route } from './+types/create'
 
-import { account, subAccount } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
-import { formatNumberWithoutCommas } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 
 import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
+import { getExistingAccountsCount, createUserAccount } from './lib/queries'
 
 export function meta() {
 	return [
@@ -35,13 +32,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
-		schema: AccountFormSchema.transform(data => ({
-			...data,
-			subAccounts: data.subAccounts.map(sa => ({
-				...sa,
-				balance: Number(formatNumberWithoutCommas(sa.balance)) * 100,
-			})),
-		})),
+		schema: AccountFormSchema,
 		async: true,
 	})
 
@@ -50,14 +41,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const body = submission.value
-	const existingAccounts = await db.$count(
-		account,
-		and(
-			eq(account.ownerId, user.id),
-			eq(account.name, body.name),
-			eq(account.accountType, body.accountType),
-		),
-	)
+	const existingAccounts = await getExistingAccountsCount(db, {
+		userId: user.id,
+		name: body.name,
+		accountType: body.accountType,
+	})
 	if (existingAccounts > 0) {
 		return data(
 			{
@@ -71,25 +59,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		)
 	}
 
-	const { subAccounts, ...accountData } = body
-
-	const accountId = await db.transaction(async tx => {
-		const [newAccount] = await tx
-			.insert(account)
-			.values({ ...accountData, ownerId: user.id })
-			.returning({ id: account.id })
-
-		const accountId = newAccount.id
-		await tx.insert(subAccount).values(
-			subAccounts.map(sa => ({
-				...sa,
-				accountId,
-			})),
-		)
-
-		return accountId
-	})
-
+	const accountId = await createUserAccount(db, user.id, body)
 	return redirect(`/app/accounts/${accountId}`)
 }
 

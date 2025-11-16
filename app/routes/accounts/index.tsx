@@ -13,6 +13,7 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
+import { getUserAccounts } from './lib/queries'
 
 export function meta() {
 	return [
@@ -33,26 +34,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const result = await db.query.account.findMany({
-		orderBy: (account, { desc }) => [desc(account.createdAt)],
-		where: (account, { eq }) => eq(account.ownerId, user.id),
-		columns: { id: true, name: true, description: true, accountType: true },
-		with: {
-			subAccounts: {
-				orderBy: (subAccount, { desc }) => [desc(subAccount.balance)],
-				columns: { id: true, currency: true, balance: true },
-			},
-		},
-	})
-
-	const accounts = result.map(account => ({
-		...account,
-		subAccounts: account.subAccounts.map(sub => ({
-			...sub,
-			balance: sub.balance / 100,
-		})),
-	}))
-
+	const accounts = await getUserAccounts(db, user.id)
 	return { accounts }
 }
 
@@ -69,7 +51,7 @@ export default function Accounts({ loaderData }: Route.ComponentProps) {
 					Accounts
 				</Title>
 				<Button asChild variant='default' autoFocus>
-					<Link to='create'>
+					<Link to='create' prefetch='intent'>
 						<PlusIcon aria-hidden />
 						<span className='sm:inline hidden'>Account</span>
 					</Link>
@@ -89,9 +71,9 @@ export default function Accounts({ loaderData }: Route.ComponentProps) {
 					({ id, name, description, accountType, subAccounts }) => (
 						<li key={id}>
 							<Link
-								to={`${id}`}
+								to={id}
 								prefetch='intent'
-								className='flex flex-col gap-6 sm:flex-row sm:justify-between border rounded-xl p-4 hover:border-primary transition-all min-h-[90px]'
+								className='flex flex-col gap-6 sm:flex-row sm:justify-between border rounded-xl p-4 hover:border-primary transition-all min-h-24'
 							>
 								<div className='flex items-center gap-4'>
 									<AccountTypeIcon
@@ -118,7 +100,7 @@ export default function Accounts({ loaderData }: Route.ComponentProps) {
 									</div>
 								</div>
 								<ul
-									className='flex flex-col justify-center gap-2 min-w-5xs'
+									className='flex flex-col justify-center gap-2'
 									aria-labelledby={id}
 								>
 									{subAccounts.map(
@@ -127,23 +109,22 @@ export default function Accounts({ loaderData }: Route.ComponentProps) {
 											balance,
 											currency,
 										}) => {
-											const currencyDisplay =
+											const { symbol } =
 												CURRENCY_DISPLAY[currency]
 											return (
 												<li
 													key={subAccId}
-													className='flex items-center justify-between gap-2 min-w-6xs'
+													className='flex items-center justify-between gap-4'
 												>
-													<Text className='flex items-center gap-1'>
+													<Text>
+														{`${symbol} ${formatNumber(balance)}`}
+													</Text>
+													<Text className='flex items-center gap-2'>
 														<CurrencyIcon
 															currency={currency}
 															size='sm'
 														/>
 														{currency}
-													</Text>
-													<Text>
-														{currencyDisplay.symbol}{' '}
-														{formatNumber(balance)}
 													</Text>
 												</li>
 											)

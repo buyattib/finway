@@ -147,9 +147,6 @@ function PrivateLayoutContent({
 						},
 					)}
 				>
-					{navigation.state === 'loading' && (
-						<Spinner size='md' className='mx-auto' />
-					)}
 					<Outlet />
 				</main>
 			</div>

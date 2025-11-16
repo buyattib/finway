@@ -1,18 +1,20 @@
 import { data, Link, redirect } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { ArrowLeftIcon } from 'lucide-react'
-import { eq, ne, and, inArray } from 'drizzle-orm'
 
 import type { Route } from './+types/edit'
 
-import { account, subAccount } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
-import { formatNumberWithoutCommas } from '~/lib/utils'
 
 import { GeneralErrorBoundary } from '~/components/general-error-boundary'
 import { Button } from '~/components/ui/button'
 
 import { AccountFormSchema } from './lib/schemas'
+import {
+	getAccount,
+	getExistingAccountsCount,
+	updateUserAccount,
+} from './lib/queries'
 import { AccountForm } from './components/form'
 
 export async function loader({
@@ -22,30 +24,14 @@ export async function loader({
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const account = await db.query.account.findFirst({
-		where: (account, { eq, and }) =>
-			and(eq(account.id, accountId), eq(account.ownerId, user.id)),
-		columns: { id: true, name: true, description: true, accountType: true },
-		with: {
-			subAccounts: {
-				orderBy: (subAccount, { desc }) => [desc(subAccount.balance)],
-				columns: { id: true, currency: true, balance: true },
-			},
-		},
-	})
-	if (!account) {
+	const account = await getAccount(db, accountId)
+
+	if (!account || account.ownerId !== user.id) {
 		throw new Response('Account not found', { status: 404 })
 	}
 
-	return {
-		account: {
-			...account,
-			subAccounts: account.subAccounts.map(sa => ({
-				...sa,
-				balance: String(sa.balance / 100),
-			})),
-		},
-	}
+	const { ownerId, ...accountData } = account
+	return { account: accountData }
 }
 
 export async function action({ context, request }: Route.ActionArgs) {
@@ -53,14 +39,9 @@ export async function action({ context, request }: Route.ActionArgs) {
 	const db = context.get(dbContext)
 
 	const formData = await request.formData()
-	const submission = parseWithZod(formData, {
-		schema: AccountFormSchema.transform(data => ({
-			...data,
-			subAccounts: data.subAccounts.map(sa => ({
-				...sa,
-				balance: Number(formatNumberWithoutCommas(sa.balance)) * 100,
-			})),
-		})),
+	const submission = await parseWithZod(formData, {
+		schema: AccountFormSchema,
+		async: true,
 	})
 
 	if (submission.status !== 'success') {
@@ -68,8 +49,8 @@ export async function action({ context, request }: Route.ActionArgs) {
 	}
 
 	const body = submission.value
-	const { id: accountId, subAccounts, ...accountData } = body
 
+	const { id: accountId } = body
 	if (!accountId) {
 		return data(
 			{
@@ -81,15 +62,12 @@ export async function action({ context, request }: Route.ActionArgs) {
 		)
 	}
 
-	const existingAccounts = await db.$count(
-		account,
-		and(
-			eq(account.ownerId, user.id),
-			eq(account.name, body.name),
-			eq(account.accountType, body.accountType),
-			ne(account.id, accountId),
-		),
-	)
+	const existingAccounts = await getExistingAccountsCount(db, {
+		userId: user.id,
+		name: body.name,
+		accountType: body.accountType,
+		accountId,
+	})
 	if (existingAccounts > 0) {
 		return data(
 			{
@@ -103,12 +81,8 @@ export async function action({ context, request }: Route.ActionArgs) {
 		)
 	}
 
-	const existingAccount = await db.query.account.findFirst({
-		columns: { id: true },
-		where: (account, { eq, and }) =>
-			and(eq(account.id, accountId), eq(account.ownerId, user.id)),
-	})
-	if (!existingAccount) {
+	const account = await getAccount(db, accountId)
+	if (!account || account.ownerId !== user.id) {
 		return data(
 			{
 				submission: submission.reply({
@@ -119,33 +93,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 		)
 	}
 
-	const existingSubAccounts = (
-		await db.query.subAccount.findMany({
-			columns: { id: true },
-			where: (subAccount, { eq }) => eq(subAccount.accountId, accountId),
-		})
-	).map(sa => sa.id)
-
-	const toCreate = subAccounts.filter(sa => !sa.id)
-	const toDelete = existingSubAccounts.filter(
-		id => !subAccounts.find(sa => sa.id === id),
-	)
-
-	await db.transaction(async tx => {
-		await tx
-			.update(account)
-			.set(accountData)
-			.where(eq(account.id, accountId))
-
-		if (toCreate.length > 0) {
-			await tx
-				.insert(subAccount)
-				.values(toCreate.map(sa => ({ ...sa, accountId })))
-		}
-		if (toDelete.length > 0) {
-			await tx.delete(subAccount).where(inArray(subAccount.id, toDelete))
-		}
-	})
+	await updateUserAccount(db, accountId, body)
 
 	return redirect(`/app/accounts/${accountId}`)
 }

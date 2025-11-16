@@ -15,7 +15,7 @@ export function isValueNumeric(value: string) {
 }
 
 export function formatNumber(
-	num: number,
+	num: number | string,
 	config: Intl.NumberFormatOptions = {},
 ) {
 	const formatter = new Intl.NumberFormat(undefined, {
@@ -23,5 +23,5 @@ export function formatNumber(
 		minimumFractionDigits: 2,
 		...config,
 	})
-	return formatter.format(num)
+	return formatter.format(Number(num))
 }

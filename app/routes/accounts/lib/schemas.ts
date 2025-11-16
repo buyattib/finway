@@ -43,3 +43,8 @@ export const AccountFormSchema = z.object({
 			return new Set(currencies).size === currencies.length
 		}, 'An account cannot have duplicate currencies'),
 })
+
+export const DeleteFormSchema = z.object({
+	accountId: z.string(),
+	intent: z.literal('delete'),
+})
