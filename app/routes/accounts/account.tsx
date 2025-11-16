@@ -1,4 +1,4 @@
-import { Link, Form, data, redirect } from 'react-router'
+import { Link, Form, data, useNavigation } from 'react-router'
 import { SquarePenIcon, TrashIcon } from 'lucide-react'
 import { useForm, getFormProps } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
@@ -6,21 +6,12 @@ import type { Route } from './+types/account'
 
 import { dbContext, userContext } from '~/lib/context'
 import { formatNumber } from '~/lib/utils'
+import { redirectWithToast } from '~/utils/toast.server'
 
+import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
-import {
-	AlertDialog,
-	AlertDialogTrigger,
-	AlertDialogContent,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogAction,
-	AlertDialogCancel,
-} from '~/components/ui/alert-dialog'
 import { GeneralErrorBoundary } from '~/components/general-error-boundary'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
@@ -28,6 +19,12 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
 import { getAccount, deleteAccount } from './lib/queries'
 import { DeleteFormSchema } from './lib/schemas'
+import { ErrorList } from '~/components/forms'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '~/components/ui/tooltip'
 
 export async function loader({
 	context,
@@ -79,7 +76,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	await deleteAccount(db, accountId)
 
-	return redirect(`/app/accounts`)
+	return await redirectWithToast('/app/accounts', request, {
+		type: 'success',
+		title: 'Success!',
+		description: 'Account deleted',
+	})
 }
 
 export default function AccountDetails({
@@ -87,6 +88,12 @@ export default function AccountDetails({
 	actionData,
 }: Route.ComponentProps) {
 	const { id, name, description, accountType, subAccounts } = account
+
+	const navigation = useNavigation()
+	const isDeleting =
+		navigation.formMethod === 'POST' &&
+		navigation.formAction === `/app/accounts/${id}` &&
+		navigation.state === 'submitting'
 
 	const [form] = useForm({
 		id: 'delete-account-form',
@@ -99,6 +106,7 @@ export default function AccountDetails({
 
 	return (
 		<div className='flex flex-col gap-6'>
+			<ErrorList id='delete-account-form-error' errors={form.errors} />
 			<div className='flex flex-col gap-4'>
 				<div className='flex items-center gap-4'>
 					<AccountTypeIcon accountType={accountType} />
@@ -116,48 +124,38 @@ export default function AccountDetails({
 								<SquarePenIcon />
 							</Link>
 						</Button>
-						<AlertDialog>
-							<AlertDialogTrigger asChild>
-								<Button
-									size='icon'
-									variant='destructive-outline'
-								>
-									<TrashIcon />
-								</Button>
-							</AlertDialogTrigger>
-							<AlertDialogContent>
-								<AlertDialogHeader>
-									<AlertDialogTitle>
-										Delete Account <i>{name}</i>?
-									</AlertDialogTitle>
-									<AlertDialogDescription>
-										This action cannot be undone. This will
-										permanently delete the account and its
-										associated transactions.
-									</AlertDialogDescription>
-								</AlertDialogHeader>
-								<AlertDialogFooter>
-									<AlertDialogCancel>
-										Cancel
-									</AlertDialogCancel>
-									<Form method='post' {...getFormProps(form)}>
-										<input
-											type='hidden'
-											name='accountId'
-											value={id}
-										/>
-										<AlertDialogAction
-											variant='destructive'
-											type='submit'
-											name='intent'
-											value='delete'
-										>
-											Delete
-										</AlertDialogAction>
-									</Form>
-								</AlertDialogFooter>
-							</AlertDialogContent>
-						</AlertDialog>
+						<Tooltip>
+							<Form method='post' {...getFormProps(form)}>
+								<input
+									type='hidden'
+									name='accountId'
+									value={id}
+								/>
+								<TooltipTrigger asChild>
+									<Button
+										size='icon'
+										variant='destructive-outline'
+										type='submit'
+										name='intent'
+										value='delete'
+										disabled={isDeleting}
+									>
+										{isDeleting ? (
+											<Spinner size='sm' />
+										) : (
+											<TrashIcon aria-hidden />
+										)}
+										<span className='sr-only'>
+											Delete account {name}
+										</span>
+									</Button>
+								</TooltipTrigger>
+							</Form>
+							<TooltipContent>
+								Deleting an account cannot be undone and it
+								deletes all its transactions.
+							</TooltipContent>
+						</Tooltip>
 					</div>
 				</div>
 				<Text theme='muted'>{description}</Text>
