@@ -10,7 +10,7 @@ import {
 	renderToPipeableStream,
 	type RenderToPipeableStreamOptions,
 } from 'react-dom/server'
-import './server-utils/env.server'
+import './utils-server/env.server'
 
 import { globalContext } from './lib/context'
 

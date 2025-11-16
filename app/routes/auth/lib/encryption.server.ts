@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { env } from '../../../server-utils/env.server'
+import { env } from '../../../utils-server/env.server'
 
 const algorithm = 'aes-256-gcm'
 

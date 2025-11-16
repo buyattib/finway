@@ -3,7 +3,7 @@ import { data, Form } from 'react-router'
 import type { Route } from './+types/dashboard'
 
 import { Button } from '~/components/ui/button'
-import { createToastHeaders } from '~/server-utils/toast.server'
+import { createToastHeaders } from '~/utils-server/toast.server'
 
 export async function action({ request }: Route.ActionArgs) {
 	const toastHeaders = await createToastHeaders(request, {

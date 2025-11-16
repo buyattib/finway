@@ -1,11 +1,6 @@
-import { useRevalidator } from 'react-router'
-import { useEffect } from 'react'
 import { getHintUtils, type ClientHint } from '@epic-web/client-hints'
 
-import {
-	clientHint as colorSchemeHint,
-	subscribeToSchemeChange,
-} from '@epic-web/client-hints/color-scheme'
+import { clientHint as colorSchemeHint } from '@epic-web/client-hints/color-scheme'
 import { clientHint as timeZoneHint } from '@epic-web/client-hints/time-zone'
 
 import { MOBILE_BREAKPOINT } from '~/hooks/use-mobile'
@@ -26,18 +21,4 @@ const hintsUtils = getHintUtils({
 	isMobile: isMobileHint,
 })
 
-export const { getHints } = hintsUtils
-
-export function ClientHintCheck({ nonce }: { nonce: string | undefined }) {
-	const { revalidate } = useRevalidator()
-	useEffect(() => subscribeToSchemeChange(() => revalidate()), [revalidate])
-
-	return (
-		<script
-			nonce={nonce}
-			dangerouslySetInnerHTML={{
-				__html: hintsUtils.getClientHintCheckScript(),
-			}}
-		/>
-	)
-}
+export const { getHints, getClientHintCheckScript } = hintsUtils

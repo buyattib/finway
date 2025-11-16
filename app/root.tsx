@@ -1,27 +1,29 @@
+import { useEffect } from 'react'
 import {
 	data,
-	// isRouteErrorResponse,
 	Links,
 	Meta,
 	Outlet,
 	Scripts,
 	ScrollRestoration,
-	useRouteLoaderData,
+	useRevalidator,
 } from 'react-router'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import { subscribeToSchemeChange } from '@epic-web/client-hints/color-scheme'
 
 import type { Route } from './+types/root'
 
 import { Toaster } from './components/ui/sonner'
 import { useTheme } from './components/theme-toggle'
 import { ShowToast } from './components/show-toast'
-
 import { globalContext } from './lib/context'
-import { getTheme } from './server-utils/theme.server'
-import { honeypot } from './server-utils/honeypot.server'
-import { getToast } from './server-utils/toast.server'
-import { combineHeaders } from './server-utils/headers.server'
-import { getHints, ClientHintCheck } from './server-utils/client-hints'
+
+import { getTheme } from './utils-server/theme.server'
+import { honeypot } from './utils-server/honeypot.server'
+import { getToast } from './utils-server/toast.server'
+import { combineHeaders } from './utils-server/headers.server'
+
+import { getHints, getClientHintCheckScript } from './utils-client/client-hints'
 
 import faviconAssetUrl from './assets/favicon.svg?url'
 import fontsCssHref from './styles/fonts.css?url'
@@ -98,17 +100,11 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-	return (
-		<HoneypotProvider {...loaderData.honeyProps}>
-			<Outlet />
-		</HoneypotProvider>
-	)
-}
-
-export function Layout({ children }: { children: React.ReactNode }) {
-	const loaderData = useRouteLoaderData<typeof loader>('root')
 	const nonce = loaderData?.cspNonce
 	const theme = useTheme()
+
+	const { revalidate } = useRevalidator()
+	useEffect(() => subscribeToSchemeChange(() => revalidate()), [revalidate])
 
 	return (
 		<html lang='en' className={theme}>
@@ -119,12 +115,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
 					content='width=device-width, initial-scale=1'
 				/>
 
-				<ClientHintCheck nonce={nonce} />
+				<script
+					nonce={nonce}
+					dangerouslySetInnerHTML={{
+						__html: getClientHintCheckScript(),
+					}}
+				/>
 				<Meta />
 				<Links />
 			</head>
 			<body className='min-h-svh flex flex-col w-full'>
-				{children}
+				<HoneypotProvider {...loaderData.honeyProps}>
+					<Outlet />
+				</HoneypotProvider>
 
 				<Toaster closeButton richColors position='bottom-right' />
 				{loaderData?.toast ? <ShowToast {...loaderData.toast} /> : null}
@@ -136,31 +139,53 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	)
 }
 
-// export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-// 	let message = 'Oops!'
-// 	let details = 'An unexpected error occurred.'
-// 	let stack: string | undefined
+// export default function App({ loaderData }: Route.ComponentProps) {
+// 	return (
+// 		<HoneypotProvider {...loaderData.honeyProps}>
+// 			<Outlet />
+// 		</HoneypotProvider>
+// 	)
+// }
 
-// 	if (isRouteErrorResponse(error)) {
-// 		message = error.status === 404 ? '404' : 'Error'
-// 		details =
-// 			error.status === 404
-// 				? 'The requested page could not be found.'
-// 				: error.statusText || details
-// 	} else if (import.meta.env.DEV && error && error instanceof Error) {
-// 		details = error.message
-// 		stack = error.stack
-// 	}
+// export function Layout({ children }: { children: React.ReactNode }) {
+// 	const loaderData = useRouteLoaderData<typeof loader>('root')
+// 	const nonce = loaderData?.cspNonce
+// 	const theme = useTheme()
 
 // 	return (
-// 		<main className='pt-16 p-4 container mx-auto'>
-// 			<h1>{message}</h1>
-// 			<p>{details}</p>
-// 			{stack && (
-// 				<pre className='w-full p-4 overflow-x-auto'>
-// 					<code>{stack}</code>
-// 				</pre>
-// 			)}
-// 		</main>
+// 		<html lang='en' className={theme}>
+// 			<head>
+// 				<meta charSet='utf-8' />
+// 				<meta
+// 					name='viewport'
+// 					content='width=device-width, initial-scale=1'
+// 				/>
+
+// 				<ClientHintCheck nonce={nonce} />
+// 				<Meta />
+// 				<Links />
+// 			</head>
+// 			<body className='min-h-svh flex flex-col w-full'>
+// 				{children}
+
+// 				<Toaster closeButton richColors position='bottom-right' />
+// 				{loaderData?.toast ? <ShowToast {...loaderData.toast} /> : null}
+
+// 				<ScrollRestoration nonce={nonce} />
+// 				<Scripts nonce={nonce} />
+// 			</body>
+// 		</html>
+// 	)
+// }
+
+// export function ClientHintCheck({ nonce }: { nonce: string | undefined }) {
+// 	const { revalidate } = useRevalidator()
+// 	useEffect(() => subscribeToSchemeChange(() => revalidate()), [revalidate])
+
+// 	return (
+// 		<script
+// 			nonce={nonce}
+// 			dangerouslySetInnerHTML={{ __html: getClientHintCheckScript() }}
+// 		/>
 // 	)
 // }

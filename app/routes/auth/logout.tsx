@@ -1,6 +1,6 @@
 import { redirect } from 'react-router'
 import type { Route } from './+types/logout'
-import { removeAuthSession } from '~/server-utils/auth.server'
+import { removeAuthSession } from '~/utils-server/auth.server'
 
 export async function loader() {
 	return redirect('/')

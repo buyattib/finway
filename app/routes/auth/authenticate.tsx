@@ -8,8 +8,8 @@ import {
 	createAuthSessionHeaders,
 	removeAuthSession,
 	requireAnonymous,
-} from '~/server-utils/auth.server'
-import { redirectWithToast } from '~/server-utils/toast.server'
+} from '~/utils-server/auth.server'
+import { redirectWithToast } from '~/utils-server/toast.server'
 
 import { validateMagicLink } from './lib/magic-link.server'
 

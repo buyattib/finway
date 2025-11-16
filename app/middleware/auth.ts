@@ -1,6 +1,6 @@
 import type { MiddlewareFunction } from 'react-router'
 import { dbContext, userContext } from '~/lib/context'
-import { requireAuthenticated } from '~/server-utils/auth.server'
+import { requireAuthenticated } from '~/utils-server/auth.server'
 
 export const authMiddleware: MiddlewareFunction = async ({
 	request,
