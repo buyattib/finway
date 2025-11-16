@@ -1,8 +1,8 @@
 import { data, redirect } from 'react-router'
 
 import { dbContext } from '~/lib/context'
-import { requireAuthenticated } from '~/utils/auth.server'
-import { themeAction } from '~/utils/theme.server'
+import { requireAuthenticated } from '~/server-utils/auth.server'
+import { themeAction } from '~/server-utils/theme.server'
 
 import type { Route } from './+types'
 

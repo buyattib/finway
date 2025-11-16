@@ -10,15 +10,11 @@ import type { Route } from './+types/login'
 
 import * as schema from '~/database/schema'
 import { dbContext } from '~/lib/context'
-import { checkHoneypot } from '~/utils/honeypot.server'
-import { createToastHeaders } from '~/utils/toast.server'
-import { requireAnonymous } from '~/utils/auth.server'
-import { getDomainUrl } from '~/utils/misc'
-import {
-	createMagicLink,
-	magicLinkExpirationTime,
-} from '~/utils/magic-link.server'
-import { sendEmail } from '~/utils/email.server'
+import { checkHoneypot } from '~/server-utils/honeypot.server'
+import { createToastHeaders } from '~/server-utils/toast.server'
+import { requireAnonymous } from '~/server-utils/auth.server'
+import { getDomainUrl } from '~/server-utils/misc'
+import { sendEmail } from '~/server-utils/email.server'
 
 import {
 	Card,
@@ -32,6 +28,11 @@ import { Button } from '~/components/ui/button'
 import { CheckboxField, ErrorList, TextField } from '~/components/forms'
 
 import { LoginEmail } from '~/emails/login'
+
+import {
+	createMagicLink,
+	magicLinkExpirationTime,
+} from './lib/magic-link.server'
 
 const LoginFormSchema = z.object({
 	email: z

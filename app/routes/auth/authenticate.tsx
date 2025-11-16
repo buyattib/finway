@@ -8,9 +8,10 @@ import {
 	createAuthSessionHeaders,
 	removeAuthSession,
 	requireAnonymous,
-} from '~/utils/auth.server'
-import { redirectWithToast } from '~/utils/toast.server'
-import { validateMagicLink } from '~/utils/magic-link.server'
+} from '~/server-utils/auth.server'
+import { redirectWithToast } from '~/server-utils/toast.server'
+
+import { validateMagicLink } from './lib/magic-link.server'
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)

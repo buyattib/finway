@@ -6,7 +6,7 @@ import type { Route } from './+types/account'
 
 import { dbContext, userContext } from '~/lib/context'
 import { formatNumber } from '~/lib/utils'
-import { redirectWithToast } from '~/utils/toast.server'
+import { redirectWithToast } from '~/server-utils/toast.server'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
