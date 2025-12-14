@@ -8,7 +8,7 @@ export const AccountFormSchema = z.object({
 	accountType: z.enum(ACCOUNT_TYPES, 'Account type is required'),
 	description: z
 		.string()
-		.optional()
+		.default('')
 		.transform(value => value?.trim()),
 	subAccounts: z
 		.array(

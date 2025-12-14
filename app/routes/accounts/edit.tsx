@@ -49,6 +49,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 	}
 
 	const body = submission.value
+	console.log(body)
 
 	const { id: accountId } = body
 	if (!accountId) {
