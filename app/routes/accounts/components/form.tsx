@@ -87,9 +87,10 @@ export function AccountForm({
 			</CardHeader>
 			<CardContent>
 				<Form
-					method='post'
 					{...getFormProps(form)}
+					method='post'
 					className='flex flex-col gap-2'
+					encType='multipart/form-data'
 				>
 					{/* Have first button to be submit */}
 					<button type='submit' className='hidden' />
@@ -104,6 +105,7 @@ export function AccountForm({
 						errors={form.errors}
 						id={form.errorId}
 					/>
+
 					<TextField autoFocus label='Name' field={fields.name} />
 					<TextField label='Description' field={fields.description} />
 					<SelectField
@@ -116,6 +118,7 @@ export function AccountForm({
 							label: ACCOUNT_TYPE_LABEL[i],
 						}))}
 					/>
+
 					<fieldset
 						className='flex flex-col gap-4'
 						{...getFieldsetProps(fields.subAccounts)}

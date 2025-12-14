@@ -5,6 +5,7 @@ import {
 	getSelectProps,
 	type FieldMetadata,
 } from '@conform-to/react'
+import { PlusCircleIcon } from 'lucide-react'
 
 import { cn, formatNumberWithoutCommas, isValueNumeric } from '~/lib/utils'
 
@@ -74,12 +75,14 @@ export function TextField({
 
 	return (
 		<div className={cn('flex flex-col gap-1 w-full', className)}>
-			<Label
-				htmlFor={fieldProps.id}
-				aria-invalid={errorId ? true : undefined}
-			>
-				{label}
-			</Label>
+			{label && (
+				<Label
+					htmlFor={fieldProps.id}
+					aria-invalid={errorId ? true : undefined}
+				>
+					{label}
+				</Label>
+			)}
 			<Input
 				aria-invalid={errorId ? true : undefined}
 				aria-describedby={errorId}
@@ -300,6 +303,51 @@ export function NumberField({
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
 			</div>
+		</div>
+	)
+}
+
+export function UploadField({
+	field,
+	label,
+	className,
+	...inputProps
+}: {
+	field: FieldMetadata<File | null>
+	label?: string
+	className?: string
+} & React.InputHTMLAttributes<HTMLInputElement>) {
+	const errors = field.errors as ListOfErrors
+	const fieldProps = getInputProps(field, { type: 'file' })
+
+	const props = { ...inputProps, ...fieldProps }
+
+	const errorId = errors?.length ? `${props.id}-error` : undefined
+
+	return (
+		<div className={cn('flex flex-col gap-1 w-full', className)}>
+			<Label
+				htmlFor={fieldProps.id}
+				className='p-2 bg-muted-foreground/20 rounded-lg cursor-pointer justify-center text-sm'
+				aria-invalid={errorId ? true : undefined}
+			>
+				<PlusCircleIcon className='w-5 h-5' />
+				{label}
+			</Label>
+			<Input
+				aria-invalid={errorId ? true : undefined}
+				aria-describedby={errorId}
+				aria-label='Image'
+				accept='image/*'
+				className='hidden'
+				{...props}
+			/>
+
+			{errorId ? (
+				<div className='py-1 px-1'>
+					<ErrorList id={errorId} errors={errors} />
+				</div>
+			) : null}
 		</div>
 	)
 }

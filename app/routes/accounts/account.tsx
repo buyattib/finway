@@ -15,16 +15,16 @@ import { Button } from '~/components/ui/button'
 import { GeneralErrorBoundary } from '~/components/general-error-boundary'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
-
-import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
-import { getAccount, deleteAccount } from './lib/queries'
-import { DeleteFormSchema } from './lib/schemas'
 import { ErrorList } from '~/components/forms'
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
+
+import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
+import { getAccount, deleteAccount } from './lib/queries'
+import { DeleteFormSchema } from './lib/schemas'
 
 export async function loader({
 	context,

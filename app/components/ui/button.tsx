@@ -33,6 +33,7 @@ const buttonVariants = cva(
 				lg: 'h-10 px-6 has-[>svg]:px-4',
 				icon: 'size-9',
 				'icon-sm': 'size-7',
+				'icon-xs': 'size-6',
 			},
 			width: {
 				full: 'w-full',

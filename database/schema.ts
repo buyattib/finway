@@ -59,27 +59,6 @@ export const account = sqliteTable(
 	}),
 )
 
-export const accountImages = sqliteTable(
-	'account_images',
-	{
-		createdAt: base.createdAt,
-		updatedAt: base.updatedAt,
-
-		id: cuid2().defaultRandom().primaryKey(),
-		altText: text(),
-		blob: blob().notNull(),
-
-		accountId: text().notNull(),
-	},
-	table => ({
-		accountImagesAccountIdFk: foreignKey({
-			name: 'account_images_accountId_fk',
-			columns: [table.accountId],
-			foreignColumns: [account.id],
-		}).onDelete('cascade'),
-	}),
-)
-
 export const subAccount = sqliteTable(
 	'sub_accounts',
 	{

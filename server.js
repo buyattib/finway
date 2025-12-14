@@ -122,10 +122,7 @@ if (DEVELOPMENT) {
 	})
 	app.use(
 		morgan('tiny', {
-			skip: (req, res) =>
-				res.statusCode === 200 &&
-				(req.url?.startsWith('/resources/images') ||
-					req.url?.startsWith('/resources/healthcheck')),
+			skip: (req, res) => res.statusCode === 200,
 		}),
 	)
 

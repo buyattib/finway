@@ -60,6 +60,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const accountId = await createUserAccount(db, user.id, body)
+
 	return redirect(`/app/accounts/${accountId}`)
 }
 
