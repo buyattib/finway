@@ -21,7 +21,7 @@ export function meta() {
 		},
 		{
 			name: 'description',
-			content: 'Create accounts to track your expenses',
+			content: 'Create accounts to track your transactions',
 		},
 	]
 }

@@ -24,5 +24,14 @@ export default [
 			route(':accountId/edit', 'routes/accounts/edit.tsx'),
 			route('create', 'routes/accounts/create.tsx'),
 		]),
+
+		// transactions
+		...prefix('transactions', [index('routes/transactions/index.tsx')]),
+
+		// transaction categories
+		...prefix('transaction-categories', [
+			index('routes/transaction-categories/index.tsx'),
+			route('create', 'routes/transaction-categories/create.tsx'),
+		]),
 	]),
 ] satisfies RouteConfig

@@ -4,12 +4,7 @@ import {
 	useNavigation,
 	type MiddlewareFunction,
 } from 'react-router'
-import {
-	ArrowRightLeftIcon,
-	BanknoteArrowDownIcon,
-	CalendarSyncIcon,
-	WalletIcon,
-} from 'lucide-react'
+import { ArrowRightLeftIcon, ListIcon, WalletIcon } from 'lucide-react'
 
 import type { Route } from './+types/private'
 
@@ -33,9 +28,6 @@ import {
 	SidebarTrigger,
 	useSidebar,
 } from '~/components/ui/sidebar'
-import { Spinner } from '~/components/ui/spinner'
-
-// NOTE: could refresh the session here if user is authenticated and has an expiration date
 
 export const middleware: MiddlewareFunction[] = [authMiddleware]
 
@@ -50,21 +42,16 @@ const links = [
 		labelKey: 'Accounts',
 		icon: <WalletIcon />,
 	},
-	// {
-	// 	to: '/app/transfers',
-	// 	labelKey: 'Transfers',
-	// 	icon: <ArrowRightLeftIcon />,
-	// },
-	// {
-	// 	to: '/app/transactions',
-	// 	labelKey: 'Transactions',
-	// 	icon: <BanknoteArrowDownIcon />,
-	// },
-	// {
-	// 	to: '/app/recurring-transactions',
-	// 	labelKey: 'Recurring Transactions',
-	// 	icon: <CalendarSyncIcon />,
-	// },
+	{
+		to: '/app/transaction-categories',
+		labelKey: 'Transaction Categories',
+		icon: <ListIcon />,
+	},
+	{
+		to: '/app/transactions',
+		labelKey: 'Transactions',
+		icon: <ArrowRightLeftIcon />,
+	},
 ]
 
 export default function PrivateLayout({

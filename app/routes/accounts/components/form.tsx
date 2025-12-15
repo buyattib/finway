@@ -90,7 +90,6 @@ export function AccountForm({
 					{...getFormProps(form)}
 					method='post'
 					className='flex flex-col gap-2'
-					encType='multipart/form-data'
 				>
 					{/* Have first button to be submit */}
 					<button type='submit' className='hidden' />
