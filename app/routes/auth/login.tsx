@@ -77,25 +77,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 		where: (user, { eq }) => eq(user.email, email),
 	})
 
-	const expiration = new Date(Date.now() - magicLinkExpirationTime)
-	if (
-		user &&
-		user.lastLoginEmail &&
-		new Date(user.lastLoginEmail) >= expiration
-	) {
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'success',
-			title: 'Welcome back!',
-			description:
-				'The link that we sent you in the last email is still valid',
-		})
-
-		return data(
-			{ submission: submission.reply({ resetForm: true }) },
-			{ headers: toastHeaders },
-		)
-	}
-
 	const magicLink = createMagicLink({
 		emailAddress: email,
 		domainUrl: getDomainUrl(request),
@@ -127,13 +108,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 			{ submission: submission.reply() },
 			{ headers: toastHeaders },
 		)
-	}
-
-	if (user) {
-		await db
-			.update(schema.user)
-			.set({ lastLoginEmail: new Date().toISOString() })
-			.where(eq(schema.user.id, user.id))
 	}
 
 	const toastHeaders = await createToastHeaders(request, {
