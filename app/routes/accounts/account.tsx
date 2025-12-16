@@ -1,12 +1,17 @@
 import { Link, Form, data, useNavigation } from 'react-router'
 import { SquarePenIcon, TrashIcon } from 'lucide-react'
-import { useForm, getFormProps } from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
+import { parseWithZod } from '@conform-to/zod/v4'
+import { eq } from 'drizzle-orm'
 import type { Route } from './+types/account'
 
 import { dbContext, userContext } from '~/lib/context'
+import { account as accountSchema } from '~/database/schema'
 import { formatNumber } from '~/lib/utils'
-import { redirectWithToast } from '~/utils-server/toast.server'
+import type { DB } from '~/lib/types'
+import {
+	createToastHeaders,
+	redirectWithToast,
+} from '~/utils-server/toast.server'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -15,7 +20,6 @@ import { Button } from '~/components/ui/button'
 import { GeneralErrorBoundary } from '~/components/general-error-boundary'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
-import { ErrorList } from '~/components/forms'
 import {
 	Tooltip,
 	TooltipContent,
@@ -23,8 +27,8 @@ import {
 } from '~/components/ui/tooltip'
 
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
-import { getAccount, deleteAccount } from './lib/queries'
 import { DeleteFormSchema } from './lib/schemas'
+import { getAccount } from './lib/queries'
 
 export async function loader({
 	context,
@@ -39,7 +43,15 @@ export async function loader({
 	}
 
 	const { ownerId, ...accountData } = account
-	return { account: accountData }
+	return {
+		account: {
+			...accountData,
+			wallets: account.wallets.map(w => ({
+				...w,
+				balance: String(w.balance / 100),
+			})),
+		},
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -47,47 +59,35 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
 
 	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		schema: DeleteFormSchema,
-		async: true,
-	})
+	const submission = parseWithZod(formData, { schema: DeleteFormSchema })
 
 	if (submission.status !== 'success') {
-		return data({ submission: submission.reply() }, { status: 422 })
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: 'Could not delete account',
+			description: 'Please try again',
+		})
+
+		return data({}, { headers: toastHeaders })
 	}
 
-	const { accountId, intent } = submission.value
-
-	const account = await getAccount(db, accountId)
+	const account = await getAccount(db, submission.value.accountId)
 	if (!account || account.ownerId !== user.id) {
 		throw new Response('Account not found', { status: 404 })
 	}
 
-	if (intent !== 'delete') {
-		return data(
-			{
-				submission: submission.reply({
-					formErrors: ['Invalid intent'],
-				}),
-			},
-			{ status: 422 },
-		)
-	}
-
-	await deleteAccount(db, accountId)
+	await db.delete(accountSchema).where(eq(accountSchema.id, account.id))
 
 	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',
-		title: 'Success!',
-		description: 'Account deleted',
+		title: `Account ${account.name} deleted`,
 	})
 }
 
 export default function AccountDetails({
 	loaderData: { account },
-	actionData,
 }: Route.ComponentProps) {
-	const { id, name, description, accountType, subAccounts } = account
+	const { id, name, description, accountType, wallets } = account
 
 	const navigation = useNavigation()
 	const isDeleting =
@@ -95,18 +95,8 @@ export default function AccountDetails({
 		navigation.formAction === `/app/accounts/${id}` &&
 		navigation.state === 'submitting'
 
-	const [form] = useForm({
-		id: 'delete-account-form',
-		lastResult: actionData?.submission,
-		constraint: getZodConstraint(DeleteFormSchema),
-		onValidate({ formData }) {
-			return parseWithZod(formData, { schema: DeleteFormSchema })
-		},
-	})
-
 	return (
 		<div className='flex flex-col gap-6'>
-			<ErrorList id='delete-account-form-error' errors={form.errors} />
 			<div className='flex flex-col gap-4'>
 				<div className='flex items-center gap-4'>
 					<AccountTypeIcon accountType={accountType} />
@@ -125,7 +115,7 @@ export default function AccountDetails({
 							</Link>
 						</Button>
 						<Tooltip>
-							<Form method='post' {...getFormProps(form)}>
+							<Form method='post'>
 								<input
 									type='hidden'
 									name='accountId'
@@ -166,11 +156,11 @@ export default function AccountDetails({
 					Currency balances
 				</Title>
 				<ul className='flex flex-col gap-2' aria-labelledby={id}>
-					{subAccounts.map(({ id: subAccId, balance, currency }) => {
+					{wallets.map(({ id: wId, balance, currency }) => {
 						const { symbol, label } = CURRENCY_DISPLAY[currency]
 						return (
 							<li
-								key={subAccId}
+								key={wId}
 								className='flex items-center justify-between gap-4 p-4 border border-muted rounded-md'
 							>
 								<Text className='flex items-center gap-2'>

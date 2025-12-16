@@ -7,7 +7,7 @@ import {
 } from '@conform-to/react'
 import { PlusCircleIcon } from 'lucide-react'
 
-import { cn, formatNumberWithoutCommas, isValueNumeric } from '~/lib/utils'
+import { cn, removeCommas, isValueNumeric } from '~/lib/utils'
 
 import { Label } from './ui/label'
 import { Input } from './ui/input'
@@ -148,7 +148,7 @@ export function CheckboxField({
 				<Label
 					htmlFor={id}
 					aria-invalid={errorId ? true : undefined}
-					className='self-center text-sm text-muted-foreground'
+					className='self-center text-sm text-muted-foreground hover:cursor-pointer'
 				>
 					{label}
 				</Label>
@@ -284,9 +284,7 @@ export function NumberField({
 				{...props}
 				value={formatNumberWithCommas(control.value)}
 				onChange={e => {
-					const value = formatNumberWithoutCommas(
-						e.target.value,
-					).trim()
+					const value = removeCommas(e.target.value).trim()
 
 					if (!isValueNumeric(value)) return
 					if (

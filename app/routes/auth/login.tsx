@@ -4,11 +4,9 @@ import { safeRedirect } from 'remix-utils/safe-redirect'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { z } from 'zod'
-import { eq } from 'drizzle-orm'
 
 import type { Route } from './+types/login'
 
-import * as schema from '~/database/schema'
 import { dbContext } from '~/lib/context'
 import { checkHoneypot } from '~/utils-server/honeypot.server'
 import { createToastHeaders } from '~/utils-server/toast.server'
@@ -29,10 +27,7 @@ import { CheckboxField, ErrorList, TextField } from '~/components/forms'
 
 import { LoginEmail } from '~/emails/login'
 
-import {
-	createMagicLink,
-	magicLinkExpirationTime,
-} from './lib/magic-link.server'
+import { createMagicLink } from './lib/magic-link.server'
 
 const LoginFormSchema = z.object({
 	email: z
@@ -154,7 +149,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
 					<HoneypotInputs label='Please leave this field blank' />
 
 					<TextField
-						label={'Email'}
+						label='Email'
 						field={fields.email}
 						autoFocus
 						autoComplete='email'
@@ -163,7 +158,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
 					/>
 
 					<CheckboxField
-						label={'Remember me'}
+						label='Remember me'
 						field={fields.remember}
 					/>
 

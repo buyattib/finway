@@ -5,8 +5,8 @@ import { z } from 'zod'
 export const ToastSessionSchema = z.object({
 	type: z.enum(['success', 'message', 'error', 'info', 'warning']),
 	title: z.string(),
-	description: z.string(),
-	id: z.optional(z.string()),
+	description: z.string().optional(),
+	id: z.string().optional(),
 })
 
 export type ToastSession = z.infer<typeof ToastSessionSchema>

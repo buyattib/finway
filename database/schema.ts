@@ -59,8 +59,8 @@ export const account = sqliteTable(
 	}),
 )
 
-export const subAccount = sqliteTable(
-	'sub_accounts',
+export const wallet = sqliteTable(
+	'wallets',
 	{
 		createdAt: base.createdAt,
 		updatedAt: base.updatedAt,
@@ -72,8 +72,8 @@ export const subAccount = sqliteTable(
 		accountId: text().notNull(),
 	},
 	table => ({
-		subAccountsAccountIdFk: foreignKey({
-			name: 'sub_accounts_accountId_fk',
+		walletAccountIdFk: foreignKey({
+			name: 'wallets_accountId_fk',
 			columns: [table.accountId],
 			foreignColumns: [account.id],
 		}).onDelete('cascade'),
@@ -115,7 +115,7 @@ export const transaction = sqliteTable(
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 
 		ownerId: text().notNull(),
-		subAccountId: text().notNull(),
+		walletId: text().notNull(),
 		transactionCategoryId: text().notNull(),
 	},
 	table => ({
@@ -129,10 +129,10 @@ export const transaction = sqliteTable(
 			columns: [table.transactionCategoryId],
 			foreignColumns: [transactionCategory.id],
 		}).onDelete('set null'),
-		transactionSubAccountIdFk: foreignKey({
+		transactionWalletIdFk: foreignKey({
 			name: 'transaction_subAccountId_fk',
-			columns: [table.subAccountId],
-			foreignColumns: [subAccount.id],
+			columns: [table.walletId],
+			foreignColumns: [wallet.id],
 		}).onDelete('cascade'),
 	}),
 )
@@ -149,12 +149,12 @@ export const accountRelations = relations(account, ({ one, many }) => ({
 		fields: [account.ownerId],
 		references: [user.id],
 	}),
-	subAccounts: many(subAccount),
+	wallets: many(wallet),
 }))
 
-export const subAccountRelations = relations(subAccount, ({ one }) => ({
+export const walletRelations = relations(wallet, ({ one }) => ({
 	account: one(account, {
-		fields: [subAccount.accountId],
+		fields: [wallet.accountId],
 		references: [account.id],
 	}),
 }))
@@ -164,9 +164,9 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
 		fields: [transaction.ownerId],
 		references: [user.id],
 	}),
-	subAccount: one(subAccount, {
-		fields: [transaction.subAccountId],
-		references: [subAccount.id],
+	wallet: one(wallet, {
+		fields: [transaction.walletId],
+		references: [wallet.id],
 	}),
 	transactionCategory: one(transactionCategory, {
 		fields: [transaction.transactionCategoryId],

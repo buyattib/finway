@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
 
-export function formatNumberWithoutCommas(value: string) {
+export function removeCommas(value: string) {
 	return value.replace(/,/g, '')
 }
 
