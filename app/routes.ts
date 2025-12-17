@@ -26,7 +26,10 @@ export default [
 		]),
 
 		// transactions
-		...prefix('transactions', [index('routes/transactions/index.tsx')]),
+		...prefix('transactions', [
+			index('routes/transactions/index.tsx'),
+			route('create', 'routes/transactions/create.tsx'),
+		]),
 
 		// transaction categories
 		...prefix('transaction-categories', [

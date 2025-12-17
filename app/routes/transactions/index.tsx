@@ -4,26 +4,24 @@ import { PlusIcon } from 'lucide-react'
 import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
-import { formatNumber } from '~/lib/utils'
+import { cn, formatNumber } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
-import { AccountTypeIcon } from '~/components/account-type-icon'
-import { CurrencyIcon } from '~/components/currency-icon'
 import {
 	Table,
 	TableBody,
 	TableCaption,
 	TableCell,
-	TableFooter,
 	TableHead,
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
 
-// import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
-import { getUserTransactions } from './lib/queries'
+import { CURRENCY_DISPLAY } from '~/routes/accounts/lib/constants'
+
+import { TRANSACTION_TYPE_DISPLAY } from './lib/constants'
 
 export function meta() {
 	return [
@@ -44,13 +42,36 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const transactions = await getUserTransactions(db, user.id)
+	const result = await db.query.transaction.findMany({
+		orderBy: (transaction, { desc }) => [desc(transaction.date)],
+		where: (transaction, { eq }) => eq(transaction.ownerId, user.id),
+		columns: { id: true, date: true, amount: true, type: true },
+		with: {
+			wallet: {
+				columns: { id: true, currency: true },
+				with: {
+					account: {
+						columns: { id: true, name: true },
+					},
+				},
+			},
+			transactionCategory: {
+				columns: { id: true, name: true },
+			},
+		},
+	})
+
+	const transactions = result.map(tx => ({
+		...tx,
+		amount: String(tx.amount / 100),
+	}))
+
 	return { transactions }
 }
 
-export default function Transactions({ loaderData }: Route.ComponentProps) {
-	const { transactions } = loaderData
-
+export default function Transactions({
+	loaderData: { transactions },
+}: Route.ComponentProps) {
 	return (
 		<section
 			className='flex flex-col gap-4'
@@ -72,38 +93,59 @@ export default function Transactions({ loaderData }: Route.ComponentProps) {
 				{transactions.length === 0 && (
 					<TableCaption>
 						<Text size='md' weight='medium' alignment='center'>
-							You have not created any transactions yet.
+							You have not created any transactions yet. Start
+							creating them{' '}
+							<Link to='create' className='text-primary'>
+								here
+							</Link>
 						</Text>
 					</TableCaption>
 				)}
-				<TableHeader>
-					<TableRow>
-						<TableHead>Date</TableHead>
-						<TableHead>Type</TableHead>
-						<TableHead>Amount</TableHead>
-						<TableHead>Account</TableHead>
-						<TableHead>Category</TableHead>
-						<TableHead></TableHead>
-					</TableRow>
-				</TableHeader>
+				{transactions.length !== 0 && (
+					<TableHeader>
+						<TableRow>
+							<TableHead>Date</TableHead>
+							<TableHead>Type</TableHead>
+							<TableHead>Amount</TableHead>
+							<TableHead>Account</TableHead>
+							<TableHead>Category</TableHead>
+							<TableHead></TableHead>
+						</TableRow>
+					</TableHeader>
+				)}
 				<TableBody>
-					{transactions.map(tx => {
-						return (
-							<TableRow key={tx.id}>
-								<TableCell>{tx.date}</TableCell>
-								<TableCell>{tx.type}</TableCell>
-								<TableCell>
-									{tx.subAccount.currency} {tx.amount}
-								</TableCell>
-								<TableCell>
-									{tx.subAccount.account.name}
-								</TableCell>
-								<TableCell>
-									{tx.transactionCategory.name}
-								</TableCell>
-							</TableRow>
-						)
-					})}
+					{transactions.map(
+						({
+							id,
+							date,
+							type,
+							amount,
+							wallet,
+							transactionCategory,
+						}) => {
+							const { symbol } = CURRENCY_DISPLAY[wallet.currency]
+							const { label: typeLabel, color: typeColor } =
+								TRANSACTION_TYPE_DISPLAY[type]
+
+							return (
+								<TableRow key={id}>
+									<TableCell>{date}</TableCell>
+									<TableCell
+										className={cn(`text-${typeColor}`)}
+									>
+										{typeLabel}
+									</TableCell>
+									<TableCell>
+										{symbol} {formatNumber(amount)}
+									</TableCell>
+									<TableCell>{wallet.account.name}</TableCell>
+									<TableCell>
+										{transactionCategory.name}
+									</TableCell>
+								</TableRow>
+							)
+						},
+					)}
 				</TableBody>
 			</Table>
 		</section>

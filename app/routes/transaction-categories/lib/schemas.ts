@@ -6,6 +6,8 @@ export const CreateTransactionCategoryFormSchema = z.object({
 		.string()
 		.default('')
 		.transform(value => value?.trim()),
+
+	redirectTo: z.string().default(''),
 })
 
 export const DeleteTransactionCategoryFormSchema = z.object({

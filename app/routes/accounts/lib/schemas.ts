@@ -42,7 +42,9 @@ const BaseAccountFormSchema = z.object({
 		}, 'An account cannot have duplicate currencies'),
 })
 
-export const CreateAccountFormSchema = BaseAccountFormSchema.extend({})
+export const CreateAccountFormSchema = BaseAccountFormSchema.extend({
+	redirectTo: z.string().default(''),
+})
 export const EditAccountFormSchema = BaseAccountFormSchema.extend({
 	id: z.string(),
 })

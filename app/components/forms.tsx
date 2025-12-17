@@ -1,13 +1,13 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import {
 	useInputControl,
 	getInputProps,
 	getSelectProps,
 	type FieldMetadata,
 } from '@conform-to/react'
-import { PlusCircleIcon } from 'lucide-react'
+import { PlusCircleIcon, CalendarIcon } from 'lucide-react'
 
-import { cn, removeCommas, isValueNumeric } from '~/lib/utils'
+import { cn, removeCommas, isValueNumeric, formatDate } from '~/lib/utils'
 
 import { Label } from './ui/label'
 import { Input } from './ui/input'
@@ -20,6 +20,9 @@ import {
 	SelectValue,
 	type SelectTriggerProps,
 } from './ui/select'
+import { Button } from './ui/button'
+import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'
+import { Calendar } from './ui/calendar'
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined
 
@@ -346,6 +349,87 @@ export function UploadField({
 					<ErrorList id={errorId} errors={errors} />
 				</div>
 			) : null}
+		</div>
+	)
+}
+
+export function DateField({
+	field,
+	label,
+	placeholder,
+	className,
+	disabled,
+}: {
+	field: FieldMetadata<string>
+	label?: string
+	placeholder?: string
+	className?: string
+	disabled?: boolean
+}) {
+	const [open, setOpen] = useState(false)
+
+	const errors = field.errors as ListOfErrors
+	const fieldProps = getInputProps(field, { type: 'date' })
+
+	const errorId = errors?.length ? `${fieldProps.id}-error` : undefined
+
+	const control = useInputControl({
+		key: fieldProps.key,
+		name: fieldProps.name,
+		formId: fieldProps.form,
+		initialValue: fieldProps.defaultValue,
+	})
+
+	const dateValue = control.value ? new Date(control.value) : undefined
+
+	return (
+		<div className={cn('flex flex-col gap-1 w-full', className)}>
+			{label && (
+				<Label
+					htmlFor={fieldProps.id}
+					aria-invalid={errorId ? true : undefined}
+				>
+					{label}
+				</Label>
+			)}
+			<Popover open={open} onOpenChange={setOpen}>
+				<PopoverTrigger asChild>
+					<Button
+						id={fieldProps.id}
+						name={field.name}
+						value={control.value}
+						disabled={disabled}
+						aria-disabled={disabled}
+						data-empty={!control.value}
+						aria-invalid={errorId ? true : undefined}
+						aria-describedby={errorId}
+						variant='outline'
+						className={cn('justify-start', {
+							'ring-destructive/20 dark:ring-destructive/40 border-destructive':
+								!!errorId,
+							'text-muted-foreground': !control.value,
+						})}
+					>
+						<CalendarIcon />
+						{dateValue ? formatDate(dateValue) : placeholder}
+					</Button>
+				</PopoverTrigger>
+				<PopoverContent className='w-auto p-0'>
+					<Calendar
+						mode='single'
+						selected={dateValue}
+						onSelect={date => {
+							if (!date) return
+							control.change(date.toISOString())
+							setOpen(false)
+						}}
+					/>
+				</PopoverContent>
+			</Popover>
+
+			<div className='min-h-6 py-1 px-1'>
+				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+			</div>
 		</div>
 	)
 }

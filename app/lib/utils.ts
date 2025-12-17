@@ -25,3 +25,15 @@ export function formatNumber(
 	})
 	return formatter.format(Number(num))
 }
+
+export function formatDate(
+	date: Date,
+	config: Intl.DateTimeFormatOptions = {},
+) {
+	return date.toLocaleDateString('en', {
+		day: '2-digit',
+		month: 'short',
+		year: 'numeric',
+		...config,
+	})
+}

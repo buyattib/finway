@@ -1,8 +1,9 @@
 import { and, eq } from 'drizzle-orm'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFieldsetProps, getFormProps, useForm } from '@conform-to/react'
-import { data, Link, Form, useNavigation } from 'react-router'
+import { data, Link, Form, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon, PlusIcon, XIcon } from 'lucide-react'
+import { safeRedirect } from 'remix-utils/safe-redirect'
 import type { Route } from './+types/create'
 
 import {
@@ -40,6 +41,28 @@ import {
 } from './lib/constants'
 import { CreateAccountFormSchema } from './lib/schemas'
 
+export function meta() {
+	return [
+		{ title: 'Create an Account | Finhub' },
+
+		{
+			property: 'og:title',
+			content: 'Create an Account | Finhub',
+		},
+		{
+			name: 'description',
+			content: 'Create an account to track your transactions',
+		},
+	]
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+	const url = new URL(request.url)
+	const redirectTo = url.searchParams.get('redirectTo') || ''
+
+	return { redirectTo }
+}
+
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
@@ -76,7 +99,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({ submission: submission.reply() }, { status: 422 })
 	}
 
-	const { wallets: walletsData, ...accountData } = submission.value
+	const {
+		redirectTo,
+		wallets: walletsData,
+		...accountData
+	} = submission.value
 
 	const accountId = await db.transaction(async tx => {
 		const [{ id: accountId }] = await tx
@@ -91,16 +118,24 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return accountId
 	})
 
-	return await redirectWithToast(`/app/accounts/${accountId}`, request, {
-		type: 'success',
-		title: 'Account created successfully',
-	})
+	return await redirectWithToast(
+		safeRedirect(redirectTo || `/app/accounts/${accountId}`),
+		request,
+		{
+			type: 'success',
+			title: 'Account created successfully',
+		},
+	)
 }
 
-export default function CreateAccount({ actionData }: Route.ComponentProps) {
+export default function CreateAccount({
+	actionData,
+	loaderData: { redirectTo },
+}: Route.ComponentProps) {
+	const location = useLocation()
 	const navigation = useNavigation()
 	const isSubmitting =
-		navigation.formAction === '/app/accounts/create' &&
+		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
 	const [form, fields] = useForm({
@@ -127,199 +162,158 @@ export default function CreateAccount({ actionData }: Route.ComponentProps) {
 	const wallets = fields.wallets.getFieldList()
 
 	return (
-		<>
-			<Button asChild variant='link'>
-				<Link to='..' relative='path'>
-					<ArrowLeftIcon />
-					Back
-				</Link>
-			</Button>
-			<div className='flex justify-center'>
-				<Card className='md:max-w-2xl w-full'>
-					<CardHeader>
-						<CardTitle>Create an account</CardTitle>
-						<CardDescription>
-							Accounts represent your real world accounts where
-							your balance is hold. They are used to associate
-							transactions and track your finances.
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<Form
-							{...getFormProps(form)}
-							method='post'
-							className='flex flex-col gap-2'
-						>
-							{/* Have first button to be submit */}
-							<button type='submit' className='hidden' />
+		<Card className='md:max-w-2xl w-full mx-auto'>
+			<CardHeader>
+				<div className='flex items-center gap-4'>
+					<Button asChild variant='link' width='fit' size='icon'>
+						<Link to='..' relative='path'>
+							<ArrowLeftIcon />
+						</Link>
+					</Button>
+					<CardTitle>Create an account</CardTitle>
+				</div>
+				<CardDescription>
+					Accounts represent your real world accounts where your
+					balance is hold. They are used to associate transactions and
+					track your finances.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Form
+					{...getFormProps(form)}
+					method='post'
+					className='flex flex-col gap-1'
+				>
+					{/* Have first button to be submit */}
+					<button type='submit' className='hidden' />
 
-							<ErrorList
-								size='md'
-								errors={form.errors}
-								id={form.errorId}
-							/>
+					<input type='hidden' name='redirectTo' value={redirectTo} />
 
-							<TextField
-								autoFocus
-								label='Name'
-								field={fields.name}
-							/>
-							<TextField
-								label='Description'
-								field={fields.description}
-							/>
-							<SelectField
-								label='Account Type'
-								field={fields.accountType}
-								placeholder='Select an option'
-								items={ACCOUNT_TYPES.map(i => ({
-									icon: (
-										<AccountTypeIcon
-											size='sm'
-											accountType={i}
-										/>
-									),
-									value: i,
-									label: ACCOUNT_TYPE_LABEL[i],
-								}))}
-							/>
+					<ErrorList
+						size='md'
+						errors={form.errors}
+						id={form.errorId}
+					/>
 
-							<fieldset
-								className='flex flex-col gap-4'
-								{...getFieldsetProps(fields.wallets)}
+					<TextField autoFocus label='Name' field={fields.name} />
+					<TextField
+						label='Description (Optional)'
+						field={fields.description}
+					/>
+					<SelectField
+						label='Account Type'
+						field={fields.accountType}
+						placeholder='Select an option'
+						items={ACCOUNT_TYPES.map(i => ({
+							icon: <AccountTypeIcon size='sm' accountType={i} />,
+							value: i,
+							label: ACCOUNT_TYPE_LABEL[i],
+						}))}
+					/>
+
+					<fieldset
+						className='flex flex-col gap-4'
+						{...getFieldsetProps(fields.wallets)}
+					>
+						<div className='flex items-start justify-between'>
+							<Title level='h4'>Supported Currencies</Title>
+							<Button
+								variant='outline'
+								disabled={wallets.length === CURRENCIES.length}
+								{...form.insert.getButtonProps({
+									name: fields.wallets.name,
+									defaultValue: {
+										currency: '',
+										balance: '0',
+									},
+								})}
 							>
-								<div className='flex items-start justify-between'>
-									<Title level='h4'>
-										Supported Currencies
-									</Title>
-									<Button
-										variant='outline'
-										disabled={
-											wallets.length === CURRENCIES.length
-										}
-										{...form.insert.getButtonProps({
-											name: fields.wallets.name,
-											defaultValue: {
-												currency: '',
-												balance: '0',
-											},
-										})}
+								<span aria-hidden>
+									<PlusIcon />
+								</span>
+								<span className='sr-only'>Add Currency</span>
+							</Button>
+						</div>
+						<ErrorList
+							size='md'
+							id={fields.wallets.errorId}
+							errors={fields.wallets.errors}
+						/>
+						<ul className='flex flex-col gap-2'>
+							{wallets.map((w, index) => {
+								const { currency, balance } = w.getFieldset()
+
+								return (
+									<li
+										key={w.key}
+										className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 pt-6 border rounded-xl relative'
 									>
-										<span aria-hidden>
-											<PlusIcon />
-										</span>
-										<span className='sr-only'>
-											Add Currency
-										</span>
-									</Button>
-								</div>
-								<ErrorList
-									size='md'
-									id={fields.wallets.errorId}
-									errors={fields.wallets.errors}
-								/>
-								<ul className='flex flex-col gap-2'>
-									{wallets.map((w, index) => {
-										const { currency, balance } =
-											w.getFieldset()
+										<SelectField
+											label='Currency'
+											field={currency}
+											placeholder='Select currency'
+											items={CURRENCIES.map(i => ({
+												value: i,
+												label: CURRENCY_DISPLAY[i]
+													.label,
+												icon: (
+													<CurrencyIcon
+														currency={i}
+														size='sm'
+													/>
+												),
+											}))}
+										/>
 
-										return (
-											<li
-												key={w.key}
-												className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 pt-6 border rounded-xl relative'
+										<NumberField
+											label='Balance'
+											placeholder='Current balance'
+											field={balance}
+										/>
+
+										<div className='absolute right-2 top-2'>
+											<Button
+												variant='destructive-outline'
+												size='icon-sm'
+												disabled={wallets.length === 1}
+												{...form.remove.getButtonProps({
+													name: fields.wallets.name,
+													index,
+												})}
 											>
-												<SelectField
-													label='Currency'
-													field={currency}
-													placeholder='Select currency'
-													items={CURRENCIES.map(
-														i => ({
-															value: i,
-															label: CURRENCY_DISPLAY[
-																i
-															].label,
-															icon: (
-																<CurrencyIcon
-																	currency={i}
-																	size='sm'
-																/>
-															),
-														}),
-													)}
-												/>
-
-												<NumberField
-													label='Balance'
-													placeholder='Current balance'
-													field={balance}
-												/>
-
-												<div className='absolute right-2 top-2'>
-													<Button
-														variant='destructive-outline'
-														size='icon-sm'
-														disabled={
-															wallets.length === 1
-														}
-														{...form.remove.getButtonProps(
-															{
-																name: fields
-																	.wallets
-																	.name,
-																index,
-															},
-														)}
-													>
-														<span aria-hidden>
-															<XIcon />
-														</span>
-														<span className='sr-only'>
-															Remove currency
-														</span>
-													</Button>
-												</div>
-											</li>
-										)
-									})}
-								</ul>
-							</fieldset>
-						</Form>
-					</CardContent>
-					<CardFooter className='gap-2'>
-						<Button
-							width='full'
-							variant='outline'
-							{...form.reset.getButtonProps()}
-						>
-							Reset
-						</Button>
-						<Button
-							width='full'
-							form={form.id}
-							type='submit'
-							disabled={isSubmitting}
-							loading={isSubmitting}
-						>
-							Create
-						</Button>
-					</CardFooter>
-				</Card>
-			</div>
-		</>
+												<span aria-hidden>
+													<XIcon />
+												</span>
+												<span className='sr-only'>
+													Remove currency
+												</span>
+											</Button>
+										</div>
+									</li>
+								)
+							})}
+						</ul>
+					</fieldset>
+				</Form>
+			</CardContent>
+			<CardFooter className='gap-2'>
+				<Button
+					width='full'
+					variant='outline'
+					{...form.reset.getButtonProps()}
+				>
+					Reset
+				</Button>
+				<Button
+					width='full'
+					form={form.id}
+					type='submit'
+					disabled={isSubmitting}
+					loading={isSubmitting}
+				>
+					Create
+				</Button>
+			</CardFooter>
+		</Card>
 	)
-}
-
-export function meta() {
-	return [
-		{ title: 'Create an Account | Finhub' },
-
-		{
-			property: 'og:title',
-			content: 'Create an Account | Finhub',
-		},
-		{
-			name: 'description',
-			content: 'Create an account to track your transactions',
-		},
-	]
 }
