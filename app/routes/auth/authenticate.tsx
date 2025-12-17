@@ -2,7 +2,7 @@ import { safeRedirect } from 'remix-utils/safe-redirect'
 
 import type { Route } from './+types/authenticate'
 
-import * as schema from '~/database/schema'
+import { user as userTable } from '~/database/schema'
 import { dbContext } from '~/lib/context'
 import {
 	createAuthSessionHeaders,
@@ -42,9 +42,9 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 	if (!user) {
 		const result = await db
-			.insert(schema.user)
+			.insert(userTable)
 			.values({ email })
-			.returning({ id: schema.user.id, email: schema.user.email })
+			.returning({ id: userTable.id, email: userTable.email })
 
 		user = result[0]
 	}

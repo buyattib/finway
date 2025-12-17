@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const TransactionCategoryFormSchema = z.object({
+export const CreateTransactionCategoryFormSchema = z.object({
 	name: z.string('Name is required').transform(value => value.trim()),
 	description: z
 		.string()

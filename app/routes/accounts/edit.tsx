@@ -12,8 +12,8 @@ import { ArrowLeftIcon, PlusIcon, XIcon } from 'lucide-react'
 import type { Route } from './+types/edit'
 
 import {
-	account as accountSchema,
-	wallet as walletSchema,
+	account as accountTable,
+	wallet as walletTable,
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { removeCommas } from '~/lib/utils'
@@ -94,12 +94,12 @@ export async function action({ context, request }: Route.ActionArgs) {
 			}
 
 			const existingAccountsCount = await db.$count(
-				accountSchema,
+				accountTable,
 				and(
-					eq(accountSchema.ownerId, user.id),
-					eq(accountSchema.name, data.name),
-					eq(accountSchema.accountType, data.accountType),
-					ne(accountSchema.id, data.id),
+					eq(accountTable.ownerId, user.id),
+					eq(accountTable.name, data.name),
+					eq(accountTable.accountType, data.accountType),
+					ne(accountTable.id, data.id),
 				),
 			)
 			if (existingAccountsCount > 0) {
@@ -112,8 +112,8 @@ export async function action({ context, request }: Route.ActionArgs) {
 		}).transform(async ({ wallets, ...accountData }) => {
 			const accountWallets = await db.query.wallet.findMany({
 				columns: { id: true },
-				where: (walletSchema, { eq }) =>
-					eq(walletSchema.accountId, accountData.id),
+				where: (walletTable, { eq }) =>
+					eq(walletTable.accountId, accountData.id),
 			})
 
 			const toCreate = wallets
@@ -143,17 +143,17 @@ export async function action({ context, request }: Route.ActionArgs) {
 
 	await db.transaction(async tx => {
 		await tx
-			.update(accountSchema)
+			.update(accountTable)
 			.set(accountData)
-			.where(eq(accountSchema.id, accountData.id))
+			.where(eq(accountTable.id, accountData.id))
 
 		if (toCreate.length > 0) {
-			await tx.insert(walletSchema).values(toCreate)
+			await tx.insert(walletTable).values(toCreate)
 		}
 		if (toDelete.length > 0) {
 			await tx
-				.delete(walletSchema)
-				.where(inArray(walletSchema.id, toDelete))
+				.delete(walletTable)
+				.where(inArray(walletTable.id, toDelete))
 		}
 	})
 

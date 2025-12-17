@@ -5,9 +5,8 @@ import { eq } from 'drizzle-orm'
 import type { Route } from './+types/account'
 
 import { dbContext, userContext } from '~/lib/context'
-import { account as accountSchema } from '~/database/schema'
+import { account as accountTable } from '~/database/schema'
 import { formatNumber } from '~/lib/utils'
-import type { DB } from '~/lib/types'
 import {
 	createToastHeaders,
 	redirectWithToast,
@@ -27,7 +26,7 @@ import {
 } from '~/components/ui/tooltip'
 
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
-import { DeleteFormSchema } from './lib/schemas'
+import { DeleteAccountFormSchema } from './lib/schemas'
 import { getAccount } from './lib/queries'
 
 export async function loader({
@@ -59,7 +58,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
 
 	const formData = await request.formData()
-	const submission = parseWithZod(formData, { schema: DeleteFormSchema })
+	const submission = parseWithZod(formData, {
+		schema: DeleteAccountFormSchema,
+	})
 
 	if (submission.status !== 'success') {
 		const toastHeaders = await createToastHeaders(request, {
@@ -76,7 +77,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		throw new Response('Account not found', { status: 404 })
 	}
 
-	await db.delete(accountSchema).where(eq(accountSchema.id, account.id))
+	await db.delete(accountTable).where(eq(accountTable.id, account.id))
 
 	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',

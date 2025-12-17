@@ -5,7 +5,10 @@ import { data, Link, Form, useNavigation } from 'react-router'
 import { ArrowLeftIcon, PlusIcon, XIcon } from 'lucide-react'
 import type { Route } from './+types/create'
 
-import { account, wallet } from '~/database/schema'
+import {
+	account as accountTable,
+	wallet as walletTable,
+} from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
@@ -46,11 +49,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 		async: true,
 		schema: CreateAccountFormSchema.superRefine(async (data, ctx) => {
 			const existingAccountsCount = await db.$count(
-				account,
+				accountTable,
 				and(
-					eq(account.ownerId, user.id),
-					eq(account.name, data.name),
-					eq(account.accountType, data.accountType),
+					eq(accountTable.ownerId, user.id),
+					eq(accountTable.name, data.name),
+					eq(accountTable.accountType, data.accountType),
 				),
 			)
 			if (existingAccountsCount > 0) {
@@ -77,12 +80,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const accountId = await db.transaction(async tx => {
 		const [{ id: accountId }] = await tx
-			.insert(account)
+			.insert(accountTable)
 			.values({ ...accountData, ownerId: user.id })
-			.returning({ id: account.id })
+			.returning({ id: accountTable.id })
 
 		await tx
-			.insert(wallet)
+			.insert(walletTable)
 			.values(walletsData.map(w => ({ ...w, accountId })))
 
 		return accountId

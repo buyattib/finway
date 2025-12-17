@@ -1,10 +1,13 @@
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm } from '@conform-to/react'
-import { data, redirect, Link, Form, useNavigation } from 'react-router'
+import { data, Link, Form, useNavigation } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
+import { eq, and } from 'drizzle-orm'
 import type { Route } from './+types/create'
 
 import { dbContext, userContext } from '~/lib/context'
+import { transactionCategory as transactionCategoryTable } from '~/database/schema'
+import { redirectWithToast } from '~/utils-server/toast.server'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -17,20 +20,20 @@ import {
 } from '~/components/ui/card'
 import { ErrorList, TextField } from '~/components/forms'
 
-import { TransactionCategoryFormSchema } from './lib/schemas'
-import { getExistingCategoriesCount, createUserCategory } from './lib/queries'
+import { CreateTransactionCategoryFormSchema } from './lib/schemas'
 
 export function meta() {
 	return [
-		{ title: 'Create Categories | Finhub' },
+		{ title: 'Create Transaction Categories | Finhub' },
 
 		{
 			property: 'og:title',
-			content: 'Create Categories | Finhub',
+			content: 'Create TransactionCategories | Finhub',
 		},
 		{
 			name: 'description',
-			content: 'Create categories to assign to your transactions',
+			content:
+				'Create transaction categories to assign to your transactions',
 		},
 	]
 }
@@ -41,8 +44,26 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
-		schema: TransactionCategoryFormSchema,
 		async: true,
+		schema: CreateTransactionCategoryFormSchema.superRefine(
+			async (data, ctx) => {
+				const existingTransactionCategoriesCount = await db.$count(
+					transactionCategoryTable,
+					and(
+						eq(transactionCategoryTable.ownerId, user.id),
+						eq(transactionCategoryTable.name, data.name),
+					),
+				)
+
+				if (existingTransactionCategoriesCount > 0) {
+					return ctx.addIssue({
+						code: 'custom',
+						message:
+							'A transaction category with this name already exists',
+					})
+				}
+			},
+		),
 	})
 
 	if (submission.status !== 'success') {
@@ -50,24 +71,16 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const body = submission.value
-	const existingCategories = await getExistingCategoriesCount(db, {
-		userId: user.id,
+	await db.insert(transactionCategoryTable).values({
 		name: body.name,
+		description: body.description,
+		ownerId: user.id,
 	})
-	if (existingCategories > 0) {
-		return data(
-			{
-				submission: submission.reply({
-					formErrors: ['A category with this name already exists'],
-				}),
-			},
-			{ status: 422 },
-		)
-	}
 
-	await createUserCategory(db, user.id, body)
-
-	return redirect(`/app/transaction-categories`)
+	return await redirectWithToast('/app/transaction-categories', request, {
+		type: 'success',
+		title: 'Transaction category created',
+	})
 }
 
 export default function CreateTransactionCategory({
@@ -75,22 +88,21 @@ export default function CreateTransactionCategory({
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
 	const isSubmitting =
-		(navigation.formAction === '/app/accounts/create' ||
-			navigation.formAction === '/app/accounts/edit') &&
+		navigation.formAction === '/app/transaction-categories/create' &&
 		navigation.state === 'submitting'
 
 	const [form, fields] = useForm({
 		lastResult: actionData?.submission,
 		id: 'create-transaction-category-form',
-		constraint: getZodConstraint(TransactionCategoryFormSchema),
 		shouldValidate: 'onInput',
 		defaultValue: {
 			name: '',
 			description: '',
 		},
+		constraint: getZodConstraint(CreateTransactionCategoryFormSchema),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: TransactionCategoryFormSchema,
+				schema: CreateTransactionCategoryFormSchema,
 			})
 		},
 	})
@@ -106,10 +118,10 @@ export default function CreateTransactionCategory({
 			<div className='flex justify-center'>
 				<Card className='md:max-w-2xl w-full'>
 					<CardHeader>
-						<CardTitle>Create a category</CardTitle>
+						<CardTitle>Create a transaction category</CardTitle>
 						<CardDescription>
 							Transaction categories are used to classify your
-							transactions
+							expenses and incomes
 						</CardDescription>
 					</CardHeader>
 					<CardContent>

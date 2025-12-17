@@ -80,7 +80,7 @@ export default function Accounts({
 				<div className='my-2'>
 					<Text size='md' weight='medium' alignment='center'>
 						You have not created any accounts yet. Start creating
-						accounts{' '}
+						them{' '}
 						<Link to='create' className='text-primary'>
 							here
 						</Link>

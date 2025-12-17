@@ -1,9 +1,11 @@
 import { Link, Form, useNavigation, data } from 'react-router'
 import { PlusIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
+import { eq } from 'drizzle-orm'
 
 import type { Route } from './+types'
 
+import { transactionCategory as transactionCategoryTable } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { createToastHeaders } from '~/utils-server/toast.server'
 
@@ -17,11 +19,6 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
-import {
-	getUserTransactionCategories,
-	getTransactionCategory,
-	deleteTransactionCategory,
-} from './lib/queries'
 import { DeleteTransactionCategoryFormSchema } from './lib/schemas'
 
 export function meta() {
@@ -43,10 +40,15 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const transactionCategories = await getUserTransactionCategories(
-		db,
-		user.id,
-	)
+	const transactionCategories = await db.query.transactionCategory.findMany({
+		orderBy: (transactionCategory, { desc }) => [
+			desc(transactionCategory.createdAt),
+		],
+		where: (transactionCategory, { eq }) =>
+			eq(transactionCategory.ownerId, user.id),
+		columns: { id: true, name: true, description: true },
+	})
+
 	return { transactionCategories }
 }
 
@@ -55,56 +57,50 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
 
 	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
+	const submission = parseWithZod(formData, {
 		schema: DeleteTransactionCategoryFormSchema,
-		async: true,
 	})
 
 	if (submission.status !== 'success') {
 		console.error(submission.reply())
 
 		const toastHeaders = await createToastHeaders(request, {
-			type: 'success',
-			title: 'Error',
-			description: 'There was an error deleting the category',
+			type: 'error',
+			title: 'Could not delete transaction category',
+			description: 'Please try again',
 		})
 		return data({}, { headers: toastHeaders })
 	}
 
-	const { transactionCategoryId, intent } = submission.value
+	const { transactionCategoryId } = submission.value
 
-	const transactionCategory = await getTransactionCategory(
-		db,
-		transactionCategoryId,
-	)
+	const transactionCategory = await db.query.transactionCategory.findFirst({
+		where: (transactionCategory, { eq }) =>
+			eq(transactionCategory.id, transactionCategoryId),
+		columns: { id: true, ownerId: true },
+	})
 	if (!transactionCategory || transactionCategory.ownerId !== user.id) {
-		throw new Response('Transaction category not found', { status: 404 })
-	}
-
-	if (intent !== 'delete') {
 		const toastHeaders = await createToastHeaders(request, {
-			type: 'success',
-			title: 'Error',
-			description: 'There was an error deleting the category',
+			type: 'error',
+			title: `Transaction category ${transactionCategoryId} not found`,
 		})
 		return data({}, { headers: toastHeaders })
 	}
 
-	await deleteTransactionCategory(db, transactionCategoryId)
+	await db
+		.delete(transactionCategoryTable)
+		.where(eq(transactionCategoryTable.id, transactionCategoryId))
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
 		title: 'Transaction category deleted',
-		description: '',
 	})
 	return data({}, { headers: toastHeaders })
 }
 
 export default function TransactionCategories({
-	loaderData,
+	loaderData: { transactionCategories },
 }: Route.ComponentProps) {
-	const { transactionCategories } = loaderData
-
 	const navigation = useNavigation()
 
 	const isDeleting =
@@ -135,7 +131,11 @@ export default function TransactionCategories({
 			{transactionCategories.length === 0 && (
 				<div className='my-2'>
 					<Text size='md' weight='medium' alignment='center'>
-						You have not created any transaction category yet.
+						You have not created any transaction category yet. Start
+						creating them{' '}
+						<Link to='create' className='text-primary'>
+							here
+						</Link>
 					</Text>
 				</div>
 			)}
@@ -144,7 +144,7 @@ export default function TransactionCategories({
 				{transactionCategories.map(({ id, name, description }) => (
 					<li
 						key={id}
-						className='flex items-center justify-between p-3 border rounded-md'
+						className='flex items-center justify-between px-4 md:px-6 py-1 border rounded-md'
 					>
 						<div className='flex items-center gap-2'>
 							<Text>{name}</Text>
@@ -163,7 +163,7 @@ export default function TransactionCategories({
 								<TooltipTrigger asChild>
 									<Button
 										size='icon'
-										variant='destructive-outline'
+										variant='destructive-ghost'
 										type='submit'
 										name='intent'
 										value='delete'

@@ -47,7 +47,7 @@ export const EditAccountFormSchema = BaseAccountFormSchema.extend({
 	id: z.string(),
 })
 
-export const DeleteFormSchema = z.object({
+export const DeleteAccountFormSchema = z.object({
 	accountId: z.string(),
 	intent: z.literal('delete'),
 })
