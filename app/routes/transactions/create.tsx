@@ -85,8 +85,14 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const initialAccountId = initialAccount?.id || ''
 	const initialWallet = walletsPerAccount[initialAccountId]?.[0]
 	const initialWalletId = initialWallet?.id || ''
+	const initialTransactionCategory = transactionCategories[0]
+	const initialTransactionCategoryId = initialTransactionCategory?.id || ''
 
 	return {
+		initialAccountId,
+		initialWalletId,
+		initialTransactionCategoryId,
+
 		accounts,
 		walletsPerAccount,
 		transactionCategories,
@@ -124,7 +130,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateTransaction({
-	loaderData: { accounts, walletsPerAccount, transactionCategories },
+	loaderData: {
+		initialAccountId,
+		initialWalletId,
+		initialTransactionCategoryId,
+
+		accounts,
+		walletsPerAccount,
+		transactionCategories,
+	},
 	actionData,
 }: Route.ComponentProps) {
 	const location = useLocation()
@@ -132,11 +146,6 @@ export default function CreateTransaction({
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
-
-	const initialAccount = accounts[0]
-	const initialAccountId = initialAccount?.id || ''
-	const initialWallet = walletsPerAccount[initialAccountId]?.[0]
-	const initialWalletId = initialWallet?.id || ''
 
 	const [form, fields] = useForm({
 		lastResult: actionData?.submission,
@@ -147,9 +156,9 @@ export default function CreateTransaction({
 			type: TRANSACTION_TYPE_EXPENSE,
 			amount: '0',
 			description: '',
-			accountId: '',
-			walletId: '',
-			transactionCategoryId: '',
+			accountId: initialAccountId,
+			walletId: initialWalletId,
+			transactionCategoryId: initialTransactionCategoryId,
 		},
 		constraint: getZodConstraint(CreateTransactionFormSchema),
 		onValidate({ formData }) {
