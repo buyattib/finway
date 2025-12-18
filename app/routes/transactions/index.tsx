@@ -4,7 +4,7 @@ import { PlusIcon } from 'lucide-react'
 import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
-import { cn, formatNumber } from '~/lib/utils'
+import { cn, formatDate, formatNumber } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -129,7 +129,9 @@ export default function Transactions({
 
 							return (
 								<TableRow key={id}>
-									<TableCell>{date}</TableCell>
+									<TableCell>
+										{formatDate(new Date(date))}
+									</TableCell>
 									<TableCell
 										className={cn(`text-${typeColor}`)}
 									>

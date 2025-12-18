@@ -17,7 +17,7 @@ import {
 	transaction as transactionTable,
 	wallet as walletTable,
 } from '~/database/schema'
-import { removeCommas } from '~/lib/utils'
+import { initializeDate, removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
 import { Button } from '~/components/ui/button'
@@ -229,7 +229,7 @@ export default function CreateTransaction({
 		id: 'create-transaction-form',
 		shouldValidate: 'onInput',
 		defaultValue: {
-			date: new Date().toISOString(),
+			date: initializeDate().toISOString(),
 			type: TRANSACTION_TYPE_EXPENSE,
 			amount: '0',
 			description: '',

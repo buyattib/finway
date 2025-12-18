@@ -26,6 +26,12 @@ export function formatNumber(
 	return formatter.format(Number(num))
 }
 
+export function initializeDate() {
+	const date = new Date()
+	date.setHours(0, 0, 0, 0)
+	return date
+}
+
 export function formatDate(
 	date: Date,
 	config: Intl.DateTimeFormatOptions = {},
