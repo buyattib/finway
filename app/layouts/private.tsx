@@ -43,14 +43,14 @@ const links = [
 		icon: <WalletIcon />,
 	},
 	{
-		to: '/app/transaction-categories',
-		labelKey: 'Transaction Categories',
-		icon: <ListIcon />,
-	},
-	{
 		to: '/app/transactions',
 		labelKey: 'Transactions',
 		icon: <ArrowRightLeftIcon />,
+	},
+	{
+		to: '/app/transaction-categories',
+		labelKey: 'Transaction Categories',
+		icon: <ListIcon />,
 	},
 ]
 

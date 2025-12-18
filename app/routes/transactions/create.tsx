@@ -9,9 +9,14 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm } from '@conform-to/react'
 import { ArrowLeftIcon } from 'lucide-react'
+import { eq } from 'drizzle-orm'
 import type { Route } from './+types/create'
 
 import { dbContext, userContext } from '~/lib/context'
+import {
+	transaction as transactionTable,
+	wallet as walletTable,
+} from '~/database/schema'
 import { removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
@@ -41,6 +46,7 @@ import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPES,
 	TRANSACTION_TYPE_DISPLAY,
+	TRANSACTION_TYPE_INCOME,
 } from './lib/constants'
 
 export async function loader({ context }: Route.LoaderArgs) {
@@ -106,27 +112,98 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
 		async: true,
-		schema: CreateTransactionFormSchema.superRefine(
-			async (data, ctx) => {},
-		).transform(data => data),
+		schema: CreateTransactionFormSchema.transform(data => ({
+			...data,
+			amount: Number(removeCommas(data.amount)) * 100,
+		})).superRefine(async (data, ctx) => {
+			const account = await db.query.account.findFirst({
+				where: (account, { eq }) => eq(account.id, data.accountId),
+				columns: { ownerId: true },
+				with: { wallets: { columns: { id: true, balance: true } } },
+			})
+			if (!account || account.ownerId !== user.id) {
+				return ctx.addIssue({
+					code: 'custom',
+					message: 'Account not found',
+					path: ['accountId'],
+				})
+			}
+
+			const selectedWallet = account.wallets.find(
+				w => w.id === data.walletId,
+			)
+			if (!selectedWallet) {
+				return ctx.addIssue({
+					code: 'custom',
+					message: 'Currency not found for selected account',
+					path: ['walletId'],
+				})
+			}
+
+			if (
+				data.type === TRANSACTION_TYPE_EXPENSE &&
+				selectedWallet.balance < data.amount
+			) {
+				return ctx.addIssue({
+					code: 'custom',
+					message:
+						'Insufficient balance in the selected currency account',
+					path: ['amount'],
+				})
+			}
+
+			const transactionCategory =
+				await db.query.transactionCategory.findFirst({
+					where: (transactionCategory, { eq }) =>
+						eq(transactionCategory.id, data.transactionCategoryId),
+					columns: { ownerId: true },
+				})
+			if (
+				!transactionCategory ||
+				transactionCategory.ownerId !== user.id
+			) {
+				return ctx.addIssue({
+					code: 'custom',
+					message: 'Transaction category not found',
+					path: ['transactionCategoryId'],
+				})
+			}
+		}),
 	})
 
 	if (submission.status !== 'success') {
 		return data({ submission: submission.reply() }, { status: 422 })
 	}
 
-	console.log(submission.value)
+	const { accountId, ...transactionData } = submission.value
 
-	const transactionId = ''
+	await db.transaction(async tx => {
+		const wallet = (await tx.query.wallet.findFirst({
+			where: (wallet, { eq }) => eq(wallet.id, transactionData.walletId),
+			columns: { balance: true },
+		}))!
 
-	return await redirectWithToast(
-		`/app/transactions/${transactionId}`,
-		request,
-		{
-			type: 'success',
-			title: 'Transaction created successfully',
-		},
-	)
+		await tx
+			.insert(transactionTable)
+			.values({ ...transactionData, ownerId: user.id })
+
+		const updatedBalance =
+			wallet.balance +
+			{
+				[TRANSACTION_TYPE_EXPENSE]: -transactionData.amount,
+				[TRANSACTION_TYPE_INCOME]: transactionData.amount,
+			}[transactionData.type]
+
+		await tx
+			.update(walletTable)
+			.set({ balance: updatedBalance })
+			.where(eq(walletTable.id, transactionData.walletId))
+	})
+
+	return await redirectWithToast(`/app/transactions`, request, {
+		type: 'success',
+		title: 'Transaction created successfully',
+	})
 }
 
 export default function CreateTransaction({
@@ -228,12 +305,6 @@ export default function CreateTransaction({
 						id={form.errorId}
 					/>
 
-					<DateField label='Date' field={fields.date} />
-
-					<TextField
-						label='Description (Optional)'
-						field={fields.description}
-					/>
 					<SelectField
 						label='Transaction Type'
 						field={fields.type}
@@ -241,10 +312,8 @@ export default function CreateTransaction({
 						items={transactionTypeOptions}
 					/>
 
-					<NumberField label='Amount' field={fields.amount} />
-
 					{accounts.length !== 0 ? (
-						<>
+						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 							<SelectField
 								label='Account'
 								field={fields.accountId}
@@ -258,7 +327,7 @@ export default function CreateTransaction({
 								placeholder='Select a currency'
 								items={walletOptions}
 							/>
-						</>
+						</div>
 					) : (
 						<Text size='sm' theme='muted' alignment='center'>
 							You need to create an account first. Do it{' '}
@@ -275,6 +344,8 @@ export default function CreateTransaction({
 							</Link>
 						</Text>
 					)}
+
+					<NumberField label='Amount' field={fields.amount} />
 
 					{transactionCategories.length !== 0 ? (
 						<SelectField
@@ -301,6 +372,13 @@ export default function CreateTransaction({
 							</Link>
 						</Text>
 					)}
+
+					<DateField label='Date' field={fields.date} />
+
+					<TextField
+						label='Description (Optional)'
+						field={fields.description}
+					/>
 				</Form>
 			</CardContent>
 			<CardFooter className='gap-2'>

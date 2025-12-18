@@ -21,10 +21,10 @@ const BaseTransactionFormSchema = z.object({
 		.refine(
 			value => {
 				const formatted = removeCommas(value)
-				return Number(formatted) >= 0
+				return Number(formatted) > 0
 			},
 			{
-				message: 'Amount cannot be negative',
+				message: 'Amount must be greater than zero',
 			},
 		),
 	description: z
