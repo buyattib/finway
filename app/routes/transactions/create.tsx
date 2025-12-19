@@ -183,9 +183,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			columns: { balance: true },
 		}))!
 
-		await tx
-			.insert(transactionTable)
-			.values({ ...transactionData, ownerId: user.id })
+		await tx.insert(transactionTable).values(transactionData)
 
 		const updatedBalance =
 			wallet.balance +

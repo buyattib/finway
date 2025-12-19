@@ -1,13 +1,15 @@
 import { Link, Form, data, useNavigation } from 'react-router'
 import { PlusIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq } from 'drizzle-orm'
+import { eq, desc, sql } from 'drizzle-orm'
 
 import type { Route } from './+types'
 
 import {
 	transaction as transactionTable,
 	wallet as walletTable,
+	account as accountTable,
+	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { cn, formatDate, formatNumber } from '~/lib/utils'
@@ -55,29 +57,28 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const result = await db.query.transaction.findMany({
-		orderBy: (transaction, { desc }) => [desc(transaction.date)],
-		where: (transaction, { eq }) => eq(transaction.ownerId, user.id),
-		columns: { id: true, date: true, amount: true, type: true },
-		with: {
-			wallet: {
-				columns: { id: true, currency: true },
-				with: {
-					account: {
-						columns: { id: true, name: true },
-					},
-				},
-			},
-			transactionCategory: {
-				columns: { id: true, name: true },
-			},
-		},
-	})
-
-	const transactions = result.map(tx => ({
-		...tx,
-		amount: String(tx.amount / 100),
-	}))
+	const transactions = await db
+		.select({
+			id: transactionTable.id,
+			date: transactionTable.date,
+			amount: sql<string>`CAST(${transactionTable.amount} / 100 as TEXT)`,
+			type: transactionTable.type,
+			currency: walletTable.currency,
+			account: accountTable.name,
+			transactionCategory: transactionCategoryTable.name,
+		})
+		.from(transactionTable)
+		.innerJoin(
+			transactionCategoryTable,
+			eq(
+				transactionCategoryTable.id,
+				transactionTable.transactionCategoryId,
+			),
+		)
+		.innerJoin(walletTable, eq(transactionTable.walletId, walletTable.id))
+		.innerJoin(accountTable, eq(walletTable.accountId, accountTable.id))
+		.where(eq(accountTable.ownerId, user.id))
+		.orderBy(desc(transactionTable.date))
 
 	return { transactions }
 }
@@ -103,11 +104,22 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const { transactionId } = submission.value
+
 	const transaction = await db.query.transaction.findFirst({
 		where: (transaction, { eq }) => eq(transaction.id, transactionId),
-		columns: { id: true, ownerId: true },
+		columns: { id: true },
+		with: {
+			wallet: {
+				columns: {},
+				with: {
+					account: {
+						columns: { ownerId: true },
+					},
+				},
+			},
+		},
 	})
-	if (!transaction || transaction.ownerId !== user.id) {
+	if (!transaction || transaction.wallet.account.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: `Transaction ${transactionId} not found`,
@@ -225,10 +237,11 @@ export default function Transactions({
 							date,
 							type,
 							amount,
-							wallet,
+							currency,
+							account,
 							transactionCategory,
 						}) => {
-							const { symbol } = CURRENCY_DISPLAY[wallet.currency]
+							const { symbol } = CURRENCY_DISPLAY[currency]
 							const { label: typeLabel, color: typeColor } =
 								TRANSACTION_TYPE_DISPLAY[type]
 
@@ -246,13 +259,13 @@ export default function Transactions({
 										{typeLabel}
 									</TableCell>
 									<TableCell className='text-center'>
-										{transactionCategory.name}
+										{transactionCategory}
 									</TableCell>
 									<TableCell className='text-center'>
 										{symbol} {formatNumber(amount)}
 									</TableCell>
 									<TableCell className='text-center'>
-										{wallet.account.name}
+										{account}
 									</TableCell>
 									<TableCell className='flex justify-end items-center gap-2'>
 										<Button

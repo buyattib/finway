@@ -114,16 +114,10 @@ export const transaction = sqliteTable(
 		description: text().default(''),
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 
-		ownerId: text().notNull(),
 		walletId: text().notNull(),
 		transactionCategoryId: text().notNull(),
 	},
 	table => ({
-		transactionOwnerIdFk: foreignKey({
-			name: 'transactions_ownerId_fk',
-			columns: [table.ownerId],
-			foreignColumns: [user.id],
-		}).onDelete('cascade'),
 		transactionWalletIdFk: foreignKey({
 			name: 'transactions_walletId_fk',
 			columns: [table.walletId],
