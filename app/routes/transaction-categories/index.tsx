@@ -170,7 +170,7 @@ export default function TransactionCategories({
 										disabled={isDeleting}
 									>
 										{isDeleting && deletingId === id ? (
-											<Spinner size='sm' />
+											<Spinner aria-hidden size='sm' />
 										) : (
 											<TrashIcon aria-hidden />
 										)}

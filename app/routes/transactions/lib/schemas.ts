@@ -37,3 +37,8 @@ const BaseTransactionFormSchema = z.object({
 })
 
 export const CreateTransactionFormSchema = BaseTransactionFormSchema.extend({})
+
+export const DeleteTransactionFormSchema = z.object({
+	transactionId: z.string(),
+	intent: z.literal('delete'),
+})

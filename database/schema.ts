@@ -120,35 +120,26 @@ export const transaction = sqliteTable(
 	},
 	table => ({
 		transactionOwnerIdFk: foreignKey({
-			name: 'transaction_ownerId_fk',
+			name: 'transactions_ownerId_fk',
 			columns: [table.ownerId],
 			foreignColumns: [user.id],
 		}).onDelete('cascade'),
-		transactionTransactionCategoryIdFk: foreignKey({
-			name: 'transaction_transactionCategoryId_fk',
-			columns: [table.transactionCategoryId],
-			foreignColumns: [transactionCategory.id],
-		}).onDelete('set null'),
 		transactionWalletIdFk: foreignKey({
-			name: 'transaction_subAccountId_fk',
+			name: 'transactions_walletId_fk',
 			columns: [table.walletId],
 			foreignColumns: [wallet.id],
 		}).onDelete('cascade'),
+		transactionTransactionCategoryIdFk: foreignKey({
+			name: 'transactions_transactionCategoryId_fk',
+			columns: [table.transactionCategoryId],
+			foreignColumns: [transactionCategory.id],
+		}).onDelete('set null'),
 	}),
 )
 
 // ORM Relations
 
-export const userRelations = relations(user, ({ many }) => ({
-	accounts: many(account),
-	transactionCategories: many(transactionCategory),
-}))
-
-export const accountRelations = relations(account, ({ one, many }) => ({
-	owner: one(user, {
-		fields: [account.ownerId],
-		references: [user.id],
-	}),
+export const accountRelations = relations(account, ({ many }) => ({
 	wallets: many(wallet),
 }))
 
@@ -160,10 +151,6 @@ export const walletRelations = relations(wallet, ({ one }) => ({
 }))
 
 export const transactionRelations = relations(transaction, ({ one }) => ({
-	owner: one(user, {
-		fields: [transaction.ownerId],
-		references: [user.id],
-	}),
 	wallet: one(wallet, {
 		fields: [transaction.walletId],
 		references: [wallet.id],
