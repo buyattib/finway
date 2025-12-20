@@ -1,9 +1,11 @@
 import { Link } from 'react-router'
 import { PlusIcon } from 'lucide-react'
+import { sql } from 'drizzle-orm'
 
 import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
+import { wallet as walletTable } from '~/database/schema'
 import { formatNumber } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
@@ -33,7 +35,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const result = await db.query.account.findMany({
+	const accounts = await db.query.account.findMany({
 		orderBy: (account, { desc }) => [desc(account.createdAt)],
 		where: (account, { eq }) => eq(account.ownerId, user.id),
 		columns: { id: true, name: true, description: true, accountType: true },
@@ -41,17 +43,15 @@ export async function loader({ context }: Route.LoaderArgs) {
 			wallets: {
 				orderBy: (wallet, { desc }) => [desc(wallet.balance)],
 				columns: { id: true, currency: true, balance: true },
+				extras: {
+					balance:
+						sql<string>`CAST(${walletTable.balance} / 100 AS TEXT)`.as(
+							'balance',
+						),
+				},
 			},
 		},
 	})
-
-	const accounts = result.map(account => ({
-		...account,
-		wallets: account.wallets.map(sub => ({
-			...sub,
-			balance: String(sub.balance / 100),
-		})),
-	}))
 
 	return { accounts }
 }

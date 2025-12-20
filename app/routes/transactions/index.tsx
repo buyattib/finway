@@ -262,7 +262,7 @@ export default function Transactions({
 										{transactionCategory}
 									</TableCell>
 									<TableCell className='text-center'>
-										{symbol} {formatNumber(amount)}
+										<b>{currency}</b> {formatNumber(amount)}
 									</TableCell>
 									<TableCell className='text-center'>
 										{account}
@@ -274,7 +274,7 @@ export default function Transactions({
 											variant='ghost'
 											disabled={isDeleting}
 										>
-											<Link to='edit'>
+											<Link to={`${id}/edit`}>
 												<SquarePenIcon />
 											</Link>
 										</Button>

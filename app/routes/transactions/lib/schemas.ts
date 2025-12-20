@@ -37,6 +37,9 @@ const BaseTransactionFormSchema = z.object({
 })
 
 export const CreateTransactionFormSchema = BaseTransactionFormSchema.extend({})
+export const EditTransactionFormSchema = BaseTransactionFormSchema.extend({
+	id: z.string(),
+})
 
 export const DeleteTransactionFormSchema = z.object({
 	transactionId: z.string(),

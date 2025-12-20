@@ -29,6 +29,7 @@ export default [
 		...prefix('transactions', [
 			index('routes/transactions/index.tsx'),
 			route('create', 'routes/transactions/create.tsx'),
+			route(':transactionId/edit', 'routes/transactions/edit.tsx'),
 		]),
 
 		// transaction categories
