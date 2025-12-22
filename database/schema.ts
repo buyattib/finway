@@ -131,6 +131,64 @@ export const transaction = sqliteTable(
 	}),
 )
 
+export const transfer = sqliteTable(
+	'transfers',
+	{
+		createdAt: base.createdAt,
+		updatedAt: base.updatedAt,
+
+		id: cuid2().defaultRandom().primaryKey(),
+
+		date: text().notNull(),
+		amount: integer().notNull(),
+
+		fromWalletId: text().notNull(),
+		toWalletId: text().notNull(),
+	},
+	table => ({
+		transferFromWalletIdFk: foreignKey({
+			name: 'transfers_fromWalletId_fk',
+			columns: [table.fromWalletId],
+			foreignColumns: [wallet.id],
+		}).onDelete('set null'),
+		transferToWalletIdFk: foreignKey({
+			name: 'transfers_toWalletId_fk',
+			columns: [table.toWalletId],
+			foreignColumns: [wallet.id],
+		}).onDelete('set null'),
+	}),
+)
+
+export const exchange = sqliteTable(
+	'exchanges',
+	{
+		createdAt: base.createdAt,
+		updatedAt: base.updatedAt,
+
+		id: cuid2().defaultRandom().primaryKey(),
+
+		date: text().notNull(),
+
+		fromAmount: integer().notNull(),
+		toAmount: integer().notNull(),
+
+		fromWalletId: text().notNull(),
+		toWalletId: text().notNull(),
+	},
+	table => ({
+		exchangeFromWalletIdFk: foreignKey({
+			name: 'exchange_fromWalletId_fk',
+			columns: [table.fromWalletId],
+			foreignColumns: [wallet.id],
+		}).onDelete('set null'),
+		exchangeToWalletIdFk: foreignKey({
+			name: 'exchange_toWalletId_fk',
+			columns: [table.toWalletId],
+			foreignColumns: [wallet.id],
+		}).onDelete('set null'),
+	}),
+)
+
 // ORM Relations
 
 export const accountRelations = relations(account, ({ many }) => ({
@@ -152,5 +210,27 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
 	transactionCategory: one(transactionCategory, {
 		fields: [transaction.transactionCategoryId],
 		references: [transactionCategory.id],
+	}),
+}))
+
+export const transferRelations = relations(transfer, ({ one }) => ({
+	fromWallet: one(wallet, {
+		fields: [transfer.fromWalletId],
+		references: [wallet.id],
+	}),
+	toWallet: one(wallet, {
+		fields: [transfer.toWalletId],
+		references: [wallet.id],
+	}),
+}))
+
+export const exchangeRelations = relations(exchange, ({ one }) => ({
+	fromWallet: one(wallet, {
+		fields: [exchange.fromWalletId],
+		references: [wallet.id],
+	}),
+	toWallet: one(wallet, {
+		fields: [exchange.toWalletId],
+		references: [wallet.id],
 	}),
 }))

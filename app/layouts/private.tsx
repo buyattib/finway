@@ -58,6 +58,11 @@ const links = [
 		icon: <ArrowRightLeftIcon />,
 	},
 	{
+		to: '/app/transfers',
+		labelKey: 'Transfers',
+		icon: <ArrowRightLeftIcon />,
+	},
+	{
 		to: '/app/transaction-categories',
 		labelKey: 'Transaction Categories',
 		icon: <ListIcon />,

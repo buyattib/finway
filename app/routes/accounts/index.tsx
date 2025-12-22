@@ -26,7 +26,7 @@ export function meta() {
 		},
 		{
 			name: 'description',
-			content: 'Your finhub accounts',
+			content: 'Your accounts',
 		},
 	]
 }

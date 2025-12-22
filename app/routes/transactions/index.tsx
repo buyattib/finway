@@ -181,10 +181,10 @@ export default function Transactions({
 	return (
 		<section
 			className='flex flex-col gap-4'
-			aria-labelledby='accounts-section'
+			aria-labelledby='transactions-section'
 		>
 			<div className='flex items-center justify-between'>
-				<Title id='accounts-section' level='h3'>
+				<Title id='transactions-section' level='h3'>
 					Transactions
 				</Title>
 				<Button

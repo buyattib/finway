@@ -38,5 +38,17 @@ export default [
 			index('routes/transaction-categories/index.tsx'),
 			route('create', 'routes/transaction-categories/create.tsx'),
 		]),
+
+		// transfers
+		...prefix('transfers', [
+			index('routes/transfers/index.tsx'),
+			// route('create', 'routes/transfers/create.tsx'),
+		]),
+
+		// exchanges
+		// ...prefix('exchanges', [
+		// 	index('routes/exchanges/index.tsx'),
+		// 	route('create', 'routes/exchanges/create.tsx'),
+		// ]),
 	]),
 ] satisfies RouteConfig
