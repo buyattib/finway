@@ -4,7 +4,12 @@ import {
 	useNavigation,
 	type MiddlewareFunction,
 } from 'react-router'
-import { ArrowRightLeftIcon, ListIcon, WalletIcon } from 'lucide-react'
+import {
+	ArrowRightLeftIcon,
+	LayoutDashboard,
+	ListIcon,
+	WalletIcon,
+} from 'lucide-react'
 
 import type { Route } from './+types/private'
 
@@ -37,6 +42,11 @@ export async function loader({ context }: Route.LoaderArgs) {
 }
 
 const links = [
+	{
+		to: '/app/dashboard',
+		labelKey: 'Dashboard',
+		icon: <LayoutDashboard />,
+	},
 	{
 		to: '/app/accounts',
 		labelKey: 'Accounts',

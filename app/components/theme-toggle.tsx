@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { useRootLoader } from '~/hooks/use-root-loader'
 
-import type { action } from '~/routes/index'
+import type { action } from '~/routes/app'
 
 export const ThemeFormSchema = z.object({
 	theme: z.enum(['light', 'dark']),
