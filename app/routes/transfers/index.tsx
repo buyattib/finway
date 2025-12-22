@@ -1,7 +1,8 @@
 import { Link, Form, useNavigation } from 'react-router'
 import { PlusIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 // import { parseWithZod } from '@conform-to/zod/v4'
-import { eq, desc, sql } from 'drizzle-orm'
+import { eq, and, or, desc, sql } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/sqlite-core'
 
 import type { Route } from './+types'
 
@@ -26,8 +27,6 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 
-// import { CURRENCY_DISPLAY } from '~/routes/accounts/lib/constants'
-
 export function meta() {
 	return [
 		{ title: 'Account Transfers | Finhub' },
@@ -47,10 +46,53 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	return {}
+	const fromWalletAlias = alias(walletTable, 'fromWallet')
+	const toWalletAlias = alias(walletTable, 'toWallet')
+	const fromAccountAlias = alias(accountTable, 'fromAccount')
+	const toAccountAlias = alias(accountTable, 'toAccount')
+
+	const transfers = await db
+		.select({
+			id: transferTable.id,
+			date: transferTable.date,
+			amount: transferTable.amount,
+
+			currency: fromWalletAlias.currency,
+
+			fromAccount: fromAccountAlias.name,
+			toAccount: toAccountAlias.name,
+		})
+		.from(transferTable)
+		.innerJoin(
+			fromWalletAlias,
+			eq(transferTable.fromWalletId, fromWalletAlias.id),
+		)
+		.innerJoin(
+			fromAccountAlias,
+			eq(fromWalletAlias.accountId, fromAccountAlias.id),
+		)
+		.innerJoin(
+			toWalletAlias,
+			eq(transferTable.toWalletId, toWalletAlias.id),
+		)
+		.innerJoin(
+			toAccountAlias,
+			eq(toWalletAlias.accountId, toAccountAlias.id),
+		)
+		.where(
+			and(
+				eq(fromAccountAlias.ownerId, user.id),
+				eq(toAccountAlias.ownerId, user.id),
+			),
+		)
+		.orderBy(desc(transferTable.date))
+
+	return { transfers }
 }
 
-export default function Transfers({ loaderData: {} }: Route.ComponentProps) {
+export default function Transfers({
+	loaderData: { transfers },
+}: Route.ComponentProps) {
 	// const navigation = useNavigation()
 
 	// const isDeleting =
@@ -66,7 +108,7 @@ export default function Transfers({ loaderData: {} }: Route.ComponentProps) {
 			className='flex flex-col gap-4'
 			aria-labelledby='transfers-section'
 		>
-			{/* <div className='flex items-center justify-between'>
+			<div className='flex items-center justify-between'>
 				<Title id='transfers-section' level='h3'>
 					Transfers
 				</Title>
@@ -78,7 +120,7 @@ export default function Transfers({ loaderData: {} }: Route.ComponentProps) {
 				>
 					<Link to='create' prefetch='intent'>
 						<PlusIcon aria-hidden />
-						<span className='sm:inline hidden'>Transaction</span>
+						<span className='sm:inline hidden'>Transfer</span>
 					</Link>
 				</Button>
 			</div>
@@ -103,10 +145,10 @@ export default function Transfers({ loaderData: {} }: Route.ComponentProps) {
 								Amount
 							</TableHead>
 							<TableHead className='text-center'>
-								Amount
+								From Account
 							</TableHead>
 							<TableHead className='text-center'>
-								Account
+								To Account
 							</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
@@ -114,11 +156,14 @@ export default function Transfers({ loaderData: {} }: Route.ComponentProps) {
 				)}
 				<TableBody>
 					{transfers.map(
-						({ id, date, amount, fromCurrency, toCurrency }) => {
-							// const { symbol } = CURRENCY_DISPLAY[currency]
-							// const { label: typeLabel, color: typeColor } =
-							// 	TRANSACTION_TYPE_DISPLAY[type]
-
+						({
+							id,
+							date,
+							amount,
+							currency,
+							fromAccount,
+							toAccount,
+						}) => {
 							return (
 								<TableRow key={id}>
 									<TableCell className='w-30'>
@@ -128,13 +173,14 @@ export default function Transfers({ loaderData: {} }: Route.ComponentProps) {
 										<b>{currency}</b> {formatNumber(amount)}
 									</TableCell>
 									<TableCell className='text-center'>
-										{transactionCategory}
+										{fromAccount}
 									</TableCell>
 									<TableCell className='text-center'>
-										{account}
+										{toAccount}
 									</TableCell>
+
 									<TableCell className='flex justify-end items-center gap-2'>
-										<Button
+										{/* <Button
 											asChild
 											size='icon-xs'
 											variant='ghost'
@@ -171,14 +217,14 @@ export default function Transfers({ loaderData: {} }: Route.ComponentProps) {
 													Delete transaction
 												</span>
 											</Button>
-										</Form>
+										</Form> */}
 									</TableCell>
 								</TableRow>
 							)
 						},
 					)}
 				</TableBody>
-			</Table> */}
+			</Table>
 		</section>
 	)
 }

@@ -27,8 +27,6 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 
-import { CURRENCY_DISPLAY } from '~/routes/accounts/lib/constants'
-
 import {
 	TRANSACTION_TYPE_DISPLAY,
 	TRANSACTION_TYPE_EXPENSE,
@@ -241,7 +239,6 @@ export default function Transactions({
 							account,
 							transactionCategory,
 						}) => {
-							const { symbol } = CURRENCY_DISPLAY[currency]
 							const { label: typeLabel, color: typeColor } =
 								TRANSACTION_TYPE_DISPLAY[type]
 
