@@ -141,20 +141,21 @@ export const transfer = sqliteTable(
 
 		date: text().notNull(),
 		amount: integer().notNull(),
+		currency: text({ enum: CURRENCIES }).notNull(),
 
-		fromWalletId: text().notNull(),
-		toWalletId: text().notNull(),
+		fromAccountId: text().notNull(),
+		toAccountId: text().notNull(),
 	},
 	table => ({
-		transferFromWalletIdFk: foreignKey({
-			name: 'transfers_fromWalletId_fk',
-			columns: [table.fromWalletId],
-			foreignColumns: [wallet.id],
+		transferFromAccountId: foreignKey({
+			name: 'transfers_fromAccountId_fk',
+			columns: [table.fromAccountId],
+			foreignColumns: [account.id],
 		}).onDelete('set null'),
-		transferToWalletIdFk: foreignKey({
-			name: 'transfers_toWalletId_fk',
-			columns: [table.toWalletId],
-			foreignColumns: [wallet.id],
+		transferToAccountIdFk: foreignKey({
+			name: 'transfers_toAccountId_fk',
+			columns: [table.toAccountId],
+			foreignColumns: [account.id],
 		}).onDelete('set null'),
 	}),
 )
@@ -214,13 +215,13 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
 }))
 
 export const transferRelations = relations(transfer, ({ one }) => ({
-	fromWallet: one(wallet, {
-		fields: [transfer.fromWalletId],
-		references: [wallet.id],
+	fromAccount: one(account, {
+		fields: [transfer.fromAccountId],
+		references: [account.id],
 	}),
-	toWallet: one(wallet, {
-		fields: [transfer.toWalletId],
-		references: [wallet.id],
+	toAccount: one(account, {
+		fields: [transfer.toAccountId],
+		references: [account.id],
 	}),
 }))
 

@@ -76,3 +76,12 @@ const transactionsData = ids.map(({ walletId, transactionCategoryId }) => {
 })
 
 await db.insert(schema.transaction).values(transactionsData)
+
+// await db.insert(schema.transfer).values([
+// 	{
+// 		date: new Date().toISOString(),
+// 		amount: 500,
+// 		fromWalletId: walletIds[0].id,
+// 		toWalletId: walletIds[1].id,
+// 	},
+// ])

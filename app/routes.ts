@@ -42,7 +42,7 @@ export default [
 		// transfers
 		...prefix('transfers', [
 			index('routes/transfers/index.tsx'),
-			// route('create', 'routes/transfers/create.tsx'),
+			route('create', 'routes/transfers/create.tsx'),
 		]),
 
 		// exchanges

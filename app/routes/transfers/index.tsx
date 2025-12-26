@@ -1,14 +1,12 @@
 import { Link, Form, useNavigation } from 'react-router'
 import { PlusIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
-// import { parseWithZod } from '@conform-to/zod/v4'
-import { eq, and, or, desc, sql } from 'drizzle-orm'
+import { eq, and, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 
 import type { Route } from './+types'
 
 import {
 	transfer as transferTable,
-	wallet as walletTable,
 	account as accountTable,
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
@@ -26,6 +24,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { Spinner } from '~/components/ui/spinner'
 
 export function meta() {
 	return [
@@ -46,38 +45,28 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const fromWalletAlias = alias(walletTable, 'fromWallet')
-	const toWalletAlias = alias(walletTable, 'toWallet')
 	const fromAccountAlias = alias(accountTable, 'fromAccount')
 	const toAccountAlias = alias(accountTable, 'toAccount')
 
 	const transfers = await db
 		.select({
 			id: transferTable.id,
-			date: transferTable.date,
-			amount: transferTable.amount,
 
-			currency: fromWalletAlias.currency,
+			date: transferTable.date,
+			amount: sql<string>`CAST(${transferTable.amount} / 100 as TEXT)`,
+			currency: transferTable.currency,
 
 			fromAccount: fromAccountAlias.name,
 			toAccount: toAccountAlias.name,
 		})
 		.from(transferTable)
 		.innerJoin(
-			fromWalletAlias,
-			eq(transferTable.fromWalletId, fromWalletAlias.id),
-		)
-		.innerJoin(
 			fromAccountAlias,
-			eq(fromWalletAlias.accountId, fromAccountAlias.id),
-		)
-		.innerJoin(
-			toWalletAlias,
-			eq(transferTable.toWalletId, toWalletAlias.id),
+			eq(transferTable.fromAccountId, fromAccountAlias.id),
 		)
 		.innerJoin(
 			toAccountAlias,
-			eq(toWalletAlias.accountId, toAccountAlias.id),
+			eq(transferTable.toAccountId, toAccountAlias.id),
 		)
 		.where(
 			and(
@@ -90,18 +79,100 @@ export async function loader({ context }: Route.LoaderArgs) {
 	return { transfers }
 }
 
+export async function action({ request, context }: Route.ActionArgs) {
+	const user = context.get(userContext)
+	const db = context.get(dbContext)
+
+	const formData = await request.formData()
+	// const submission = parseWithZod(formData, {
+	// 	schema: DeleteTransactionFormSchema,
+	// })
+
+	// if (submission.status !== 'success') {
+	// 	console.error(submission.reply())
+
+	// 	const toastHeaders = await createToastHeaders(request, {
+	// 		type: 'error',
+	// 		title: 'Could not delete transaction',
+	// 		description: 'Please try again',
+	// 	})
+	// 	return data({}, { headers: toastHeaders })
+	// }
+
+	// const { transactionId } = submission.value
+
+	// const transaction = await db.query.transaction.findFirst({
+	// 	where: (transaction, { eq }) => eq(transaction.id, transactionId),
+	// 	columns: { id: true },
+	// 	with: {
+	// 		wallet: {
+	// 			columns: {},
+	// 			with: {
+	// 				account: {
+	// 					columns: { ownerId: true },
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// })
+	// if (!transaction || transaction.wallet.account.ownerId !== user.id) {
+	// 	const toastHeaders = await createToastHeaders(request, {
+	// 		type: 'error',
+	// 		title: `Transaction ${transactionId} not found`,
+	// 	})
+	// 	return data({}, { headers: toastHeaders })
+	// }
+
+	// await db.transaction(async tx => {
+	// 	const transaction = (await tx.query.transaction.findFirst({
+	// 		where: (transaction, { eq }) => eq(transaction.id, transactionId),
+	// 		columns: { amount: true, type: true },
+	// 		with: {
+	// 			wallet: {
+	// 				columns: {
+	// 					id: true,
+	// 					balance: true,
+	// 				},
+	// 			},
+	// 		},
+	// 	}))!
+
+	// 	const updatedBalance =
+	// 		transaction.wallet.balance +
+	// 		{
+	// 			[TRANSACTION_TYPE_EXPENSE]: transaction.amount,
+	// 			[TRANSACTION_TYPE_INCOME]: -transaction.amount,
+	// 		}[transaction.type]
+
+	// 	await tx
+	// 		.update(walletTable)
+	// 		.set({ balance: updatedBalance })
+	// 		.where(eq(walletTable.id, transaction.wallet.id))
+
+	// 	await tx
+	// 		.delete(transactionTable)
+	// 		.where(eq(transactionTable.id, transactionId))
+	// })
+
+	// const toastHeaders = await createToastHeaders(request, {
+	// 	type: 'success',
+	// 	title: 'Transaction deleted',
+	// })
+	// return data({}, { headers: toastHeaders })
+}
+
 export default function Transfers({
 	loaderData: { transfers },
 }: Route.ComponentProps) {
-	// const navigation = useNavigation()
+	const navigation = useNavigation()
 
-	// const isDeleting =
-	// 	navigation.formMethod === 'POST' &&
-	// 	navigation.formAction === `/app/transactions?index` &&
-	// 	navigation.state === 'submitting' &&
-	// 	navigation.formData?.get('intent') === 'delete'
+	const isDeleting =
+		navigation.formMethod === 'POST' &&
+		navigation.formAction === `/app/transfers?index` &&
+		navigation.state === 'submitting' &&
+		navigation.formData?.get('intent') === 'delete'
 
-	// const deletingId = navigation.formData?.get('transactionId')
+	const deletingId = navigation.formData?.get('transactionId')
 
 	return (
 		<section
@@ -116,7 +187,7 @@ export default function Transfers({
 					asChild
 					variant='default'
 					autoFocus
-					// disabled={isDeleting}
+					disabled={isDeleting}
 				>
 					<Link to='create' prefetch='intent'>
 						<PlusIcon aria-hidden />
@@ -178,9 +249,8 @@ export default function Transfers({
 									<TableCell className='text-center'>
 										{toAccount}
 									</TableCell>
-
 									<TableCell className='flex justify-end items-center gap-2'>
-										{/* <Button
+										<Button
 											asChild
 											size='icon-xs'
 											variant='ghost'
@@ -193,7 +263,7 @@ export default function Transfers({
 										<Form method='post'>
 											<input
 												type='hidden'
-												name='transactionId'
+												name='transferId'
 												value={id}
 											/>
 											<Button
@@ -214,10 +284,10 @@ export default function Transfers({
 													<TrashIcon aria-hidden />
 												)}
 												<span className='sr-only'>
-													Delete transaction
+													Delete transfer
 												</span>
 											</Button>
-										</Form> */}
+										</Form>
 									</TableCell>
 								</TableRow>
 							)
