@@ -130,7 +130,11 @@ export async function loader({
 	const { wallet, ...transactionData } = transaction
 
 	return {
-		transaction: { ...transactionData, accountId: wallet.account.id },
+		transaction: {
+			...transactionData,
+			transactionCategoryId: transactionData.transactionCategoryId ?? '',
+			accountId: wallet.account.id,
+		},
 
 		accounts,
 		walletsPerAccount,

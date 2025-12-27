@@ -112,7 +112,7 @@ export const transaction = sqliteTable(
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 
 		walletId: text().notNull(),
-		transactionCategoryId: text().notNull().default(''),
+		transactionCategoryId: text(),
 	},
 	table => [
 		foreignKey({
@@ -140,8 +140,8 @@ export const transfer = sqliteTable(
 		amount: integer().notNull(),
 		currency: text({ enum: CURRENCIES }).notNull(),
 
-		fromAccountId: text().notNull(),
-		toAccountId: text().notNull(),
+		fromAccountId: text(),
+		toAccountId: text(),
 	},
 	table => [
 		foreignKey({

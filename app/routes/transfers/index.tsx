@@ -116,8 +116,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	})
 	if (
 		!transfer ||
-		transfer.fromAccount.ownerId !== user.id ||
-		transfer.toAccount.ownerId !== user.id
+		(transfer.fromAccount && transfer.fromAccount.ownerId !== user.id) ||
+		(transfer.toAccount && transfer.toAccount.ownerId !== user.id)
 	) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
@@ -158,10 +158,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 			},
 		}))!
 
-		const fromWallet = transfer.fromAccount.wallets.find(
+		const fromWallet = transfer?.fromAccount?.wallets.find(
 			w => w.currency === transfer.currency,
 		)
-		const toWallet = transfer.toAccount.wallets.find(
+		const toWallet = transfer?.toAccount?.wallets.find(
 			w => w.currency === transfer.currency,
 		)
 

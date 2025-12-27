@@ -2,8 +2,8 @@ import {
 	ACCOUNT_TYPE_BANK,
 	ACCOUNT_TYPE_CASH,
 	CURRENCY_USD,
+	CURRENCY_ARS,
 } from '~/routes/accounts/lib/constants'
-import { TRANSACTION_TYPE_EXPENSE } from '~/routes/transactions/lib/constants'
 
 import * as schema from '../schema'
 import { getDb } from './db'
@@ -31,20 +31,29 @@ const accountIds = await db
 	])
 	.returning({ id: schema.account.id })
 
-const walletIds = await db
+await db
 	.insert(schema.wallet)
 	.values(
-		accountIds.map(({ id }) => {
-			return {
-				accountId: id,
-				balance: 10000,
-				currency: CURRENCY_USD,
-			} as const
-		}),
+		accountIds
+			.map(({ id }) => {
+				return [
+					{
+						accountId: id,
+						balance: 10000,
+						currency: CURRENCY_USD,
+					} as const,
+					{
+						accountId: id,
+						balance: 100000,
+						currency: CURRENCY_ARS,
+					} as const,
+				]
+			})
+			.flat(),
 	)
 	.returning({ id: schema.wallet.id })
 
-const transactionCategoryIds = await db
+await db
 	.insert(schema.transactionCategory)
 	.values([
 		{
@@ -57,31 +66,3 @@ const transactionCategoryIds = await db
 		},
 	])
 	.returning({ id: schema.transactionCategory.id })
-
-const ids: Array<{ walletId: string; transactionCategoryId: string }> = []
-walletIds.forEach(({ id }) => {
-	transactionCategoryIds.forEach(({ id: txcId }) => {
-		ids.push({ walletId: id, transactionCategoryId: txcId })
-	})
-})
-
-const transactionsData = ids.map(({ walletId, transactionCategoryId }) => {
-	return {
-		date: new Date().toISOString(),
-		amount: 1000,
-		type: TRANSACTION_TYPE_EXPENSE,
-		walletId,
-		transactionCategoryId,
-	} as const
-})
-
-await db.insert(schema.transaction).values(transactionsData)
-
-// await db.insert(schema.transfer).values([
-// 	{
-// 		date: new Date().toISOString(),
-// 		amount: 500,
-// 		fromWalletId: walletIds[0].id,
-// 		toWalletId: walletIds[1].id,
-// 	},
-// ])
