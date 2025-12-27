@@ -143,8 +143,9 @@ export default function AccountDetails({
 								</TooltipTrigger>
 							</Form>
 							<TooltipContent>
-								Deleting an account cannot be undone and it
-								deletes all its transactions.
+								Deleting an account cannot be undone and it has
+								effects on transactions, transfers and
+								exchanges.
 							</TooltipContent>
 						</Tooltip>
 					</div>

@@ -66,7 +66,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 			transactionCategory: transactionCategoryTable.name,
 		})
 		.from(transactionTable)
-		.innerJoin(
+		.leftJoin(
 			transactionCategoryTable,
 			eq(
 				transactionCategoryTable.id,
@@ -256,7 +256,7 @@ export default function Transactions({
 										{typeLabel}
 									</TableCell>
 									<TableCell className='text-center'>
-										{transactionCategory}
+										{transactionCategory ?? '-'}
 									</TableCell>
 									<TableCell className='text-center'>
 										<b>{currency}</b> {formatNumber(amount)}

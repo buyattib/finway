@@ -115,7 +115,7 @@ export const transaction = sqliteTable(
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 
 		walletId: text().notNull(),
-		transactionCategoryId: text().notNull(),
+		transactionCategoryId: text(),
 	},
 	table => ({
 		transactionWalletIdFk: foreignKey({

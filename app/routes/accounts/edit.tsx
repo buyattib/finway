@@ -367,11 +367,12 @@ export default function EditAccount({
 															<TooltipContent>
 																Removing the
 																currency will
-																delete all the
-																transactions
-																associated with
-																it and the
-																balance.
+																have effects on
+																the
+																transactions,
+																transfers and
+																exchanges that
+																cannot be undone
 															</TooltipContent>
 														)}
 													</Tooltip>
