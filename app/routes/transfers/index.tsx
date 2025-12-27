@@ -1,16 +1,19 @@
-import { Link, Form, useNavigation } from 'react-router'
+import { Link, Form, useNavigation, data } from 'react-router'
 import { PlusIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
+import { parseWithZod } from '@conform-to/zod/v4'
 
 import type { Route } from './+types'
 
 import {
 	transfer as transferTable,
 	account as accountTable,
+	wallet as walletTable,
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
-import { cn, formatDate, formatNumber } from '~/lib/utils'
+import { formatDate, formatNumber } from '~/lib/utils'
+import { createToastHeaders } from '~/utils-server/toast.server'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -25,6 +28,8 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
+
+import { DeleteTransferFormSchema } from './lib/schemas'
 
 export function meta() {
 	return [
@@ -84,81 +89,103 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
 
 	const formData = await request.formData()
-	// const submission = parseWithZod(formData, {
-	// 	schema: DeleteTransactionFormSchema,
-	// })
+	const submission = parseWithZod(formData, {
+		schema: DeleteTransferFormSchema,
+	})
 
-	// if (submission.status !== 'success') {
-	// 	console.error(submission.reply())
+	if (submission.status !== 'success') {
+		console.error(submission.reply())
 
-	// 	const toastHeaders = await createToastHeaders(request, {
-	// 		type: 'error',
-	// 		title: 'Could not delete transaction',
-	// 		description: 'Please try again',
-	// 	})
-	// 	return data({}, { headers: toastHeaders })
-	// }
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: 'Could not delete transfer',
+			description: 'Please try again',
+		})
+		return data({}, { headers: toastHeaders })
+	}
 
-	// const { transactionId } = submission.value
+	const { transferId } = submission.value
 
-	// const transaction = await db.query.transaction.findFirst({
-	// 	where: (transaction, { eq }) => eq(transaction.id, transactionId),
-	// 	columns: { id: true },
-	// 	with: {
-	// 		wallet: {
-	// 			columns: {},
-	// 			with: {
-	// 				account: {
-	// 					columns: { ownerId: true },
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// })
-	// if (!transaction || transaction.wallet.account.ownerId !== user.id) {
-	// 	const toastHeaders = await createToastHeaders(request, {
-	// 		type: 'error',
-	// 		title: `Transaction ${transactionId} not found`,
-	// 	})
-	// 	return data({}, { headers: toastHeaders })
-	// }
+	const transfer = await db.query.transfer.findFirst({
+		where: (transfer, { eq }) => eq(transfer.id, transferId),
+		columns: { id: true },
+		with: {
+			fromAccount: { columns: { ownerId: true } },
+			toAccount: { columns: { ownerId: true } },
+		},
+	})
+	if (
+		!transfer ||
+		transfer.fromAccount.ownerId !== user.id ||
+		transfer.toAccount.ownerId !== user.id
+	) {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: `Transfer ${transferId} not found`,
+		})
+		return data({}, { headers: toastHeaders })
+	}
 
-	// await db.transaction(async tx => {
-	// 	const transaction = (await tx.query.transaction.findFirst({
-	// 		where: (transaction, { eq }) => eq(transaction.id, transactionId),
-	// 		columns: { amount: true, type: true },
-	// 		with: {
-	// 			wallet: {
-	// 				columns: {
-	// 					id: true,
-	// 					balance: true,
-	// 				},
-	// 			},
-	// 		},
-	// 	}))!
+	await db.transaction(async tx => {
+		const transfer = (await tx.query.transfer.findFirst({
+			where: (transfer, { eq }) => eq(transfer.id, transferId),
+			columns: { amount: true, currency: true },
+			with: {
+				fromAccount: {
+					columns: {},
+					with: {
+						wallets: {
+							columns: {
+								id: true,
+								balance: true,
+								currency: true,
+							},
+						},
+					},
+				},
+				toAccount: {
+					columns: {},
+					with: {
+						wallets: {
+							columns: {
+								id: true,
+								balance: true,
+								currency: true,
+							},
+						},
+					},
+				},
+			},
+		}))!
 
-	// 	const updatedBalance =
-	// 		transaction.wallet.balance +
-	// 		{
-	// 			[TRANSACTION_TYPE_EXPENSE]: transaction.amount,
-	// 			[TRANSACTION_TYPE_INCOME]: -transaction.amount,
-	// 		}[transaction.type]
+		const fromWallet = transfer.fromAccount.wallets.find(
+			w => w.currency === transfer.currency,
+		)
+		const toWallet = transfer.toAccount.wallets.find(
+			w => w.currency === transfer.currency,
+		)
 
-	// 	await tx
-	// 		.update(walletTable)
-	// 		.set({ balance: updatedBalance })
-	// 		.where(eq(walletTable.id, transaction.wallet.id))
+		if (fromWallet) {
+			await tx
+				.update(walletTable)
+				.set({ balance: fromWallet.balance + transfer.amount })
+				.where(eq(walletTable.id, fromWallet.id))
+		}
+		if (toWallet) {
+			await tx
+				.update(walletTable)
+				.set({ balance: toWallet.balance - transfer.amount })
+				.where(eq(walletTable.id, toWallet.id))
+		}
 
-	// 	await tx
-	// 		.delete(transactionTable)
-	// 		.where(eq(transactionTable.id, transactionId))
-	// })
+		await tx.delete(transferTable).where(eq(transferTable.id, transferId))
+	})
 
-	// const toastHeaders = await createToastHeaders(request, {
-	// 	type: 'success',
-	// 	title: 'Transaction deleted',
-	// })
-	// return data({}, { headers: toastHeaders })
+	const toastHeaders = await createToastHeaders(request, {
+		type: 'success',
+		title: 'Transfer deleted',
+	})
+	return data({}, { headers: toastHeaders })
 }
 
 export default function Transfers({

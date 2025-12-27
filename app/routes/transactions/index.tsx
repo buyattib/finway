@@ -13,6 +13,7 @@ import {
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { cn, formatDate, formatNumber } from '~/lib/utils'
+import { createToastHeaders } from '~/utils-server/toast.server'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -26,6 +27,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { Spinner } from '~/components/ui/spinner'
 
 import {
 	TRANSACTION_TYPE_DISPLAY,
@@ -33,8 +35,6 @@ import {
 	TRANSACTION_TYPE_INCOME,
 } from './lib/constants'
 import { DeleteTransactionFormSchema } from './lib/schemas'
-import { createToastHeaders } from '~/utils-server/toast.server'
-import { Spinner } from '~/components/ui/spinner'
 
 export function meta() {
 	return [

@@ -42,3 +42,8 @@ export const CreateTransferFormSchema = BaseTransferFormSchema.extend(
 		path: ['toAccountId'],
 	},
 )
+
+export const DeleteTransferFormSchema = z.object({
+	transferId: z.string(),
+	intent: z.literal('delete'),
+})
