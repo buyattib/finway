@@ -70,7 +70,7 @@ export async function loader({
 			walletId: true,
 		},
 		extras: {
-			amount: sql<string>`CAST(${transactionTable.amount} / 100 AS TEXT)`.as(
+			amount: sql<string>`CAST(${transactionTable.amount} / 100.0 AS TEXT)`.as(
 				'amount',
 			),
 		},

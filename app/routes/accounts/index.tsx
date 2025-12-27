@@ -45,7 +45,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 				columns: { id: true, currency: true, balance: true },
 				extras: {
 					balance:
-						sql<string>`CAST(${walletTable.balance} / 100 AS TEXT)`.as(
+						sql<string>`CAST(${walletTable.balance} / 100.0 AS TEXT)`.as(
 							'balance',
 						),
 				},

@@ -46,9 +46,9 @@ export default [
 		]),
 
 		// exchanges
-		// ...prefix('exchanges', [
-		// 	index('routes/exchanges/index.tsx'),
-		// 	route('create', 'routes/exchanges/create.tsx'),
-		// ]),
+		...prefix('exchanges', [
+			index('routes/exchanges/index.tsx'),
+			route('create', 'routes/exchanges/create.tsx'),
+		]),
 	]),
 ] satisfies RouteConfig

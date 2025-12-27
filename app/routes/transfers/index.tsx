@@ -1,5 +1,5 @@
 import { Link, Form, useNavigation, data } from 'react-router'
-import { PlusIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
+import { PlusIcon, TrashIcon } from 'lucide-react'
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { parseWithZod } from '@conform-to/zod/v4'
@@ -33,11 +33,11 @@ import { DeleteTransferFormSchema } from './lib/schemas'
 
 export function meta() {
 	return [
-		{ title: 'Account Transfers | Finhub' },
+		{ title: 'Transfers | Finhub' },
 
 		{
 			property: 'og:title',
-			content: 'Account Transfers | Finhub',
+			content: 'Transfers | Finhub',
 		},
 		{
 			name: 'description',
@@ -58,7 +58,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 			id: transferTable.id,
 
 			date: transferTable.date,
-			amount: sql<string>`CAST(${transferTable.amount} / 100 as TEXT)`,
+			amount: sql<string>`CAST(${transferTable.amount} / 100.0 as TEXT)`,
 			currency: transferTable.currency,
 
 			fromAccount: fromAccountAlias.name,
@@ -277,16 +277,6 @@ export default function Transfers({
 										{toAccount}
 									</TableCell>
 									<TableCell className='flex justify-end items-center gap-2'>
-										<Button
-											asChild
-											size='icon-xs'
-											variant='ghost'
-											disabled={isDeleting}
-										>
-											<Link to={`${id}/edit`}>
-												<SquarePenIcon />
-											</Link>
-										</Button>
 										<Form method='post'>
 											<input
 												type='hidden'

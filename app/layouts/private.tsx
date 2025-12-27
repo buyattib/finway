@@ -6,6 +6,8 @@ import {
 } from 'react-router'
 import {
 	ArrowRightLeftIcon,
+	ArrowUpDownIcon,
+	BanknoteArrowDownIcon,
 	LayoutDashboard,
 	ListIcon,
 	WalletIcon,
@@ -55,12 +57,17 @@ const links = [
 	{
 		to: '/app/transactions',
 		labelKey: 'Transactions',
-		icon: <ArrowRightLeftIcon />,
+		icon: <BanknoteArrowDownIcon />,
 	},
 	{
 		to: '/app/transfers',
 		labelKey: 'Transfers',
 		icon: <ArrowRightLeftIcon />,
+	},
+	{
+		to: '/app/exchanges',
+		labelKey: 'Exchanges',
+		icon: <ArrowUpDownIcon />,
 	},
 	{
 		to: '/app/transaction-categories',

@@ -59,7 +59,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		.select({
 			id: transactionTable.id,
 			date: transactionTable.date,
-			amount: sql<string>`CAST(${transactionTable.amount} / 100 as TEXT)`,
+			amount: sql<string>`CAST(${transactionTable.amount} / 100.0 as TEXT)`,
 			type: transactionTable.type,
 			currency: walletTable.currency,
 			account: accountTable.name,
