@@ -1,11 +1,15 @@
 import { Link } from 'react-router'
 import { PlusIcon } from 'lucide-react'
-import { sql } from 'drizzle-orm'
+import { desc, eq, sql } from 'drizzle-orm'
 
 import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
-import { wallet as walletTable } from '~/database/schema'
+import {
+	currency as currencyTable,
+	account as accountTable,
+	transaction as transactionTable,
+} from '~/database/schema'
 import { formatNumber } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
@@ -14,7 +18,13 @@ import { Title } from '~/components/ui/title'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
+import {
+	TRANSACTION_TYPE_EXPENSE,
+	TRANSACTION_TYPE_INCOME,
+} from '~/routes/transactions/lib/constants'
+
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
+import type { TAccountBalance } from './lib/types'
 
 export function meta() {
 	return [
@@ -35,25 +45,72 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const accounts = await db.query.account.findMany({
-		orderBy: (account, { desc }) => [desc(account.createdAt)],
-		where: (account, { eq }) => eq(account.ownerId, user.id),
-		columns: { id: true, name: true, description: true, accountType: true },
-		with: {
-			wallets: {
-				orderBy: (wallet, { desc }) => [desc(wallet.balance)],
-				columns: { id: true, currency: true, balance: true },
-				extras: {
-					balance:
-						sql<string>`CAST(${walletTable.balance} / 100.0 AS TEXT)`.as(
-							'balance',
-						),
-				},
-			},
+	const balances = await db
+		.select({
+			accountId: transactionTable.accountId,
+			currencyId: transactionTable.currencyId,
+			currency: currencyTable.code,
+			balance: sql<number>`SUM(
+					CASE 
+					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_INCOME} THEN ${transactionTable.amount}
+					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_EXPENSE} THEN -${transactionTable.amount}
+					ELSE 0
+					END
+				)`.as('balance'),
+		})
+		.from(transactionTable)
+		.innerJoin(
+			currencyTable,
+			eq(currencyTable.id, transactionTable.currencyId),
+		)
+		.innerJoin(
+			accountTable,
+			eq(accountTable.id, transactionTable.accountId),
+		)
+		.where(eq(accountTable.ownerId, user.id))
+		.groupBy(transactionTable.accountId, transactionTable.currencyId)
+		.orderBy(transactionTable.accountId, desc(sql`balance`))
+
+	const balancesByAccount = balances.reduce(
+		(acc, curr) => {
+			const balances = acc[curr.accountId] || []
+
+			acc[curr.accountId] =
+				balances.length < 3
+					? [
+							...balances,
+							{
+								id: `${curr.accountId}-${curr.currencyId}`,
+								balance: String(curr.balance / 100),
+								currency: curr.currency,
+							},
+						]
+					: balances
+
+			return acc
 		},
+		{} as Record<string, Array<TAccountBalance>>,
+	)
+
+	const accounts = await db
+		.select({
+			id: accountTable.id,
+			name: accountTable.name,
+			description: accountTable.description,
+			accountType: accountTable.accountType,
+		})
+		.from(accountTable)
+		.where(eq(accountTable.ownerId, user.id))
+		.orderBy(desc(accountTable.createdAt))
+
+	const accountsWithBalances = accounts.map(account => {
+		return {
+			...account,
+			balances: (balancesByAccount[account.id] || []).slice(0, 3),
+		}
 	})
 
-	return { accounts }
+	return { accounts: accountsWithBalances }
 }
 
 export default function Accounts({
@@ -90,7 +147,7 @@ export default function Accounts({
 
 			<ul className='flex flex-col gap-2'>
 				{accounts.map(
-					({ id, name, description, accountType, wallets }) => (
+					({ id, name, description, accountType, balances }) => (
 						<li key={id}>
 							<Link
 								to={id}
@@ -121,34 +178,42 @@ export default function Accounts({
 										)}
 									</div>
 								</div>
-								<ul
-									className='flex flex-col justify-center gap-2'
-									aria-labelledby={id}
-								>
-									{wallets.map(
-										({ id: wId, balance, currency }) => {
-											const { symbol } =
-												CURRENCY_DISPLAY[currency]
-											return (
-												<li
-													key={wId}
-													className='flex items-center justify-between gap-4'
-												>
-													<Text>
-														{`${symbol} ${formatNumber(balance)}`}
-													</Text>
-													<Text className='flex items-center gap-2'>
-														<CurrencyIcon
-															currency={currency}
-															size='sm'
-														/>
-														{currency}
-													</Text>
-												</li>
-											)
-										},
-									)}
-								</ul>
+								{!!balances.length && (
+									<ul
+										className='flex flex-col justify-center gap-2'
+										aria-labelledby={id}
+									>
+										{balances.map(
+											({
+												id: bId,
+												balance,
+												currency,
+											}) => {
+												const { symbol } =
+													CURRENCY_DISPLAY[currency]
+												return (
+													<li
+														key={bId}
+														className='flex items-center justify-between gap-4'
+													>
+														<Text>
+															{`${symbol} ${formatNumber(balance)}`}
+														</Text>
+														<Text className='flex items-center gap-2'>
+															<CurrencyIcon
+																currency={
+																	currency
+																}
+																size='sm'
+															/>
+															{currency}
+														</Text>
+													</li>
+												)
+											},
+										)}
+									</ul>
+								)}
 							</Link>
 						</li>
 					),

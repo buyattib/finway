@@ -1,53 +1,27 @@
 import { z } from 'zod'
-import { removeCommas } from '~/lib/utils'
-import { ACCOUNT_TYPES, CURRENCIES } from './constants'
+import { ACCOUNT_TYPES, ACTION_CREATION, ACTION_EDITION } from './constants'
 
-const WalletFormSchema = z.object({
-	currency: z.enum(CURRENCIES, 'Currency is required'),
-	balance: z
-		.string({ message: 'Balance is required' })
-		.refine(
-			value => {
-				const formatted = removeCommas(value)
-				return !isNaN(Number(formatted))
-			},
-			{
-				message: 'Balance must be a valid number',
-			},
-		)
-		.refine(
-			value => {
-				const formatted = removeCommas(value)
-				return Number(formatted) >= 0
-			},
-			{
-				message: 'Balance cannot be negative',
-			},
-		),
-})
+const ActionSchema = z.discriminatedUnion('action', [
+	z.object({
+		action: z.literal(ACTION_CREATION),
+		redirectTo: z.string().default(''),
+	}),
+	z.object({
+		action: z.literal(ACTION_EDITION),
+		id: z.string(),
+	}),
+])
 
-const BaseAccountFormSchema = z.object({
-	name: z.string('Name is required').transform(value => value.trim()),
-	accountType: z.enum(ACCOUNT_TYPES, 'Account type is required'),
-	description: z
-		.string()
-		.default('')
-		.transform(value => value?.trim()),
-	wallets: z
-		.array(WalletFormSchema.extend({ id: z.string().optional() }))
-		.min(1, 'At least one supported currency is required')
-		.refine(wallets => {
-			const currencies = wallets.map(w => w.currency)
-			return new Set(currencies).size === currencies.length
-		}, 'An account cannot have duplicate currencies'),
-})
-
-export const CreateAccountFormSchema = BaseAccountFormSchema.extend({
-	redirectTo: z.string().default(''),
-})
-export const EditAccountFormSchema = BaseAccountFormSchema.extend({
-	id: z.string(),
-})
+export const AccountFormSchema = z
+	.object({
+		name: z.string('Name is required').transform(value => value.trim()),
+		accountType: z.enum(ACCOUNT_TYPES, 'Account type is required'),
+		description: z
+			.string()
+			.default('')
+			.transform(value => value?.trim()),
+	})
+	.and(ActionSchema)
 
 export const DeleteAccountFormSchema = z.object({
 	accountId: z.string(),

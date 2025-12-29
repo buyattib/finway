@@ -19,27 +19,32 @@ const base = {
 		.notNull()
 		.$defaultFn(() => new Date().toISOString())
 		.$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
-	deletedAt: text().$type<string | null>().default(null),
 }
 
 export const user = sqliteTable(
 	'users',
 	{
-		createdAt: base.createdAt,
-		updatedAt: base.updatedAt,
-
+		...base,
 		id: cuid2().defaultRandom().primaryKey(),
 		email: text().notNull(),
 	},
 	table => [uniqueIndex('users_email_idx').on(table.email)],
 )
 
+export const currency = sqliteTable(
+	'currencies',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		code: text({ enum: CURRENCIES }).notNull(),
+	},
+	table => [uniqueIndex('currencies_code_idx').on(table.code)],
+)
+
 export const account = sqliteTable(
 	'accounts',
 	{
-		createdAt: base.createdAt,
-		updatedAt: base.updatedAt,
-
+		...base,
 		id: cuid2().defaultRandom().primaryKey(),
 		name: text().notNull(),
 		description: text().default(''),
@@ -49,30 +54,9 @@ export const account = sqliteTable(
 	},
 	table => [
 		foreignKey({
-			name: 'accounts_ownerId_fk',
+			name: 'accounts_users_fk',
 			columns: [table.ownerId],
 			foreignColumns: [user.id],
-		}).onDelete('cascade'),
-	],
-)
-
-export const wallet = sqliteTable(
-	'wallets',
-	{
-		createdAt: base.createdAt,
-		updatedAt: base.updatedAt,
-
-		id: cuid2().defaultRandom().primaryKey(),
-		currency: text({ enum: CURRENCIES }).notNull(),
-		balance: integer().notNull(), // store in base units (i.e. cents)
-
-		accountId: text().notNull(),
-	},
-	table => [
-		foreignKey({
-			name: 'wallets_accountId_fk',
-			columns: [table.accountId],
-			foreignColumns: [account.id],
 		}).onDelete('cascade'),
 	],
 )
@@ -80,9 +64,7 @@ export const wallet = sqliteTable(
 export const transactionCategory = sqliteTable(
 	'transaction_categories',
 	{
-		createdAt: base.createdAt,
-		updatedAt: base.updatedAt,
-
+		...base,
 		id: cuid2().defaultRandom().primaryKey(),
 		name: text().notNull(),
 		description: text().default(''),
@@ -91,7 +73,7 @@ export const transactionCategory = sqliteTable(
 	},
 	table => [
 		foreignKey({
-			name: 'transaction_categories_ownerId_fk',
+			name: 'transaction_categories_users_fk',
 			columns: [table.ownerId],
 			foreignColumns: [user.id],
 		}).onDelete('cascade'),
@@ -101,105 +83,109 @@ export const transactionCategory = sqliteTable(
 export const transaction = sqliteTable(
 	'transactions',
 	{
-		createdAt: base.createdAt,
-		updatedAt: base.updatedAt,
-
+		...base,
 		id: cuid2().defaultRandom().primaryKey(),
-
 		date: text().notNull(),
 		amount: integer().notNull(),
 		description: text().default(''),
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 
-		walletId: text().notNull(),
-		transactionCategoryId: text(),
+		accountId: text().notNull(),
+		currencyId: text().notNull(),
+		transactionCategoryId: text().notNull(),
 	},
 	table => [
 		foreignKey({
-			name: 'transactions_walletId_fk',
-			columns: [table.walletId],
-			foreignColumns: [wallet.id],
+			name: 'transactions_accounts_fk',
+			columns: [table.accountId],
+			foreignColumns: [account.id],
 		}).onDelete('cascade'),
 		foreignKey({
-			name: 'transactions_transactionCategoryId_fk',
+			name: 'transactions_currencies_fk',
+			columns: [table.currencyId],
+			foreignColumns: [currency.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'transactions_transaction_categories_fk',
 			columns: [table.transactionCategoryId],
 			foreignColumns: [transactionCategory.id],
-		}).onDelete('set null'),
+		}).onDelete('cascade'),
 	],
 )
 
 export const transfer = sqliteTable(
 	'transfers',
 	{
-		createdAt: base.createdAt,
-		updatedAt: base.updatedAt,
-
+		...base,
 		id: cuid2().defaultRandom().primaryKey(),
-
 		date: text().notNull(),
 		amount: integer().notNull(),
-		currency: text({ enum: CURRENCIES }).notNull(),
 
-		fromAccountId: text(),
-		toAccountId: text(),
+		fromAccountId: text().notNull(),
+		toAccountId: text().notNull(),
+		currencyId: text().notNull(),
 	},
 	table => [
 		foreignKey({
-			name: 'transfers_fromAccountId_fk',
+			name: 'transfers_from_accounts_fk',
 			columns: [table.fromAccountId],
 			foreignColumns: [account.id],
-		}).onDelete('set null'),
+		}).onDelete('cascade'),
 		foreignKey({
-			name: 'transfers_toAccountId_fk',
+			name: 'transfers_to_accounts_fk',
 			columns: [table.toAccountId],
 			foreignColumns: [account.id],
-		}).onDelete('set null'),
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'transfers_currencies_fk',
+			columns: [table.currencyId],
+			foreignColumns: [currency.id],
+		}).onDelete('cascade'),
 	],
 )
 
 export const exchange = sqliteTable(
 	'exchanges',
 	{
-		createdAt: base.createdAt,
-		updatedAt: base.updatedAt,
-
+		...base,
 		id: cuid2().defaultRandom().primaryKey(),
 		date: text().notNull(),
-
-		accountId: text().notNull(),
-
-		fromCurrency: text({ enum: CURRENCIES }).notNull(),
-		toCurrency: text({ enum: CURRENCIES }).notNull(),
-
 		fromAmount: integer().notNull(),
 		toAmount: integer().notNull(),
+
+		accountId: text().notNull(),
+		fromCurrencyId: text().notNull(),
+		toCurrencyId: text().notNull(),
 	},
 	table => [
 		foreignKey({
-			name: 'exchange_accountId_fk',
+			name: 'exchanges_accounts_fk',
 			columns: [table.accountId],
 			foreignColumns: [account.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'exchanges_from_currencies_fk',
+			columns: [table.fromCurrencyId],
+			foreignColumns: [currency.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'exchanges_to_currencies_fk',
+			columns: [table.toCurrencyId],
+			foreignColumns: [currency.id],
 		}).onDelete('cascade'),
 	],
 )
 
 // ORM Relations
 
-export const accountRelations = relations(account, ({ many }) => ({
-	wallets: many(wallet),
-}))
-
-export const walletRelations = relations(wallet, ({ one }) => ({
+export const transactionRelations = relations(transaction, ({ one }) => ({
 	account: one(account, {
-		fields: [wallet.accountId],
+		fields: [transaction.accountId],
 		references: [account.id],
 	}),
-}))
-
-export const transactionRelations = relations(transaction, ({ one }) => ({
-	wallet: one(wallet, {
-		fields: [transaction.walletId],
-		references: [wallet.id],
+	currency: one(currency, {
+		fields: [transaction.currencyId],
+		references: [currency.id],
 	}),
 	transactionCategory: one(transactionCategory, {
 		fields: [transaction.transactionCategoryId],
@@ -216,11 +202,23 @@ export const transferRelations = relations(transfer, ({ one }) => ({
 		fields: [transfer.toAccountId],
 		references: [account.id],
 	}),
+	currency: one(currency, {
+		fields: [transfer.currencyId],
+		references: [currency.id],
+	}),
 }))
 
 export const exchangeRelations = relations(exchange, ({ one }) => ({
 	account: one(account, {
 		fields: [exchange.accountId],
 		references: [account.id],
+	}),
+	fromCurrency: one(currency, {
+		fields: [exchange.fromCurrencyId],
+		references: [currency.id],
+	}),
+	toCurrency: one(currency, {
+		fields: [exchange.toCurrencyId],
+		references: [currency.id],
 	}),
 }))
