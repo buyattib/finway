@@ -1,4 +1,4 @@
-import { Link, Form, data, useNavigation } from 'react-router'
+import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { PlusIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq, desc, sql } from 'drizzle-orm'
@@ -6,9 +6,9 @@ import { eq, desc, sql } from 'drizzle-orm'
 import type { Route } from './+types'
 
 import {
-	transaction as transactionTable,
-	wallet as walletTable,
+	currency as currencyTable,
 	account as accountTable,
+	transaction as transactionTable,
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
@@ -29,11 +29,7 @@ import {
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
 
-import {
-	TRANSACTION_TYPE_DISPLAY,
-	TRANSACTION_TYPE_EXPENSE,
-	TRANSACTION_TYPE_INCOME,
-} from './lib/constants'
+import { TRANSACTION_TYPE_DISPLAY } from './lib/constants'
 import { DeleteTransactionFormSchema } from './lib/schemas'
 
 export function meta() {
@@ -55,17 +51,42 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
+	// const txs = await db.query.transaction.findMany({
+	// 	where: (transaction, { eq }) =>
+	// 		eq(transaction.account.ownerId, user.id),
+	// 	orderBy: (transaction, { desc }) => [desc(transaction.date)],
+	// 	columns: { id: true, date: true, amount: true, type: true },
+	// 	with: {
+	// 		currency: { columns: { code: true } },
+	// 		account: { columns: { name: true } },
+	// 		transactionCategory: { columns: { name: true } },
+	// 	},
+	// 	extras: {
+	// 		amount: sql<string>`CAST(${transactionTable.amount} / 100.0 as TEXT)`.as(
+	// 			'amount',
+	// 		),
+	// 	},
+	// })
+
 	const transactions = await db
 		.select({
 			id: transactionTable.id,
 			date: transactionTable.date,
 			amount: sql<string>`CAST(${transactionTable.amount} / 100.0 as TEXT)`,
 			type: transactionTable.type,
-			currency: walletTable.currency,
+			currency: currencyTable.code,
 			account: accountTable.name,
 			transactionCategory: transactionCategoryTable.name,
 		})
 		.from(transactionTable)
+		.innerJoin(
+			currencyTable,
+			eq(transactionTable.currencyId, currencyTable.id),
+		)
+		.innerJoin(
+			accountTable,
+			eq(transactionTable.accountId, accountTable.id),
+		)
 		.leftJoin(
 			transactionCategoryTable,
 			eq(
@@ -73,10 +94,8 @@ export async function loader({ context }: Route.LoaderArgs) {
 				transactionTable.transactionCategoryId,
 			),
 		)
-		.innerJoin(walletTable, eq(transactionTable.walletId, walletTable.id))
-		.innerJoin(accountTable, eq(walletTable.accountId, accountTable.id))
 		.where(eq(accountTable.ownerId, user.id))
-		.orderBy(desc(transactionTable.date))
+		.orderBy(desc(transactionTable.date), desc(transactionTable.createdAt))
 
 	return { transactions }
 }
@@ -106,18 +125,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const transaction = await db.query.transaction.findFirst({
 		where: (transaction, { eq }) => eq(transaction.id, transactionId),
 		columns: { id: true },
-		with: {
-			wallet: {
-				columns: {},
-				with: {
-					account: {
-						columns: { ownerId: true },
-					},
-				},
-			},
-		},
+		with: { account: { columns: { ownerId: true } } },
 	})
-	if (!transaction || transaction.wallet.account.ownerId !== user.id) {
+	if (!transaction || transaction.account.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: `Transaction ${transactionId} not found`,
@@ -125,36 +135,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	await db.transaction(async tx => {
-		const transaction = (await tx.query.transaction.findFirst({
-			where: (transaction, { eq }) => eq(transaction.id, transactionId),
-			columns: { amount: true, type: true },
-			with: {
-				wallet: {
-					columns: {
-						id: true,
-						balance: true,
-					},
-				},
-			},
-		}))!
-
-		const updatedBalance =
-			transaction.wallet.balance +
-			{
-				[TRANSACTION_TYPE_EXPENSE]: transaction.amount,
-				[TRANSACTION_TYPE_INCOME]: -transaction.amount,
-			}[transaction.type]
-
-		await tx
-			.update(walletTable)
-			.set({ balance: updatedBalance })
-			.where(eq(walletTable.id, transaction.wallet.id))
-
-		await tx
-			.delete(transactionTable)
-			.where(eq(transactionTable.id, transactionId))
-	})
+	await db
+		.delete(transactionTable)
+		.where(eq(transactionTable.id, transactionId))
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
@@ -166,11 +149,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 export default function Transactions({
 	loaderData: { transactions },
 }: Route.ComponentProps) {
+	const location = useLocation()
 	const navigation = useNavigation()
-
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === `/app/transactions?index` &&
+		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete'
 
@@ -216,13 +199,13 @@ export default function Transactions({
 							<TableHead>Date</TableHead>
 							<TableHead className='text-center'>Type</TableHead>
 							<TableHead className='text-center'>
+								Account
+							</TableHead>
+							<TableHead className='text-center'>
 								Category
 							</TableHead>
 							<TableHead className='text-center'>
 								Amount
-							</TableHead>
-							<TableHead className='text-center'>
-								Account
 							</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
@@ -256,13 +239,13 @@ export default function Transactions({
 										{typeLabel}
 									</TableCell>
 									<TableCell className='text-center'>
+										{account}
+									</TableCell>
+									<TableCell className='text-center'>
 										{transactionCategory ?? '-'}
 									</TableCell>
 									<TableCell className='text-center'>
 										<b>{currency}</b> {formatNumber(amount)}
-									</TableCell>
-									<TableCell className='text-center'>
-										{account}
 									</TableCell>
 									<TableCell className='flex justify-end items-center gap-2'>
 										<Button

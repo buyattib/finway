@@ -2,44 +2,52 @@ import { z } from 'zod'
 
 import { removeCommas } from '~/lib/utils'
 
-import { TRANSACTION_TYPES } from './constants'
+import { TRANSACTION_TYPES, ACTION_CREATION, ACTION_EDITION } from './constants'
 
-const BaseTransactionFormSchema = z.object({
-	date: z.iso.datetime('Date is required'),
-	type: z.enum(TRANSACTION_TYPES, 'Transaction type is required'),
-	amount: z
-		.string({ message: 'Amount is required' })
-		.refine(
-			value => {
-				const formatted = removeCommas(value)
-				return !isNaN(Number(formatted))
-			},
-			{
-				message: 'Amount must be a valid number',
-			},
-		)
-		.refine(
-			value => {
-				const formatted = removeCommas(value)
-				return Number(formatted) > 0
-			},
-			{
-				message: 'Amount must be greater than zero',
-			},
-		),
-	description: z
-		.string()
-		.default('')
-		.transform(value => value?.trim()),
-	accountId: z.string('Account is required'),
-	walletId: z.string('Currency is required'),
-	transactionCategoryId: z.string('Category is required'),
-})
+const ActionSchema = z.discriminatedUnion('action', [
+	z.object({
+		action: z.literal(ACTION_CREATION),
+	}),
+	z.object({
+		action: z.literal(ACTION_EDITION),
+		id: z.string(),
+	}),
+])
 
-export const CreateTransactionFormSchema = BaseTransactionFormSchema.extend({})
-export const EditTransactionFormSchema = BaseTransactionFormSchema.extend({
-	id: z.string(),
-})
+export const TransactionFormSchema = z
+	.object({
+		date: z.iso.datetime('Date is required'),
+		type: z.enum(TRANSACTION_TYPES, 'Transaction type is required'),
+		amount: z
+			.string({ message: 'Amount is required' })
+			.refine(
+				value => {
+					const formatted = removeCommas(value)
+					return !isNaN(Number(formatted))
+				},
+				{
+					message: 'Amount must be a valid number',
+				},
+			)
+			.refine(
+				value => {
+					const formatted = removeCommas(value)
+					return Number(formatted) > 0
+				},
+				{
+					message: 'Amount must be greater than zero',
+				},
+			),
+		description: z
+			.string()
+			.default('')
+			.transform(value => value?.trim()),
+
+		accountId: z.string('Account is required'),
+		currencyId: z.string('Currency is required'),
+		transactionCategoryId: z.string('Category is required'),
+	})
+	.and(ActionSchema)
 
 export const DeleteTransactionFormSchema = z.object({
 	transactionId: z.string(),

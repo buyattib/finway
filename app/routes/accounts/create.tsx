@@ -8,7 +8,7 @@ import { account as accountTable } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
-import { AccountForm } from './components/account-form'
+import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
 import { ACTION_CREATION } from './lib/constants'
 

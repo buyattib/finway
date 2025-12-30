@@ -20,3 +20,6 @@ export const TRANSACTION_TYPE_DISPLAY = {
 		color: 'green',
 	},
 }
+
+export const ACTION_CREATION = 'CREATION'
+export const ACTION_EDITION = 'EDITION'

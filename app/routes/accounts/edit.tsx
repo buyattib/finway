@@ -10,7 +10,7 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 
 import { GeneralErrorBoundary } from '~/components/general-error-boundary'
 
-import { AccountForm } from './components/account-form'
+import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
 import { ACTION_EDITION } from './lib/constants'
 

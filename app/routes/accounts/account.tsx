@@ -1,4 +1,4 @@
-import { Link, Form, data, useNavigation } from 'react-router'
+import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq, sql, desc } from 'drizzle-orm'
@@ -122,14 +122,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function AccountDetails({
-	loaderData: { account },
+	loaderData: {
+		account: { id, name, description, accountType, balances },
+	},
 }: Route.ComponentProps) {
-	const { id, name, description, accountType, balances } = account
-
+	const location = useLocation()
 	const navigation = useNavigation()
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === `/app/accounts/${id}` &&
+		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
 	return (
