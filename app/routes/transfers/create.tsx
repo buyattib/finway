@@ -9,14 +9,10 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm } from '@conform-to/react'
 import { ArrowLeftIcon } from 'lucide-react'
-import { eq } from 'drizzle-orm'
 import type { Route } from './+types/create'
 
 import { dbContext, userContext } from '~/lib/context'
-import {
-	wallet as walletTable,
-	transfer as transferTable,
-} from '~/database/schema'
+import { transfer as transferTable } from '~/database/schema'
 import { initializeDate, removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
@@ -39,7 +35,7 @@ import {
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import type { TCurrency } from '~/routes/accounts/lib/types'
+import { getAccountCurrencyBalance } from '~/routes/accounts/lib/queries'
 
 import { CreateTransferFormSchema } from './lib/schemas'
 
@@ -47,32 +43,17 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
 
-	const accountsResult = await db.query.account.findMany({
-		orderBy: (account, { desc }) => [desc(account.createdAt)],
+	const accounts = await db.query.account.findMany({
 		where: (account, { eq }) => eq(account.ownerId, user.id),
 		columns: { id: true, name: true, accountType: true },
-		with: {
-			wallets: {
-				orderBy: (wallet, { desc }) => [desc(wallet.balance)],
-				columns: { currency: true },
-			},
-		},
+		orderBy: (account, { desc }) => [desc(account.createdAt)],
 	})
 
-	const accounts = accountsResult.map(account => ({
-		id: account.id,
-		name: account.name,
-		accountType: account.accountType,
-	}))
-	const currenciesPerAccount = accountsResult.reduce(
-		(acc, account) => {
-			acc[account.id] = account.wallets.map(w => w.currency)
-			return acc
-		},
-		{} as Record<string, Array<TCurrency>>,
-	)
+	const currencies = await db.query.currency.findMany({
+		columns: { id: true, code: true },
+	})
 
-	return { accounts, currenciesPerAccount }
+	return { accounts, currencies }
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -90,20 +71,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 			const fromAccount = await db.query.account.findFirst({
 				where: (account, { eq }) => eq(account.id, data.fromAccountId),
 				columns: { ownerId: true },
-				with: {
-					wallets: {
-						columns: { id: true, balance: true, currency: true },
-					},
-				},
 			})
 			const toAccount = await db.query.account.findFirst({
 				where: (account, { eq }) => eq(account.id, data.toAccountId),
 				columns: { ownerId: true },
-				with: {
-					wallets: {
-						columns: { id: true, balance: true, currency: true },
-					},
-				},
 			})
 
 			if (!fromAccount || fromAccount.ownerId !== user.id) {
@@ -122,26 +93,28 @@ export async function action({ request, context }: Route.ActionArgs) {
 				})
 			}
 
-			const fromWallet = fromAccount.wallets.find(
-				w => w.currency === data.currency,
-			)
-			const toWallet = toAccount.wallets.find(
-				w => w.currency === data.currency,
-			)
-
-			if (!fromWallet || !toWallet) {
+			const currency = await db.query.currency.findFirst({
+				where: (currency, { eq }) => eq(currency.id, data.currencyId),
+				columns: { id: true },
+			})
+			if (!currency) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: 'Currency is not supported by one of the accounts',
-					path: ['currency'],
+					message: 'Currency not found',
+					path: ['currencyId'],
 				})
 			}
 
-			if (fromWallet.balance < data.amount) {
+			const fromBalance = await getAccountCurrencyBalance(
+				db,
+				data.fromAccountId,
+				data.currencyId,
+			)
+			if (fromBalance < data.amount) {
 				return ctx.addIssue({
 					code: 'custom',
 					message:
-						'Insufficient balance in the selected from account',
+						'Insufficient balance in the selected currency on the from account',
 					path: ['amount'],
 				})
 			}
@@ -152,38 +125,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({ submission: submission.reply() }, { status: 422 })
 	}
 
-	const body = submission.value
-	await db.transaction(async tx => {
-		const fromWallet = (await tx.query.wallet.findFirst({
-			where: (wallet, { eq, and }) =>
-				and(
-					eq(wallet.accountId, body.fromAccountId),
-					eq(wallet.currency, body.currency),
-				),
-			columns: { id: true, balance: true },
-		}))!
+	await db.insert(transferTable).values(submission.value)
 
-		const toWallet = (await tx.query.wallet.findFirst({
-			where: (wallet, { eq, and }) =>
-				and(
-					eq(wallet.accountId, body.toAccountId),
-					eq(wallet.currency, body.currency),
-				),
-			columns: { id: true, balance: true },
-		}))!
-
-		await tx.insert(transferTable).values(body)
-
-		await tx
-			.update(walletTable)
-			.set({ balance: fromWallet.balance - body.amount })
-			.where(eq(walletTable.id, fromWallet.id))
-
-		await tx
-			.update(walletTable)
-			.set({ balance: toWallet.balance + body.amount })
-			.where(eq(walletTable.id, toWallet.id))
-	})
 	return await redirectWithToast(`/app/transfers`, request, {
 		type: 'success',
 		title: 'Transfer created successfully',
@@ -191,7 +134,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateTransfer({
-	loaderData: { accounts, currenciesPerAccount },
+	loaderData: { accounts, currencies },
 	actionData,
 }: Route.ComponentProps) {
 	const location = useLocation()
@@ -207,7 +150,7 @@ export default function CreateTransfer({
 		defaultValue: {
 			date: initializeDate().toISOString(),
 			amount: '0',
-			currency: '',
+			currencyId: '',
 			fromAccountId: '',
 			toAccountId: '',
 		},
@@ -225,23 +168,11 @@ export default function CreateTransfer({
 		label: name,
 	}))
 
-	const selectedFromAccountId = fields.fromAccountId.value
-	const selectedToAccountId = fields.toAccountId.value
-
-	const fromCurrencies = selectedFromAccountId
-		? currenciesPerAccount[selectedFromAccountId]
-		: []
-	const toCurrencies = selectedToAccountId
-		? currenciesPerAccount[selectedToAccountId]
-		: []
-
-	const currencyOptions = fromCurrencies
-		.filter(c => toCurrencies.includes(c))
-		.map(c => ({
-			icon: <CurrencyIcon currency={c} size='sm' />,
-			value: c,
-			label: c,
-		}))
+	const currencyOptions = currencies.map(c => ({
+		icon: <CurrencyIcon currency={c.code} size='sm' />,
+		value: c.id,
+		label: c.code,
+	}))
 
 	return (
 		<Card className='md:max-w-2xl w-full mx-auto'>
@@ -297,7 +228,7 @@ export default function CreateTransfer({
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 								<SelectField
 									label='Currency'
-									field={fields.currency}
+									field={fields.currencyId}
 									placeholder='Select a currency'
 									items={currencyOptions}
 								/>

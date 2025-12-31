@@ -22,6 +22,7 @@ import type { TAccountType } from '~/routes/accounts/lib/types'
 const accountTypeIconVariants = cva('text-background', {
 	variants: {
 		size: {
+			xs: 'w-5 h-5',
 			sm: 'w-6 h-6',
 			md: 'w-6 h-6',
 			lg: 'w-8 h-8',
@@ -35,6 +36,7 @@ const accountTypeIconVariants = cva('text-background', {
 const containerVariants = cva('rounded-full', {
 	variants: {
 		size: {
+			xs: 'p-0.5',
 			sm: 'p-1',
 			md: 'p-2',
 			lg: 'p-2',

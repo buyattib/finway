@@ -1,12 +1,14 @@
 import { data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { and, eq, sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import type { Route } from './+types/edit'
 
 import { dbContext, userContext } from '~/lib/context'
 import { transaction as transactionTable } from '~/database/schema'
 import { removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
+
+import { getAccountCurrencyBalance } from '~/routes/accounts/lib/queries'
 
 import { TransactionFormSchema } from './lib/schemas'
 import {
@@ -137,24 +139,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 			}
 
 			// Current balance for account and currency
-			let [{ balance }] = await db
-				.select({
-					balance: sql<number>`COALESCE(
-						SUM(
-							CASE 
-								WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_INCOME} THEN ${transactionTable.amount}
-								WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_EXPENSE} THEN -${transactionTable.amount}
-								ELSE 0
-							END
-						), 0)`,
-				})
-				.from(transactionTable)
-				.where(
-					and(
-						eq(transactionTable.accountId, transaction.accountId),
-						eq(transactionTable.currencyId, transaction.currencyId),
-					),
-				)
+			let balance = await getAccountCurrencyBalance(
+				db,
+				data.accountId,
+				data.currencyId,
+			)
 
 			// Balance for account and currency before the transaction
 			if (

@@ -1,6 +1,5 @@
 import { data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { and, eq, sql } from 'drizzle-orm'
 import type { Route } from './+types/create'
 
 import { dbContext, userContext } from '~/lib/context'
@@ -8,12 +7,10 @@ import { transaction as transactionTable } from '~/database/schema'
 import { removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
+import { getAccountCurrencyBalance } from '~/routes/accounts/lib/queries'
+
 import { TransactionFormSchema } from './lib/schemas'
-import {
-	TRANSACTION_TYPE_EXPENSE,
-	TRANSACTION_TYPE_INCOME,
-	ACTION_CREATION,
-} from './lib/constants'
+import { TRANSACTION_TYPE_EXPENSE, ACTION_CREATION } from './lib/constants'
 import { getSelectData } from './lib/queries'
 import { TransactionForm } from './components/form'
 
@@ -76,24 +73,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 				})
 			}
 
-			const [{ balance }] = await db
-				.select({
-					balance: sql<number>`COALESCE(
-						SUM(
-							CASE 
-								WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_INCOME} THEN ${transactionTable.amount}
-								WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_EXPENSE} THEN -${transactionTable.amount}
-								ELSE 0
-							END
-						), 0)`,
-				})
-				.from(transactionTable)
-				.where(
-					and(
-						eq(transactionTable.accountId, data.accountId),
-						eq(transactionTable.currencyId, data.currencyId),
-					),
-				)
+			const balance = await getAccountCurrencyBalance(
+				db,
+				data.accountId,
+				data.currencyId,
+			)
 
 			if (
 				data.type === TRANSACTION_TYPE_EXPENSE &&

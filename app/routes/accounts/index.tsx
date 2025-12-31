@@ -152,7 +152,7 @@ export default function Accounts({
 							<Link
 								to={id}
 								prefetch='intent'
-								className='flex flex-col gap-6 sm:flex-row sm:justify-between border rounded-xl p-4 hover:border-primary transition-all min-h-24'
+								className='flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-center border rounded-xl p-4 sm:px-6 hover:border-primary transition-all min-h-32'
 							>
 								<div className='flex items-center gap-4'>
 									<AccountTypeIcon
@@ -180,7 +180,7 @@ export default function Accounts({
 								</div>
 								{!!balances.length && (
 									<ul
-										className='flex flex-col justify-center gap-2'
+										className='flex flex-col justify-center gap-2 min-w-5xs'
 										aria-labelledby={id}
 									>
 										{balances.map(
