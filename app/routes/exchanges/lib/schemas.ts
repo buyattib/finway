@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
 import { removeCommas } from '~/lib/utils'
-import { CURRENCIES } from '~/routes/accounts/lib/constants'
 
 const BaseExchangeFormSchema = z.object({
 	date: z.iso.datetime('Date is required'),
@@ -46,8 +45,8 @@ const BaseExchangeFormSchema = z.object({
 			},
 		),
 
-	fromCurrency: z.enum(CURRENCIES, 'Currency is required'),
-	toCurrency: z.enum(CURRENCIES, 'Currency is required'),
+	fromCurrencyId: z.string('From currency is required'),
+	toCurrencyId: z.string('To currency is required'),
 
 	accountId: z.string('Account is required'),
 })
@@ -56,11 +55,11 @@ export const CreateExchangeFormSchema = BaseExchangeFormSchema.extend(
 	{},
 ).refine(
 	data => {
-		return data.fromCurrency !== data.toCurrency
+		return data.fromCurrencyId !== data.toCurrencyId
 	},
 	{
 		message: 'An exchange can only be done between different currencies',
-		path: ['toCurrency'],
+		path: ['toCurrencyId'],
 	},
 )
 

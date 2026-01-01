@@ -1,14 +1,15 @@
-import { Link, Form, useNavigation, data } from 'react-router'
+import { Link, Form, useNavigation, data, useLocation } from 'react-router'
 import { PlusIcon, TrashIcon } from 'lucide-react'
 import { eq, desc, sql } from 'drizzle-orm'
 import { parseWithZod } from '@conform-to/zod/v4'
+import { alias } from 'drizzle-orm/sqlite-core'
 
 import type { Route } from './+types'
 
 import {
+	currency as currencyTable,
 	account as accountTable,
 	exchange as exchangeTable,
-	wallet as walletTable,
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber } from '~/lib/utils'
@@ -49,18 +50,33 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
+	const fromCurrencyAlias = alias(currencyTable, 'fromCurrency')
+	const toCurrencyAlias = alias(currencyTable, 'toCurrency')
+
 	const exchanges = await db
 		.select({
 			id: exchangeTable.id,
 			date: exchangeTable.date,
-			fromCurrency: exchangeTable.fromCurrency,
-			toCurrency: exchangeTable.toCurrency,
+
+			account: accountTable.name,
+			accountType: accountTable.accountType,
+
+			fromCurrency: fromCurrencyAlias.code,
+			toCurrency: toCurrencyAlias.code,
+
 			fromAmount: sql<string>`CAST(${exchangeTable.fromAmount} / 100.0 as TEXT)`,
 			toAmount: sql<string>`CAST(${exchangeTable.toAmount} / 100.0 as TEXT)`,
-			account: accountTable.name,
 		})
 		.from(exchangeTable)
 		.innerJoin(accountTable, eq(exchangeTable.accountId, accountTable.id))
+		.innerJoin(
+			fromCurrencyAlias,
+			eq(exchangeTable.fromCurrencyId, fromCurrencyAlias.id),
+		)
+		.innerJoin(
+			toCurrencyAlias,
+			eq(exchangeTable.toCurrencyId, toCurrencyAlias.id),
+		)
 		.where(eq(accountTable.ownerId, user.id))
 		.orderBy(desc(exchangeTable.date))
 
@@ -92,9 +108,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const exchange = await db.query.exchange.findFirst({
 		where: (exchange, { eq }) => eq(exchange.id, exchangeId),
 		columns: { id: true },
-		with: {
-			account: { columns: { ownerId: true } },
-		},
+		with: { account: { columns: { ownerId: true } } },
 	})
 	if (!exchange || exchange.account.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
@@ -104,53 +118,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	await db.transaction(async tx => {
-		const exchange = (await tx.query.exchange.findFirst({
-			where: (exchange, { eq }) => eq(exchange.id, exchangeId),
-			columns: {
-				fromCurrency: true,
-				toCurrency: true,
-				fromAmount: true,
-				toAmount: true,
-			},
-			with: {
-				account: {
-					columns: {},
-					with: {
-						wallets: {
-							columns: {
-								id: true,
-								balance: true,
-								currency: true,
-							},
-						},
-					},
-				},
-			},
-		}))!
-
-		const fromWallet = exchange.account.wallets.find(
-			w => w.currency === exchange.fromCurrency,
-		)
-		const toWallet = exchange.account.wallets.find(
-			w => w.currency === exchange.toCurrency,
-		)
-
-		if (fromWallet) {
-			await tx
-				.update(walletTable)
-				.set({ balance: fromWallet.balance + exchange.fromAmount })
-				.where(eq(walletTable.id, fromWallet.id))
-		}
-		if (toWallet) {
-			await tx
-				.update(walletTable)
-				.set({ balance: toWallet.balance - exchange.toAmount })
-				.where(eq(walletTable.id, toWallet.id))
-		}
-
-		await tx.delete(exchangeTable).where(eq(exchangeTable.id, exchangeId))
-	})
+	await db.delete(exchangeTable).where(eq(exchangeTable.id, exchangeId))
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
@@ -162,11 +130,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 export default function Exchanges({
 	loaderData: { exchanges },
 }: Route.ComponentProps) {
+	const location = useLocation()
 	const navigation = useNavigation()
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === `/app/exchanges?index` &&
+		navigation.formAction === location.pathname + '?index' &&
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete'
 

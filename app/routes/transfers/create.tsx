@@ -36,6 +36,7 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 import { getAccountCurrencyBalance } from '~/routes/accounts/lib/queries'
+import { getSelectData } from '~/routes/transactions/lib/queries'
 
 import { CreateTransferFormSchema } from './lib/schemas'
 
@@ -43,15 +44,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
 
-	const accounts = await db.query.account.findMany({
-		where: (account, { eq }) => eq(account.ownerId, user.id),
-		columns: { id: true, name: true, accountType: true },
-		orderBy: (account, { desc }) => [desc(account.createdAt)],
-	})
-
-	const currencies = await db.query.currency.findMany({
-		columns: { id: true, code: true },
-	})
+	const { accounts, currencies } = await getSelectData(db, user.id)
 
 	return { accounts, currencies }
 }

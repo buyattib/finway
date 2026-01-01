@@ -153,7 +153,7 @@ export default function Transactions({
 	const navigation = useNavigation()
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === location.pathname &&
+		navigation.formAction === location.pathname + '?index' &&
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete'
 

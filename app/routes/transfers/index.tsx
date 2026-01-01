@@ -150,7 +150,7 @@ export default function Transfers({
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === `/app/transfers?index` &&
+		navigation.formAction === location.pathname + '?index' &&
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete'
 
