@@ -8,7 +8,7 @@ import { transaction as transactionTable } from '~/database/schema'
 import { removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
-import { getAccountCurrencyBalance } from '~/routes/accounts/lib/queries'
+import { getBalances } from '~/routes/accounts/lib/queries'
 
 import { TransactionFormSchema } from './lib/schemas'
 import {
@@ -139,11 +139,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 			}
 
 			// Current balance for account and currency
-			let balance = await getAccountCurrencyBalance(
+			const [result] = await getBalances(
 				db,
+				user.id,
 				data.accountId,
 				data.currencyId,
+				false,
 			)
+			let balance = !result ? 0 : result.balance
 
 			// Balance for account and currency before the transaction
 			if (

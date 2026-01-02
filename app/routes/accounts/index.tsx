@@ -1,15 +1,11 @@
 import { Link } from 'react-router'
 import { PlusIcon } from 'lucide-react'
-import { desc, eq, sql } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 
 import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
-import {
-	currency as currencyTable,
-	account as accountTable,
-	transaction as transactionTable,
-} from '~/database/schema'
+import { account as accountTable } from '~/database/schema'
 import { formatNumber } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
@@ -18,11 +14,7 @@ import { Title } from '~/components/ui/title'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import {
-	TRANSACTION_TYPE_EXPENSE,
-	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
-
+import { getBalances } from './lib/queries'
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
 import type { TAccountBalance } from './lib/types'
 
@@ -45,51 +37,18 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const balances = await db
-		.select({
-			accountId: transactionTable.accountId,
-			currencyId: transactionTable.currencyId,
-			currency: currencyTable.code,
-			balance: sql<number>`SUM(
-					CASE 
-					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_INCOME} THEN ${transactionTable.amount}
-					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_EXPENSE} THEN -${transactionTable.amount}
-					ELSE 0
-					END
-				)`.as('balance'),
-		})
-		.from(transactionTable)
-		.innerJoin(
-			currencyTable,
-			eq(currencyTable.id, transactionTable.currencyId),
-		)
-		.innerJoin(
-			accountTable,
-			eq(accountTable.id, transactionTable.accountId),
-		)
-		.where(eq(accountTable.ownerId, user.id))
-		.groupBy(transactionTable.accountId, transactionTable.currencyId)
-		.orderBy(transactionTable.accountId, desc(sql`balance`))
-
+	const balances = await getBalances(db, user.id)
 	const balancesByAccount = balances.reduce(
-		(acc, curr) => {
-			const balances = acc[curr.accountId] || []
-
-			acc[curr.accountId] =
-				balances.length < 3
-					? [
-							...balances,
-							{
-								id: `${curr.accountId}-${curr.currencyId}`,
-								balance: String(curr.balance / 100),
-								currency: curr.currency,
-							},
-						]
-					: balances
-
+		(acc, { accountId, currency, currencyId, balance }) => {
+			acc[accountId] = acc[accountId] || []
+			acc[accountId].push({
+				id: `${accountId}-${currencyId}`,
+				currency,
+				balance,
+			})
 			return acc
 		},
-		{} as Record<string, Array<TAccountBalance>>,
+		{} as Record<string, TAccountBalance[]>,
 	)
 
 	const accounts = await db

@@ -35,7 +35,7 @@ import {
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { getAccountCurrencyBalance } from '~/routes/accounts/lib/queries'
+import { getBalances } from '~/routes/accounts/lib/queries'
 import { getSelectData } from '~/routes/transactions/lib/queries'
 
 import { CreateTransferFormSchema } from './lib/schemas'
@@ -98,12 +98,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 				})
 			}
 
-			const fromBalance = await getAccountCurrencyBalance(
+			const [result] = await getBalances(
 				db,
+				user.id,
 				data.fromAccountId,
 				data.currencyId,
+				false,
 			)
-			if (fromBalance < data.amount) {
+			if (!result || result.balance < data.amount) {
 				return ctx.addIssue({
 					code: 'custom',
 					message:

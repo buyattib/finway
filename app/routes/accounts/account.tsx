@@ -1,15 +1,11 @@
 import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq, sql, desc } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import type { Route } from './+types/account'
 
 import { dbContext, userContext } from '~/lib/context'
-import {
-	currency as currencyTable,
-	account as accountTable,
-	transaction as transactionTable,
-} from '~/database/schema'
+import { account as accountTable } from '~/database/schema'
 import { formatNumber } from '~/lib/utils'
 import {
 	createToastHeaders,
@@ -29,11 +25,7 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
-import {
-	TRANSACTION_TYPE_EXPENSE,
-	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
-
+import { getBalances } from './lib/queries'
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
 import { DeleteAccountFormSchema } from './lib/schemas'
 
@@ -58,28 +50,7 @@ export async function loader({
 		throw new Response('Account not found', { status: 404 })
 	}
 
-	const balances = await db
-		.select({
-			currencyId: transactionTable.currencyId,
-			currency: currencyTable.code,
-			balance: sql<string>`CAST(
-				SUM(
-					CASE 
-					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_INCOME} THEN ${transactionTable.amount}
-					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_EXPENSE} THEN -${transactionTable.amount}
-					ELSE 0
-					END
-				) / 100.0 AS TEXT
-			)`.as('balance'),
-		})
-		.from(transactionTable)
-		.innerJoin(
-			currencyTable,
-			eq(currencyTable.id, transactionTable.currencyId),
-		)
-		.where(eq(transactionTable.accountId, accountId))
-		.groupBy(transactionTable.currencyId)
-		.orderBy(desc(sql`balance`))
+	const balances = await getBalances(db, user.id, accountId)
 
 	const { ownerId, ...accountData } = account
 	return { account: { ...accountData, balances } }

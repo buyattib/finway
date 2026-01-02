@@ -7,7 +7,7 @@ import { transaction as transactionTable } from '~/database/schema'
 import { removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
-import { getAccountCurrencyBalance } from '~/routes/accounts/lib/queries'
+import { getBalances } from '~/routes/accounts/lib/queries'
 
 import { TransactionFormSchema } from './lib/schemas'
 import { TRANSACTION_TYPE_EXPENSE, ACTION_CREATION } from './lib/constants'
@@ -73,15 +73,16 @@ export async function action({ request, context }: Route.ActionArgs) {
 				})
 			}
 
-			const balance = await getAccountCurrencyBalance(
+			const [result] = await getBalances(
 				db,
+				user.id,
 				data.accountId,
 				data.currencyId,
+				false,
 			)
-
 			if (
 				data.type === TRANSACTION_TYPE_EXPENSE &&
-				balance < data.amount
+				(!result || result.balance < data.amount)
 			) {
 				return ctx.addIssue({
 					code: 'custom',
