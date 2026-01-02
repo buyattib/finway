@@ -5,7 +5,12 @@ import {
 	getSelectProps,
 	type FieldMetadata,
 } from '@conform-to/react'
-import { PlusCircleIcon, CalendarIcon } from 'lucide-react'
+import {
+	PlusCircleIcon,
+	CalendarIcon,
+	ChevronsUpDownIcon,
+	CheckIcon,
+} from 'lucide-react'
 
 import { cn, removeCommas, isValueNumeric, formatDate } from '~/lib/utils'
 
@@ -23,6 +28,14 @@ import {
 import { Button } from './ui/button'
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'
 import { Calendar } from './ui/calendar'
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from './ui/command'
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined
 
@@ -225,6 +238,112 @@ export function SelectField({
 					))}
 				</SelectContent>
 			</Select>
+
+			<div className='min-h-6 py-1 px-1'>
+				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+			</div>
+		</div>
+	)
+}
+
+export function ComboboxField({
+	field,
+	items,
+	label,
+	buttonPlaceholder,
+	inputPlaceholder,
+	emptyPlaceholder,
+	disabled,
+	dropdownWidth,
+	className,
+}: {
+	field: FieldMetadata<string>
+	items: Array<{ value: string; label: string; icon?: React.ReactNode }>
+	label?: string
+	buttonPlaceholder?: string
+	inputPlaceholder?: string
+	emptyPlaceholder?: string
+	disabled?: boolean
+	dropdownWidth?: string
+	className?: string
+}) {
+	const [open, setOpen] = useState(false)
+
+	const fallbackId = useId()
+	const fieldProps = getSelectProps(field)
+	const errors = field.errors as ListOfErrors
+
+	const id = fieldProps.id ?? fallbackId
+	const errorId = errors?.length ? `${id}-error` : undefined
+
+	const control = useInputControl({
+		key: fieldProps.key,
+		name: fieldProps.name,
+		formId: fieldProps.form,
+		initialValue: fieldProps.defaultValue
+			? String(fieldProps.defaultValue)
+			: '',
+	})
+
+	const selected = items.find(item => item.value === control.value)
+	const buttonDisplay = selected ? (
+		<div className='flex items-center gap-2'>
+			{selected.icon} {selected.label}
+		</div>
+	) : (
+		buttonPlaceholder
+	)
+
+	return (
+		<div className={cn('flex flex-col gap-1 w-full', className)}>
+			<Label htmlFor={id} aria-invalid={errorId ? true : undefined}>
+				{label}
+			</Label>
+
+			<Popover open={open} onOpenChange={setOpen}>
+				<PopoverTrigger asChild>
+					<Button
+						variant='outline'
+						role='combobox'
+						aria-expanded={open}
+						className={cn('justify-between', {
+							'text-muted-foreground': !selected,
+						})}
+						disabled={disabled}
+						aria-invalid={errorId ? true : undefined}
+						aria-describedby={errorId}
+						width='full'
+					>
+						{buttonDisplay}
+						<ChevronsUpDownIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+					</Button>
+				</PopoverTrigger>
+				<PopoverContent className={cn('p-0')}>
+					<Command>
+						<CommandInput placeholder={inputPlaceholder} />
+						<CommandList>
+							<CommandEmpty>
+								{emptyPlaceholder ?? 'No results found'}
+							</CommandEmpty>
+							<CommandGroup>
+								{items.map(item => (
+									<CommandItem
+										key={item.value}
+										value={item.value}
+										keywords={[item.label.toLowerCase()]}
+										onSelect={value => {
+											control.change(value)
+											setOpen(false)
+										}}
+									>
+										{item?.icon} {item.label}
+									</CommandItem>
+								))}
+							</CommandGroup>
+						</CommandList>
+					</Command>
+				</PopoverContent>
+			</Popover>
 
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}

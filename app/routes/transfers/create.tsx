@@ -28,9 +28,9 @@ import {
 import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
-	SelectField,
 	NumberField,
 	DateField,
+	ComboboxField,
 } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
@@ -205,26 +205,26 @@ export default function CreateTransfer({
 					{accounts.length !== 0 ? (
 						<>
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-								<SelectField
+								<ComboboxField
 									label='From Account'
 									field={fields.fromAccountId}
-									placeholder='Select an account'
+									buttonPlaceholder='Select an account'
 									items={accountOptions}
 								/>
 
-								<SelectField
+								<ComboboxField
 									label='To Account'
 									field={fields.toAccountId}
-									placeholder='Select an account'
+									buttonPlaceholder='Select an account'
 									items={accountOptions}
 								/>
 							</div>
 
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-								<SelectField
+								<ComboboxField
 									label='Currency'
 									field={fields.currencyId}
-									placeholder='Select a currency'
+									buttonPlaceholder='Select a currency'
 									items={currencyOptions}
 								/>
 								<NumberField

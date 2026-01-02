@@ -26,6 +26,7 @@ import {
 	ErrorList,
 	TextField,
 	SelectField,
+	ComboboxField,
 	NumberField,
 	DateField,
 } from '~/components/forms'
@@ -127,7 +128,7 @@ export function TransactionForm(props: Props) {
 	}))
 
 	const accountOptions = accounts.map(({ id, name, accountType }) => ({
-		icon: <AccountTypeIcon accountType={accountType} size='sm' />,
+		icon: <AccountTypeIcon accountType={accountType} size='xs' />,
 		value: id,
 		label: name,
 	}))
@@ -195,17 +196,17 @@ export function TransactionForm(props: Props) {
 
 					{accounts.length !== 0 ? (
 						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-							<SelectField
+							<ComboboxField
 								label='Account'
 								field={fields.accountId}
-								placeholder='Select an account'
+								buttonPlaceholder='Select an account'
 								items={accountOptions}
 							/>
 
-							<SelectField
+							<ComboboxField
 								label='Currency'
 								field={fields.currencyId}
-								placeholder='Select a currency'
+								buttonPlaceholder='Select a currency'
 								items={currencyOptions}
 							/>
 						</div>
@@ -229,10 +230,10 @@ export function TransactionForm(props: Props) {
 					<NumberField label='Amount' field={fields.amount} />
 
 					{transactionCategories.length !== 0 ? (
-						<SelectField
+						<ComboboxField
 							label='Transaction Category'
 							field={fields.transactionCategoryId}
-							placeholder='Select a transaction category'
+							buttonPlaceholder='Select a transaction category'
 							items={transactionCategoryOptions}
 						/>
 					) : (
