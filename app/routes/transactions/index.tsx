@@ -28,6 +28,9 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
+import { AccountTypeIcon } from '~/components/account-type-icon'
+
+import { getBalances } from '~/routes/accounts/lib/queries'
 
 import { TRANSACTION_TYPE_DISPLAY } from './lib/constants'
 import { DeleteTransactionFormSchema } from './lib/schemas'
@@ -51,23 +54,6 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	// const txs = await db.query.transaction.findMany({
-	// 	where: (transaction, { eq }) =>
-	// 		eq(transaction.account.ownerId, user.id),
-	// 	orderBy: (transaction, { desc }) => [desc(transaction.date)],
-	// 	columns: { id: true, date: true, amount: true, type: true },
-	// 	with: {
-	// 		currency: { columns: { code: true } },
-	// 		account: { columns: { name: true } },
-	// 		transactionCategory: { columns: { name: true } },
-	// 	},
-	// 	extras: {
-	// 		amount: sql<string>`CAST(${transactionTable.amount} / 100.0 as TEXT)`.as(
-	// 			'amount',
-	// 		),
-	// 	},
-	// })
-
 	const transactions = await db
 		.select({
 			id: transactionTable.id,
@@ -76,6 +62,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 			type: transactionTable.type,
 			currency: currencyTable.code,
 			account: accountTable.name,
+			accountType: accountTable.accountType,
 			transactionCategory: transactionCategoryTable.name,
 		})
 		.from(transactionTable)
@@ -124,13 +111,28 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const transaction = await db.query.transaction.findFirst({
 		where: (transaction, { eq }) => eq(transaction.id, transactionId),
-		columns: { id: true },
+		columns: { id: true, accountId: true, currencyId: true, amount: true },
 		with: { account: { columns: { ownerId: true } } },
 	})
 	if (!transaction || transaction.account.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: `Transaction ${transactionId} not found`,
+		})
+		return data({}, { headers: toastHeaders })
+	}
+
+	const [{ balance }] = await getBalances(
+		db,
+		user.id,
+		transaction.accountId,
+		transaction.currencyId,
+		false,
+	)
+	if (balance < transaction.amount) {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: 'Cannot delete transaction as account would hold a negative balance',
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -197,13 +199,13 @@ export default function Transactions({
 					<TableHeader>
 						<TableRow>
 							<TableHead>Date</TableHead>
-							<TableHead className='text-center'>Type</TableHead>
 							<TableHead className='text-center'>
 								Account
 							</TableHead>
 							<TableHead className='text-center'>
 								Category
 							</TableHead>
+							<TableHead className='text-center'>Type</TableHead>
 							<TableHead className='text-center'>
 								Amount
 							</TableHead>
@@ -220,6 +222,7 @@ export default function Transactions({
 							amount,
 							currency,
 							account,
+							accountType,
 							transactionCategory,
 						}) => {
 							const { label: typeLabel, color: typeColor } =
@@ -230,6 +233,18 @@ export default function Transactions({
 									<TableCell className='w-30'>
 										{formatDate(new Date(date))}
 									</TableCell>
+									<TableCell>
+										<div className='flex justify-center items-center gap-2'>
+											<AccountTypeIcon
+												size='xs'
+												accountType={accountType}
+											/>
+											{account}
+										</div>
+									</TableCell>
+									<TableCell className='text-center'>
+										{transactionCategory ?? '-'}
+									</TableCell>
 									<TableCell
 										className={cn(
 											'text-center',
@@ -237,12 +252,6 @@ export default function Transactions({
 										)}
 									>
 										{typeLabel}
-									</TableCell>
-									<TableCell className='text-center'>
-										{account}
-									</TableCell>
-									<TableCell className='text-center'>
-										{transactionCategory ?? '-'}
 									</TableCell>
 									<TableCell className='text-center'>
 										<b>{currency}</b> {formatNumber(amount)}

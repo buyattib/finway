@@ -28,6 +28,9 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
+import { AccountTypeIcon } from '~/components/account-type-icon'
+
+import { getBalances } from '~/routes/accounts/lib/queries'
 
 import { DeleteExchangeFormSchema } from './lib/schemas'
 
@@ -78,7 +81,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 			eq(exchangeTable.toCurrencyId, toCurrencyAlias.id),
 		)
 		.where(eq(accountTable.ownerId, user.id))
-		.orderBy(desc(exchangeTable.date))
+		.orderBy(desc(exchangeTable.date), desc(exchangeTable.createdAt))
 
 	return { exchanges }
 }
@@ -107,13 +110,33 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const exchange = await db.query.exchange.findFirst({
 		where: (exchange, { eq }) => eq(exchange.id, exchangeId),
-		columns: { id: true },
+		columns: {
+			id: true,
+			accountId: true,
+			toCurrencyId: true,
+			toAmount: true,
+		},
 		with: { account: { columns: { ownerId: true } } },
 	})
 	if (!exchange || exchange.account.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: `Exchange ${exchangeId} not found`,
+		})
+		return data({}, { headers: toastHeaders })
+	}
+
+	const [{ balance }] = await getBalances(
+		db,
+		user.id,
+		exchange.accountId,
+		exchange.toCurrencyId,
+		false,
+	)
+	if (balance < exchange.toAmount) {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: 'Cannot delete exchange as account would hold a negative balance',
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -199,14 +222,21 @@ export default function Exchanges({
 							fromCurrency,
 							toCurrency,
 							account,
+							accountType,
 						}) => {
 							return (
 								<TableRow key={id}>
 									<TableCell className='w-30'>
 										{formatDate(new Date(date))}
 									</TableCell>
-									<TableCell className='text-center'>
-										{account}
+									<TableCell>
+										<div className='flex justify-center items-center gap-2'>
+											<AccountTypeIcon
+												size='xs'
+												accountType={accountType}
+											/>
+											{account}
+										</div>
 									</TableCell>
 									<TableCell className='text-center'>
 										<b>{fromCurrency}</b>{' '}

@@ -29,6 +29,8 @@ import {
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
 
+import { getBalances } from '~/routes/accounts/lib/queries'
+
 import { DeleteTransferFormSchema } from './lib/schemas'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
@@ -87,7 +89,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 				eq(toAccountAlias.ownerId, user.id),
 			),
 		)
-		.orderBy(desc(transferTable.date))
+		.orderBy(desc(transferTable.date), desc(transferTable.createdAt))
 
 	return { transfers }
 }
@@ -116,7 +118,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const transfer = await db.query.transfer.findFirst({
 		where: (transfer, { eq }) => eq(transfer.id, transferId),
-		columns: { id: true },
+		columns: {
+			id: true,
+			toAccountId: true,
+			currencyId: true,
+			amount: true,
+		},
 		with: {
 			fromAccount: { columns: { ownerId: true } },
 			toAccount: { columns: { ownerId: true } },
@@ -130,6 +137,21 @@ export async function action({ request, context }: Route.ActionArgs) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: `Transfer ${transferId} not found`,
+		})
+		return data({}, { headers: toastHeaders })
+	}
+
+	const [{ balance }] = await getBalances(
+		db,
+		user.id,
+		transfer.toAccountId,
+		transfer.currencyId,
+		false,
+	)
+	if (balance < transfer.amount) {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: 'Cannot delete transfer as account would hold a negative balance',
 		})
 		return data({}, { headers: toastHeaders })
 	}
