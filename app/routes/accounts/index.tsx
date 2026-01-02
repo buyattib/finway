@@ -1,6 +1,6 @@
-import { Link } from 'react-router'
+import { Form, Link, useNavigation, useSubmit } from 'react-router'
 import { PlusIcon } from 'lucide-react'
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, and, like, sql } from 'drizzle-orm'
 
 import type { Route } from './+types'
 
@@ -13,10 +13,13 @@ import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
+import { Input } from '~/components/ui/input'
 
 import { getBalances } from './lib/queries'
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
 import type { TAccountBalance } from './lib/types'
+import { useEffect } from 'react'
+import { Spinner } from '~/components/ui/spinner'
 
 export function meta() {
 	return [
@@ -33,9 +36,11 @@ export function meta() {
 	]
 }
 
-export async function loader({ context }: Route.LoaderArgs) {
+export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const url = new URL(request.url)
+	const search = url.searchParams.get('search')
 
 	const balances = await getBalances(db, user.id)
 	const balancesByAccount = balances.reduce(
@@ -51,6 +56,13 @@ export async function loader({ context }: Route.LoaderArgs) {
 		{} as Record<string, TAccountBalance[]>,
 	)
 
+	const filters = [eq(accountTable.ownerId, user.id)]
+	if (search) {
+		filters.push(
+			like(sql`lower(${accountTable.name})`, `%${search.toLowerCase()}%`),
+		)
+	}
+
 	const accounts = await db
 		.select({
 			id: accountTable.id,
@@ -59,7 +71,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 			accountType: accountTable.accountType,
 		})
 		.from(accountTable)
-		.where(eq(accountTable.ownerId, user.id))
+		.where(and(...filters))
 		.orderBy(desc(accountTable.createdAt))
 
 	const accountsWithBalances = accounts.map(account => {
@@ -69,12 +81,27 @@ export async function loader({ context }: Route.LoaderArgs) {
 		}
 	})
 
-	return { accounts: accountsWithBalances }
+	return { accounts: accountsWithBalances, search }
 }
 
 export default function Accounts({
-	loaderData: { accounts },
+	loaderData: { accounts, search },
 }: Route.ComponentProps) {
+	const navigation = useNavigation()
+	const submit = useSubmit()
+
+	useEffect(() => {
+		const searchField = document.getElementById('search')
+		if (searchField instanceof HTMLInputElement) {
+			searchField.value = search ?? ''
+		}
+	}, [search])
+
+	const isSearching =
+		navigation.location &&
+		navigation.location.search &&
+		navigation.location.search.includes('search')
+
 	return (
 		<section
 			className='flex flex-col gap-4'
@@ -92,15 +119,44 @@ export default function Accounts({
 				</Button>
 			</div>
 
+			<Form
+				id='search-accounts'
+				role='search'
+				onChange={event => {
+					const isFirstSearch = search === null
+					submit(event.currentTarget, { replace: !isFirstSearch })
+				}}
+			>
+				<Input
+					className='px-6'
+					aria-label='Search accounts'
+					id='search'
+					name='search'
+					placeholder='Search by account name'
+					type='search'
+					defaultValue={search ?? ''}
+				/>
+			</Form>
+
+			<div className='h-4'>
+				{isSearching && <Spinner size='sm' className='mx-auto' />}
+			</div>
+
 			{accounts.length === 0 && (
 				<div className='my-2'>
-					<Text size='md' weight='medium' alignment='center'>
-						You have not created any accounts yet. Start creating
-						them{' '}
-						<Link to='create' className='text-primary'>
-							here
-						</Link>
-					</Text>
+					{!search ? (
+						<Text size='md' weight='medium' alignment='center'>
+							You have not created any accounts yet. Start
+							creating them{' '}
+							<Link to='create' className='text-primary'>
+								here
+							</Link>
+						</Text>
+					) : (
+						<Text size='md' weight='medium' alignment='center'>
+							No accounts found for the search {search}
+						</Text>
+					)}
 				</div>
 			)}
 
