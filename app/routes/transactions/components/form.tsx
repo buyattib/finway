@@ -200,14 +200,14 @@ export function TransactionForm(props: Props) {
 								label='Account'
 								field={fields.accountId}
 								buttonPlaceholder='Select an account'
-								items={accountOptions}
+								options={accountOptions}
 							/>
 
 							<ComboboxField
 								label='Currency'
 								field={fields.currencyId}
 								buttonPlaceholder='Select a currency'
-								items={currencyOptions}
+								options={currencyOptions}
 							/>
 						</div>
 					) : (
@@ -234,7 +234,7 @@ export function TransactionForm(props: Props) {
 							label='Transaction Category'
 							field={fields.transactionCategoryId}
 							buttonPlaceholder='Select a transaction category'
-							items={transactionCategoryOptions}
+							options={transactionCategoryOptions}
 						/>
 					) : (
 						<Text size='sm' theme='muted' alignment='center'>

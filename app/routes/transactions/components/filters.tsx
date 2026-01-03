@@ -1,16 +1,14 @@
-import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
-import { getFormProps, useForm } from '@conform-to/react'
-import { Form } from 'react-router'
+import { useRef } from 'react'
+import { Form, useSubmit } from 'react-router'
 import type { Route } from '../+types'
 
-import { ComboboxField, SelectField } from '~/components/forms'
 import { TransactionTypeIcon } from '~/components/transaction-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { AccountTypeIcon } from '~/components/account-type-icon'
-import { Button } from '~/components/ui/button'
+import { Combobox } from '~/components/ui/combobox'
+import { Select } from '~/components/select'
 
 import { TRANSACTION_TYPE_DISPLAY, TRANSACTION_TYPES } from '../lib/constants'
-import { TransactionFiltersSchema } from '../lib/schemas'
 
 export function TransactionsFilters({
 	filters,
@@ -19,17 +17,8 @@ export function TransactionsFilters({
 	filters: Route.ComponentProps['loaderData']['filters']
 	selectData: Route.ComponentProps['loaderData']['selectData']
 }) {
-	const [form, fields] = useForm({
-		id: 'transactions-filters-form',
-		shouldValidate: 'onSubmit',
-		defaultValue: filters,
-		constraint: getZodConstraint(TransactionFiltersSchema),
-		onValidate({ formData }) {
-			return parseWithZod(formData, {
-				schema: TransactionFiltersSchema,
-			})
-		},
-	})
+	const submit = useSubmit()
+	const form = useRef<HTMLFormElement>(null)
 
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionTypeIcon size='sm' transactionType={i} />,
@@ -61,50 +50,52 @@ export function TransactionsFilters({
 	return (
 		<>
 			<Form
-				{...getFormProps(form)}
-				method='get'
-				className='grid md:grid-cols-2 grid-cols-1 gap-2 w-full'
+				ref={form}
+				id='transactions-filters'
+				className='flex sm:flex-row sm:items-center gap-2'
 			>
-				<ComboboxField
-					field={fields.accountId}
-					items={accountOptions}
-					buttonPlaceholder='Filter by accounts'
-					hideErrors
+				<Combobox
+					options={accountOptions}
+					name='accountId'
+					defaultValue={filters.accountId}
+					buttonPlaceholder='Filter by account'
+					onValueChange={() => {
+						if (!form.current) return
+						submit(form.current)
+					}}
 				/>
-				<ComboboxField
-					field={fields.currencyId}
-					items={currencyOptions}
-					buttonPlaceholder='Filter by currencies'
-					hideErrors
+				<Combobox
+					options={currencyOptions}
+					name='currencyId'
+					defaultValue={filters.currencyId}
+					buttonPlaceholder='Filter by currency'
+					onValueChange={() => {
+						if (!form.current) return
+						submit(form.current)
+					}}
 				/>
-				<ComboboxField
-					field={fields.transactionCategoryId}
-					items={transactionCategoryOptions}
-					buttonPlaceholder='Filter by categories'
-					hideErrors
+				<Combobox
+					options={transactionCategoryOptions}
+					name='transactionCategoryId'
+					defaultValue={filters.transactionCategoryId}
+					buttonPlaceholder='Filter by category'
+					onValueChange={() => {
+						if (!form.current) return
+						submit(form.current)
+					}}
 				/>
-				<SelectField
-					field={fields.transactionType}
-					items={transactionTypeOptions}
+				<Select
+					clearable
+					options={transactionTypeOptions}
+					name='transactionType'
+					defaultValue={filters.transactionType}
 					placeholder='Filter by type'
-					hideErrors
+					onValueChange={() => {
+						if (!form.current) return
+						submit(form.current)
+					}}
 				/>
 			</Form>
-			<div className='flex flex-col md:flex-row md:items-center md:justify-end gap-2'>
-				<Button
-					variant='outline'
-					onClick={() => {
-						Object.keys(filters).map(name => {
-							form.update({ name, value: '' })
-						})
-					}}
-				>
-					Reset
-				</Button>
-				<Button form={form.id} type='submit'>
-					Apply
-				</Button>
-			</div>
 		</>
 	)
 }

@@ -209,14 +209,14 @@ export default function CreateTransfer({
 									label='From Account'
 									field={fields.fromAccountId}
 									buttonPlaceholder='Select an account'
-									items={accountOptions}
+									options={accountOptions}
 								/>
 
 								<ComboboxField
 									label='To Account'
 									field={fields.toAccountId}
 									buttonPlaceholder='Select an account'
-									items={accountOptions}
+									options={accountOptions}
 								/>
 							</div>
 
@@ -225,7 +225,7 @@ export default function CreateTransfer({
 									label='Currency'
 									field={fields.currencyId}
 									buttonPlaceholder='Select a currency'
-									items={currencyOptions}
+									options={currencyOptions}
 								/>
 								<NumberField
 									label='Amount'

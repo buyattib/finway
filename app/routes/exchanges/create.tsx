@@ -28,7 +28,6 @@ import {
 import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
-	SelectField,
 	ComboboxField,
 	NumberField,
 	DateField,
@@ -211,20 +210,20 @@ export default function CreateExchange({
 								label='Account'
 								field={fields.accountId}
 								buttonPlaceholder='Select an account'
-								items={accountOptions}
+								options={accountOptions}
 							/>
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 								<ComboboxField
 									label='From Currency'
 									field={fields.fromCurrencyId}
 									buttonPlaceholder='Select a currency'
-									items={currencyOptions}
+									options={currencyOptions}
 								/>
 								<ComboboxField
 									label='To Currency'
 									field={fields.toCurrencyId}
 									buttonPlaceholder='Select a currency'
-									items={currencyOptions}
+									options={currencyOptions}
 								/>
 							</div>
 
