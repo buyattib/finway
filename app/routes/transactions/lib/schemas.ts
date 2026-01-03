@@ -53,3 +53,10 @@ export const DeleteTransactionFormSchema = z.object({
 	transactionId: z.string(),
 	intent: z.literal('delete'),
 })
+
+export const TransactionFiltersSchema = z.object({
+	transactionType: z.enum(TRANSACTION_TYPES).optional(),
+	accountId: z.string().optional(),
+	currencyId: z.string().optional(),
+	transactionCategoryId: z.string().optional(),
+})

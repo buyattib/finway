@@ -39,6 +39,7 @@ export function meta() {
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+
 	const url = new URL(request.url)
 	const search = url.searchParams.get('search')
 

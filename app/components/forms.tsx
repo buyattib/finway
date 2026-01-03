@@ -5,12 +5,7 @@ import {
 	getSelectProps,
 	type FieldMetadata,
 } from '@conform-to/react'
-import {
-	PlusCircleIcon,
-	CalendarIcon,
-	ChevronsUpDownIcon,
-	CheckIcon,
-} from 'lucide-react'
+import { PlusCircleIcon, CalendarIcon, ChevronsUpDownIcon } from 'lucide-react'
 
 import { cn, removeCommas, isValueNumeric, formatDate } from '~/lib/utils'
 
@@ -182,6 +177,7 @@ export function SelectField({
 	items,
 	placeholder,
 	className,
+	hideErrors,
 	...triggerProps
 }: {
 	label?: string
@@ -189,6 +185,7 @@ export function SelectField({
 	items: Array<{ label: string; value: string; icon?: React.ReactNode }>
 	placeholder?: string
 	className?: string
+	hideErrors?: boolean
 } & SelectTriggerProps) {
 	const fallbackId = useId()
 	const fieldProps = getSelectProps(field)
@@ -238,10 +235,13 @@ export function SelectField({
 					))}
 				</SelectContent>
 			</Select>
-
-			<div className='min-h-6 py-1 px-1'>
-				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
-			</div>
+			{!hideErrors && (
+				<div className='min-h-6 py-1 px-1'>
+					{errorId ? (
+						<ErrorList id={errorId} errors={errors} />
+					) : null}
+				</div>
+			)}
 		</div>
 	)
 }
@@ -254,8 +254,8 @@ export function ComboboxField({
 	inputPlaceholder,
 	emptyPlaceholder,
 	disabled,
-	dropdownWidth,
 	className,
+	hideErrors,
 }: {
 	field: FieldMetadata<string>
 	items: Array<{ value: string; label: string; icon?: React.ReactNode }>
@@ -264,8 +264,8 @@ export function ComboboxField({
 	inputPlaceholder?: string
 	emptyPlaceholder?: string
 	disabled?: boolean
-	dropdownWidth?: string
 	className?: string
+	hideErrors?: boolean
 }) {
 	const [open, setOpen] = useState(false)
 
@@ -299,10 +299,11 @@ export function ComboboxField({
 			<Label htmlFor={id} aria-invalid={errorId ? true : undefined}>
 				{label}
 			</Label>
-
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<Button
+						name={fieldProps.name}
+						value={control.value}
 						variant='outline'
 						role='combobox'
 						aria-expanded={open}
@@ -344,10 +345,13 @@ export function ComboboxField({
 					</Command>
 				</PopoverContent>
 			</Popover>
-
-			<div className='min-h-6 py-1 px-1'>
-				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
-			</div>
+			{!hideErrors && (
+				<div className='min-h-6 py-1 px-1'>
+					{errorId ? (
+						<ErrorList id={errorId} errors={errors} />
+					) : null}
+				</div>
+			)}
 		</div>
 	)
 }
