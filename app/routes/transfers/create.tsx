@@ -98,13 +98,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 				})
 			}
 
-			const [result] = await getBalances(
+			const { fromAccountId: accountId, currencyId } = data
+			const [result] = await getBalances({
 				db,
-				user.id,
-				data.fromAccountId,
-				data.currencyId,
-				false,
-			)
+				ownerId: user.id,
+				accountId,
+				currencyId,
+				parseBalance: false,
+			})
 			if (!result || result.balance < data.amount) {
 				return ctx.addIssue({
 					code: 'custom',

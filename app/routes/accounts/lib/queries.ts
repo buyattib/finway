@@ -23,29 +23,29 @@ type BaseBalance = {
 	currency: TCurrency
 }
 
+type Args = {
+	db: DB
+	ownerId: string
+	accountId?: string
+	currencyId?: string
+	parseBalance?: boolean
+}
+
 export async function getBalances(
-	db: DB,
-	ownerId: string,
-	accountId?: string | undefined,
-	currencyId?: string | undefined,
-	parseBalance?: true,
+	args: Args & { parseBalance?: true },
 ): Promise<Array<BaseBalance & { balance: string }>>
 
 export async function getBalances(
-	db: DB,
-	ownerId: string,
-	accountId?: string,
-	currencyId?: string,
-	parseBalance?: false,
+	args: Args & { parseBalance?: false },
 ): Promise<Array<BaseBalance & { balance: number }>>
 
-export async function getBalances(
-	db: DB,
-	ownerId: string,
-	accountId?: string,
-	currencyId?: string,
+export async function getBalances({
+	db,
+	ownerId,
+	accountId,
+	currencyId,
 	parseBalance = true,
-) {
+}: Args) {
 	const transactionBalances = db
 		.select({
 			accountId: transactionTable.accountId,
@@ -167,7 +167,7 @@ export async function getBalances(
 		.from(allBalances)
 		.where(and(...filters))
 		.groupBy(allBalances.accountId, allBalances.currencyId)
-		.orderBy(desc(sql`balance`))
+		.orderBy(desc(sql`SUM(${allBalances.balance})`))
 
 	return balances
 }

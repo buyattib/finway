@@ -73,13 +73,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 				})
 			}
 
-			const [result] = await getBalances(
+			const { accountId, currencyId } = data
+			const [result] = await getBalances({
 				db,
-				user.id,
-				data.accountId,
-				data.currencyId,
-				false,
-			)
+				ownerId: user.id,
+				accountId,
+				currencyId,
+				parseBalance: false,
+			})
 			if (
 				data.type === TRANSACTION_TYPE_EXPENSE &&
 				(!result || result.balance < data.amount)

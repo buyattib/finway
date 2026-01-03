@@ -141,13 +141,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	const [{ balance }] = await getBalances(
+	const { toAccountId: accountId, currencyId } = transfer
+	const [{ balance }] = await getBalances({
 		db,
-		user.id,
-		transfer.toAccountId,
-		transfer.currencyId,
-		false,
-	)
+		ownerId: user.id,
+		accountId,
+		currencyId,
+		parseBalance: false,
+	})
 	if (balance < transfer.amount) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',

@@ -50,7 +50,7 @@ export async function loader({
 		throw new Response('Account not found', { status: 404 })
 	}
 
-	const balances = await getBalances(db, user.id, accountId)
+	const balances = await getBalances({ db, ownerId: user.id, accountId })
 
 	const { ownerId, ...accountData } = account
 	return { account: { ...accountData, balances } }

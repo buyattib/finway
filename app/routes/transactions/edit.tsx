@@ -139,13 +139,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 			}
 
 			// Current balance for account and currency
-			const [result] = await getBalances(
+			const { accountId, currencyId } = data
+			const [result] = await getBalances({
 				db,
-				user.id,
-				data.accountId,
-				data.currencyId,
-				false,
-			)
+				ownerId: user.id,
+				accountId,
+				currencyId,
+				parseBalance: false,
+			})
 			let balance = !result ? 0 : result.balance
 
 			// Balance for account and currency before the transaction

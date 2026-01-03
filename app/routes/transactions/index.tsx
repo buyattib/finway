@@ -184,13 +184,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	const [{ balance }] = await getBalances(
+	const { accountId, currencyId } = transaction
+
+	const [{ balance }] = await getBalances({
 		db,
-		user.id,
-		transaction.accountId,
-		transaction.currencyId,
-		false,
-	)
+		ownerId: user.id,
+		accountId,
+		currencyId,
+		parseBalance: false,
+	})
 	if (balance < transaction.amount) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
