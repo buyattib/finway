@@ -41,77 +41,77 @@ export const currency = sqliteTable(
 	table => [uniqueIndex('currencies_code_idx').on(table.code)],
 )
 
-// export const account = sqliteTable(
-// 	'accounts',
-// 	{
-// 		...base,
-// 		id: cuid2().defaultRandom().primaryKey(),
-// 		name: text().notNull(),
-// 		description: text().default(''),
-// 		accountType: text({ enum: ACCOUNT_TYPES }).notNull(),
+export const account = sqliteTable(
+	'accounts',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		name: text().notNull(),
+		description: text().default(''),
+		accountType: text({ enum: ACCOUNT_TYPES }).notNull(),
 
-// 		ownerId: text().notNull(),
-// 	},
-// 	table => [
-// 		foreignKey({
-// 			name: 'accounts_users_fk',
-// 			columns: [table.ownerId],
-// 			foreignColumns: [user.id],
-// 		}).onDelete('cascade'),
-// 	],
-// )
+		ownerId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'accounts_users_fk',
+			columns: [table.ownerId],
+			foreignColumns: [user.id],
+		}).onDelete('cascade'),
+	],
+)
 
-// export const transactionCategory = sqliteTable(
-// 	'transaction_categories',
-// 	{
-// 		...base,
-// 		id: cuid2().defaultRandom().primaryKey(),
-// 		name: text().notNull(),
-// 		description: text().default(''),
+export const transactionCategory = sqliteTable(
+	'transaction_categories',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		name: text().notNull(),
+		description: text().default(''),
 
-// 		ownerId: text().notNull(),
-// 	},
-// 	table => [
-// 		foreignKey({
-// 			name: 'transaction_categories_users_fk',
-// 			columns: [table.ownerId],
-// 			foreignColumns: [user.id],
-// 		}).onDelete('cascade'),
-// 	],
-// )
+		ownerId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'transaction_categories_users_fk',
+			columns: [table.ownerId],
+			foreignColumns: [user.id],
+		}).onDelete('cascade'),
+	],
+)
 
-// export const transaction = sqliteTable(
-// 	'transactions',
-// 	{
-// 		...base,
-// 		id: cuid2().defaultRandom().primaryKey(),
-// 		date: text().notNull(),
-// 		amount: integer().notNull(),
-// 		description: text().default(''),
-// 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
+export const transaction = sqliteTable(
+	'transactions',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		date: text().notNull(),
+		amount: integer().notNull(),
+		description: text().default(''),
+		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 
-// 		accountId: text().notNull(),
-// 		currencyId: text().notNull(),
-// 		transactionCategoryId: text().notNull(),
-// 	},
-// 	table => [
-// 		foreignKey({
-// 			name: 'transactions_accounts_fk',
-// 			columns: [table.accountId],
-// 			foreignColumns: [account.id],
-// 		}).onDelete('cascade'),
-// 		foreignKey({
-// 			name: 'transactions_currencies_fk',
-// 			columns: [table.currencyId],
-// 			foreignColumns: [currency.id],
-// 		}).onDelete('cascade'),
-// 		foreignKey({
-// 			name: 'transactions_transaction_categories_fk',
-// 			columns: [table.transactionCategoryId],
-// 			foreignColumns: [transactionCategory.id],
-// 		}).onDelete('cascade'),
-// 	],
-// )
+		accountId: text().notNull(),
+		currencyId: text().notNull(),
+		transactionCategoryId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'transactions_accounts_fk',
+			columns: [table.accountId],
+			foreignColumns: [account.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'transactions_currencies_fk',
+			columns: [table.currencyId],
+			foreignColumns: [currency.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'transactions_transaction_categories_fk',
+			columns: [table.transactionCategoryId],
+			foreignColumns: [transactionCategory.id],
+		}).onDelete('cascade'),
+	],
+)
 
 // export const transfer = sqliteTable(
 // 	'transfers',
