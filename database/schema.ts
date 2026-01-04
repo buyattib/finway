@@ -18,7 +18,7 @@ const base = {
 	updatedAt: text()
 		.notNull()
 		.$defaultFn(() => new Date().toISOString())
-		.$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+		.$onUpdate(() => new Date().toISOString()),
 }
 
 export const user = sqliteTable(
