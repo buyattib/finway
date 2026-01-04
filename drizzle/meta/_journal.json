@@ -15,6 +15,13 @@
       "when": 1767489546156,
       "tag": "0001_create_currencies_table",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1767489592832,
+      "tag": "0002_populate_currencies_table",
+      "breakpoints": true
     }
   ]
 }
