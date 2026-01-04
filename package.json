@@ -4,6 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"db:generate": "dotenv -- drizzle-kit generate --name",
+		"db:generate-custom": "dotenv -- drizzle-kit generate --custom --name",
 		"db:migrate": "dotenv -- drizzle-kit migrate",
 		"db:drop": "dotenv -- drizzle-kit drop",
 		"db:push": "dotenv -- drizzle-kit push",
