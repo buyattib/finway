@@ -20,6 +20,9 @@ There are scripts in the package.json defined to:
 - pnpm run db:migrate: applies the migrations in the generated .sql file
 - pnpm run db:drop: prompts you to select a migration to remove (does not apply changes on the db)
 
+NOTE: when modifying generated migrations, dont remove the: --> statement-breakpoint
+as its used to run multiple statements
+
 ## Run scripts
 
 - With 'script' script: pnpm run script -- database/seed/new-user.ts

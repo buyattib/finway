@@ -4,4 +4,5 @@ CREATE TABLE `users` (
 	`id` text(24) PRIMARY KEY NOT NULL,
 	`email` text NOT NULL
 );
+--> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique_idx` ON `users` (`email`);

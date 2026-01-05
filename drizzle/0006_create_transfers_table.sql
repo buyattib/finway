@@ -11,5 +11,6 @@ CREATE TABLE `transfers` (
 	FOREIGN KEY (`toAccountId`) REFERENCES `accounts`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`currencyId`) REFERENCES `currencies`(`id`) ON UPDATE no action ON DELETE cascade
 );
-CREATE INDEX `transfers_fromAccountId_currencyId_idx` ON `transfers` (`fromAccountId`,`currencyId`);
+--> statement-breakpoint
+CREATE INDEX `transfers_fromAccountId_currencyId_idx` ON `transfers` (`fromAccountId`,`currencyId`);--> statement-breakpoint
 CREATE INDEX `transfers_toAccountId_currencyId_idx` ON `transfers` (`toAccountId`,`currencyId`);
