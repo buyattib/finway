@@ -7,9 +7,9 @@ import { parseWithZod } from '@conform-to/zod/v4'
 import type { Route } from './+types'
 
 import {
-	transfer as transferTable,
+	currency as currencyTable,
 	account as accountTable,
-	wallet as walletTable,
+	transfer as transferTable,
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber } from '~/lib/utils'
@@ -29,7 +29,10 @@ import {
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
 
+import { getBalances } from '~/routes/accounts/lib/queries'
+
 import { DeleteTransferFormSchema } from './lib/schemas'
+import { AccountTypeIcon } from '~/components/account-type-icon'
 
 export function meta() {
 	return [
@@ -59,12 +62,19 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 			date: transferTable.date,
 			amount: sql<string>`CAST(${transferTable.amount} / 100.0 as TEXT)`,
-			currency: transferTable.currency,
+			currency: currencyTable.code,
 
 			fromAccount: fromAccountAlias.name,
+			fromAccountType: fromAccountAlias.accountType,
+
 			toAccount: toAccountAlias.name,
+			toAccountType: toAccountAlias.accountType,
 		})
 		.from(transferTable)
+		.innerJoin(
+			currencyTable,
+			eq(transferTable.currencyId, currencyTable.id),
+		)
 		.innerJoin(
 			fromAccountAlias,
 			eq(transferTable.fromAccountId, fromAccountAlias.id),
@@ -79,7 +89,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 				eq(toAccountAlias.ownerId, user.id),
 			),
 		)
-		.orderBy(desc(transferTable.date))
+		.orderBy(desc(transferTable.date), desc(transferTable.createdAt))
 
 	return { transfers }
 }
@@ -108,7 +118,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const transfer = await db.query.transfer.findFirst({
 		where: (transfer, { eq }) => eq(transfer.id, transferId),
-		columns: { id: true },
+		columns: {
+			id: true,
+			toAccountId: true,
+			currencyId: true,
+			amount: true,
+		},
 		with: {
 			fromAccount: { columns: { ownerId: true } },
 			toAccount: { columns: { ownerId: true } },
@@ -126,60 +141,23 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	await db.transaction(async tx => {
-		const transfer = (await tx.query.transfer.findFirst({
-			where: (transfer, { eq }) => eq(transfer.id, transferId),
-			columns: { amount: true, currency: true },
-			with: {
-				fromAccount: {
-					columns: {},
-					with: {
-						wallets: {
-							columns: {
-								id: true,
-								balance: true,
-								currency: true,
-							},
-						},
-					},
-				},
-				toAccount: {
-					columns: {},
-					with: {
-						wallets: {
-							columns: {
-								id: true,
-								balance: true,
-								currency: true,
-							},
-						},
-					},
-				},
-			},
-		}))!
-
-		const fromWallet = transfer?.fromAccount?.wallets.find(
-			w => w.currency === transfer.currency,
-		)
-		const toWallet = transfer?.toAccount?.wallets.find(
-			w => w.currency === transfer.currency,
-		)
-
-		if (fromWallet) {
-			await tx
-				.update(walletTable)
-				.set({ balance: fromWallet.balance + transfer.amount })
-				.where(eq(walletTable.id, fromWallet.id))
-		}
-		if (toWallet) {
-			await tx
-				.update(walletTable)
-				.set({ balance: toWallet.balance - transfer.amount })
-				.where(eq(walletTable.id, toWallet.id))
-		}
-
-		await tx.delete(transferTable).where(eq(transferTable.id, transferId))
+	const { toAccountId: accountId, currencyId } = transfer
+	const [{ balance }] = await getBalances({
+		db,
+		ownerId: user.id,
+		accountId,
+		currencyId,
+		parseBalance: false,
 	})
+	if (balance < transfer.amount) {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: 'Cannot delete transfer as account would hold a negative balance',
+		})
+		return data({}, { headers: toastHeaders })
+	}
+
+	await db.delete(transferTable).where(eq(transferTable.id, transferId))
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
@@ -195,7 +173,7 @@ export default function Transfers({
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === `/app/transfers?index` &&
+		navigation.formAction === location.pathname + '?index' &&
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete'
 
@@ -260,7 +238,9 @@ export default function Transfers({
 							amount,
 							currency,
 							fromAccount,
+							fromAccountType,
 							toAccount,
+							toAccountType,
 						}) => {
 							return (
 								<TableRow key={id}>
@@ -270,11 +250,23 @@ export default function Transfers({
 									<TableCell className='text-center'>
 										<b>{currency}</b> {formatNumber(amount)}
 									</TableCell>
-									<TableCell className='text-center'>
-										{fromAccount}
+									<TableCell>
+										<div className='flex justify-center items-center gap-2'>
+											<AccountTypeIcon
+												size='xs'
+												accountType={fromAccountType}
+											/>
+											{fromAccount}
+										</div>
 									</TableCell>
-									<TableCell className='text-center'>
-										{toAccount}
+									<TableCell>
+										<div className='flex justify-center items-center gap-2'>
+											<AccountTypeIcon
+												size='xs'
+												accountType={toAccountType}
+											/>
+											{toAccount}
+										</div>
 									</TableCell>
 									<TableCell className='flex justify-end items-center gap-2'>
 										<Form method='post'>

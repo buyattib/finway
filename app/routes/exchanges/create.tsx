@@ -9,14 +9,10 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm } from '@conform-to/react'
 import { ArrowLeftIcon } from 'lucide-react'
-import { eq } from 'drizzle-orm'
 import type { Route } from './+types/create'
 
 import { dbContext, userContext } from '~/lib/context'
-import {
-	wallet as walletTable,
-	exchange as exchangeTable,
-} from '~/database/schema'
+import { exchange as exchangeTable } from '~/database/schema'
 import { initializeDate, removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
@@ -32,14 +28,15 @@ import {
 import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
-	SelectField,
+	ComboboxField,
 	NumberField,
 	DateField,
 } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import type { TCurrency } from '~/routes/accounts/lib/types'
+import { getBalances } from '~/routes/accounts/lib/queries'
+import { getSelectData } from '~/routes/transactions/lib/queries'
 
 import { CreateExchangeFormSchema } from './lib/schemas'
 
@@ -47,32 +44,9 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
 
-	const accountsResult = await db.query.account.findMany({
-		orderBy: (account, { desc }) => [desc(account.createdAt)],
-		where: (account, { eq }) => eq(account.ownerId, user.id),
-		columns: { id: true, name: true, accountType: true },
-		with: {
-			wallets: {
-				orderBy: (wallet, { desc }) => [desc(wallet.balance)],
-				columns: { currency: true },
-			},
-		},
-	})
+	const { accounts, currencies } = await getSelectData(db, user.id)
 
-	const accounts = accountsResult.map(account => ({
-		id: account.id,
-		name: account.name,
-		accountType: account.accountType,
-	}))
-	const currenciesPerAccount = accountsResult.reduce(
-		(acc, account) => {
-			acc[account.id] = account.wallets.map(w => w.currency)
-			return acc
-		},
-		{} as Record<string, Array<TCurrency>>,
-	)
-
-	return { accounts, currenciesPerAccount }
+	return { accounts, currencies }
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -91,11 +65,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 			const account = await db.query.account.findFirst({
 				where: (account, { eq }) => eq(account.id, data.accountId),
 				columns: { ownerId: true },
-				with: {
-					wallets: {
-						columns: { id: true, balance: true, currency: true },
-					},
-				},
 			})
 			if (!account || account.ownerId !== user.id) {
 				return ctx.addIssue({
@@ -105,24 +74,44 @@ export async function action({ request, context }: Route.ActionArgs) {
 				})
 			}
 
-			const fromWallet = account.wallets.find(
-				w => w.currency === data.fromCurrency,
-			)
-			const toWallet = account.wallets.find(
-				w => w.currency === data.toCurrency,
-			)
-
-			if (!fromWallet || !toWallet) {
+			const fromCurrency = await db.query.currency.findFirst({
+				where: (currency, { eq }) =>
+					eq(currency.id, data.fromCurrencyId),
+				columns: { id: true },
+			})
+			if (!fromCurrency) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: 'Currency is not supported by one of the accounts',
+					message: 'From currency not found',
+					path: ['fromCurrencyId'],
 				})
 			}
 
-			if (fromWallet.balance < data.fromAmount) {
+			const toCurrency = await db.query.currency.findFirst({
+				where: (currency, { eq }) => eq(currency.id, data.toCurrencyId),
+				columns: { id: true },
+			})
+			if (!toCurrency) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: 'Insufficient balance in the selected currency',
+					message: 'to currency not found',
+					path: ['toCurrencyId'],
+				})
+			}
+
+			const { accountId, fromCurrencyId: currencyId } = data
+			const [result] = await getBalances({
+				db,
+				ownerId: user.id,
+				accountId,
+				currencyId,
+				parseBalance: false,
+			})
+			if (!result || result.balance < data.fromAmount) {
+				return ctx.addIssue({
+					code: 'custom',
+					message:
+						'Insufficient balance in the selected from currency',
 					path: ['fromAmount'],
 				})
 			}
@@ -133,37 +122,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({ submission: submission.reply() }, { status: 422 })
 	}
 
-	const body = submission.value
-	await db.transaction(async tx => {
-		const account = (await tx.query.account.findFirst({
-			where: (account, { eq }) => eq(account.id, body.accountId),
-			columns: {},
-			with: {
-				wallets: {
-					columns: { id: true, balance: true, currency: true },
-				},
-			},
-		}))!
-
-		const fromWallet = account.wallets.find(
-			w => w.currency === body.fromCurrency,
-		)!
-		const toWallet = account.wallets.find(
-			w => w.currency === body.toCurrency,
-		)!
-
-		await tx.insert(exchangeTable).values(body)
-
-		await tx
-			.update(walletTable)
-			.set({ balance: fromWallet.balance - body.fromAmount })
-			.where(eq(walletTable.id, fromWallet.id))
-
-		await tx
-			.update(walletTable)
-			.set({ balance: toWallet.balance + body.toAmount })
-			.where(eq(walletTable.id, toWallet.id))
-	})
+	await db.insert(exchangeTable).values(submission.value)
 
 	return await redirectWithToast(`/app/exchanges`, request, {
 		type: 'success',
@@ -172,7 +131,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateExchange({
-	loaderData: { accounts, currenciesPerAccount },
+	loaderData: { accounts, currencies },
 	actionData,
 }: Route.ComponentProps) {
 	const location = useLocation()
@@ -189,8 +148,8 @@ export default function CreateExchange({
 			date: initializeDate().toISOString(),
 			fromAmount: '0',
 			toAmount: '0',
-			fromCurrency: '',
-			toCurrency: '',
+			fromCurrencyId: '',
+			toCurrencyId: '',
 			accountId: '',
 		},
 		constraint: getZodConstraint(CreateExchangeFormSchema),
@@ -207,15 +166,11 @@ export default function CreateExchange({
 		label: name,
 	}))
 
-	const selectedAccount = fields.accountId.value
-
-	const currencyOptions = selectedAccount
-		? currenciesPerAccount[selectedAccount].map(c => ({
-				icon: <CurrencyIcon currency={c} size='sm' />,
-				value: c,
-				label: c,
-			}))
-		: []
+	const currencyOptions = currencies.map(c => ({
+		icon: <CurrencyIcon currency={c.code} size='sm' />,
+		value: c.id,
+		label: c.code,
+	}))
 
 	return (
 		<Card className='md:max-w-2xl w-full mx-auto'>
@@ -252,24 +207,24 @@ export default function CreateExchange({
 
 					{accounts.length !== 0 ? (
 						<>
-							<SelectField
+							<ComboboxField
 								label='Account'
 								field={fields.accountId}
-								placeholder='Select an account'
-								items={accountOptions}
+								buttonPlaceholder='Select an account'
+								options={accountOptions}
 							/>
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-								<SelectField
+								<ComboboxField
 									label='From Currency'
-									field={fields.fromCurrency}
-									placeholder='Select a currency'
-									items={currencyOptions}
+									field={fields.fromCurrencyId}
+									buttonPlaceholder='Select a currency'
+									options={currencyOptions}
 								/>
-								<SelectField
+								<ComboboxField
 									label='To Currency'
-									field={fields.toCurrency}
-									placeholder='Select a currency'
-									items={currencyOptions}
+									field={fields.toCurrencyId}
+									buttonPlaceholder='Select a currency'
+									options={currencyOptions}
 								/>
 							</div>
 

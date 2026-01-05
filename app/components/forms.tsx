@@ -5,7 +5,7 @@ import {
 	getSelectProps,
 	type FieldMetadata,
 } from '@conform-to/react'
-import { PlusCircleIcon, CalendarIcon } from 'lucide-react'
+import { PlusCircleIcon, CalendarIcon, ChevronsUpDownIcon } from 'lucide-react'
 
 import { cn, removeCommas, isValueNumeric, formatDate } from '~/lib/utils'
 
@@ -23,6 +23,15 @@ import {
 import { Button } from './ui/button'
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'
 import { Calendar } from './ui/calendar'
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from './ui/command'
+import { Combobox, type ComboboxProps } from './ui/combobox'
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined
 
@@ -201,7 +210,7 @@ export function SelectField({
 			<Select
 				disabled={triggerProps.disabled}
 				value={control.value}
-				onValueChange={value => control.change(value)}
+				onValueChange={control.change}
 				onOpenChange={open => {
 					if (!open) control.blur()
 				}}
@@ -225,7 +234,63 @@ export function SelectField({
 					))}
 				</SelectContent>
 			</Select>
+			<div className='min-h-6 py-1 px-1'>
+				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+			</div>
+		</div>
+	)
+}
 
+export function ComboboxField({
+	field,
+	label,
+	disabled,
+	className,
+
+	...comboboxProps
+}: {
+	field: FieldMetadata<string>
+	label?: string
+	disabled?: boolean
+	className?: string
+} & Pick<
+	ComboboxProps,
+	'options' | 'buttonPlaceholder' | 'inputPlaceholder' | 'emptyPlaceholder'
+>) {
+	const fallbackId = useId()
+	const fieldProps = getSelectProps(field)
+	const errors = field.errors as ListOfErrors
+
+	const id = fieldProps.id ?? fallbackId
+	const errorId = errors?.length ? `${id}-error` : undefined
+
+	const defaultValue = fieldProps.defaultValue
+		? String(fieldProps.defaultValue)
+		: ''
+	const control = useInputControl({
+		key: fieldProps.key,
+		name: fieldProps.name,
+		formId: fieldProps.form,
+		initialValue: defaultValue,
+	})
+
+	return (
+		<div className={cn('flex flex-col gap-1 w-full', className)}>
+			<Label htmlFor={id} aria-invalid={errorId ? true : undefined}>
+				{label}
+			</Label>
+			<Combobox
+				{...comboboxProps}
+				id={id}
+				name={fieldProps.name}
+				defaultValue={defaultValue}
+				onValueChange={control.change}
+				buttonProps={{
+					disabled,
+					'aria-invalid': errorId ? true : undefined,
+					'aria-describedby': errorId,
+				}}
+			/>
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
 			</div>

@@ -1,4 +1,4 @@
-import { Link, Form, data, useNavigation } from 'react-router'
+import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq } from 'drizzle-orm'
@@ -25,9 +25,9 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
+import { getBalances } from './lib/queries'
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
 import { DeleteAccountFormSchema } from './lib/schemas'
-import { getAccount } from './lib/queries'
 
 export async function loader({
 	context,
@@ -36,21 +36,24 @@ export async function loader({
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const account = await getAccount(db, accountId)
+	const account = await db.query.account.findFirst({
+		where: eq(accountTable.id, accountId),
+		columns: {
+			id: true,
+			name: true,
+			description: true,
+			accountType: true,
+			ownerId: true,
+		},
+	})
 	if (!account || account.ownerId !== user.id) {
 		throw new Response('Account not found', { status: 404 })
 	}
 
+	const balances = await getBalances({ db, ownerId: user.id, accountId })
+
 	const { ownerId, ...accountData } = account
-	return {
-		account: {
-			...accountData,
-			wallets: account.wallets.map(w => ({
-				...w,
-				balance: String(w.balance / 100),
-			})),
-		},
-	}
+	return { account: { ...accountData, balances } }
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -72,12 +75,16 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	const account = await getAccount(db, submission.value.accountId)
+	const { accountId } = submission.value
+	const account = await db.query.account.findFirst({
+		where: eq(accountTable.id, accountId),
+		columns: { name: true, ownerId: true },
+	})
 	if (!account || account.ownerId !== user.id) {
 		throw new Response('Account not found', { status: 404 })
 	}
 
-	await db.delete(accountTable).where(eq(accountTable.id, account.id))
+	await db.delete(accountTable).where(eq(accountTable.id, accountId))
 
 	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',
@@ -86,14 +93,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function AccountDetails({
-	loaderData: { account },
+	loaderData: {
+		account: { id, name, description, accountType, balances },
+	},
 }: Route.ComponentProps) {
-	const { id, name, description, accountType, wallets } = account
-
+	const location = useLocation()
 	const navigation = useNavigation()
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === `/app/accounts/${id}` &&
+		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
 	return (
@@ -143,9 +151,9 @@ export default function AccountDetails({
 								</TooltipTrigger>
 							</Form>
 							<TooltipContent>
-								Deleting an account cannot be undone and it has
-								effects on transactions, transfers and
-								exchanges.
+								Deleting an account cannot be undone and it
+								deletes all transactions, transfers or exchanges
+								associated with it.
 							</TooltipContent>
 						</Tooltip>
 					</div>
@@ -157,28 +165,34 @@ export default function AccountDetails({
 				<Title id={id} level='h2'>
 					Currency balances
 				</Title>
-				<ul className='flex flex-col gap-2' aria-labelledby={id}>
-					{wallets.map(({ id: wId, balance, currency }) => {
-						const { symbol, label } = CURRENCY_DISPLAY[currency]
-						return (
-							<li
-								key={wId}
-								className='flex items-center justify-between gap-4 p-4 border border-muted rounded-md'
-							>
-								<Text className='flex items-center gap-2'>
-									<CurrencyIcon
-										currency={currency}
-										size='md'
-									/>
-									{label}
-								</Text>
-								<Text>
-									{`${symbol} ${formatNumber(balance)}`}
-								</Text>
-							</li>
-						)
-					})}
-				</ul>
+				{balances.length === 0 ? (
+					<Text alignment='center'>
+						You dont have any activity in this account yet.
+					</Text>
+				) : (
+					<ul className='flex flex-col gap-2' aria-labelledby={id}>
+						{balances.map(({ currencyId, balance, currency }) => {
+							const { symbol, label } = CURRENCY_DISPLAY[currency]
+							return (
+								<li
+									key={currencyId}
+									className='flex items-center justify-between gap-4 p-4 border border-muted rounded-md'
+								>
+									<Text className='flex items-center gap-2'>
+										<CurrencyIcon
+											currency={currency}
+											size='md'
+										/>
+										{label}
+									</Text>
+									<Text>
+										{`${symbol} ${formatNumber(balance)}`}
+									</Text>
+								</li>
+							)
+						})}
+					</ul>
+				)}
 			</div>
 		</div>
 	)

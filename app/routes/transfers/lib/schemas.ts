@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
 import { removeCommas } from '~/lib/utils'
-import { CURRENCIES } from '~/routes/accounts/lib/constants'
 
 const BaseTransferFormSchema = z.object({
 	date: z.iso.datetime('Date is required'),
@@ -25,7 +24,7 @@ const BaseTransferFormSchema = z.object({
 				message: 'Amount must be greater than zero',
 			},
 		),
-	currency: z.enum(CURRENCIES, 'Currency is required'),
+	currencyId: z.string('Currency is required'),
 
 	fromAccountId: z.string('From Account is required'),
 	toAccountId: z.string('To Account is required'),

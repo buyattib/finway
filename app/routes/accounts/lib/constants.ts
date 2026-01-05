@@ -40,3 +40,6 @@ export const CURRENCY_DISPLAY = {
 		symbol: '$',
 	},
 }
+
+export const ACTION_CREATION = 'CREATION'
+export const ACTION_EDITION = 'EDITION'

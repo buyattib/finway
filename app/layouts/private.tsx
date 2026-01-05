@@ -92,6 +92,10 @@ function PrivateLayoutContent({
 	user: Route.ComponentProps['loaderData']['user']
 }) {
 	const navigation = useNavigation()
+	const isLoading =
+		navigation.state === 'loading' &&
+		navigation.location &&
+		!navigation.location.search
 
 	const { isMobile, toggleSidebar } = useSidebar()
 	const closeSidebar = () => {
@@ -151,8 +155,7 @@ function PrivateLayoutContent({
 					className={cn(
 						'flex-1 mx-auto w-full lg:max-w-6xl md:max-w-3xl py-6 lg:px-12 md:px-8 sm:px-6 px-4 overflow-auto',
 						{
-							'opacity-50 pointer-events-none':
-								navigation.state === 'loading',
+							'opacity-50 pointer-events-none': isLoading,
 						},
 					)}
 				>
