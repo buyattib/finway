@@ -12,3 +12,5 @@ CREATE TABLE `exchanges` (
 	FOREIGN KEY (`fromCurrencyId`) REFERENCES `currencies`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`toCurrencyId`) REFERENCES `currencies`(`id`) ON UPDATE no action ON DELETE cascade
 );
+CREATE INDEX `exchanges_accountId_fromCurrencyId_idx` ON `exchanges` (`accountId`,`fromCurrencyId`);
+CREATE INDEX `exchanges_accountId_toCurrencyId_idx` ON `exchanges` (`accountId`,`toCurrencyId`);

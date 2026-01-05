@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a3c418f1-1dc0-46e7-bb7a-56156c60f1e7",
-  "prevId": "c0949b3e-db46-4f1c-95a4-4482441b1da4",
+  "id": "83e00ea2-7c6f-4c3b-8e18-500c13921765",
+  "prevId": "1896469f-8284-4bcb-8303-c918c72399b8",
   "tables": {
     "accounts": {
       "name": "accounts",
@@ -58,7 +58,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "accounts_ownerId_idx": {
+          "name": "accounts_ownerId_idx",
+          "columns": [
+            "ownerId"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "accounts_users_fk": {
           "name": "accounts_users_fk",
@@ -111,8 +119,8 @@
         }
       },
       "indexes": {
-        "currencies_code_idx": {
-          "name": "currencies_code_idx",
+        "currencies_code_unique_idx": {
+          "name": "currencies_code_unique_idx",
           "columns": [
             "code"
           ],
@@ -157,8 +165,8 @@
         }
       },
       "indexes": {
-        "users_email_idx": {
-          "name": "users_email_idx",
+        "users_email_unique_idx": {
+          "name": "users_email_unique_idx",
           "columns": [
             "email"
           ],

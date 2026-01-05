@@ -13,3 +13,4 @@ CREATE TABLE `transactions` (
 	FOREIGN KEY (`currencyId`) REFERENCES `currencies`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`transactionCategoryId`) REFERENCES `transaction_categories`(`id`) ON UPDATE no action ON DELETE cascade
 );
+CREATE INDEX `transactions_accountId_currencyId_idx` ON `transactions` (`accountId`,`currencyId`);

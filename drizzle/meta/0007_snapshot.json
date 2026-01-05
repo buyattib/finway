@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "0c02cf08-c82e-4f0b-bda8-2acd4b3a4077",
-  "prevId": "7fc21ed2-57c3-431c-921c-51bf18f3aaac",
+  "id": "10c8ab2f-c159-4911-a333-95c614f1f5ce",
+  "prevId": "3e20e74a-b363-4fc7-a7c0-b5b34153d81f",
   "tables": {
     "accounts": {
       "name": "accounts",
@@ -58,7 +58,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "accounts_ownerId_idx": {
+          "name": "accounts_ownerId_idx",
+          "columns": [
+            "ownerId"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "accounts_users_fk": {
           "name": "accounts_users_fk",
@@ -111,8 +119,8 @@
         }
       },
       "indexes": {
-        "currencies_code_idx": {
-          "name": "currencies_code_idx",
+        "currencies_code_unique_idx": {
+          "name": "currencies_code_unique_idx",
           "columns": [
             "code"
           ],
@@ -191,7 +199,24 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "exchanges_accountId_fromCurrencyId_idx": {
+          "name": "exchanges_accountId_fromCurrencyId_idx",
+          "columns": [
+            "accountId",
+            "fromCurrencyId"
+          ],
+          "isUnique": false
+        },
+        "exchanges_accountId_toCurrencyId_idx": {
+          "name": "exchanges_accountId_toCurrencyId_idx",
+          "columns": [
+            "accountId",
+            "toCurrencyId"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "exchanges_accounts_fk": {
           "name": "exchanges_accounts_fk",
@@ -312,7 +337,16 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "transactions_accountId_currencyId_idx": {
+          "name": "transactions_accountId_currencyId_idx",
+          "columns": [
+            "accountId",
+            "currencyId"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "transactions_accounts_fk": {
           "name": "transactions_accounts_fk",
@@ -485,7 +519,24 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "transfers_fromAccountId_currencyId_idx": {
+          "name": "transfers_fromAccountId_currencyId_idx",
+          "columns": [
+            "fromAccountId",
+            "currencyId"
+          ],
+          "isUnique": false
+        },
+        "transfers_toAccountId_currencyId_idx": {
+          "name": "transfers_toAccountId_currencyId_idx",
+          "columns": [
+            "toAccountId",
+            "currencyId"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "transfers_from_accounts_fk": {
           "name": "transfers_from_accounts_fk",
@@ -564,8 +615,8 @@
         }
       },
       "indexes": {
-        "users_email_idx": {
-          "name": "users_email_idx",
+        "users_email_unique_idx": {
+          "name": "users_email_unique_idx",
           "columns": [
             "email"
           ],

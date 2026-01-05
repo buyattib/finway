@@ -4,4 +4,4 @@ CREATE TABLE `currencies` (
 	`id` text(24) PRIMARY KEY NOT NULL,
 	`code` text NOT NULL
 );
-CREATE UNIQUE INDEX `currencies_code_idx` ON `currencies` (`code`);
+CREATE UNIQUE INDEX `currencies_code_unique_idx` ON `currencies` (`code`);

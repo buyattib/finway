@@ -1,6 +1,6 @@
 {
-  "id": "c0949b3e-db46-4f1c-95a4-4482441b1da4",
-  "prevId": "2c3513ea-8591-4f5a-ac60-186f7f7133c7",
+  "id": "1896469f-8284-4bcb-8303-c918c72399b8",
+  "prevId": "6a7f732f-8dda-414a-8c37-d47425b4386e",
   "version": "6",
   "dialect": "sqlite",
   "tables": {
@@ -37,8 +37,8 @@
         }
       },
       "indexes": {
-        "currencies_code_idx": {
-          "name": "currencies_code_idx",
+        "currencies_code_unique_idx": {
+          "name": "currencies_code_unique_idx",
           "columns": [
             "code"
           ],
@@ -83,8 +83,8 @@
         }
       },
       "indexes": {
-        "users_email_idx": {
-          "name": "users_email_idx",
+        "users_email_unique_idx": {
+          "name": "users_email_unique_idx",
           "columns": [
             "email"
           ],

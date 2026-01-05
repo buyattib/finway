@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "70e6b2b1-68df-431d-b33b-40621d7db68e",
-  "prevId": "b2c12e26-3bd2-4bf7-8517-dfc650bb66b2",
+  "id": "99faac13-7cba-4331-99cc-c977964458ac",
+  "prevId": "b7c5f5a6-478e-4f3b-90b8-24f0f6c86b02",
   "tables": {
     "accounts": {
       "name": "accounts",
@@ -58,7 +58,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "accounts_ownerId_idx": {
+          "name": "accounts_ownerId_idx",
+          "columns": [
+            "ownerId"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "accounts_users_fk": {
           "name": "accounts_users_fk",
@@ -111,8 +119,8 @@
         }
       },
       "indexes": {
-        "currencies_code_idx": {
-          "name": "currencies_code_idx",
+        "currencies_code_unique_idx": {
+          "name": "currencies_code_unique_idx",
           "columns": [
             "code"
           ],
@@ -199,7 +207,16 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "transactions_accountId_currencyId_idx": {
+          "name": "transactions_accountId_currencyId_idx",
+          "columns": [
+            "accountId",
+            "currencyId"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "transactions_accounts_fk": {
           "name": "transactions_accounts_fk",
@@ -345,8 +362,8 @@
         }
       },
       "indexes": {
-        "users_email_idx": {
-          "name": "users_email_idx",
+        "users_email_unique_idx": {
+          "name": "users_email_unique_idx",
           "columns": [
             "email"
           ],

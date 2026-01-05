@@ -8,3 +8,4 @@ CREATE TABLE `accounts` (
 	`ownerId` text NOT NULL,
 	FOREIGN KEY (`ownerId`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
+CREATE INDEX `accounts_ownerId_idx` ON `accounts` (`ownerId`);

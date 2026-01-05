@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2c3513ea-8591-4f5a-ac60-186f7f7133c7",
-  "prevId": "cea99d91-9e7d-4261-968e-288858c97fa2",
+  "id": "6a7f732f-8dda-414a-8c37-d47425b4386e",
+  "prevId": "705ed7da-3660-47d4-9f2c-e06f88494a1b",
   "tables": {
     "currencies": {
       "name": "currencies",
@@ -37,8 +37,8 @@
         }
       },
       "indexes": {
-        "currencies_code_idx": {
-          "name": "currencies_code_idx",
+        "currencies_code_unique_idx": {
+          "name": "currencies_code_unique_idx",
           "columns": [
             "code"
           ],
@@ -83,8 +83,8 @@
         }
       },
       "indexes": {
-        "users_email_idx": {
-          "name": "users_email_idx",
+        "users_email_unique_idx": {
+          "name": "users_email_unique_idx",
           "columns": [
             "email"
           ],

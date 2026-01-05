@@ -4,4 +4,4 @@ CREATE TABLE `users` (
 	`id` text(24) PRIMARY KEY NOT NULL,
 	`email` text NOT NULL
 );
-CREATE UNIQUE INDEX `users_email_idx` ON `users` (`email`);
+CREATE UNIQUE INDEX `users_email_unique_idx` ON `users` (`email`);

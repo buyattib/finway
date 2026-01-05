@@ -4,7 +4,6 @@ import {
 	sqliteTable,
 	text,
 	integer,
-	uniqueIndex,
 	foreignKey,
 	index,
 } from 'drizzle-orm/sqlite-core'
@@ -22,25 +21,19 @@ const base = {
 		.$onUpdate(() => new Date().toISOString()),
 }
 
-export const user = sqliteTable(
-	'users',
-	{
-		...base,
-		id: cuid2().defaultRandom().primaryKey(),
-		email: text().notNull(),
-	},
-	table => [uniqueIndex('users_email_idx').on(table.email)],
-)
+export const user = sqliteTable('users', {
+	...base,
+	id: cuid2().defaultRandom().primaryKey(),
+	email: text().notNull().unique('users_email_unique_idx'),
+})
 
-export const currency = sqliteTable(
-	'currencies',
-	{
-		...base,
-		id: cuid2().defaultRandom().primaryKey(),
-		code: text({ enum: CURRENCIES }).notNull(),
-	},
-	table => [uniqueIndex('currencies_code_idx').on(table.code)],
-)
+export const currency = sqliteTable('currencies', {
+	...base,
+	id: cuid2().defaultRandom().primaryKey(),
+	code: text({ enum: CURRENCIES })
+		.notNull()
+		.unique('currencies_code_unique_idx'),
+})
 
 export const account = sqliteTable(
 	'accounts',
