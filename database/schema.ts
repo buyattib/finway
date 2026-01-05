@@ -1,11 +1,12 @@
 import { cuid2 } from 'drizzle-cuid2/sqlite'
-import { relations, sql } from 'drizzle-orm'
+import { relations } from 'drizzle-orm'
 import {
 	sqliteTable,
 	text,
 	integer,
 	uniqueIndex,
 	foreignKey,
+	index,
 } from 'drizzle-orm/sqlite-core'
 
 import { CURRENCIES, ACCOUNT_TYPES } from '~/routes/accounts/lib/constants'
@@ -58,6 +59,7 @@ export const account = sqliteTable(
 			columns: [table.ownerId],
 			foreignColumns: [user.id],
 		}).onDelete('cascade'),
+		index('accounts_ownerId_idx').on(table.ownerId),
 	],
 )
 
@@ -110,6 +112,10 @@ export const transaction = sqliteTable(
 			columns: [table.transactionCategoryId],
 			foreignColumns: [transactionCategory.id],
 		}).onDelete('cascade'),
+		index('transactions_accountId_currencyId_idx').on(
+			table.accountId,
+			table.currencyId,
+		),
 	],
 )
 
@@ -141,6 +147,14 @@ export const transfer = sqliteTable(
 			columns: [table.currencyId],
 			foreignColumns: [currency.id],
 		}).onDelete('cascade'),
+		index('transfers_fromAccountId_currencyId_idx').on(
+			table.fromAccountId,
+			table.currencyId,
+		),
+		index('transfers_toAccountId_currencyId_idx').on(
+			table.toAccountId,
+			table.currencyId,
+		),
 	],
 )
 
@@ -173,6 +187,14 @@ export const exchange = sqliteTable(
 			columns: [table.toCurrencyId],
 			foreignColumns: [currency.id],
 		}).onDelete('cascade'),
+		index('exchanges_accountId_fromCurrencyId_idx').on(
+			table.accountId,
+			table.fromCurrencyId,
+		),
+		index('exchanges_accountId_toCurrencyId_idx').on(
+			table.accountId,
+			table.toCurrencyId,
+		),
 	],
 )
 

@@ -57,6 +57,13 @@
       "when": 1767490551091,
       "tag": "0007_create_exchanges_table",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1767579374427,
+      "tag": "0008_add_indexes",
+      "breakpoints": true
     }
   ]
 }
