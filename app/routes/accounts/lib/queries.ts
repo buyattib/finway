@@ -48,95 +48,114 @@ export async function getBalances({
 }: Args) {
 	const transactionBalances = db
 		.select({
-			accountId: transactionTable.accountId,
-			currencyId: transactionTable.currencyId,
+			accountId: sql`${accountTable.id}`.as('accountId'),
+			currencyId: sql`${currencyTable.id}`.as('currencyId'),
 			currency: currencyTable.code,
 			balance: sql<number>`SUM(
-					CASE 
+				CASE
 					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_INCOME} THEN ${transactionTable.amount}
 					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_EXPENSE} THEN -${transactionTable.amount}
 					ELSE 0
-					END
-				)`.as('balance'),
+				END
+			)`.as('balance'),
 		})
-		.from(transactionTable)
-		.innerJoin(
-			currencyTable,
-			eq(currencyTable.id, transactionTable.currencyId),
-		)
-		.innerJoin(
-			accountTable,
-			eq(accountTable.id, transactionTable.accountId),
+		.from(accountTable)
+		.crossJoin(currencyTable)
+		.leftJoin(
+			transactionTable,
+			and(
+				eq(accountTable.id, transactionTable.accountId),
+				eq(currencyTable.id, transactionTable.currencyId),
+			),
 		)
 		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(transactionTable.accountId, transactionTable.currencyId)
+		.groupBy(accountTable.id, currencyTable.id)
 
 	const outgoingTransferBalances = db
 		.select({
-			accountId: transferTable.fromAccountId,
-			currencyId: transferTable.currencyId,
+			accountId: sql`${accountTable.id}`.as('accountId'),
+			currencyId: sql`${currencyTable.id}`.as('currencyId'),
 			currency: currencyTable.code,
-			balance: sql<number>`-SUM(${transferTable.amount})`,
+			balance: sql<number>`COALESCE(-SUM(${transferTable.amount}), 0)`.as(
+				'balance',
+			),
 		})
-		.from(transferTable)
-		.innerJoin(
-			currencyTable,
-			eq(currencyTable.id, transferTable.currencyId),
-		)
-		.innerJoin(
-			accountTable,
-			eq(accountTable.id, transferTable.fromAccountId),
+		.from(accountTable)
+		.crossJoin(currencyTable)
+		.leftJoin(
+			transferTable,
+			and(
+				eq(accountTable.id, transferTable.fromAccountId),
+				eq(currencyTable.id, transferTable.currencyId),
+			),
 		)
 		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(transferTable.fromAccountId, transferTable.currencyId)
+		.groupBy(accountTable.id, currencyTable.id)
 
 	const incomingTransferBalances = db
 		.select({
-			accountId: transferTable.toAccountId,
-			currencyId: transferTable.currencyId,
+			accountId: sql`${accountTable.id}`.as('accountId'),
+			currencyId: sql`${currencyTable.id}`.as('currencyId'),
 			currency: currencyTable.code,
-			balance: sql<number>`SUM(${transferTable.amount})`,
+			balance: sql<number>`COALESCE(SUM(${transferTable.amount}), 0)`.as(
+				'balance',
+			),
 		})
-		.from(transferTable)
-		.innerJoin(
-			currencyTable,
-			eq(currencyTable.id, transferTable.currencyId),
+		.from(accountTable)
+		.crossJoin(currencyTable)
+		.leftJoin(
+			transferTable,
+			and(
+				eq(accountTable.id, transferTable.toAccountId),
+				eq(currencyTable.id, transferTable.currencyId),
+			),
 		)
-		.innerJoin(accountTable, eq(accountTable.id, transferTable.toAccountId))
 		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(transferTable.toAccountId, transferTable.currencyId)
+		.groupBy(accountTable.id, currencyTable.id)
 
 	const outgoingExchangeBalances = db
 		.select({
-			accountId: exchangeTable.accountId,
-			currencyId: exchangeTable.fromCurrencyId,
+			accountId: sql`${accountTable.id}`.as('accountId'),
+			currencyId: sql`${currencyTable.id}`.as('currencyId'),
 			currency: currencyTable.code,
-			balance: sql<number>`-SUM(${exchangeTable.fromAmount})`,
+			balance:
+				sql<number>`COALESCE(-SUM(${exchangeTable.fromAmount}), 0)`.as(
+					'balance',
+				),
 		})
-		.from(exchangeTable)
-		.innerJoin(
-			currencyTable,
-			eq(currencyTable.id, exchangeTable.fromCurrencyId),
+		.from(accountTable)
+		.crossJoin(currencyTable)
+		.leftJoin(
+			exchangeTable,
+			and(
+				eq(accountTable.id, exchangeTable.accountId),
+				eq(currencyTable.id, exchangeTable.fromCurrencyId),
+			),
 		)
-		.innerJoin(accountTable, eq(accountTable.id, exchangeTable.accountId))
 		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(exchangeTable.accountId, exchangeTable.fromCurrencyId)
+		.groupBy(accountTable.id, currencyTable.id)
 
 	const incomingExchangeBalances = db
 		.select({
-			accountId: exchangeTable.accountId,
-			currencyId: exchangeTable.toCurrencyId,
+			accountId: sql`${accountTable.id}`.as('accountId'),
+			currencyId: sql`${currencyTable.id}`.as('currencyId'),
 			currency: currencyTable.code,
-			balance: sql<number>`SUM(${exchangeTable.toAmount})`,
+			balance:
+				sql<number>`COALESCE(SUM(${exchangeTable.toAmount}), 0)`.as(
+					'balance',
+				),
 		})
-		.from(exchangeTable)
-		.innerJoin(
-			currencyTable,
-			eq(currencyTable.id, exchangeTable.toCurrencyId),
+		.from(accountTable)
+		.crossJoin(currencyTable)
+		.leftJoin(
+			exchangeTable,
+			and(
+				eq(accountTable.id, exchangeTable.accountId),
+				eq(currencyTable.id, exchangeTable.toCurrencyId),
+			),
 		)
-		.innerJoin(accountTable, eq(accountTable.id, exchangeTable.accountId))
 		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(exchangeTable.accountId, exchangeTable.toCurrencyId)
+		.groupBy(accountTable.id, currencyTable.id)
 
 	const allBalances = unionAll(
 		transactionBalances,
@@ -148,11 +167,11 @@ export async function getBalances({
 
 	const filters = []
 	if (accountId) {
-		filters.push(eq(allBalances.accountId, accountId))
+		filters.push(eq(sql`${allBalances.accountId}`, accountId))
 	}
 
 	if (currencyId) {
-		filters.push(eq(allBalances.currencyId, currencyId))
+		filters.push(eq(sql`${allBalances.currencyId}`, currencyId))
 	}
 
 	const balances = await db
@@ -160,13 +179,14 @@ export async function getBalances({
 			accountId: allBalances.accountId,
 			currencyId: allBalances.currencyId,
 			currency: allBalances.currency,
-			balance: parseBalance
+			balance: (parseBalance
 				? sql<string>`CAST(SUM(${allBalances.balance}) / 100.0 AS TEXT)`
-				: sql<number>`SUM(${allBalances.balance})`,
+				: sql<number>`SUM(${allBalances.balance})`
+			).as('balance'),
 		})
 		.from(allBalances)
 		.where(and(...filters))
-		.groupBy(allBalances.accountId, allBalances.currencyId)
+		.groupBy(sql`${allBalances.accountId}`, sql`${allBalances.currencyId}`)
 		.orderBy(desc(sql`SUM(${allBalances.balance})`))
 
 	return balances
