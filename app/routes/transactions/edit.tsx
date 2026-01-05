@@ -31,7 +31,6 @@ export async function loader({
 		columns: {
 			id: true,
 			date: true,
-			amount: true,
 			type: true,
 			description: true,
 
@@ -53,13 +52,13 @@ export async function loader({
 
 	const { account, ...transactionData } = transaction
 
-	const data = await getSelectData(db, user.id)
+	const selectData = await getSelectData(db, user.id)
 	return {
-		transaction: {
+		selectData,
+		initialData: {
 			...transactionData,
 			transactionCategoryId: transactionData.transactionCategoryId ?? '',
 		},
-		...data,
 	}
 }
 
@@ -196,16 +195,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateTransaction({
-	loaderData,
+	loaderData: { selectData, initialData },
 	actionData,
 }: Route.ComponentProps) {
-	const { transaction, ...selectData } = loaderData
 	return (
 		<TransactionForm
 			action={ACTION_EDITION}
 			lastResult={actionData?.submission}
-			transaction={transaction}
-			{...selectData}
+			selectData={selectData}
+			initialData={initialData}
 		/>
 	)
 }

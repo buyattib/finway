@@ -1,5 +1,16 @@
-import { Form, Link, useNavigation, useSubmit } from 'react-router'
-import { PlusIcon } from 'lucide-react'
+import {
+	createSearchParams,
+	Form,
+	Link,
+	useNavigation,
+	useSubmit,
+} from 'react-router'
+import {
+	BanknoteArrowDownIcon,
+	EllipsisIcon,
+	PlusIcon,
+	SquarePenIcon,
+} from 'lucide-react'
 import { desc, eq, and, like, sql } from 'drizzle-orm'
 
 import type { Route } from './+types'
@@ -14,6 +25,14 @@ import { Title } from '~/components/ui/title'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { Input } from '~/components/ui/input'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
 
 import { getBalances } from './lib/queries'
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
@@ -162,13 +181,16 @@ export default function Accounts({
 			<ul className='flex flex-col gap-2'>
 				{accounts.map(
 					({ id, name, description, accountType, balances }) => (
-						<li key={id}>
-							<Link
-								to={id}
-								prefetch='intent'
-								className='flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-center border rounded-xl p-4 sm:px-6 hover:border-primary transition-all min-h-32'
-							>
-								<div className='flex items-center gap-4'>
+						<li
+							key={id}
+							className='flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-center border rounded-xl p-4 sm:px-6 min-h-32'
+						>
+							<div className='flex flex-col sm:flex-row sm:items-center gap-4'>
+								<Link
+									to={id}
+									prefetch='intent'
+									className='flex items-center gap-4 w-3xs'
+								>
 									<AccountTypeIcon
 										accountType={accountType}
 									/>
@@ -191,10 +213,11 @@ export default function Accounts({
 											</Text>
 										)}
 									</div>
-								</div>
+								</Link>
+								<div className='sm:h-32 sm:border-l border-b' />
 								{!!balances.length && (
 									<ul
-										className='flex flex-col justify-center gap-2 min-w-5xs'
+										className='flex flex-col justify-center gap-2'
 										aria-labelledby={id}
 									>
 										{balances.map(
@@ -208,11 +231,8 @@ export default function Accounts({
 												return (
 													<li
 														key={bId}
-														className='flex items-center justify-between gap-4'
+														className='flex items-center gap-4'
 													>
-														<Text>
-															{`${symbol} ${formatNumber(balance)}`}
-														</Text>
 														<Text className='flex items-center gap-2'>
 															<CurrencyIcon
 																currency={
@@ -222,13 +242,43 @@ export default function Accounts({
 															/>
 															{currency}
 														</Text>
+														<Text>
+															{`${symbol} ${formatNumber(balance)}`}
+														</Text>
 													</li>
 												)
 											},
 										)}
 									</ul>
 								)}
-							</Link>
+							</div>
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button size='icon' variant='ghost'>
+										<EllipsisIcon />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent>
+									<DropdownMenuItem>
+										<SquarePenIcon />
+										<Link to={`${id}/edit`}>Edit</Link>
+									</DropdownMenuItem>
+									<DropdownMenuItem>
+										<BanknoteArrowDownIcon />
+										<Link
+											to={{
+												pathname:
+													'../transactions/create',
+												search: createSearchParams({
+													accountId: id,
+												}).toString(),
+											}}
+										>
+											Transaction
+										</Link>
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
 						</li>
 					),
 				)}

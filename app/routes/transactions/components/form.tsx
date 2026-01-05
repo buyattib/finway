@@ -8,9 +8,9 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { ArrowLeftIcon } from 'lucide-react'
-import type { Route } from '../+types/edit'
+import type { Route as EditRoute } from '../+types/edit'
 
-import { initializeDate, removeCommas } from '~/lib/utils'
+import { initializeDate } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -36,72 +36,53 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { ACTION_CREATION, ACTION_EDITION } from '../lib/constants'
 import { TransactionFormSchema } from '../lib/schemas'
-import {
-	TRANSACTION_TYPE_EXPENSE,
-	TRANSACTION_TYPES,
-	TRANSACTION_TYPE_DISPLAY,
-} from '../lib/constants'
+import { TRANSACTION_TYPES, TRANSACTION_TYPE_DISPLAY } from '../lib/constants'
+import type { getSelectData } from '../lib/queries'
 
-type LoaderData = Route.ComponentProps['loaderData']
+type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
-type Props = Pick<
-	LoaderData,
-	'accounts' | 'currencies' | 'transactionCategories'
-> & {
+type Props = {
+	selectData: Awaited<ReturnType<typeof getSelectData>>
 	lastResult?: SubmissionResult
-} & (
-		| {
-				action: typeof ACTION_CREATION
-		  }
-		| {
-				action: typeof ACTION_EDITION
-				transaction: LoaderData['transaction']
-		  }
-	)
+	initialData: Partial<TInitialData>
+	action: typeof ACTION_CREATION | typeof ACTION_EDITION
+}
 
-export function TransactionForm(props: Props) {
+export function TransactionForm({
+	selectData,
+	lastResult,
+	initialData,
+	action,
+}: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
-	const { accounts, currencies, transactionCategories } = props
+	const { accounts, currencies, transactionCategories } = selectData
 
-	const defaultValue = () => {
-		if (props.action === ACTION_CREATION) {
-			return {
+	const { defaultValue, title, buttonLabel } = {
+		[ACTION_CREATION]: {
+			defaultValue: {
 				date: initializeDate().toISOString(),
-				type: TRANSACTION_TYPE_EXPENSE,
-				amount: '0',
-				description: '',
-				accountId: accounts?.[0]?.id || '',
-				currencyId: currencies?.[0]?.id || '',
-				transactionCategoryId: transactionCategories?.[0]?.id || '',
-			}
-		}
-
-		if (props.action === ACTION_EDITION) {
-			const tx = props.transaction
-			return {
-				date: tx.date,
-				type: tx.type,
-				amount: tx.amount,
-				description: tx.description,
-				accountId: tx.accountId,
-				currencyId: tx.currencyId,
-				transactionCategoryId: tx.transactionCategoryId,
-			}
-		}
-
-		throw new Error('Invalid action')
-	}
+				...initialData,
+			},
+			title: 'Create a transaction',
+			buttonLabel: 'Create',
+		},
+		[ACTION_EDITION]: {
+			defaultValue: initialData,
+			title: 'Edit transaction',
+			buttonLabel: 'Update',
+		},
+	}[action]
 
 	const [form, fields] = useForm({
-		lastResult: props.lastResult,
+		lastResult,
 		id: 'transaction-form',
 		shouldValidate: 'onInput',
-		defaultValue: defaultValue(),
+		defaultValue,
 		constraint: getZodConstraint(TransactionFormSchema),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
@@ -109,17 +90,6 @@ export function TransactionForm(props: Props) {
 			})
 		},
 	})
-
-	const { title, buttonLabel } = {
-		[ACTION_CREATION]: {
-			title: 'Create a transaction',
-			buttonLabel: 'Create',
-		},
-		[ACTION_EDITION]: {
-			title: 'Edit transaction',
-			buttonLabel: 'Update',
-		},
-	}[props.action]
 
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionTypeIcon size='sm' transactionType={i} />,
@@ -171,14 +141,10 @@ export function TransactionForm(props: Props) {
 					{/* Have first button to be submit */}
 					<button type='submit' className='hidden' />
 
-					<input type='hidden' name='action' value={props.action} />
+					<input type='hidden' name='action' value={action} />
 
-					{props.action === ACTION_EDITION && (
-						<input
-							type='hidden'
-							name='id'
-							value={props.transaction.id}
-						/>
+					{action === ACTION_EDITION && (
+						<input type='hidden' name='id' value={initialData.id} />
 					)}
 
 					<ErrorList

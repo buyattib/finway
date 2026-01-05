@@ -14,11 +14,35 @@ import { TRANSACTION_TYPE_EXPENSE, ACTION_CREATION } from './lib/constants'
 import { getSelectData } from './lib/queries'
 import { TransactionForm } from './components/form'
 
-export async function loader({ context }: Route.LoaderArgs) {
+export async function loader({ context, request }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
 
-	return await getSelectData(db, user.id)
+	const url = new URL(request.url)
+	const accountIdParam = url.searchParams.get('accountId')
+
+	const selectData = await getSelectData(db, user.id)
+
+	let accountId = selectData.accounts?.[0]?.id || ''
+	if (
+		accountIdParam &&
+		selectData.accounts.filter(acc => acc.id === accountIdParam)
+	) {
+		accountId = accountIdParam
+	}
+
+	return {
+		selectData,
+		initialData: {
+			type: TRANSACTION_TYPE_EXPENSE,
+			amount: '0',
+			description: '',
+			accountId,
+			currencyId: selectData.currencies?.[0]?.id || '',
+			transactionCategoryId:
+				selectData.transactionCategories?.[0]?.id || '',
+		} as const,
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -114,14 +138,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateTransaction({
-	loaderData,
+	loaderData: { selectData, initialData },
 	actionData,
 }: Route.ComponentProps) {
 	return (
 		<TransactionForm
 			action={ACTION_CREATION}
 			lastResult={actionData?.submission}
-			{...loaderData}
+			selectData={selectData}
+			initialData={initialData}
 		/>
 	)
 }
