@@ -43,12 +43,9 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const search = url.searchParams.get('search')
 
-	const balances = await getBalances({
-		db,
-		ownerId: user.id,
-	})
+	const balances = await getBalances({ db, ownerId: user.id })
 	const balancesByAccount = balances.reduce(
-		(acc, { accountId, currency, currencyId, balance }) => {
+		(acc, { accountId, currencyId, currency, balance }) => {
 			acc[accountId] = acc[accountId] || []
 			acc[accountId].push({
 				id: `${accountId}-${currencyId}`,
@@ -78,33 +75,10 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		.where(and(...filters))
 		.orderBy(desc(accountTable.createdAt))
 
-	const accountsById = accountsQuery.reduce(
-		(acc, curr) => {
-			acc[curr.id] = curr
-			return acc
-		},
-		{} as Record<string, (typeof accountsQuery)[number]>,
-	)
-
-	const accountsWithBalances = Object.keys(balancesByAccount)
-	const accountsWithoutBalances = accountsQuery
-		.filter(acc => !(acc.id in balancesByAccount))
-		.map(a => a.id)
-
-	const accounts = [
-		...accountsWithBalances.map(accountId => {
-			return {
-				...accountsById[accountId],
-				balances: balancesByAccount[accountId].slice(0, 3),
-			}
-		}),
-		...accountsWithoutBalances.map(accountId => {
-			return {
-				...accountsById[accountId],
-				balances: [],
-			}
-		}),
-	]
+	const accounts = accountsQuery.map(acc => ({
+		...acc,
+		balances: balancesByAccount[acc.id],
+	}))
 
 	return { accounts, search }
 }
