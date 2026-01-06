@@ -49,7 +49,7 @@ export default function Dashboard({
 						</CardHeader>
 						<CardContent>
 							{data.length === 0 && (
-								<Text size='md' weight='semi'>
+								<Text size='md' weight='medium'>
 									No balances yet
 								</Text>
 							)}
