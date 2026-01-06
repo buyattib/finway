@@ -16,7 +16,7 @@ export default [
 
 	route('app', 'layouts/private.tsx', [
 		index('routes/index.tsx'),
-		route('dashboard', 'routes/dashboard.tsx'),
+		route('dashboard', 'routes/dashboard/index.tsx'),
 
 		// accounts
 		...prefix('accounts', [
