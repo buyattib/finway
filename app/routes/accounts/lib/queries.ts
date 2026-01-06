@@ -17,11 +17,12 @@ import {
 
 import type { TCurrency } from './types'
 
-type BaseBalance = {
-	accountId: string
+type CurrencyBalance = {
 	currencyId: string
 	currency: TCurrency
 }
+
+type BaseBalance = CurrencyBalance & { accountId: string }
 
 type Args = {
 	db: DB
@@ -29,15 +30,24 @@ type Args = {
 	accountId?: string
 	currencyId?: string
 	parseBalance?: boolean
+	group?: 'account' | 'currency'
 }
 
 export async function getBalances(
-	args: Args & { parseBalance?: true },
+	args: Args & { parseBalance?: true; group?: 'account' },
 ): Promise<Array<BaseBalance & { balance: string }>>
 
 export async function getBalances(
-	args: Args & { parseBalance?: false },
+	args: Args & { parseBalance?: true; group?: 'currency' },
+): Promise<Array<CurrencyBalance & { balance: string }>>
+
+export async function getBalances(
+	args: Args & { parseBalance?: false; group?: 'account' },
 ): Promise<Array<BaseBalance & { balance: number }>>
+
+export async function getBalances(
+	args: Args & { parseBalance?: false; group?: 'currency' },
+): Promise<Array<CurrencyBalance & { balance: number }>>
 
 export async function getBalances({
 	db,
@@ -45,6 +55,7 @@ export async function getBalances({
 	accountId,
 	currencyId,
 	parseBalance = true,
+	group = 'account',
 }: Args) {
 	const transactionBalances = db
 		.select({
@@ -174,19 +185,35 @@ export async function getBalances({
 		filters.push(eq(sql`${allBalances.currencyId}`, currencyId))
 	}
 
-	const balances = await db
-		.select({
-			accountId: allBalances.accountId,
+	const groups = {
+		currency: [sql`${allBalances.currencyId}`],
+		account: [
+			sql`${allBalances.accountId}`,
+			sql`${allBalances.currencyId}`,
+		],
+	}[group]
+
+	const selections = {
+		currency: () => ({
 			currencyId: allBalances.currencyId,
 			currency: allBalances.currency,
 			balance: (parseBalance
 				? sql<string>`CAST(SUM(${allBalances.balance}) / 100.0 AS TEXT)`
 				: sql<number>`SUM(${allBalances.balance})`
 			).as('balance'),
-		})
+		}),
+		account: () => ({
+			accountId: allBalances.accountId,
+			...selections.currency(),
+		}),
+	}
+	const selection = selections[group]
+
+	const balances = await db
+		.select(selection())
 		.from(allBalances)
 		.where(and(...filters))
-		.groupBy(sql`${allBalances.accountId}`, sql`${allBalances.currencyId}`)
+		.groupBy(...groups)
 		.orderBy(desc(sql`SUM(${allBalances.balance})`))
 
 	return balances

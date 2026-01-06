@@ -52,7 +52,7 @@ export function TransactionsFilters({
 			<Form
 				ref={form}
 				id='transactions-filters'
-				className='flex sm:flex-row sm:items-center gap-2'
+				className='flex flex-col sm:flex-row sm:items-center gap-2'
 			>
 				<Combobox
 					options={accountOptions}
@@ -84,12 +84,11 @@ export function TransactionsFilters({
 						submit(form.current)
 					}}
 				/>
-				<Select
-					clearable
+				<Combobox
 					options={transactionTypeOptions}
 					name='transactionType'
 					defaultValue={filters.transactionType}
-					placeholder='Filter by type'
+					buttonPlaceholder='Filter by type'
 					onValueChange={() => {
 						if (!form.current) return
 						submit(form.current)

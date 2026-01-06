@@ -217,13 +217,11 @@ export default function Transfers({
 					<TableHeader>
 						<TableRow>
 							<TableHead>Date</TableHead>
-							<TableHead className='text-center'>
-								Amount
-							</TableHead>
-							<TableHead className='text-center'>
+							<TableHead className='text-right'>Amount</TableHead>
+							<TableHead className='text-right'>
 								From Account
 							</TableHead>
-							<TableHead className='text-center'>
+							<TableHead className='text-right'>
 								To Account
 							</TableHead>
 							<TableHead></TableHead>
@@ -247,11 +245,11 @@ export default function Transfers({
 									<TableCell className='w-30'>
 										{formatDate(new Date(date))}
 									</TableCell>
-									<TableCell className='text-center'>
+									<TableCell className='text-right'>
 										<b>{currency}</b> {formatNumber(amount)}
 									</TableCell>
 									<TableCell>
-										<div className='flex justify-center items-center gap-2'>
+										<div className='flex justify-end items-center gap-2'>
 											<AccountTypeIcon
 												size='xs'
 												accountType={fromAccountType}
@@ -260,7 +258,7 @@ export default function Transfers({
 										</div>
 									</TableCell>
 									<TableCell>
-										<div className='flex justify-center items-center gap-2'>
+										<div className='flex justify-end items-center gap-2'>
 											<AccountTypeIcon
 												size='xs'
 												accountType={toAccountType}

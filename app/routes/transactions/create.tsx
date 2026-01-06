@@ -20,6 +20,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 	const url = new URL(request.url)
 	const accountIdParam = url.searchParams.get('accountId')
+	const currencyIdParam = url.searchParams.get('currencyId')
 
 	const selectData = await getSelectData(db, user.id)
 
@@ -31,6 +32,14 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		accountId = accountIdParam
 	}
 
+	let currencyId = selectData.currencies[0].id
+	if (
+		currencyIdParam &&
+		selectData.currencies.filter(c => c.id === currencyIdParam)
+	) {
+		currencyId = currencyIdParam
+	}
+
 	return {
 		selectData,
 		initialData: {
@@ -38,7 +47,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			amount: '0',
 			description: '',
 			accountId,
-			currencyId: selectData.currencies?.[0]?.id || '',
+			currencyId,
 			transactionCategoryId:
 				selectData.transactionCategories?.[0]?.id || '',
 		} as const,

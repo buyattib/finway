@@ -1,27 +1,87 @@
-import { data, Form } from 'react-router'
-
 import type { Route } from './+types/dashboard'
+import { WalletIcon } from 'lucide-react'
 
-import { Button } from '~/components/ui/button'
-import { createToastHeaders } from '~/utils-server/toast.server'
+import { dbContext, userContext } from '~/lib/context'
+import { formatNumber } from '~/lib/utils'
 
-export async function action({ request }: Route.ActionArgs) {
-	const toastHeaders = await createToastHeaders(request, {
-		type: 'success',
-		title: 'Testing toasts from the dashboard',
-		description: 'Pretty cool aye?',
+import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
+import { Text } from '~/components/ui/text'
+import { CurrencyIcon } from '~/components/currency-icon'
+
+import { getBalances } from '~/routes/accounts/lib/queries'
+import { CURRENCY_DISPLAY } from '~/routes/accounts/lib/constants'
+
+export async function loader({ context }: Route.LoaderArgs) {
+	const db = context.get(dbContext)
+	const user = context.get(userContext)
+
+	const balances = await getBalances({
+		db,
+		ownerId: user.id,
+		group: 'currency',
 	})
 
-	return data({}, { headers: toastHeaders })
+	// TODO: get this month expenses by currency
+	// TODO: get this month incomes by currency
+
+	return { balances }
 }
 
-export default function Dashboard() {
+export default function Dashboard({
+	loaderData: { balances },
+}: Route.ComponentProps) {
+	const cards = [
+		{
+			title: 'Total balances',
+			icon: <WalletIcon />,
+			data: balances,
+		},
+	]
+
 	return (
 		<>
-			Dashboard
-			<Form method='post'>
-				<Button type='submit'>Toast</Button>
-			</Form>
+			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
+				{cards.map(({ title, icon, data }) => (
+					<Card key={title}>
+						<CardHeader className='flex items-center justify-between'>
+							<CardTitle>{title}</CardTitle>
+							{icon}
+						</CardHeader>
+						<CardContent>
+							{data.length === 0 && (
+								<Text size='md' weight='semi'>
+									No balances yet
+								</Text>
+							)}
+							<ul className='flex flex-col gap-2'>
+								{data.map(
+									({ currencyId, currency, balance }) => (
+										<li
+											key={currencyId}
+											className='flex items-center justify-between gap-2'
+										>
+											<Text className='flex items-center gap-2'>
+												<CurrencyIcon
+													currency={currency}
+													size='sm'
+												/>
+												{currency}
+											</Text>
+											<Text>
+												{
+													CURRENCY_DISPLAY[currency]
+														.symbol
+												}{' '}
+												{formatNumber(balance)}
+											</Text>
+										</li>
+									),
+								)}
+							</ul>
+						</CardContent>
+					</Card>
+				))}
+			</div>
 		</>
 	)
 }

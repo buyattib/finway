@@ -203,12 +203,12 @@ export default function Exchanges({
 					<TableHeader>
 						<TableRow>
 							<TableHead>Date</TableHead>
-							<TableHead className='text-center'>
+							<TableHead className='text-right'>
 								Account
 							</TableHead>
-							<TableHead className='text-center'>From</TableHead>
-							<TableHead className='text-center'>To</TableHead>
-							<TableHead className='text-center'>Rate</TableHead>
+							<TableHead className='text-right'>From</TableHead>
+							<TableHead className='text-right'>To</TableHead>
+							<TableHead className='text-right'>Rate</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
 					</TableHeader>
@@ -231,7 +231,7 @@ export default function Exchanges({
 										{formatDate(new Date(date))}
 									</TableCell>
 									<TableCell>
-										<div className='flex justify-center items-center gap-2'>
+										<div className='flex justify-end items-center gap-2'>
 											<AccountTypeIcon
 												size='xs'
 												accountType={accountType}
@@ -239,15 +239,15 @@ export default function Exchanges({
 											{account}
 										</div>
 									</TableCell>
-									<TableCell className='text-center'>
+									<TableCell className='text-right'>
 										<b>{fromCurrency}</b>{' '}
 										{formatNumber(fromAmount)}
 									</TableCell>
-									<TableCell className='text-center'>
+									<TableCell className='text-right'>
 										<b>{toCurrency}</b>{' '}
 										{formatNumber(toAmount)}
 									</TableCell>
-									<TableCell className='text-center'>
+									<TableCell className='text-right'>
 										{formatNumber(
 											Number(fromAmount) /
 												Number(toAmount),

@@ -29,8 +29,6 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 
@@ -228,20 +226,36 @@ export default function Accounts({
 											}) => {
 												const { symbol } =
 													CURRENCY_DISPLAY[currency]
+												const [, currencyId] =
+													bId.split('-')
 												return (
 													<li
 														key={bId}
 														className='flex items-center gap-4'
 													>
-														<Text className='flex items-center gap-2'>
-															<CurrencyIcon
-																currency={
-																	currency
-																}
-																size='sm'
-															/>
-															{currency}
-														</Text>
+														<Link
+															to={{
+																pathname:
+																	'../transactions/create',
+																search: createSearchParams(
+																	{
+																		accountId:
+																			id,
+																		currencyId,
+																	},
+																).toString(),
+															}}
+														>
+															<Text className='flex items-center gap-2'>
+																<CurrencyIcon
+																	currency={
+																		currency
+																	}
+																	size='sm'
+																/>
+																{currency}
+															</Text>
+														</Link>
 														<Text>
 															{`${symbol} ${formatNumber(balance)}`}
 														</Text>
