@@ -230,7 +230,7 @@ export default function Transactions({
 		navigation.location &&
 		navigation.location.search
 
-	const hasFilters = !!Object.entries(filters).length
+	const hasFilters = Object.values(filters).some(Boolean)
 
 	return (
 		<section
