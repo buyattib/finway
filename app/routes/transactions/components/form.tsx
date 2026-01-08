@@ -121,7 +121,7 @@ export function TransactionForm({
 			<CardHeader>
 				<div className='flex items-center gap-4'>
 					<Button asChild variant='link' width='fit' size='icon'>
-						<Link to='..' relative='path'>
+						<Link to='/app/transactions' relative='path'>
 							<ArrowLeftIcon />
 						</Link>
 					</Button>
