@@ -1,5 +1,5 @@
 import type { DB } from '~/lib/types'
-import { and, eq, gte, lte, sql, desc } from 'drizzle-orm'
+import { and, eq, gte, lte, sql, desc, asc } from 'drizzle-orm'
 
 import {
 	transaction as transactionTable,
@@ -10,13 +10,13 @@ import {
 
 import type { TTransactionType } from '~/routes/transactions/lib/types'
 
-import type { CurrencyResponse, CategoryResponse } from './types'
+import type { CurrencyResponse, CategoryResponse, MonthResponse } from './types'
 
 type Args = {
 	db: DB
 	ownerId: string
 	transactionType: TTransactionType
-	group: 'currency' | 'category'
+	group: 'currency' | 'category' | 'month'
 }
 
 export async function getMonthTransactions(
@@ -27,6 +27,10 @@ export async function getMonthTransactions(
 	args: Args & { group: 'category' },
 ): Promise<Array<CurrencyResponse & CategoryResponse>>
 
+export async function getMonthTransactions(
+	args: Args & { group: 'month' },
+): Promise<Array<CurrencyResponse & MonthResponse>>
+
 export async function getMonthTransactions({
 	db,
 	ownerId,
@@ -34,8 +38,9 @@ export async function getMonthTransactions({
 	group,
 }: Args) {
 	const now = new Date()
-	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+	const monthStart = new Date(now.getFullYear(), now.getMonth(), 0)
 	const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+	const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 0)
 
 	const groups = {
 		currency: {
@@ -47,6 +52,13 @@ export async function getMonthTransactions({
 				),
 			}),
 			groupBy: () => [transactionTable.currencyId],
+			where: () =>
+				and(
+					eq(transactionTable.type, transactionType),
+					gte(transactionTable.date, monthStart.toISOString()),
+					lte(transactionTable.date, monthEnd.toISOString()),
+				),
+			orderBy: () => [desc(sql`amount`)],
 		},
 		category: {
 			columns: () => ({
@@ -58,10 +70,34 @@ export async function getMonthTransactions({
 				...groups.currency.groupBy(),
 				transactionTable.transactionCategoryId,
 			],
+			where: () => groups.currency.where(),
+			orderBy: () => [...groups.currency.orderBy()],
+		},
+		month: {
+			columns: () => ({
+				...groups.currency.columns(),
+				month: sql<number>`CAST(strftime('%m', ${transactionTable.date}) AS INTEGER)`.as(
+					'month',
+				),
+				year: sql<number>`CAST(strftime('%Y', ${transactionTable.date}) AS INTEGER)`.as(
+					'year',
+				),
+			}),
+			groupBy: () => [
+				...groups.currency.groupBy(),
+				sql`month`,
+				sql`year`,
+			],
+			where: () =>
+				and(
+					eq(transactionTable.type, transactionType),
+					gte(transactionTable.date, yearAgo.toISOString()),
+				),
+			orderBy: () => [asc(sql`year`), asc(sql`month`)],
 		},
 	}
 
-	const { columns, groupBy } = groups[group]
+	const { columns, groupBy, where, orderBy } = groups[group]
 
 	return db
 		.select(columns())
@@ -84,13 +120,7 @@ export async function getMonthTransactions({
 				transactionTable.transactionCategoryId,
 			),
 		)
-		.where(
-			and(
-				eq(transactionTable.type, transactionType),
-				gte(transactionTable.date, monthStart.toISOString()),
-				lte(transactionTable.date, monthEnd.toISOString()),
-			),
-		)
+		.where(where())
 		.groupBy(...groupBy())
-		.orderBy(desc(sql`amount`))
+		.orderBy(...orderBy())
 }

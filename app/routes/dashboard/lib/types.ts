@@ -10,3 +10,8 @@ export type CategoryResponse = {
 	transactionCategoryId: string
 	transactionCategory: string
 }
+
+export type MonthResponse = {
+	month: number
+	year: number
+}
