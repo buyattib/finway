@@ -13,7 +13,7 @@
 		"dev": "node --env-file=.env server.js",
 		"build": "react-router build",
 		"start": "node --env-file=.env.build server.js",
-		"start-dev": "node --env-file=.env server.js",
+		"start-dev": "node --env-file=.env.develop.build server.js",
 		"email": "email dev --dir app/emails --port 6000",
 		"typecheck": "react-router typegen && tsc -b",
 		"format": "pnpm exec prettier . --write"
