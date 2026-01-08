@@ -4,7 +4,7 @@ import { type ToastSession, ToastSessionSchema } from '~/components/show-toast'
 import { env } from './env.server'
 import { combineHeaders } from './headers.server'
 
-const toastCookieKey = 'finhub_toast'
+const toastCookieKey = 'finway_toast'
 
 export const toastSessionStorage = createCookieSessionStorage({
 	cookie: {

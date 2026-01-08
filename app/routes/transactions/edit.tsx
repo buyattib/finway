@@ -19,6 +19,22 @@ import {
 import { getSelectData } from './lib/queries'
 import { TransactionForm } from './components/form'
 
+export function meta({ params: { transactionId } }: Route.MetaArgs) {
+	return [
+		{
+			title: `Edit transaction ${transactionId} | Finway`,
+		},
+		{
+			property: 'og:title',
+			content: `Edit transaction ${transactionId} | Finway`,
+		},
+		{
+			name: 'description',
+			content: `Edit transaction ${transactionId} | Finway`,
+		},
+	]
+}
+
 export async function loader({
 	context,
 	params: { transactionId },

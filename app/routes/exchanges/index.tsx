@@ -36,11 +36,11 @@ import { DeleteExchangeFormSchema } from './lib/schemas'
 
 export function meta() {
 	return [
-		{ title: 'Exchanges | Finhub' },
+		{ title: 'Exchanges | Finway' },
 
 		{
 			property: 'og:title',
-			content: 'Exchanges | Finhub',
+			content: 'Exchanges | Finway',
 		},
 		{
 			name: 'description',

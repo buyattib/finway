@@ -1,15 +1,15 @@
 import { Link, type LinkProps } from 'react-router'
-import { FinhubIcon } from './finhub-icon'
+import { FinwayIcon } from './finway-icon'
 
-export function FinhubLink(props: Pick<LinkProps, 'onClick'>) {
+export function FinwayLink(props: Pick<LinkProps, 'onClick'>) {
 	return (
 		<Link
 			{...props}
 			to='/app'
 			className='flex items-center gap-2 font-semibold text-primary text-lg'
 		>
-			<FinhubIcon />
-			Finhub
+			<FinwayIcon />
+			Finway
 		</Link>
 	)
 }

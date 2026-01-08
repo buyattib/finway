@@ -14,6 +14,42 @@ import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
 import { ACTION_EDITION } from './lib/constants'
 
+export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
+	if (!loaderData?.account) {
+		return [
+			{
+				title: `Account ${accountId} not found | Finway`,
+			},
+			{
+				property: 'og:title',
+				content: `Account ${accountId} not found | Finway`,
+			},
+			{
+				name: 'description',
+				content: `Account ${accountId} not found | Finway`,
+			},
+		]
+	}
+
+	const {
+		account: { name },
+	} = loaderData
+
+	return [
+		{
+			title: `Edit Account ${name} | Finway`,
+		},
+		{
+			property: 'og:title',
+			content: `Edit Account ${name} | Finway`,
+		},
+		{
+			name: 'description',
+			content: `Edit Account ${name} | Finway`,
+		},
+	]
+}
+
 export async function loader({
 	context,
 	params: { accountId },

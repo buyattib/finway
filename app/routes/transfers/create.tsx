@@ -40,6 +40,22 @@ import { getSelectData } from '~/routes/transactions/lib/queries'
 
 import { CreateTransferFormSchema } from './lib/schemas'
 
+export function meta() {
+	return [
+		{ title: 'Create a transfer | Finway' },
+
+		{
+			property: 'og:title',
+			content: 'Create a transfer | Finway',
+		},
+		{
+			name: 'description',
+			content:
+				'Create a transfer between accounts to track your money movements',
+		},
+	]
+}
+
 export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)

@@ -19,7 +19,7 @@ import { authMiddleware } from '~/middleware/auth'
 import { userContext } from '~/lib/context'
 import { cn } from '~/lib/utils'
 
-import { FinhubLink } from '~/components/finhub-link'
+import { FinwayLink } from '~/components/finway-link'
 import { LogoutButton } from '~/components/logout-button'
 import { ThemeToggle } from '~/components/theme-toggle'
 import {
@@ -106,7 +106,7 @@ function PrivateLayoutContent({
 		<>
 			<Sidebar>
 				<SidebarHeader className='p-4'>
-					<FinhubLink onClick={closeSidebar} />
+					<FinwayLink onClick={closeSidebar} />
 					<p className='leading-7 font-semibold sm:hidden'>
 						{user.email}
 					</p>

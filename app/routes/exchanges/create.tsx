@@ -40,6 +40,21 @@ import { getSelectData } from '~/routes/transactions/lib/queries'
 
 import { CreateExchangeFormSchema } from './lib/schemas'
 
+export function meta() {
+	return [
+		{ title: 'Create an exchange | Finway' },
+
+		{
+			property: 'og:title',
+			content: 'Create an exchange | Finway',
+		},
+		{
+			name: 'description',
+			content: 'Create a currency exchange to track your money',
+		},
+	]
+}
+
 export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)

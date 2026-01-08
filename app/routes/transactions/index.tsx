@@ -48,11 +48,11 @@ import type { TTransactionType } from './lib/types'
 
 export function meta() {
 	return [
-		{ title: 'Transactions | Finhub' },
+		{ title: 'Transactions | Finway' },
 
 		{
 			property: 'og:title',
-			content: 'Transactions | Finhub',
+			content: 'Transactions | Finway',
 		},
 		{
 			name: 'description',

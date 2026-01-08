@@ -4,7 +4,7 @@ import { parseWithZod } from '@conform-to/zod/v4'
 import { ThemeFormSchema } from '~/components/theme-toggle'
 
 const expireDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-export const themeCookie = createCookie('finhub_theme', {
+export const themeCookie = createCookie('finway_theme', {
 	path: '/',
 	sameSite: 'lax',
 	httpOnly: true,

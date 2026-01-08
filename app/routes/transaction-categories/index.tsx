@@ -23,11 +23,11 @@ import { DeleteTransactionCategoryFormSchema } from './lib/schemas'
 
 export function meta() {
 	return [
-		{ title: 'Transaction categories | Finhub' },
+		{ title: 'Transaction categories | Finway' },
 
 		{
 			property: 'og:title',
-			content: 'Transaction categories | Finhub',
+			content: 'Transaction categories | Finway',
 		},
 		{
 			name: 'description',

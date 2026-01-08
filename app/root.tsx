@@ -71,10 +71,10 @@ export const links: Route.LinksFunction = () => [
 
 export function meta({ error }: Route.MetaArgs) {
 	return [
-		{ title: !error ? 'Finhub' : 'Error | Finhub' },
+		{ title: !error ? 'Finway' : 'Error | Finway' },
 		{
 			property: 'og:title',
-			content: 'Finhub',
+			content: 'Finway',
 		},
 		{
 			name: 'description',

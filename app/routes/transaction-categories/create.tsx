@@ -25,11 +25,11 @@ import { safeRedirect } from 'remix-utils/safe-redirect'
 
 export function meta() {
 	return [
-		{ title: 'Create Transaction Categories | Finhub' },
+		{ title: 'Create Transaction Categories | Finway' },
 
 		{
 			property: 'og:title',
-			content: 'Create TransactionCategories | Finhub',
+			content: 'Create TransactionCategories | Finway',
 		},
 		{
 			name: 'description',

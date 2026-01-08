@@ -3,8 +3,6 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
-import { z } from 'zod'
-
 import type { Route } from './+types/login'
 
 import { dbContext } from '~/lib/context'
@@ -27,22 +25,13 @@ import { CheckboxField, ErrorList, TextField } from '~/components/forms'
 
 import { LoginEmail } from '~/emails/login'
 
-import { createMagicLink } from './lib/magic-link.server'
-
-const LoginFormSchema = z.object({
-	email: z
-		.email({ message: 'Email is invalid' })
-		.min(3, { message: 'Email is too short' })
-		.max(100, { message: 'Email is too long' })
-		.transform(value => value.toLowerCase()),
-	remember: z.boolean().optional(),
-	redirectTo: z.string().optional(),
-})
+import { createMagicLink } from './server/magic-link.server'
+import { LoginFormSchema } from './lib/schemas'
 
 export function meta() {
 	return [
-		{ title: 'Login to Finhub' },
-		{ property: 'og:title', content: 'Login to Finhub' },
+		{ title: 'Login to Finway' },
+		{ property: 'og:title', content: 'Login to Finway' },
 	]
 }
 
@@ -88,7 +77,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const result = await sendEmail({
 		to: email,
-		subject: 'Welcome to Finhub - Your Login Link',
+		subject: 'Welcome to Finway - Your Login Link',
 		react: <LoginEmail url={magicLink.toString()} />,
 	})
 	if (result.status === 'error') {
@@ -107,7 +96,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
-		title: user ? 'Welcome back!' : 'Welcome to Finhub!',
+		title: user ? 'Welcome back!' : 'Welcome to Finway!',
 		description: 'We sent you an email with a link to log in',
 	})
 

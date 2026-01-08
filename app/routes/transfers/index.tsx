@@ -36,11 +36,11 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 
 export function meta() {
 	return [
-		{ title: 'Transfers | Finhub' },
+		{ title: 'Transfers | Finway' },
 
 		{
 			property: 'og:title',
-			content: 'Transfers | Finhub',
+			content: 'Transfers | Finway',
 		},
 		{
 			name: 'description',

@@ -28,7 +28,7 @@ export async function sendEmail({
 	}
 
 	const email = {
-		from: 'finhub.team@gmail.app',
+		from: 'finway.team@gmail.app',
 		to,
 		subject,
 		html,

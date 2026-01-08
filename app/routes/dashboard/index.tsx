@@ -21,6 +21,21 @@ import { SummaryCards } from './components/summary-cards'
 import { ExpensesByCategory } from './components/expenses-by-category'
 import { ExpensesByMonth } from './components/expenses-by-month'
 
+export function meta() {
+	return [
+		{ title: 'Dashboard | Finway' },
+
+		{
+			property: 'og:title',
+			content: 'Dashboard | Finway',
+		},
+		{
+			name: 'description',
+			content: 'Your financial dashboard',
+		},
+	]
+}
+
 export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)

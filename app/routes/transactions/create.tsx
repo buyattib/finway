@@ -14,6 +14,21 @@ import { TRANSACTION_TYPE_EXPENSE, ACTION_CREATION } from './lib/constants'
 import { getSelectData } from './lib/queries'
 import { TransactionForm } from './components/form'
 
+export function meta() {
+	return [
+		{ title: 'Create a transaction | Finway' },
+
+		{
+			property: 'og:title',
+			content: 'Create a transaction | Finway',
+		},
+		{
+			name: 'description',
+			content: 'Create a transaction to track your income and expenses',
+		},
+	]
+}
+
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)

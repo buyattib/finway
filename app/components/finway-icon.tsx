@@ -1,10 +1,10 @@
 import { cn } from '~/lib/utils'
 
-export function FinhubIcon({ size = 'lg' }: { size?: 'md' | 'lg' }) {
+export function FinwayIcon({ size = 'lg' }: { size?: 'md' | 'lg' }) {
 	return (
 		<img
-			src='/app/assets/finhub.svg'
-			alt='Finhub'
+			src='/app/assets/finway.svg'
+			alt='Finway'
 			className={cn({
 				'w-8 h-8': size === 'md',
 				'w-10 h-10': size === 'lg',

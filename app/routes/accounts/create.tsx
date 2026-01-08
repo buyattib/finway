@@ -14,11 +14,11 @@ import { ACTION_CREATION } from './lib/constants'
 
 export function meta() {
 	return [
-		{ title: 'Create an Account | Finhub' },
+		{ title: 'Create an Account | Finway' },
 
 		{
 			property: 'og:title',
-			content: 'Create an Account | Finhub',
+			content: 'Create an Account | Finway',
 		},
 		{
 			name: 'description',

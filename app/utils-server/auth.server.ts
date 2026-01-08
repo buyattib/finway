@@ -4,7 +4,7 @@ import { env } from './env.server'
 
 export const authSessionStorage = createCookieSessionStorage({
 	cookie: {
-		name: 'finhub_session',
+		name: 'finway_session',
 		sameSite: 'lax',
 		path: '/',
 		secure: env.NODE_ENV === 'production',

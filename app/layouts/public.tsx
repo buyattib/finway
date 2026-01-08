@@ -1,13 +1,13 @@
 import { Outlet } from 'react-router'
 
-import { FinhubLink } from '~/components/finhub-link'
+import { FinwayLink } from '~/components/finway-link'
 import { ThemeToggle } from '~/components/theme-toggle'
 
 export default function PublicLayout() {
 	return (
 		<>
 			<header className='flex items-center justify-between p-6 border-b-2 border-b-secondary'>
-				<FinhubLink />
+				<FinwayLink />
 				<div className='flex items-center gap-4'>
 					<ThemeToggle />
 				</div>

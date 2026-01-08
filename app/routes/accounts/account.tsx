@@ -29,6 +29,42 @@ import { getBalances } from './lib/queries'
 import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
 import { DeleteAccountFormSchema } from './lib/schemas'
 
+export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
+	if (!loaderData?.account) {
+		return [
+			{
+				title: `Account ${accountId} not found | Finway`,
+			},
+			{
+				property: 'og:title',
+				content: `Account ${accountId} not found | Finway`,
+			},
+			{
+				name: 'description',
+				content: `Account ${accountId} not found | Finway`,
+			},
+		]
+	}
+
+	const {
+		account: { name },
+	} = loaderData
+
+	return [
+		{
+			title: `Account ${name} | Finway`,
+		},
+		{
+			property: 'og:title',
+			content: `Account ${name} | Finway`,
+		},
+		{
+			name: 'description',
+			content: `Account ${name} | Finway`,
+		},
+	]
+}
+
 export async function loader({
 	context,
 	params: { accountId },

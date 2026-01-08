@@ -40,11 +40,11 @@ import { Spinner } from '~/components/ui/spinner'
 
 export function meta() {
 	return [
-		{ title: 'Accounts | Finhub' },
+		{ title: 'Accounts | Finway' },
 
 		{
 			property: 'og:title',
-			content: 'Accounts | Finhub',
+			content: 'Accounts | Finway',
 		},
 		{
 			name: 'description',

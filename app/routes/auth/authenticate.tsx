@@ -11,7 +11,7 @@ import {
 } from '~/utils-server/auth.server'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
-import { validateMagicLink } from './lib/magic-link.server'
+import { validateMagicLink } from './server/magic-link.server'
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
