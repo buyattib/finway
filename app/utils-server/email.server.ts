@@ -1,4 +1,4 @@
-import { render, toPlainText } from '@react-email/components'
+import { render } from '@react-email/components'
 import { env } from './env.server'
 
 const RESEND_BASE_URL = 'https://api.resend.com'
