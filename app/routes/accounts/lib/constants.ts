@@ -23,8 +23,16 @@ export const ACCOUNT_TYPE_LABEL = {
 export const CURRENCY_USD = 'USD'
 export const CURRENCY_EUR = 'EUR'
 export const CURRENCY_ARS = 'ARS'
+export const CURRENCY_USDT = 'USDT'
+export const CURRENCY_USDC = 'USDC'
 
-export const CURRENCIES = [CURRENCY_USD, CURRENCY_EUR, CURRENCY_ARS] as const
+export const CURRENCIES = [
+	CURRENCY_USD,
+	CURRENCY_EUR,
+	CURRENCY_ARS,
+	CURRENCY_USDT,
+	CURRENCY_USDC,
+] as const
 
 export const CURRENCY_DISPLAY = {
 	[CURRENCY_USD]: {
@@ -37,6 +45,14 @@ export const CURRENCY_DISPLAY = {
 	},
 	[CURRENCY_ARS]: {
 		label: 'Argentine Peso (ARS)',
+		symbol: '$',
+	},
+	[CURRENCY_USDT]: {
+		label: 'Tether (USDT)',
+		symbol: '$',
+	},
+	[CURRENCY_USDC]: {
+		label: 'USD Coin (USDC)',
 		symbol: '$',
 	},
 }
