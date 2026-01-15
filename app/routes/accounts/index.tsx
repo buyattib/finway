@@ -94,7 +94,9 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 	const accounts = accountsQuery.map(acc => ({
 		...acc,
-		balances: balancesByAccount[acc.id],
+		balances: balancesByAccount[acc.id]
+			.filter(({ balance }) => Number(balance) > 0)
+			.slice(0, 3),
 	}))
 
 	return { accounts, search }
@@ -213,7 +215,7 @@ export default function Accounts({
 									</div>
 								</Link>
 								<div className='sm:h-32 sm:border-l border-b' />
-								{!!balances.length && (
+								{balances.length !== 0 && (
 									<ul
 										className='flex flex-col justify-center gap-2'
 										aria-labelledby={id}

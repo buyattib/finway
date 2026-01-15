@@ -9,6 +9,7 @@ import {
 	transaction as transactionTable,
 } from '~/database/schema'
 import type { DB } from '~/lib/types'
+import type { Beautify } from '~/types/utils'
 
 import {
 	TRANSACTION_TYPE_EXPENSE,
@@ -35,19 +36,19 @@ type Args = {
 
 export async function getBalances(
 	args: Args & { parseBalance?: true; group?: 'account' },
-): Promise<Array<BaseBalance & { balance: string }>>
+): Promise<Array<Beautify<BaseBalance & { balance: string }>>>
 
 export async function getBalances(
 	args: Args & { parseBalance?: true; group?: 'currency' },
-): Promise<Array<CurrencyBalance & { balance: string }>>
+): Promise<Array<Beautify<CurrencyBalance & { balance: string }>>>
 
 export async function getBalances(
 	args: Args & { parseBalance?: false; group?: 'account' },
-): Promise<Array<BaseBalance & { balance: number }>>
+): Promise<Array<Beautify<BaseBalance & { balance: number }>>>
 
 export async function getBalances(
 	args: Args & { parseBalance?: false; group?: 'currency' },
-): Promise<Array<CurrencyBalance & { balance: number }>>
+): Promise<Array<Beautify<CurrencyBalance & { balance: number }>>>
 
 export async function getBalances({
 	db,
