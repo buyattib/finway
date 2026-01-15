@@ -1,22 +1,31 @@
 import { cn } from '~/lib/utils'
 import { cva, type VariantProps } from 'class-variance-authority'
 
-import USAFlagIcon from '~/assets/flags/usa-flag.svg'
-import EURFlagIcon from '~/assets/flags/europe-flag.svg'
-import ARSFlagIcon from '~/assets/flags/argentina-flag.svg'
+import USDIcon from '~/assets/currencies/usd.svg'
+import EURIcon from '~/assets/currencies/eur.svg'
+import ARSIcon from '~/assets/currencies/ars.svg'
+import USDTIcon from '~/assets/currencies/usdt.svg'
+import USDCIcon from '~/assets/currencies/usdc.svg'
+import DAIIcon from '~/assets/currencies/dai.svg'
 
 import {
 	CURRENCY_USD,
 	CURRENCY_ARS,
 	CURRENCY_EUR,
+	CURRENCY_USDT,
+	CURRENCY_USDC,
+	CURRENCY_DAI,
 	CURRENCY_DISPLAY,
 } from '~/routes/accounts/lib/constants'
 import type { TCurrency } from '~/routes/accounts/lib/types'
 
 const CURRENCY_ICONS = {
-	[CURRENCY_USD]: USAFlagIcon,
-	[CURRENCY_EUR]: EURFlagIcon,
-	[CURRENCY_ARS]: ARSFlagIcon,
+	[CURRENCY_USD]: USDIcon,
+	[CURRENCY_EUR]: EURIcon,
+	[CURRENCY_ARS]: ARSIcon,
+	[CURRENCY_USDT]: USDTIcon,
+	[CURRENCY_USDC]: USDCIcon,
+	[CURRENCY_DAI]: DAIIcon,
 }
 
 const currencyIconVariants = cva('text-background', {

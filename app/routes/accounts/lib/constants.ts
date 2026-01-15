@@ -25,6 +25,7 @@ export const CURRENCY_EUR = 'EUR'
 export const CURRENCY_ARS = 'ARS'
 export const CURRENCY_USDT = 'USDT'
 export const CURRENCY_USDC = 'USDC'
+export const CURRENCY_DAI = 'DAI'
 
 export const CURRENCIES = [
 	CURRENCY_USD,
@@ -32,6 +33,7 @@ export const CURRENCIES = [
 	CURRENCY_ARS,
 	CURRENCY_USDT,
 	CURRENCY_USDC,
+	CURRENCY_DAI,
 ] as const
 
 export const CURRENCY_DISPLAY = {
@@ -53,6 +55,10 @@ export const CURRENCY_DISPLAY = {
 	},
 	[CURRENCY_USDC]: {
 		label: 'USD Coin (USDC)',
+		symbol: '$',
+	},
+	[CURRENCY_DAI]: {
+		label: 'Dai (DAI)',
 		symbol: '$',
 	},
 }
