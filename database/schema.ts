@@ -191,6 +191,38 @@ export const exchange = sqliteTable(
 	],
 )
 
+export const creditCard = sqliteTable(
+	'credit_cards',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+
+		brand: text().notNull(),
+		last4: text().notNull(),
+		expiryMonth: text().notNull(),
+		expiryYear: text().notNull(),
+
+		accountId: text().notNull(),
+		currencyId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'credit_cards_accounts_fk',
+			columns: [table.accountId],
+			foreignColumns: [account.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'credit_cards_currencies_fk',
+			columns: [table.currencyId],
+			foreignColumns: [currency.id],
+		}).onDelete('cascade'),
+		index('credit_cards_accountId_currencyId_idx').on(
+			table.accountId,
+			table.currencyId,
+		),
+	],
+)
+
 // ORM Relations
 
 export const transactionRelations = relations(transaction, ({ one }) => ({
@@ -234,6 +266,17 @@ export const exchangeRelations = relations(exchange, ({ one }) => ({
 	}),
 	toCurrency: one(currency, {
 		fields: [exchange.toCurrencyId],
+		references: [currency.id],
+	}),
+}))
+
+export const creditCardRelations = relations(creditCard, ({ one }) => ({
+	account: one(account, {
+		fields: [creditCard.accountId],
+		references: [account.id],
+	}),
+	currency: one(currency, {
+		fields: [creditCard.currencyId],
 		references: [currency.id],
 	}),
 }))

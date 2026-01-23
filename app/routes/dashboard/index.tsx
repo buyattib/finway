@@ -47,11 +47,13 @@ export async function loader({ context }: Route.LoaderArgs) {
 				ownerId: user.id,
 				group: 'currency',
 			})
-		).map(({ currency, currencyId, balance }) => ({
-			currencyId,
-			currency,
-			amount: balance,
-		})),
+		)
+			.filter(({ balance }) => Number(balance) > 0)
+			.map(({ currency, currencyId, balance }) => ({
+				currencyId,
+				currency,
+				amount: balance,
+			})),
 		monthExpenses: await getMonthTransactions({
 			db,
 			ownerId: user.id,

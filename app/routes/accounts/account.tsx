@@ -1,11 +1,14 @@
 import { Link, Form, data, useNavigation, useLocation } from 'react-router'
-import { SquarePenIcon, TrashIcon } from 'lucide-react'
+import { CreditCardIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq } from 'drizzle-orm'
 import type { Route } from './+types/account'
 
 import { dbContext, userContext } from '~/lib/context'
-import { account as accountTable } from '~/database/schema'
+import {
+	account as accountTable,
+	creditCard as creditCardTable,
+} from '~/database/schema'
 import { formatNumber } from '~/lib/utils'
 import {
 	createToastHeaders,
@@ -87,8 +90,29 @@ export async function loader({
 
 	const balances = await getBalances({ db, ownerId: user.id, accountId })
 
+	const creditCards = await db.query.creditCard.findMany({
+		where: (creditCard, { eq }) => eq(creditCard.accountId, accountId),
+		orderBy: (creditCard, { desc }) => desc(creditCard.createdAt),
+		columns: {
+			id: true,
+			last4: true,
+			brand: true,
+			expiryMonth: true,
+			expiryYear: true,
+		},
+		with: {
+			account: {
+				columns: { name: true, accountType: true },
+			},
+			currency: {
+				columns: { code: true },
+			},
+		},
+	})
+
 	const { ownerId, ...accountData } = account
-	return { account: { ...accountData, balances } }
+
+	return { account: { ...accountData, balances }, creditCards }
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -130,6 +154,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 export default function AccountDetails({
 	loaderData: {
 		account: { id, name, description, accountType, balances },
+		creditCards,
 	},
 }: Route.ComponentProps) {
 	const location = useLocation()
@@ -197,9 +222,11 @@ export default function AccountDetails({
 			</div>
 
 			<div className='flex flex-col gap-2'>
-				<Title id={id} level='h2'>
-					Currency balances
-				</Title>
+				<div className='border-b border-b-accent py-2'>
+					<Title id={id} level='h3'>
+						Currency balances
+					</Title>
+				</div>
 				{balances.length === 0 ? (
 					<Text alignment='center'>
 						You dont have any activity in this account yet.
@@ -226,6 +253,56 @@ export default function AccountDetails({
 								</li>
 							)
 						})}
+					</ul>
+				)}
+			</div>
+
+			<div className='flex flex-col gap-2'>
+				<div className='flex flex-row justify-between border-b border-b-accent py-2'>
+					<Title id={id} level='h3'>
+						Credit Cards
+					</Title>
+
+					<Button size='icon' variant='outline' asChild>
+						<Link to='/app/credit-cards/create' prefetch='intent'>
+							<CreditCardIcon />
+						</Link>
+					</Button>
+				</div>
+				{creditCards.length === 0 ? (
+					<Text alignment='center'>
+						You dont have any credit cards in this account yet.
+					</Text>
+				) : (
+					<ul className='flex flex-col gap-2' aria-labelledby={id}>
+						{creditCards.map(
+							({
+								id,
+								last4,
+								brand,
+								expiryMonth,
+								expiryYear,
+								currency,
+								account,
+							}) => {
+								const { label } =
+									CURRENCY_DISPLAY[currency.code]
+								return (
+									<li
+										key={id}
+										className='flex items-center justify-between gap-4 p-4 border border-muted rounded-md'
+									>
+										<Text className='flex items-center gap-2'>
+											<CurrencyIcon
+												currency={currency.code}
+												size='md'
+											/>
+											{label}
+										</Text>
+									</li>
+								)
+							},
+						)}
 					</ul>
 				)}
 			</div>

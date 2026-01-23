@@ -8,6 +8,8 @@ import {
 	ArrowRightLeftIcon,
 	ArrowUpDownIcon,
 	BanknoteArrowDownIcon,
+	CreditCard,
+	CreditCardIcon,
 	LayoutDashboard,
 	ListIcon,
 	WalletIcon,
@@ -58,6 +60,11 @@ const links = [
 		to: '/app/transactions',
 		labelKey: 'Transactions',
 		icon: <BanknoteArrowDownIcon />,
+	},
+	{
+		to: '/app/credit-cards',
+		labelKey: 'Credit Cards',
+		icon: <CreditCardIcon />,
 	},
 	{
 		to: '/app/transfers',
