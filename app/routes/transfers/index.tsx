@@ -177,7 +177,7 @@ export default function Transfers({
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete'
 
-	const deletingId = navigation.formData?.get('transactionId')
+	const deletingId = navigation.formData?.get('transferId')
 
 	return (
 		<section

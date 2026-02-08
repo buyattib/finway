@@ -8,8 +8,6 @@ import { account as accountTable } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
-import { GeneralErrorBoundary } from '~/components/general-error-boundary'
-
 import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
 import { ACTION_EDITION } from './lib/constants'
@@ -148,20 +146,6 @@ export default function EditAccount({
 			action={ACTION_EDITION}
 			account={account}
 			lastResult={actionData?.submission}
-		/>
-	)
-}
-
-export function ErrorBoundary() {
-	return (
-		<GeneralErrorBoundary
-			statusHandlers={{
-				404: ({ params }) => (
-					<p>
-						Account with id <b>{params.accountId}</b> not found.
-					</p>
-				),
-			}}
 		/>
 	)
 }

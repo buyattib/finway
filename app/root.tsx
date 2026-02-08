@@ -1,12 +1,14 @@
 import { useEffect } from 'react'
 import {
 	data,
+	isRouteErrorResponse,
 	Links,
 	Meta,
 	Outlet,
 	Scripts,
 	ScrollRestoration,
 	useRevalidator,
+	useRouteError,
 } from 'react-router'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import { subscribeToSchemeChange } from '@epic-web/client-hints/color-scheme'
@@ -134,6 +136,43 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
+			</body>
+		</html>
+	)
+}
+
+
+export function ErrorBoundary() {
+	const error = useRouteError()
+
+	let status = 500
+	let message = 'An unexpected error occurred.'
+
+	if (isRouteErrorResponse(error)) {
+		status = error.status
+		message =
+			status === 404
+				? 'The page you were looking for could not be found.'
+				: (error.data?.message ?? error.statusText)
+	}
+
+	return (
+		<html lang='en'>
+			<head>
+				<meta charSet='utf-8' />
+				<meta
+					name='viewport'
+					content='width=device-width, initial-scale=1'
+				/>
+				<Meta />
+				<Links />
+			</head>
+			<body className='min-h-svh flex flex-col items-center justify-center w-full'>
+				<div className='text-center space-y-2'>
+					<h1 className='text-4xl font-bold'>{status}</h1>
+					<p className='text-muted-foreground'>{message}</p>
+				</div>
+				<Scripts />
 			</body>
 		</html>
 	)

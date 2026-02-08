@@ -16,7 +16,6 @@ import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
-import { GeneralErrorBoundary } from '~/components/general-error-boundary'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import {
@@ -231,19 +230,5 @@ export default function AccountDetails({
 				)}
 			</div>
 		</div>
-	)
-}
-
-export function ErrorBoundary() {
-	return (
-		<GeneralErrorBoundary
-			statusHandlers={{
-				404: ({ params }) => (
-					<p>
-						Account with id <b>{params.accountId}</b> not found.
-					</p>
-				),
-			}}
-		/>
 	)
 }

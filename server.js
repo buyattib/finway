@@ -7,7 +7,7 @@ import { rateLimit } from 'express-rate-limit'
 
 // Short-circuit the type-checking of the built output.
 const BUILD_PATH = './build/server/index.js'
-const DEVELOPMENT = process.env.NODE_ENV === 'development'
+const PRODUCTION = process.env.NODE_ENV === 'production'
 const PORT = Number.parseInt(process.env.PORT || '3000')
 
 const app = express()
@@ -31,19 +31,18 @@ app.use((req, res, next) => {
 	const nonce = crypto.randomBytes(32).toString('base64')
 	res.locals.cspNonce = nonce
 	const _helmet = helmet({
-		contentSecurityPolicy:
-			process.env.NODE_MODE === 'production'
-				? {
-						directives: {
-							'script-src': ["'self'", `'nonce-${nonce}'`],
-						},
-					}
-				: false,
+		contentSecurityPolicy: PRODUCTION
+			? {
+					directives: {
+						'script-src': ["'self'", `'nonce-${nonce}'`],
+					},
+				}
+			: false,
 	})
 	_helmet(req, res, next)
 })
 
-if (!DEVELOPMENT) {
+if (PRODUCTION) {
 	// Add rate limiting to all requests
 	const defaultLimiter = {
 		windowMs: 15 * 60 * 1000, // 15 minutes
@@ -77,7 +76,7 @@ if (!DEVELOPMENT) {
 	})
 }
 
-if (DEVELOPMENT) {
+if (!PRODUCTION) {
 	console.log('Starting development server')
 	const viteDevServer = await import('vite').then(vite =>
 		vite.createServer({

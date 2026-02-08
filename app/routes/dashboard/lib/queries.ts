@@ -38,9 +38,9 @@ export async function getMonthTransactions({
 	group,
 }: Args) {
 	const now = new Date()
-	const monthStart = new Date(now.getFullYear(), now.getMonth(), 0)
+	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
 	const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-	const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 0)
+	const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1)
 
 	const groups = {
 		currency: {

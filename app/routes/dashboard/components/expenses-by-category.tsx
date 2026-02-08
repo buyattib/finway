@@ -88,13 +88,13 @@ export function ExpensesByCategory({
 						</Text>
 						<div className='flex items-center gap-4'>
 							<Button asChild variant='outline'>
-								<Link to='/accounts'>
+								<Link to='/app/accounts'>
 									<PlusIcon />
 									Create Account
 								</Link>
 							</Button>
 							<Button asChild variant='default'>
-								<Link to='/transactions'>
+								<Link to='/app/transactions'>
 									<PlusIcon />
 									Create Transaction
 								</Link>

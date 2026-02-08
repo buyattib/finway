@@ -206,7 +206,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	return await redirectWithToast(`/app/transactions`, request, {
 		type: 'success',
-		title: 'Transaction created successfully',
+		title: 'Transaction edited successfully',
 	})
 }
 

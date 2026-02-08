@@ -42,7 +42,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	let accountId = selectData.accounts?.[0]?.id || ''
 	if (
 		accountIdParam &&
-		selectData.accounts.filter(acc => acc.id === accountIdParam)
+		selectData.accounts.some(acc => acc.id === accountIdParam)
 	) {
 		accountId = accountIdParam
 	}
