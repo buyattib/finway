@@ -2,7 +2,7 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Link, Form, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
-import type { Route } from '../+types/edit'
+import type { Route as EditRoute } from '../+types/edit'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -24,56 +24,26 @@ import {
 } from '../lib/constants'
 import { AccountFormSchema } from '../lib/schemas'
 
+type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
+
 type Props = {
 	lastResult?: SubmissionResult
-} & (
-	| {
-			action: typeof ACTION_CREATION
-			redirectTo: string
-	  }
-	| {
-			action: typeof ACTION_EDITION
-			account: Route.ComponentProps['loaderData']['account']
-	  }
-)
+	initialData: Partial<TInitialData>
+	action: typeof ACTION_CREATION | typeof ACTION_EDITION
+	redirectTo?: string
+}
 
-export function AccountForm(props: Props) {
+export function AccountForm({
+	lastResult,
+	initialData,
+	action,
+	redirectTo,
+}: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
-
-	const defaultValue = () => {
-		if (props.action === ACTION_CREATION) {
-			return {
-				name: '',
-				accountType: '',
-				description: '',
-			}
-		}
-
-		if (props.action === ACTION_EDITION) {
-			return {
-				name: props.account.name,
-				accountType: props.account.accountType,
-				description: props.account.description,
-			}
-		}
-
-		throw new Error('Invalid action')
-	}
-
-	const [form, fields] = useForm({
-		lastResult: props.lastResult,
-		id: 'account-form',
-		shouldValidate: 'onInput',
-		defaultValue: defaultValue(),
-		constraint: getZodConstraint(AccountFormSchema),
-		onValidate({ formData }) {
-			return parseWithZod(formData, { schema: AccountFormSchema })
-		},
-	})
 
 	const { title, buttonLabel } = {
 		[ACTION_CREATION]: {
@@ -84,7 +54,18 @@ export function AccountForm(props: Props) {
 			title: 'Edit account',
 			buttonLabel: 'Update',
 		},
-	}[props.action]
+	}[action]
+
+	const [form, fields] = useForm({
+		lastResult,
+		id: 'account-form',
+		shouldValidate: 'onInput',
+		defaultValue: initialData,
+		constraint: getZodConstraint(AccountFormSchema),
+		onValidate({ formData }) {
+			return parseWithZod(formData, { schema: AccountFormSchema })
+		},
+	})
 
 	return (
 		<Card className='md:max-w-2xl w-full mx-auto'>
@@ -111,22 +92,18 @@ export function AccountForm(props: Props) {
 					{/* Have first button to be submit */}
 					<button type='submit' className='hidden' />
 
-					<input type='hidden' name='action' value={props.action} />
+					<input type='hidden' name='action' value={action} />
 
-					{props.action === ACTION_CREATION && (
+					{action === ACTION_CREATION && (
 						<input
 							type='hidden'
 							name='redirectTo'
-							value={props.redirectTo}
+							value={redirectTo}
 						/>
 					)}
 
-					{props.action === ACTION_EDITION && (
-						<input
-							type='hidden'
-							name='id'
-							value={props.account.id}
-						/>
+					{action === ACTION_EDITION && (
+						<input type='hidden' name='id' value={initialData.id} />
 					)}
 
 					<ErrorList
