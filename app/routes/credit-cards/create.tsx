@@ -5,11 +5,11 @@ import type { Route } from './+types/create'
 import { dbContext, userContext } from '~/lib/context'
 import { creditCard as creditCardTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
-import { getSelectData } from '~/routes/transactions/lib/queries'
+import { getSelectData } from '~/lib/queries'
 
 import { CreditCardForm } from './components/form'
 import { CreditCardFormSchema } from './lib/schemas'
-import { ACTION_CREATION } from './lib/constants'
+import { ACTION_CREATION } from '~/lib/constants'
 
 export function meta() {
 	return [

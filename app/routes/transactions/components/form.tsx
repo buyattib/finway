@@ -34,15 +34,20 @@ import { TransactionTypeIcon } from '~/components/transaction-type-icon'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { ACTION_CREATION, ACTION_EDITION } from '../lib/constants'
+import {
+	ACTION_CREATION,
+	ACTION_EDITION,
+	TRANSACTION_TYPES,
+	TRANSACTION_TYPE_DISPLAY,
+} from '~/lib/constants'
+import type { TSelectData } from '~/lib/types'
+
 import { TransactionFormSchema } from '../lib/schemas'
-import { TRANSACTION_TYPES, TRANSACTION_TYPE_DISPLAY } from '../lib/constants'
-import type { getSelectData } from '../lib/queries'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
 type Props = {
-	selectData: Awaited<ReturnType<typeof getSelectData>>
+	selectData: TSelectData
 	lastResult?: SubmissionResult
 	initialData: Partial<TInitialData>
 	action: typeof ACTION_CREATION | typeof ACTION_EDITION

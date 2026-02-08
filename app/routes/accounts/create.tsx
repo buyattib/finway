@@ -10,8 +10,8 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 
 import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
-import { ACTION_CREATION } from './lib/constants'
-import type { TAccountType } from './lib/types'
+import { ACTION_CREATION } from '~/lib/constants'
+import type { TAccountType } from '~/lib/types'
 
 export function meta() {
 	return [

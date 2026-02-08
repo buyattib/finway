@@ -8,15 +8,14 @@ import { transaction as transactionTable } from '~/database/schema'
 import { removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
-
-import { TransactionFormSchema } from './lib/schemas'
+import { getBalances, getSelectData } from '~/lib/queries'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
 	ACTION_EDITION,
-} from './lib/constants'
-import { getSelectData } from './lib/queries'
+} from '~/lib/constants'
+
+import { TransactionFormSchema } from './lib/schemas'
 import { TransactionForm } from './components/form'
 
 export function meta({ params: { transactionId } }: Route.MetaArgs) {

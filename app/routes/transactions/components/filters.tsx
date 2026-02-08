@@ -8,7 +8,7 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 import { Combobox } from '~/components/ui/combobox'
 import { Select } from '~/components/select'
 
-import { TRANSACTION_TYPE_DISPLAY, TRANSACTION_TYPES } from '../lib/constants'
+import { TRANSACTION_TYPE_DISPLAY, TRANSACTION_TYPES } from '~/lib/constants'
 
 export function TransactionsFilters({
 	filters,

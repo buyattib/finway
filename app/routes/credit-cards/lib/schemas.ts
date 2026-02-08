@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ACTION_CREATION, ACTION_EDITION } from './constants'
+import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({

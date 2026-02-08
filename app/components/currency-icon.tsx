@@ -16,8 +16,8 @@ import {
 	CURRENCY_USDC,
 	CURRENCY_DAI,
 	CURRENCY_DISPLAY,
-} from '~/routes/accounts/lib/constants'
-import type { TCurrency } from '~/routes/accounts/lib/types'
+} from '~/lib/constants'
+import type { TCurrency } from '~/lib/types'
 
 const CURRENCY_ICONS = {
 	[CURRENCY_USD]: USDIcon,

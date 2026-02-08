@@ -19,8 +19,8 @@ import {
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
 
-import { CURRENCY_DISPLAY } from '~/routes/accounts/lib/constants'
-import type { TCurrency } from '~/routes/accounts/lib/types'
+import { CURRENCY_DISPLAY } from '~/lib/constants'
+import type { TCurrency } from '~/lib/types'
 
 const colorPalette = [
 	'#8884d8',

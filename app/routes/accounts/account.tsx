@@ -24,8 +24,8 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
-import { getBalances } from './lib/queries'
-import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
+import { getBalances } from '~/lib/queries'
+import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from '~/lib/constants'
 import { DeleteAccountFormSchema } from './lib/schemas'
 
 export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {

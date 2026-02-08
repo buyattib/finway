@@ -32,9 +32,9 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 
-import { getBalances } from './lib/queries'
-import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from './lib/constants'
-import type { TAccountBalance } from './lib/types'
+import { getBalances } from '~/lib/queries'
+import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from '~/lib/constants'
+import type { TAccountBalance } from '~/lib/types'
 import { useEffect } from 'react'
 import { Spinner } from '~/components/ui/spinner'
 

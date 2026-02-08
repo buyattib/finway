@@ -29,7 +29,7 @@ import {
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
+import { getBalances } from '~/lib/queries'
 
 import { DeleteTransferFormSchema } from './lib/schemas'
 import { AccountTypeIcon } from '~/components/account-type-icon'

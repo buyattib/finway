@@ -1,3 +1,12 @@
+import { BanknoteArrowDownIcon, BanknoteArrowUpIcon } from 'lucide-react'
+
+// Actions
+
+export const ACTION_CREATION = 'CREATION'
+export const ACTION_EDITION = 'EDITION'
+
+// Account Types
+
 export const ACCOUNT_TYPE_BANK = 'bank'
 export const ACCOUNT_TYPE_CASH = 'cash'
 export const ACCOUNT_TYPE_DIGITAL_WALLET = 'digital-wallet'
@@ -19,6 +28,8 @@ export const ACCOUNT_TYPE_LABEL = {
 	[ACCOUNT_TYPE_CRYPTO_WALLET]: 'Crypto Wallet',
 	[ACCOUNT_TYPE_BROKER]: 'Broker',
 }
+
+// Currencies
 
 export const CURRENCY_USD = 'USD'
 export const CURRENCY_EUR = 'EUR'
@@ -63,5 +74,25 @@ export const CURRENCY_DISPLAY = {
 	},
 }
 
-export const ACTION_CREATION = 'CREATION'
-export const ACTION_EDITION = 'EDITION'
+// Transaction Types
+
+export const TRANSACTION_TYPE_EXPENSE = 'EXPENSE'
+export const TRANSACTION_TYPE_INCOME = 'INCOME'
+
+export const TRANSACTION_TYPES = [
+	TRANSACTION_TYPE_EXPENSE,
+	TRANSACTION_TYPE_INCOME,
+] as const
+
+export const TRANSACTION_TYPE_DISPLAY = {
+	[TRANSACTION_TYPE_EXPENSE]: {
+		icon: BanknoteArrowUpIcon,
+		label: 'Expense',
+		color: 'red',
+	},
+	[TRANSACTION_TYPE_INCOME]: {
+		icon: BanknoteArrowDownIcon,
+		label: 'Income',
+		color: 'green',
+	},
+}

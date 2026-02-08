@@ -38,13 +38,12 @@ import {
 import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
+import { getBalances, getSelectData } from '~/lib/queries'
+import { TRANSACTION_TYPE_DISPLAY } from '~/lib/constants'
+import type { TTransactionType } from '~/lib/types'
 
 import { TransactionsFilters } from './components/filters'
-import { TRANSACTION_TYPE_DISPLAY } from './lib/constants'
 import { DeleteTransactionFormSchema } from './lib/schemas'
-import { getSelectData } from './lib/queries'
-import type { TTransactionType } from './lib/types'
 
 export function meta() {
 	return [

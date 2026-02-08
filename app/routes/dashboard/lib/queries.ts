@@ -8,7 +8,7 @@ import {
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
 
-import type { TTransactionType } from '~/routes/transactions/lib/types'
+import type { TTransactionType } from '~/lib/types'
 
 import type { CurrencyResponse, CategoryResponse, MonthResponse } from './types'
 

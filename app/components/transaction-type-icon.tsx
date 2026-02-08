@@ -7,8 +7,8 @@ import {
 	TRANSACTION_TYPE_DISPLAY,
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
-import type { TTransactionType } from '~/routes/transactions/lib/types'
+} from '~/lib/constants'
+import type { TTransactionType } from '~/lib/types'
 
 const transactionTypeIconVariants = cva('', {
 	variants: {

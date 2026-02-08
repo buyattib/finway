@@ -30,7 +30,7 @@ import {
 import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
+import { getBalances } from '~/lib/queries'
 
 import { DeleteExchangeFormSchema } from './lib/schemas'
 

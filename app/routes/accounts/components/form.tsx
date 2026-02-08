@@ -21,7 +21,7 @@ import {
 	ACCOUNT_TYPE_LABEL,
 	ACTION_CREATION,
 	ACTION_EDITION,
-} from '../lib/constants'
+} from '~/lib/constants'
 import { AccountFormSchema } from '../lib/schemas'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']

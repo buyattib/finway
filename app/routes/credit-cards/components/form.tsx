@@ -24,18 +24,15 @@ import {
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import type { getSelectData } from '~/routes/transactions/lib/queries'
+import type { TSelectData } from '~/lib/types'
+import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 
 import { CreditCardFormSchema } from '../lib/schemas'
-import { ACTION_CREATION, ACTION_EDITION } from '../lib/constants'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
 type Props = {
-	selectData: Pick<
-		Awaited<ReturnType<typeof getSelectData>>,
-		'accounts' | 'currencies'
-	>
+	selectData: Pick<TSelectData, 'accounts' | 'currencies'>
 	lastResult?: SubmissionResult
 	initialData: Partial<TInitialData>
 	action: typeof ACTION_CREATION | typeof ACTION_EDITION

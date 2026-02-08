@@ -16,7 +16,7 @@ import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { CURRENCY_DISPLAY } from '~/routes/accounts/lib/constants'
+import { CURRENCY_DISPLAY } from '~/lib/constants'
 
 export function meta() {
 	return [

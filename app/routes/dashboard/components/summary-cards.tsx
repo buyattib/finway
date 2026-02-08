@@ -11,7 +11,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { CURRENCY_DISPLAY } from '~/routes/accounts/lib/constants'
+import { CURRENCY_DISPLAY } from '~/lib/constants'
 
 export function SummaryCards({
 	summary,

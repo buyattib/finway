@@ -10,7 +10,7 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 
 import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
-import { ACTION_EDITION } from './lib/constants'
+import { ACTION_EDITION } from '~/lib/constants'
 
 export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
 	if (!loaderData?.initialData) {

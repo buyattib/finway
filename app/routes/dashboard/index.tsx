@@ -2,13 +2,12 @@ import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
-import type { TCurrency } from '~/routes/accounts/lib/types'
-
+import { getBalances } from '~/lib/queries'
+import type { TCurrency } from '~/lib/types'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
+} from '~/lib/constants'
 
 import { getMonthTransactions } from './lib/queries'
 import type {
