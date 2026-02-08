@@ -53,6 +53,7 @@ export default [
 
 		// credit cards
 		...prefix('credit-cards', [
+			index('routes/credit-cards/index.tsx'),
 			route('create', 'routes/credit-cards/create.tsx'),
 		]),
 	]),
