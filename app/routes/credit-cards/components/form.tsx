@@ -54,6 +54,7 @@ export function CreditCardForm({
 		navigation.state === 'submitting'
 
 	const { accounts, currencies } = selectData
+	const isEditing = action === ACTION_EDITION
 
 	const { title, buttonLabel } = {
 		[ACTION_CREATION]: {
@@ -163,6 +164,7 @@ export function CreditCardForm({
 								field={fields.accountId}
 								buttonPlaceholder='Select an account'
 								options={accountOptions}
+								disabled={isEditing}
 							/>
 
 							<ComboboxField
@@ -170,6 +172,7 @@ export function CreditCardForm({
 								field={fields.currencyId}
 								buttonPlaceholder='Select a currency'
 								options={currencyOptions}
+								disabled={isEditing}
 							/>
 						</div>
 					) : (
