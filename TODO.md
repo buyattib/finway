@@ -1,0 +1,7 @@
+- Improve organization of various constants and functions used globally.
+- Add a linter?
+- Add a claude.md file
+- Ask agent what is needed to be production ready
+- Improve styling and a design system?
+- Internationalization
+- Sessions for auth?
