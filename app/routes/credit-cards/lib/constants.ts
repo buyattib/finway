@@ -1,0 +1,2 @@
+export const ACTION_CREATION = 'CREATION'
+export const ACTION_EDITION = 'EDITION'
