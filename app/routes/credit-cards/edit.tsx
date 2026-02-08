@@ -105,31 +105,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 					message: 'Credit card not found',
 				})
 			}
-
-			const account = await db.query.account.findFirst({
-				where: (account, { eq }) => eq(account.id, data.accountId),
-				columns: { ownerId: true },
-			})
-			if (!account || account.ownerId !== user.id) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'Account not found',
-					path: ['accountId'],
-				})
-			}
-
-			const currency = await db.query.currency.findFirst({
-				where: (currency, { eq }) => eq(currency.id, data.currencyId),
-				columns: { id: true },
-			})
-			if (!currency) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'Currency not found',
-					path: ['currencyId'],
-				})
-			}
-		}),
+		}).transform(({ accountId, currencyId, ...rest }) => rest),
 	})
 
 	if (submission.status !== 'success') {
