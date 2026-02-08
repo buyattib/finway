@@ -5,7 +5,7 @@ import {
 	getSelectProps,
 	type FieldMetadata,
 } from '@conform-to/react'
-import { PlusCircleIcon, CalendarIcon, ChevronsUpDownIcon } from 'lucide-react'
+import { PlusCircleIcon, CalendarIcon } from 'lucide-react'
 
 import { cn, removeCommas, isValueNumeric, formatDate } from '~/lib/utils'
 
@@ -23,14 +23,6 @@ import {
 import { Button } from './ui/button'
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'
 import { Calendar } from './ui/calendar'
-import {
-	Command,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from './ui/command'
 import { Combobox, type ComboboxProps } from './ui/combobox'
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined
@@ -99,6 +91,60 @@ export function TextField({
 				aria-invalid={errorId ? true : undefined}
 				aria-describedby={errorId}
 				{...props}
+			/>
+			<div className='min-h-6 py-1 px-1'>
+				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+			</div>
+		</div>
+	)
+}
+
+export function NumberField({
+	field,
+	label,
+	className,
+	...inputProps
+}: {
+	field: FieldMetadata<string | null>
+	label?: string
+	className?: string
+} & React.InputHTMLAttributes<HTMLInputElement>) {
+	const errors = field.errors as ListOfErrors
+	const fieldProps = getInputProps(field, { type: 'text' })
+
+	const errorId = errors?.length ? `${fieldProps.id}-error` : undefined
+
+	const { defaultValue, ...rest } = fieldProps
+	const props = { ...inputProps, ...rest }
+
+	const control = useInputControl<string>({
+		key: fieldProps.key,
+		name: fieldProps.name,
+		formId: fieldProps.form,
+		initialValue: defaultValue,
+	})
+
+	return (
+		<div className={cn('flex flex-col gap-1 w-full', className)}>
+			{label && (
+				<Label
+					htmlFor={fieldProps.id}
+					aria-invalid={errorId ? true : undefined}
+				>
+					{label}
+				</Label>
+			)}
+			<Input
+				aria-invalid={errorId ? true : undefined}
+				aria-describedby={errorId}
+				inputMode='numeric'
+				{...props}
+				value={control.value ?? ''}
+				onChange={e => {
+					const value = e.target.value.replace(/\D/g, '')
+					if (!value) return
+					control.change(value)
+				}}
 			/>
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
@@ -298,7 +344,7 @@ export function ComboboxField({
 	)
 }
 
-export function NumberField({
+export function AmountField({
 	label,
 	field,
 	className,

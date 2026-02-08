@@ -29,7 +29,7 @@ import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
 	ComboboxField,
-	NumberField,
+	AmountField,
 	DateField,
 } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
@@ -244,11 +244,11 @@ export default function CreateExchange({
 							</div>
 
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-								<NumberField
+								<AmountField
 									label='From Amount'
 									field={fields.fromAmount}
 								/>
-								<NumberField
+								<AmountField
 									label='To Amount'
 									field={fields.toAmount}
 								/>

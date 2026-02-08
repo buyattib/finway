@@ -27,7 +27,7 @@ import {
 	TextField,
 	SelectField,
 	ComboboxField,
-	NumberField,
+	AmountField,
 	DateField,
 } from '~/components/forms'
 import { TransactionTypeIcon } from '~/components/transaction-type-icon'
@@ -193,7 +193,7 @@ export function TransactionForm({
 						</Text>
 					)}
 
-					<NumberField label='Amount' field={fields.amount} />
+					<AmountField label='Amount' field={fields.amount} />
 
 					{transactionCategories.length !== 0 ? (
 						<ComboboxField

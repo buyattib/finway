@@ -28,7 +28,7 @@ import {
 import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
-	NumberField,
+	AmountField,
 	DateField,
 	ComboboxField,
 } from '~/components/forms'
@@ -244,7 +244,7 @@ export default function CreateTransfer({
 									buttonPlaceholder='Select a currency'
 									options={currencyOptions}
 								/>
-								<NumberField
+								<AmountField
 									label='Amount'
 									field={fields.amount}
 								/>
