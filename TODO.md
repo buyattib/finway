@@ -1,4 +1,4 @@
-- Improve organization of various constants and functions used globally.
+- Finish credit cards
 - Add a linter?
 - Ask agent what is needed to be production ready
 - Improve styling and a design system?
