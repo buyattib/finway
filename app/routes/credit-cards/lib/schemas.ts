@@ -42,3 +42,8 @@ export const CreditCardFormSchema = z
 		currencyId: z.string('Currency is required'),
 	})
 	.and(ActionSchema)
+
+export const DeleteCreditCardFormSchema = z.object({
+	creditCardId: z.string(),
+	intent: z.literal('delete'),
+})

@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { CreditCardIcon, PlusIcon, SquarePenIcon } from 'lucide-react'
+import { CreditCardIcon, PlusIcon } from 'lucide-react'
 import { desc, eq } from 'drizzle-orm'
 
 import type { Route } from './+types'
@@ -104,9 +104,13 @@ export default function CreditCards({
 							return (
 								<li
 									key={id}
-									className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border rounded-xl'
+									className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border rounded-xl'
 								>
-									<div className='flex items-center gap-4'>
+									<Link
+										to={id}
+										prefetch='intent'
+										className='flex items-center gap-4'
+									>
 										<CreditCardIcon className='size-5 text-muted-foreground' />
 										<div className='flex flex-col gap-1'>
 											<Text weight='medium'>
@@ -117,7 +121,7 @@ export default function CreditCards({
 												{expiryYear}
 											</Text>
 										</div>
-									</div>
+									</Link>
 									<div className='flex items-center gap-4'>
 										<Text className='flex items-center gap-2'>
 											<CurrencyIcon
@@ -129,21 +133,6 @@ export default function CreditCards({
 										<Text size='sm' theme='muted'>
 											{accountName}
 										</Text>
-										<Button
-											size='icon'
-											variant='ghost'
-											asChild
-										>
-											<Link
-												to={`${id}/edit`}
-												prefetch='intent'
-											>
-												<SquarePenIcon />
-												<span className='sr-only'>
-													Edit {brand} •••• {last4}
-												</span>
-											</Link>
-										</Button>
 									</div>
 								</li>
 							)

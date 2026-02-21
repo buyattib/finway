@@ -94,7 +94,7 @@ export function CreditCardForm({
 			<CardHeader>
 				<div className='flex items-center gap-4'>
 					<Button asChild variant='link' width='fit' size='icon'>
-						<Link to='/app/credit-cards' relative='path'>
+						<Link to='..' relative='path'>
 							<ArrowLeftIcon />
 						</Link>
 					</Button>
