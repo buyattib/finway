@@ -10,10 +10,7 @@ import {
 } from '~/database/schema'
 import type { Beautify } from '~/types/utils'
 
-import {
-	TRANSACTION_TYPE_EXPENSE,
-	TRANSACTION_TYPE_INCOME,
-} from './constants'
+import { TRANSACTION_TYPE_EXPENSE, TRANSACTION_TYPE_INCOME } from './constants'
 import type { DB, TCurrency } from './types'
 
 type CurrencyBalance = {

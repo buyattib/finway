@@ -1,7 +1,9 @@
 ## Install dependencies
+
 - `pnpm install`
 
 ## Build the app
+
 - `pnpm run build`
 
 ## Run the app
@@ -32,7 +34,6 @@ There are scripts in the package.json defined to:
 
 NOTE: when modifying generated migrations, dont remove the: --> statement-breakpoint
 as its used to run multiple statements
-
 
 ## Run scripts
 
