@@ -142,7 +142,6 @@ export function NumberField({
 				value={control.value ?? ''}
 				onChange={e => {
 					const value = e.target.value.replace(/\D/g, '')
-					if (!value) return
 					control.change(value)
 				}}
 			/>
