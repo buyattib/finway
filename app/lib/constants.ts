@@ -5,7 +5,7 @@ import { BanknoteArrowDownIcon, BanknoteArrowUpIcon } from 'lucide-react'
 export const ACTION_CREATION = 'CREATION'
 export const ACTION_EDITION = 'EDITION'
 
-// Account Types
+// Accounts
 
 export const ACCOUNT_TYPE_BANK = 'bank'
 export const ACCOUNT_TYPE_CASH = 'cash'
@@ -74,7 +74,7 @@ export const CURRENCY_DISPLAY = {
 	},
 }
 
-// Transaction Types
+// Transactions
 
 export const TRANSACTION_TYPE_EXPENSE = 'EXPENSE'
 export const TRANSACTION_TYPE_INCOME = 'INCOME'
@@ -93,6 +93,29 @@ export const TRANSACTION_TYPE_DISPLAY = {
 	[TRANSACTION_TYPE_INCOME]: {
 		icon: BanknoteArrowDownIcon,
 		label: 'Income',
+		color: 'green',
+	},
+}
+
+// Credit Cards
+
+export const CC_TRANSACTION_TYPE_CHARGE = 'CHARGE'
+export const CC_TRANSACTION_TYPE_REFUND = 'REFUND'
+
+export const CC_TRANSACTION_TYPES = [
+	CC_TRANSACTION_TYPE_CHARGE,
+	CC_TRANSACTION_TYPE_REFUND,
+] as const
+
+export const CC_TRANSACTION_TYPE_DISPLAY = {
+	[CC_TRANSACTION_TYPE_CHARGE]: {
+		icon: BanknoteArrowUpIcon,
+		label: 'Charge',
+		color: 'red',
+	},
+	[CC_TRANSACTION_TYPE_REFUND]: {
+		icon: BanknoteArrowDownIcon,
+		label: 'Refund',
 		color: 'green',
 	},
 }

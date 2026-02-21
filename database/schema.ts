@@ -8,7 +8,12 @@ import {
 	index,
 } from 'drizzle-orm/sqlite-core'
 
-import { CURRENCIES, ACCOUNT_TYPES, TRANSACTION_TYPES } from '~/lib/constants'
+import {
+	CURRENCIES,
+	ACCOUNT_TYPES,
+	TRANSACTION_TYPES,
+	CC_TRANSACTION_TYPES,
+} from '~/lib/constants'
 
 const base = {
 	createdAt: text()
@@ -222,6 +227,36 @@ export const creditCard = sqliteTable(
 	],
 )
 
+export const creditCardTransaction = sqliteTable(
+	'credit_card_transactions',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		date: text().notNull(),
+		amount: integer().notNull(),
+		description: text().default(''),
+		type: text({ enum: CC_TRANSACTION_TYPES }).notNull(),
+
+		creditCardId: text().notNull(),
+		transactionCategoryId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'credit_card_transactions_credit_cards_fk',
+			columns: [table.creditCardId],
+			foreignColumns: [creditCard.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'credit_card_transactions_transaction_categories_fk',
+			columns: [table.transactionCategoryId],
+			foreignColumns: [transactionCategory.id],
+		}).onDelete('cascade'),
+		index('credit_card_transactions_creditCardId_idx').on(
+			table.creditCardId,
+		),
+	],
+)
+
 // ORM Relations
 
 export const transactionRelations = relations(transaction, ({ one }) => ({
@@ -269,7 +304,7 @@ export const exchangeRelations = relations(exchange, ({ one }) => ({
 	}),
 }))
 
-export const creditCardRelations = relations(creditCard, ({ one }) => ({
+export const creditCardRelations = relations(creditCard, ({ one, many }) => ({
 	account: one(account, {
 		fields: [creditCard.accountId],
 		references: [account.id],
@@ -279,3 +314,17 @@ export const creditCardRelations = relations(creditCard, ({ one }) => ({
 		references: [currency.id],
 	}),
 }))
+
+export const creditCardTransactionRelations = relations(
+	creditCardTransaction,
+	({ one }) => ({
+		creditCard: one(creditCard, {
+			fields: [creditCardTransaction.creditCardId],
+			references: [creditCard.id],
+		}),
+		transactionCategory: one(transactionCategory, {
+			fields: [creditCardTransaction.transactionCategoryId],
+			references: [transactionCategory.id],
+		}),
+	}),
+)
