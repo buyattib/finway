@@ -281,13 +281,13 @@ export default function Transactions({
 					<TableHeader>
 						<TableRow>
 							<TableHead>Date</TableHead>
-							<TableHead className='text-right'>
+							<TableHead className='text-center'>
 								Account
 							</TableHead>
-							<TableHead className='text-right'>
+							<TableHead className='text-center'>
 								Category
 							</TableHead>
-							<TableHead className='text-right'>Type</TableHead>
+							<TableHead className='text-center'>Type</TableHead>
 							<TableHead className='text-right'>Amount</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
@@ -314,7 +314,7 @@ export default function Transactions({
 										{formatDate(new Date(date))}
 									</TableCell>
 									<TableCell>
-										<div className='flex justify-end items-center gap-2'>
+										<div className='flex justify-center items-center gap-2'>
 											<AccountTypeIcon
 												size='xs'
 												accountType={accountType}
@@ -322,12 +322,12 @@ export default function Transactions({
 											{account}
 										</div>
 									</TableCell>
-									<TableCell className='text-right'>
+									<TableCell className='text-center'>
 										{transactionCategory ?? '-'}
 									</TableCell>
 									<TableCell
 										className={cn(
-											'text-right',
+											'text-center',
 											`text-${typeColor}`,
 										)}
 									>

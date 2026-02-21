@@ -4,3 +4,5 @@
 - Improve styling and a design system?
 - Internationalization
 - Sessions for auth?
+- Investment porfolio tracking
+- MCP server to comunicate through llms

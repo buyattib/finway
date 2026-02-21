@@ -14,12 +14,10 @@ import { dbContext, userContext } from '~/lib/context'
 import {
 	creditCard as creditCardTable,
 	creditCardTransaction as creditCardTransactionTable,
+	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
-import {
-	CURRENCY_DISPLAY,
-	CC_TRANSACTION_TYPE_DISPLAY,
-} from '~/lib/constants'
+import { CURRENCY_DISPLAY, CC_TRANSACTION_TYPE_DISPLAY } from '~/lib/constants'
 import {
 	createToastHeaders,
 	redirectWithToast,
@@ -144,6 +142,13 @@ export async function loader({
 			amount: creditCardTransactionTable.amount,
 			description: creditCardTransactionTable.description,
 			categoryName: transactionCategoryTable.name,
+			installments: db.$count(
+				creditCardTransactionInstallmentTable,
+				eq(
+					creditCardTransactionTable.id,
+					creditCardTransactionInstallmentTable.creditCardTransactionId,
+				),
+			),
 		})
 		.from(creditCardTransactionTable)
 		.innerJoin(
@@ -153,7 +158,15 @@ export async function loader({
 				transactionCategoryTable.id,
 			),
 		)
+		.innerJoin(
+			creditCardTransactionInstallmentTable,
+			eq(
+				creditCardTransactionTable.id,
+				creditCardTransactionInstallmentTable.creditCardTransactionId,
+			),
+		)
 		.where(eq(creditCardTransactionTable.creditCardId, creditCardId))
+		.groupBy(creditCardTransactionTable.id)
 		.orderBy(
 			desc(creditCardTransactionTable.date),
 			desc(creditCardTransactionTable.createdAt),
@@ -260,9 +273,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		await db
 			.delete(creditCardTransactionTable)
-			.where(
-				eq(creditCardTransactionTable.id, creditCardTransactionId),
-			)
+			.where(eq(creditCardTransactionTable.id, creditCardTransactionId))
 
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'success',
@@ -306,8 +317,9 @@ export default function CreditCardDetails({
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete-transaction'
 
-	const deletingTransactionId =
-		navigation.formData?.get('creditCardTransactionId')
+	const deletingTransactionId = navigation.formData?.get(
+		'creditCardTransactionId',
+	)
 
 	return (
 		<div className='flex flex-col gap-6'>
@@ -396,17 +408,11 @@ export default function CreditCardDetails({
 				aria-labelledby='cc-transactions-section'
 			>
 				<div className='flex items-center justify-between'>
-					<Title
-						id='cc-transactions-section'
-						level='h3'
-					>
+					<Title id='cc-transactions-section' level='h3'>
 						Transactions ({pagination.total})
 					</Title>
 					<Button asChild variant='default'>
-						<Link
-							to='transactions/create'
-							prefetch='intent'
-						>
+						<Link to='transactions/create' prefetch='intent'>
 							<PlusIcon aria-hidden />
 							<span className='sm:inline hidden'>
 								Transaction
@@ -433,14 +439,17 @@ export default function CreditCardDetails({
 						<TableHeader>
 							<TableRow>
 								<TableHead>Date</TableHead>
-								<TableHead className='text-right'>
+								<TableHead className='text-center'>
 									Category
 								</TableHead>
-								<TableHead className='text-right'>
+								<TableHead className='text-center'>
 									Type
 								</TableHead>
-								<TableHead className='text-right'>
+								<TableHead className='text-center'>
 									Amount
+								</TableHead>
+								<TableHead className='text-center'>
+									Installments
 								</TableHead>
 								<TableHead></TableHead>
 							</TableRow>
@@ -454,31 +463,33 @@ export default function CreditCardDetails({
 								type,
 								amount,
 								categoryName,
+								installments,
 							}) => {
-								const {
-									label: typeLabel,
-									color: typeColor,
-								} = CC_TRANSACTION_TYPE_DISPLAY[type]
+								const { label: typeLabel, color: typeColor } =
+									CC_TRANSACTION_TYPE_DISPLAY[type]
 
 								return (
 									<TableRow key={txId}>
 										<TableCell className='w-30'>
 											{formatDate(new Date(date))}
 										</TableCell>
-										<TableCell className='text-right'>
+										<TableCell className='text-center'>
 											{categoryName}
 										</TableCell>
 										<TableCell
 											className={cn(
-												'text-right',
+												'text-center',
 												`text-${typeColor}`,
 											)}
 										>
 											{typeLabel}
 										</TableCell>
-										<TableCell className='text-right'>
+										<TableCell className='text-center'>
 											<b>{currencyCode}</b>{' '}
 											{formatNumber(amount)}
+										</TableCell>
+										<TableCell className='text-center'>
+											{installments}
 										</TableCell>
 										<TableCell className='flex justify-end items-center gap-2'>
 											<Form method='post'>
@@ -505,7 +516,9 @@ export default function CreditCardDetails({
 															size='sm'
 														/>
 													) : (
-														<TrashIcon aria-hidden />
+														<TrashIcon
+															aria-hidden
+														/>
 													)}
 													<span className='sr-only'>
 														Delete transaction
@@ -531,21 +544,19 @@ export default function CreditCardDetails({
 									}}
 								/>
 							</PaginationItem>
-							{Array.from(
-								Array(pagination.pages).keys(),
-							).map(v => (
-								<PaginationItem key={v}>
-									<PaginationLink
-										prefetch='intent'
-										to={{ search: `?page=${v + 1}` }}
-										isActive={
-											pagination.page === v + 1
-										}
-									>
-										{v + 1}
-									</PaginationLink>
-								</PaginationItem>
-							))}
+							{Array.from(Array(pagination.pages).keys()).map(
+								v => (
+									<PaginationItem key={v}>
+										<PaginationLink
+											prefetch='intent'
+											to={{ search: `?page=${v + 1}` }}
+											isActive={pagination.page === v + 1}
+										>
+											{v + 1}
+										</PaginationLink>
+									</PaginationItem>
+								),
+							)}
 							<PaginationItem>
 								<PaginationNext
 									prefetch='intent'
