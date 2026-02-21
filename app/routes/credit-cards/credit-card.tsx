@@ -1,17 +1,30 @@
 import { Link, Form, data, useNavigation, useLocation } from 'react-router'
-import { CreditCardIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
+import {
+	CreditCardIcon,
+	SquarePenIcon,
+	TrashIcon,
+	PlusIcon,
+} from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 
 import type { Route } from './+types/credit-card'
 
 import { dbContext, userContext } from '~/lib/context'
-import { creditCard as creditCardTable } from '~/database/schema'
-import { CURRENCY_DISPLAY } from '~/lib/constants'
+import {
+	creditCard as creditCardTable,
+	creditCardTransaction as creditCardTransactionTable,
+	transactionCategory as transactionCategoryTable,
+} from '~/database/schema'
+import {
+	CURRENCY_DISPLAY,
+	CC_TRANSACTION_TYPE_DISPLAY,
+} from '~/lib/constants'
 import {
 	createToastHeaders,
 	redirectWithToast,
 } from '~/utils-server/toast.server'
+import { cn, formatDate, formatNumber } from '~/lib/utils'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -23,8 +36,30 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
+import {
+	Table,
+	TableBody,
+	TableCaption,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '~/components/ui/table'
+import {
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from '~/components/ui/pagination'
 
-import { DeleteCreditCardFormSchema } from './lib/schemas'
+import {
+	DeleteCreditCardFormSchema,
+	DeleteCreditCardTransactionFormSchema,
+} from './lib/schemas'
+
+const PAGE_SIZE = 20
 
 export function meta({ loaderData, params: { creditCardId } }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
@@ -64,6 +99,7 @@ export function meta({ loaderData, params: { creditCardId } }: Route.MetaArgs) {
 
 export async function loader({
 	context,
+	request,
 	params: { creditCardId },
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
@@ -97,12 +133,48 @@ export async function loader({
 		...creditCardData
 	} = creditCard
 
+	const url = new URL(request.url)
+	const page = Number(url.searchParams.get('page') ?? '1')
+
+	const transactionsQuery = db
+		.select({
+			id: creditCardTransactionTable.id,
+			date: creditCardTransactionTable.date,
+			type: creditCardTransactionTable.type,
+			amount: creditCardTransactionTable.amount,
+			description: creditCardTransactionTable.description,
+			categoryName: transactionCategoryTable.name,
+		})
+		.from(creditCardTransactionTable)
+		.innerJoin(
+			transactionCategoryTable,
+			eq(
+				creditCardTransactionTable.transactionCategoryId,
+				transactionCategoryTable.id,
+			),
+		)
+		.where(eq(creditCardTransactionTable.creditCardId, creditCardId))
+		.orderBy(
+			desc(creditCardTransactionTable.date),
+			desc(creditCardTransactionTable.createdAt),
+		)
+
+	const total = await db.$count(transactionsQuery)
+	const transactions = await transactionsQuery
+		.limit(PAGE_SIZE)
+		.offset((page - 1) * PAGE_SIZE)
+
 	return {
 		creditCard: {
 			...creditCardData,
 			accountName: account.name,
 			currencyCode: currency.code,
 		},
+		transactions: transactions.map(t => ({
+			...t,
+			amount: String(t.amount / 100),
+		})),
+		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
 	}
 }
 
@@ -111,70 +183,143 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
 
 	const formData = await request.formData()
-	const submission = parseWithZod(formData, {
-		schema: DeleteCreditCardFormSchema,
-	})
+	const intent = formData.get('intent')
 
-	if (submission.status !== 'success') {
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'error',
-			title: 'Could not delete credit card',
-			description: 'Please try again',
+	if (intent === 'delete-card') {
+		const submission = parseWithZod(formData, {
+			schema: DeleteCreditCardFormSchema,
 		})
 
+		if (submission.status !== 'success') {
+			const toastHeaders = await createToastHeaders(request, {
+				type: 'error',
+				title: 'Could not delete credit card',
+				description: 'Please try again',
+			})
+			return data({}, { headers: toastHeaders })
+		}
+
+		const { creditCardId } = submission.value
+		const creditCard = await db.query.creditCard.findFirst({
+			where: eq(creditCardTable.id, creditCardId),
+			columns: { brand: true, last4: true },
+			with: {
+				account: { columns: { ownerId: true } },
+			},
+		})
+		if (!creditCard || creditCard.account.ownerId !== user.id) {
+			throw new Response('Credit card not found', { status: 404 })
+		}
+
+		await db
+			.delete(creditCardTable)
+			.where(eq(creditCardTable.id, creditCardId))
+
+		return await redirectWithToast('/app/credit-cards', request, {
+			type: 'success',
+			title: `Credit card ${creditCard.brand} •••• ${creditCard.last4} deleted`,
+		})
+	}
+
+	if (intent === 'delete-transaction') {
+		const submission = parseWithZod(formData, {
+			schema: DeleteCreditCardTransactionFormSchema,
+		})
+
+		if (submission.status !== 'success') {
+			const toastHeaders = await createToastHeaders(request, {
+				type: 'error',
+				title: 'Could not delete transaction',
+				description: 'Please try again',
+			})
+			return data({}, { headers: toastHeaders })
+		}
+
+		const { creditCardTransactionId } = submission.value
+
+		const transaction = await db.query.creditCardTransaction.findFirst({
+			where: (t, { eq }) => eq(t.id, creditCardTransactionId),
+			columns: { id: true },
+			with: {
+				creditCard: {
+					columns: {},
+					with: { account: { columns: { ownerId: true } } },
+				},
+			},
+		})
+		if (
+			!transaction ||
+			transaction.creditCard.account.ownerId !== user.id
+		) {
+			const toastHeaders = await createToastHeaders(request, {
+				type: 'error',
+				title: `Transaction not found`,
+			})
+			return data({}, { headers: toastHeaders })
+		}
+
+		await db
+			.delete(creditCardTransactionTable)
+			.where(
+				eq(creditCardTransactionTable.id, creditCardTransactionId),
+			)
+
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'success',
+			title: 'Transaction deleted',
+		})
 		return data({}, { headers: toastHeaders })
 	}
 
-	const { creditCardId } = submission.value
-	const creditCard = await db.query.creditCard.findFirst({
-		where: eq(creditCardTable.id, creditCardId),
-		columns: { brand: true, last4: true },
-		with: {
-			account: { columns: { ownerId: true } },
-		},
+	const toastHeaders = await createToastHeaders(request, {
+		type: 'error',
+		title: 'Unknown action',
 	})
-	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response('Credit card not found', { status: 404 })
-	}
-
-	await db.delete(creditCardTable).where(eq(creditCardTable.id, creditCardId))
-
-	return await redirectWithToast('/app/credit-cards', request, {
-		type: 'success',
-		title: `Credit card ${creditCard.brand} •••• ${creditCard.last4} deleted`,
-	})
+	return data({}, { headers: toastHeaders })
 }
 
 export default function CreditCardDetails({
-	loaderData: {
-		creditCard: {
-			id,
-			brand,
-			last4,
-			expiryMonth,
-			expiryYear,
-			accountName,
-			currencyCode,
-		},
-	},
+	loaderData: { creditCard, transactions, pagination },
 }: Route.ComponentProps) {
+	const {
+		id,
+		brand,
+		last4,
+		expiryMonth,
+		expiryYear,
+		accountName,
+		currencyCode,
+	} = creditCard
 	const { label } = CURRENCY_DISPLAY[currencyCode]
 	const location = useLocation()
 	const navigation = useNavigation()
-	const isDeleting =
+
+	const isDeletingCard =
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname &&
-		navigation.state === 'submitting'
+		navigation.state === 'submitting' &&
+		navigation.formData?.get('intent') === 'delete-card'
+
+	const isDeletingTransaction =
+		navigation.formMethod === 'POST' &&
+		navigation.formAction === location.pathname &&
+		navigation.state === 'submitting' &&
+		navigation.formData?.get('intent') === 'delete-transaction'
+
+	const deletingTransactionId =
+		navigation.formData?.get('creditCardTransactionId')
 
 	return (
 		<div className='flex flex-col gap-6'>
 			<div className='flex flex-col gap-4'>
 				<div className='flex items-center gap-4'>
-					<CreditCardIcon className='size-8 text-muted-foreground' />
 					<div className='flex flex-col gap-2'>
-						<Title id={id} level='h1'>
-							{brand} •••• {last4}
-						</Title>
+						<div className='flex items-center gap-4'>
+							<CreditCardIcon className='size-8 text-muted-foreground' />
+							<Title id={id} level='h1'>
+								{brand} •••• {last4}
+							</Title>
+						</div>
 						<div className='flex items-center gap-4'>
 							<Text size='md' theme='primary'>
 								Expires {expiryMonth}/{expiryYear}
@@ -223,10 +368,10 @@ export default function CreditCardDetails({
 										variant='destructive-outline'
 										type='submit'
 										name='intent'
-										value='delete'
-										disabled={isDeleting}
+										value='delete-card'
+										disabled={isDeletingCard}
 									>
-										{isDeleting ? (
+										{isDeletingCard ? (
 											<Spinner size='sm' />
 										) : (
 											<TrashIcon aria-hidden />
@@ -245,6 +390,174 @@ export default function CreditCardDetails({
 					</div>
 				</div>
 			</div>
+
+			<section
+				className='flex flex-col gap-4'
+				aria-labelledby='cc-transactions-section'
+			>
+				<div className='flex items-center justify-between'>
+					<Title
+						id='cc-transactions-section'
+						level='h3'
+					>
+						Transactions ({pagination.total})
+					</Title>
+					<Button asChild variant='default'>
+						<Link
+							to='transactions/create'
+							prefetch='intent'
+						>
+							<PlusIcon aria-hidden />
+							<span className='sm:inline hidden'>
+								Transaction
+							</span>
+						</Link>
+					</Button>
+				</div>
+
+				<Table>
+					{transactions.length === 0 && (
+						<TableCaption>
+							<Text size='md' weight='medium' alignment='center'>
+								No transactions yet.{' '}
+								<Link
+									to='transactions/create'
+									className='text-primary'
+								>
+									Create one
+								</Link>
+							</Text>
+						</TableCaption>
+					)}
+					{transactions.length !== 0 && (
+						<TableHeader>
+							<TableRow>
+								<TableHead>Date</TableHead>
+								<TableHead className='text-right'>
+									Category
+								</TableHead>
+								<TableHead className='text-right'>
+									Type
+								</TableHead>
+								<TableHead className='text-right'>
+									Amount
+								</TableHead>
+								<TableHead></TableHead>
+							</TableRow>
+						</TableHeader>
+					)}
+					<TableBody>
+						{transactions.map(
+							({
+								id: txId,
+								date,
+								type,
+								amount,
+								categoryName,
+							}) => {
+								const {
+									label: typeLabel,
+									color: typeColor,
+								} = CC_TRANSACTION_TYPE_DISPLAY[type]
+
+								return (
+									<TableRow key={txId}>
+										<TableCell className='w-30'>
+											{formatDate(new Date(date))}
+										</TableCell>
+										<TableCell className='text-right'>
+											{categoryName}
+										</TableCell>
+										<TableCell
+											className={cn(
+												'text-right',
+												`text-${typeColor}`,
+											)}
+										>
+											{typeLabel}
+										</TableCell>
+										<TableCell className='text-right'>
+											<b>{currencyCode}</b>{' '}
+											{formatNumber(amount)}
+										</TableCell>
+										<TableCell className='flex justify-end items-center gap-2'>
+											<Form method='post'>
+												<input
+													type='hidden'
+													name='creditCardTransactionId'
+													value={txId}
+												/>
+												<Button
+													size='icon-xs'
+													variant='destructive-ghost'
+													type='submit'
+													name='intent'
+													value='delete-transaction'
+													disabled={
+														isDeletingTransaction
+													}
+												>
+													{isDeletingTransaction &&
+													deletingTransactionId ===
+														txId ? (
+														<Spinner
+															aria-hidden
+															size='sm'
+														/>
+													) : (
+														<TrashIcon aria-hidden />
+													)}
+													<span className='sr-only'>
+														Delete transaction
+													</span>
+												</Button>
+											</Form>
+										</TableCell>
+									</TableRow>
+								)
+							},
+						)}
+					</TableBody>
+				</Table>
+
+				{pagination.pages > 1 && (
+					<Pagination>
+						<PaginationContent>
+							<PaginationItem>
+								<PaginationPrevious
+									prefetch='intent'
+									to={{
+										search: `?page=${pagination.page === 1 ? 1 : pagination.page - 1}`,
+									}}
+								/>
+							</PaginationItem>
+							{Array.from(
+								Array(pagination.pages).keys(),
+							).map(v => (
+								<PaginationItem key={v}>
+									<PaginationLink
+										prefetch='intent'
+										to={{ search: `?page=${v + 1}` }}
+										isActive={
+											pagination.page === v + 1
+										}
+									>
+										{v + 1}
+									</PaginationLink>
+								</PaginationItem>
+							))}
+							<PaginationItem>
+								<PaginationNext
+									prefetch='intent'
+									to={{
+										search: `?page=${pagination.page === pagination.pages ? pagination.pages : pagination.page + 1}`,
+									}}
+								/>
+							</PaginationItem>
+						</PaginationContent>
+					</Pagination>
+				)}
+			</section>
 		</div>
 	)
 }

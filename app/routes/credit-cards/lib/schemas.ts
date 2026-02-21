@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
+import { ACTION_CREATION, ACTION_EDITION, CC_TRANSACTION_TYPES } from '~/lib/constants'
+import { removeCommas } from '~/lib/utils'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({
@@ -45,5 +46,39 @@ export const CreditCardFormSchema = z
 
 export const DeleteCreditCardFormSchema = z.object({
 	creditCardId: z.string(),
-	intent: z.literal('delete'),
+	intent: z.literal('delete-card'),
+})
+
+export const CreditCardTransactionFormSchema = z
+	.object({
+		date: z.iso.datetime('Date is required'),
+		type: z.enum(CC_TRANSACTION_TYPES, 'Transaction type is required'),
+		amount: z
+			.string({ message: 'Amount is required' })
+			.refine(
+				value => {
+					const formatted = removeCommas(value)
+					return !isNaN(Number(formatted))
+				},
+				{ message: 'Amount must be a valid number' },
+			)
+			.refine(
+				value => {
+					const formatted = removeCommas(value)
+					return Number(formatted) > 0
+				},
+				{ message: 'Amount must be greater than zero' },
+			),
+		description: z
+			.string()
+			.default('')
+			.transform(value => value?.trim()),
+		transactionCategoryId: z.string('Category is required'),
+		creditCardId: z.string('Credit card is required'),
+	})
+	.and(ActionSchema)
+
+export const DeleteCreditCardTransactionFormSchema = z.object({
+	creditCardTransactionId: z.string(),
+	intent: z.literal('delete-transaction'),
 })
