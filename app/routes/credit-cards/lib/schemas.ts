@@ -69,6 +69,13 @@ export const CreditCardTransactionFormSchema = z
 				},
 				{ message: 'Amount must be greater than zero' },
 			),
+		totalInstallments: z
+			.string()
+			.refine(
+				value => !isNaN(Number(value)) && Number(value) >= 1,
+				{ message: 'Must be at least 1' },
+			),
+		firstInstallmentDate: z.iso.datetime(),
 		description: z
 			.string()
 			.default('')

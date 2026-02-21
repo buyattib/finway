@@ -78,6 +78,13 @@
       "when": 1771685405991,
       "tag": "0010_credit_card_transactions_table",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1771712064866,
+      "tag": "0011_credit_card_transaction_installments_table",
+      "breakpoints": true
     }
   ]
 }

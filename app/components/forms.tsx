@@ -21,6 +21,7 @@ import {
 	type SelectTriggerProps,
 } from './ui/select'
 import { Button } from './ui/button'
+import { Text } from './ui/text'
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'
 import { Calendar } from './ui/calendar'
 import { Combobox, type ComboboxProps } from './ui/combobox'
@@ -347,11 +348,13 @@ export function AmountField({
 	label,
 	field,
 	className,
+	description,
 	...inputProps
 }: {
 	label?: string
 	field: FieldMetadata<string>
 	className?: string
+	description?: string
 } & React.InputHTMLAttributes<HTMLInputElement>) {
 	const fallbackId = useId()
 	const fieldProps = getInputProps(field, { type: 'text' })
@@ -411,6 +414,11 @@ export function AmountField({
 					control.change(value)
 				}}
 			/>
+			{description && (
+				<Text size='xs' theme='muted' className='px-1'>
+					{description}
+				</Text>
+			)}
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
 			</div>

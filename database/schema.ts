@@ -257,6 +257,29 @@ export const creditCardTransaction = sqliteTable(
 	],
 )
 
+export const creditCardTransactionInstallment = sqliteTable(
+	'credit_card_transaction_installments',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		installmentNumber: integer().notNull(),
+		amount: integer().notNull(),
+		date: text().notNull(),
+
+		creditCardTransactionId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'credit_card_transaction_installments_credit_card_transactions_fk',
+			columns: [table.creditCardTransactionId],
+			foreignColumns: [creditCardTransaction.id],
+		}).onDelete('cascade'),
+		index('credit_card_transaction_installments_creditCardTransactionId_idx').on(
+			table.creditCardTransactionId,
+		),
+	],
+)
+
 // ORM Relations
 
 export const transactionRelations = relations(transaction, ({ one }) => ({
@@ -325,6 +348,16 @@ export const creditCardTransactionRelations = relations(
 		transactionCategory: one(transactionCategory, {
 			fields: [creditCardTransaction.transactionCategoryId],
 			references: [transactionCategory.id],
+		}),
+	}),
+)
+
+export const creditCardTransactionInstallmentRelations = relations(
+	creditCardTransactionInstallment,
+	({ one }) => ({
+		creditCardTransaction: one(creditCardTransaction, {
+			fields: [creditCardTransactionInstallment.creditCardTransactionId],
+			references: [creditCardTransaction.id],
 		}),
 	}),
 )

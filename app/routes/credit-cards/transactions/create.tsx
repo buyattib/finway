@@ -5,8 +5,11 @@ import { ArrowLeftIcon } from 'lucide-react'
 import type { Route } from './+types/create'
 
 import { dbContext, userContext } from '~/lib/context'
-import { creditCardTransaction as creditCardTransactionTable } from '~/database/schema'
-import { removeCommas, initializeDate } from '~/lib/utils'
+import {
+	creditCardTransaction as creditCardTransactionTable,
+	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
+} from '~/database/schema'
+import { removeCommas, initializeDate, formatNumber } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
 import {
@@ -18,6 +21,7 @@ import {
 import { getSelectData } from '~/lib/queries'
 
 import { Button } from '~/components/ui/button'
+import { Text } from '~/components/ui/text'
 import {
 	Card,
 	CardContent,
@@ -76,6 +80,7 @@ export async function loader({
 			creditCardId,
 			type: CC_TRANSACTION_TYPE_CHARGE,
 			amount: '0',
+			totalInstallments: '1',
 			description: '',
 			transactionCategoryId:
 				selectData.transactionCategories?.[0]?.id || '',
@@ -135,11 +140,45 @@ export async function action({ request, context }: Route.ActionArgs) {
 		throw new Response('Invalid action', { status: 422 })
 	}
 
-	const { action, creditCardId, ...transactionData } = submission.value
-
-	await db.insert(creditCardTransactionTable).values({
-		...transactionData,
+	const {
+		action,
 		creditCardId,
+		totalInstallments,
+		firstInstallmentDate,
+		...transactionData
+	} = submission.value
+
+	await db.transaction(async tx => {
+		const [{ id: creditCardTransactionId }] = await tx
+			.insert(creditCardTransactionTable)
+			.values({
+				...transactionData,
+				creditCardId,
+			})
+			.returning({ id: creditCardTransactionTable.id })
+
+		const installmentCount = Number(totalInstallments)
+		const baseAmount = Math.floor(transactionData.amount / installmentCount)
+		const remainder = transactionData.amount - baseAmount * installmentCount
+
+		const installments = Array.from(
+			{ length: installmentCount },
+			(_, i) => {
+				const date = new Date(firstInstallmentDate)
+				date.setMonth(date.getMonth() + i)
+
+				return {
+					installmentNumber: i + 1,
+					amount: baseAmount + (i < remainder ? 1 : 0),
+					date: date.toISOString(),
+					creditCardTransactionId,
+				}
+			},
+		)
+
+		await tx
+			.insert(creditCardTransactionInstallmentTable)
+			.values(installments)
 	})
 
 	return await redirectWithToast(
@@ -172,6 +211,7 @@ export default function CreateCreditCardTransaction({
 		shouldValidate: 'onInput',
 		defaultValue: {
 			date: initializeDate().toISOString(),
+			firstInstallmentDate: initializeDate().toISOString(),
 			...initialData,
 		},
 		constraint: getZodConstraint(CreditCardTransactionFormSchema),
@@ -181,6 +221,15 @@ export default function CreateCreditCardTransaction({
 			})
 		},
 	})
+
+	const installmentCount = Number(fields.totalInstallments.value) || 1
+	const hasInstallments = installmentCount > 1
+
+	const amountValue = Number(removeCommas(fields.amount.value ?? '0'))
+	const perInstallmentAmount =
+		hasInstallments && amountValue > 0
+			? formatNumber(amountValue / installmentCount)
+			: null
 
 	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => {
 		const { icon: Icon, label, color } = CC_TRANSACTION_TYPE_DISPLAY[i]
@@ -247,7 +296,38 @@ export default function CreateCreditCardTransaction({
 						items={transactionTypeOptions}
 					/>
 
-					<AmountField label='Amount' field={fields.amount} />
+					<div className='grid grid-cols-1 md:grid-cols-5 gap-2'>
+						<AmountField
+							className='md:col-span-4'
+							label='Amount'
+							field={fields.amount}
+							{...(hasInstallments &&
+								amountValue > 0 && {
+									description: `${formatNumber(
+										amountValue / installmentCount,
+										{
+											maximumFractionDigits: 2,
+										},
+									)} per installment`,
+								})}
+						/>
+
+						<SelectField
+							className='md:col-span-1'
+							label='Installments'
+							field={fields.totalInstallments}
+							placeholder='Select installments'
+							items={[
+								{ value: '1', label: '1' },
+								{ value: '3', label: '3' },
+								{ value: '6', label: '6' },
+								{ value: '9', label: '9' },
+								{ value: '12', label: '12' },
+								{ value: '18', label: '18' },
+								{ value: '24', label: '24' },
+							]}
+						/>
+					</div>
 
 					<ComboboxField
 						label='Transaction Category'
@@ -257,6 +337,15 @@ export default function CreateCreditCardTransaction({
 					/>
 
 					<DateField label='Date' field={fields.date} />
+
+					<DateField
+						label={
+							hasInstallments
+								? 'First Installment Date'
+								: 'Charge Date'
+						}
+						field={fields.firstInstallmentDate}
+					/>
 
 					<TextField
 						label='Description (Optional)'
