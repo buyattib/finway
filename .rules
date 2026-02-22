@@ -1,1 +1,1 @@
-After making any code edits, always check that the code format follows the prettier config in .prettierrc file, if not then run the format command.
+After making any code edits, always check that the code format follows the prettier config in .prettierrc file, if not then run the format command: `pnpm run format`.

@@ -226,7 +226,8 @@ export default function Accounts({
 												balance,
 												currency,
 											}) => {
-												const { symbol } = getCurrencyData(currency)
+												const { symbol } =
+													getCurrencyData(currency)
 												const [, currencyId] =
 													bId.split('-')
 												return (

@@ -274,9 +274,9 @@ export const creditCardTransactionInstallment = sqliteTable(
 			columns: [table.creditCardTransactionId],
 			foreignColumns: [creditCardTransaction.id],
 		}).onDelete('cascade'),
-		index('credit_card_transaction_installments_creditCardTransactionId_idx').on(
-			table.creditCardTransactionId,
-		),
+		index(
+			'credit_card_transaction_installments_creditCardTransactionId_idx',
+		).on(table.creditCardTransactionId),
 	],
 )
 

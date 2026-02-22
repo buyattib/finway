@@ -3,6 +3,7 @@ import {
 	BanknoteArrowDownIcon,
 	BanknoteArrowUpIcon,
 	WalletIcon,
+	CreditCardIcon,
 } from 'lucide-react'
 
 import { formatNumber, getCurrencyData } from '~/lib/utils'
@@ -33,10 +34,16 @@ export function SummaryCards({
 			data: summary.monthIncomes,
 			empty: 'No incomes',
 		},
+		{
+			title: 'This month credit card totals',
+			icon: <CreditCardIcon />,
+			data: summary.monthCreditCardTotals,
+			empty: 'No installments',
+		},
 	]
 
 	return (
-		<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
+		<div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
 			{cards.map(({ title, icon, data, empty }) => (
 				<Card key={title}>
 					<CardHeader className='flex items-center justify-between'>

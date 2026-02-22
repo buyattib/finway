@@ -1,5 +1,9 @@
 import { z } from 'zod'
-import { ACTION_CREATION, ACTION_EDITION, CC_TRANSACTION_TYPES } from '~/lib/constants'
+import {
+	ACTION_CREATION,
+	ACTION_EDITION,
+	CC_TRANSACTION_TYPES,
+} from '~/lib/constants'
 import { removeCommas } from '~/lib/utils'
 
 const ActionSchema = z.discriminatedUnion('action', [
@@ -71,10 +75,9 @@ export const CreditCardTransactionFormSchema = z
 			),
 		totalInstallments: z
 			.string()
-			.refine(
-				value => !isNaN(Number(value)) && Number(value) >= 1,
-				{ message: 'Must be at least 1' },
-			),
+			.refine(value => !isNaN(Number(value)) && Number(value) >= 1, {
+				message: 'Must be at least 1',
+			}),
 		firstInstallmentDate: z.iso.datetime(),
 		description: z
 			.string()

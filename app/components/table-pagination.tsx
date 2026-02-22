@@ -38,7 +38,9 @@ export function TablePagination({ page, pages }: TablePaginationProps) {
 				<PaginationItem>
 					<PaginationNext
 						prefetch='intent'
-						to={{ search: `?page=${page === pages ? pages : page + 1}` }}
+						to={{
+							search: `?page=${page === pages ? pages : page + 1}`,
+						}}
 					/>
 				</PaginationItem>
 			</PaginationContent>
