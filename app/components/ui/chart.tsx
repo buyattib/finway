@@ -40,9 +40,7 @@ function ChartContainer({
 	...props
 }: React.ComponentProps<'div'> & {
 	config: ChartConfig
-	children: React.ComponentProps<
-		typeof RechartsPrimitive.ResponsiveContainer
-	>['children']
+	children: React.ReactElement
 }) {
 	const uniqueId = React.useId()
 	const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`
@@ -59,9 +57,10 @@ function ChartContainer({
 				{...props}
 			>
 				<ChartStyle id={chartId} config={config} />
-				<RechartsPrimitive.ResponsiveContainer>
-					{children}
-				</RechartsPrimitive.ResponsiveContainer>
+				{React.cloneElement(children, {
+					width: '100%',
+					height: '100%',
+				})}
 			</div>
 		</ChartContext.Provider>
 	)

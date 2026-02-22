@@ -1,4 +1,3 @@
-- Finish credit cards
 - Suggest default categories to automatically create
 - Add a linter?
 - Ask agent what is needed to be production ready
