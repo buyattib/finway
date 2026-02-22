@@ -6,12 +6,7 @@ import {
 	useLocation,
 	useNavigate,
 } from 'react-router'
-import {
-	CreditCardIcon,
-	SquarePenIcon,
-	TrashIcon,
-	PlusIcon,
-} from 'lucide-react'
+import { SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq, desc } from 'drizzle-orm'
 
@@ -24,18 +19,18 @@ import {
 	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
-import { CURRENCY_DISPLAY, CC_TRANSACTION_TYPE_DISPLAY } from '~/lib/constants'
+import { CURRENCY_DISPLAY } from '~/lib/constants'
 import {
 	createToastHeaders,
 	redirectWithToast,
 } from '~/utils-server/toast.server'
-import { cn, formatDate, formatNumber } from '~/lib/utils'
+import { formatDate, formatNumber } from '~/lib/utils'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
-import { CurrencyIcon } from '~/components/currency-icon'
+import { TransactionType } from '~/components/transaction-type'
 import {
 	Tooltip,
 	TooltipContent,
@@ -452,9 +447,6 @@ export default function CreditCardDetails({
 								categoryName,
 								installments,
 							}) => {
-								const { label: typeLabel, color: typeColor } =
-									CC_TRANSACTION_TYPE_DISPLAY[type]
-
 								return (
 									<TableRow
 										key={txId}
@@ -469,13 +461,11 @@ export default function CreditCardDetails({
 										<TableCell className='text-center'>
 											{categoryName}
 										</TableCell>
-										<TableCell
-											className={cn(
-												'text-center',
-												`text-${typeColor}`,
-											)}
-										>
-											{typeLabel}
+										<TableCell className='text-center'>
+											<TransactionType
+												variant='text'
+												transactionType={type}
+											/>
 										</TableCell>
 										<TableCell className='text-center'>
 											<b>{currencyCode}</b>{' '}

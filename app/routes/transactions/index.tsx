@@ -12,7 +12,7 @@ import {
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
-import { cn, formatDate, formatNumber } from '~/lib/utils'
+import { formatDate, formatNumber } from '~/lib/utils'
 import { createToastHeaders } from '~/utils-server/toast.server'
 
 import { Button } from '~/components/ui/button'
@@ -39,9 +39,9 @@ import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
 import { getBalances, getSelectData } from '~/lib/queries'
-import { TRANSACTION_TYPE_DISPLAY } from '~/lib/constants'
 import type { TTransactionType } from '~/lib/types'
 
+import { TransactionType } from '~/components/transaction-type'
 import { TransactionsFilters } from './components/filters'
 import { DeleteTransactionFormSchema } from './lib/schemas'
 
@@ -305,9 +305,6 @@ export default function Transactions({
 							accountType,
 							transactionCategory,
 						}) => {
-							const { label: typeLabel, color: typeColor } =
-								TRANSACTION_TYPE_DISPLAY[type]
-
 							return (
 								<TableRow key={id}>
 									<TableCell className='w-30'>
@@ -325,13 +322,11 @@ export default function Transactions({
 									<TableCell className='text-center'>
 										{transactionCategory ?? '-'}
 									</TableCell>
-									<TableCell
-										className={cn(
-											'text-center',
-											`text-${typeColor}`,
-										)}
-									>
-										{typeLabel}
+									<TableCell className='text-center'>
+										<TransactionType
+											variant='text'
+											transactionType={type}
+										/>
 									</TableCell>
 									<TableCell className='text-right'>
 										<b>{currency}</b> {formatNumber(amount)}

@@ -2,13 +2,13 @@ import { useRef } from 'react'
 import { Form, useSubmit } from 'react-router'
 import type { Route } from '../+types'
 
-import { TransactionTypeIcon } from '~/components/transaction-type-icon'
+import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { Combobox } from '~/components/ui/combobox'
 import { Select } from '~/components/select'
 
-import { TRANSACTION_TYPE_DISPLAY, TRANSACTION_TYPES } from '~/lib/constants'
+import { TRANSACTION_TYPES } from '~/lib/constants'
 
 export function TransactionsFilters({
 	filters,
@@ -21,9 +21,9 @@ export function TransactionsFilters({
 	const form = useRef<HTMLFormElement>(null)
 
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
-		icon: <TransactionTypeIcon size='sm' transactionType={i} />,
+		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: TRANSACTION_TYPE_DISPLAY[i].label,
+		label: i === 'EXPENSE' ? 'Expense' : 'Income',
 	}))
 
 	const accountOptions = selectData.accounts.map(

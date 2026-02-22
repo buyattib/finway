@@ -16,7 +16,6 @@ import {
 	ACTION_CREATION,
 	CC_TRANSACTION_TYPE_CHARGE,
 	CC_TRANSACTION_TYPES,
-	CC_TRANSACTION_TYPE_DISPLAY,
 } from '~/lib/constants'
 import { getSelectData } from '~/lib/queries'
 
@@ -38,6 +37,7 @@ import {
 	AmountField,
 	DateField,
 } from '~/components/forms'
+import { TransactionType } from '~/components/transaction-type'
 
 import { CreditCardTransactionFormSchema } from '../lib/schemas'
 
@@ -231,14 +231,11 @@ export default function CreateCreditCardTransaction({
 			? formatNumber(amountValue / installmentCount)
 			: null
 
-	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => {
-		const { icon: Icon, label, color } = CC_TRANSACTION_TYPE_DISPLAY[i]
-		return {
-			icon: <Icon className={`w-4 h-4 text-${color}`} />,
-			value: i,
-			label,
-		}
-	})
+	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => ({
+		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
+		value: i,
+		label: i === 'CHARGE' ? 'Charge' : 'Refund',
+	}))
 
 	const transactionCategoryOptions = transactionCategories.map(
 		({ id, name }) => ({

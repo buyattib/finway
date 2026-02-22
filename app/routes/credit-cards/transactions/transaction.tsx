@@ -1,18 +1,18 @@
 import { Link } from 'react-router'
-import { CreditCardIcon, ArrowLeftIcon } from 'lucide-react'
+import { ArrowLeftIcon } from 'lucide-react'
 import { eq, asc } from 'drizzle-orm'
 
 import type { Route } from './+types/transaction'
 
 import { dbContext, userContext } from '~/lib/context'
 import { creditCardTransactionInstallment as creditCardTransactionInstallmentTable } from '~/database/schema'
-import { CC_TRANSACTION_TYPE_DISPLAY } from '~/lib/constants'
 import { cn, formatDate, formatNumber } from '~/lib/utils'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
 import { CreditCardHeader } from '../components/credit-card-header'
+import { TransactionType } from '~/components/transaction-type'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
@@ -129,11 +129,6 @@ export default function CreditCardTransaction({
 		creditCard
 
 	const { date, type, amount, description, categoryName } = transaction
-	const {
-		label: typeLabel,
-		color: typeColor,
-		icon: TypeIcon,
-	} = CC_TRANSACTION_TYPE_DISPLAY[type]
 
 	return (
 		<div className='flex flex-col gap-6'>
@@ -174,16 +169,11 @@ export default function CreditCardTransaction({
 					<Text size='sm' theme='muted'>
 						Type
 					</Text>
-					<Text
-						size='md'
-						className={cn(
-							'flex items-center gap-1',
-							`text-${typeColor}`,
-						)}
-					>
-						<TypeIcon className='size-4' />
-						{typeLabel}
-					</Text>
+					<TransactionType
+						variant='icon-text'
+						size='sm'
+						transactionType={type}
+					/>
 				</div>
 				<div className='flex flex-col gap-1'>
 					<Text size='sm' theme='muted'>
