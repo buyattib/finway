@@ -1,4 +1,11 @@
-import { Link, Form, data, useNavigation, useLocation } from 'react-router'
+import {
+	Link,
+	Form,
+	data,
+	useNavigation,
+	useLocation,
+	useNavigate,
+} from 'react-router'
 import {
 	CreditCardIcon,
 	SquarePenIcon,
@@ -52,6 +59,7 @@ import {
 	PaginationPrevious,
 } from '~/components/ui/pagination'
 
+import { CreditCardHeader } from './components/credit-card-header'
 import {
 	DeleteCreditCardFormSchema,
 	DeleteCreditCardTransactionFormSchema,
@@ -304,6 +312,7 @@ export default function CreditCardDetails({
 	const { label } = CURRENCY_DISPLAY[currencyCode]
 	const location = useLocation()
 	const navigation = useNavigation()
+	const navigate = useNavigate()
 
 	const isDeletingCard =
 		navigation.formMethod === 'POST' &&
@@ -325,39 +334,17 @@ export default function CreditCardDetails({
 		<div className='flex flex-col gap-6'>
 			<div className='flex flex-col gap-4'>
 				<div className='flex items-center gap-4'>
-					<div className='flex flex-col gap-2'>
-						<div className='flex items-center gap-4'>
-							<CreditCardIcon className='size-8 text-muted-foreground' />
-							<Title id={id} level='h1'>
-								{brand} •••• {last4}
-							</Title>
-						</div>
-						<div className='flex items-center gap-4'>
-							<Text size='md' theme='primary'>
-								Expires {expiryMonth}/{expiryYear}
-							</Text>
-							<Text size='sm' theme='muted'>
-								·
-							</Text>
-							<Text size='md' theme='muted'>
-								{accountName}
-							</Text>
-							<Text size='sm' theme='muted'>
-								·
-							</Text>
-							<Text
-								size='md'
-								theme='muted'
-								className='flex items-center gap-1'
-							>
-								<CurrencyIcon
-									currency={currencyCode}
-									size='sm'
-								/>
-								{label}
-							</Text>
-						</div>
-					</div>
+					<CreditCardHeader
+						{...{
+							brand,
+							last4,
+							expiryMonth,
+							expiryYear,
+							accountName,
+							currency: currencyCode,
+						}}
+					/>
+
 					<div className='flex items-center gap-2 ml-auto'>
 						<Button size='icon' variant='outline' asChild>
 							<Link to='edit' prefetch='intent'>
@@ -469,7 +456,13 @@ export default function CreditCardDetails({
 									CC_TRANSACTION_TYPE_DISPLAY[type]
 
 								return (
-									<TableRow key={txId}>
+									<TableRow
+										key={txId}
+										className='cursor-pointer'
+										onClick={() =>
+											navigate(`transactions/${txId}`)
+										}
+									>
 										<TableCell className='w-30'>
 											{formatDate(new Date(date))}
 										</TableCell>
@@ -492,7 +485,12 @@ export default function CreditCardDetails({
 											{installments}
 										</TableCell>
 										<TableCell className='flex justify-end items-center gap-2'>
-											<Form method='post'>
+											<Form
+												method='post'
+												onClick={e =>
+													e.stopPropagation()
+												}
+											>
 												<input
 													type='hidden'
 													name='creditCardTransactionId'

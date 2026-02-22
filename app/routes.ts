@@ -63,6 +63,10 @@ export default [
 					'transactions/create',
 					'routes/credit-cards/transactions/create.tsx',
 				),
+				route(
+					'transactions/:transactionId',
+					'routes/credit-cards/transactions/transaction.tsx',
+				),
 			]),
 		]),
 	]),
