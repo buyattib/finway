@@ -23,7 +23,7 @@ export async function createToastHeaders(
 ) {
 	const cookie = request.headers.get('Cookie')
 	const toastCookieSession = await toastSessionStorage.getSession(cookie)
-	const data = ToastSessionSchema.parse(toast)
+	const data = ToastSessionSchema.parse({ id: crypto.randomUUID(), ...toast })
 	toastCookieSession.flash(toastCookieKey, data)
 	const toastCookie =
 		await toastSessionStorage.commitSession(toastCookieSession)

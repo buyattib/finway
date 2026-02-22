@@ -13,10 +13,8 @@ export type ToastSession = z.infer<typeof ToastSessionSchema>
 
 export function ShowToast({ type, title, description, id }: ToastSession) {
 	useEffect(() => {
-		setTimeout(() => {
-			toast[type](title, { id, description })
-		}, 0)
-	}, [description, id, title, type])
+		toast[type](title, { id, description })
+	}, [id])
 
 	return null
 }

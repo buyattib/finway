@@ -6,11 +6,13 @@ import type { Route } from './+types/create'
 
 import { account as accountTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+
 import { dbContext, userContext } from '~/lib/context'
-import { AccountFormSchema } from './lib/schemas'
 import { ACTION_CREATION } from '~/lib/constants'
 import type { TAccountType } from '~/lib/types'
 
+import { AccountFormSchema } from './lib/schemas'
 import { AccountForm } from './components/form'
 
 export function meta() {
@@ -44,6 +46,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'accounts')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
@@ -60,8 +63,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			if (existingAccountsCount > 0) {
 				return ctx.addIssue({
 					code: 'custom',
-					message:
-						'An account with this name and type already exists',
+					message: t('form.create.duplicateError'),
 				})
 			}
 		}),
@@ -87,7 +89,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		request,
 		{
 			type: 'success',
-			title: 'Account created successfully',
+			title: t('form.create.successToast'),
 		},
 	)
 }

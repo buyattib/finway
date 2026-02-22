@@ -10,6 +10,8 @@ import {
 	createToastHeaders,
 	redirectWithToast,
 } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+
 import { dbContext, userContext } from '~/lib/context'
 import { formatNumber, getCurrencyData } from '~/lib/utils'
 import { getBalances } from '~/lib/queries'
@@ -70,6 +72,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'accounts')
 
 	const account = await db.query.account.findFirst({
 		where: eq(accountTable.id, accountId),
@@ -82,7 +85,7 @@ export async function loader({
 		},
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response('Account not found', { status: 404 })
+		throw new Response(t('details.notFoundError'), { status: 404 })
 	}
 
 	const balances = await getBalances({ db, ownerId: user.id, accountId })
@@ -95,6 +98,7 @@ export async function loader({
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'accounts')
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -104,8 +108,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (submission.status !== 'success') {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'Could not delete account',
-			description: 'Please try again',
+			title: t('details.deleteErrorToast'),
+			description: t('details.deleteErrorToastDescription'),
 		})
 
 		return data({}, { headers: toastHeaders })
@@ -117,14 +121,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 		columns: { name: true, ownerId: true },
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response('Account not found', { status: 404 })
+		throw new Response(t('details.notFoundError'), { status: 404 })
 	}
 
 	await db.delete(accountTable).where(eq(accountTable.id, accountId))
 
 	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',
-		title: `Account ${account.name} deleted`,
+		title: t('details.successToast', { name: account.name }),
 	})
 }
 

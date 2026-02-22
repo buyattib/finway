@@ -21,10 +21,16 @@ export default {
 		create: {
 			title: 'Crear una cuenta',
 			submitButton: 'Crear',
+			successToast: 'Cuenta creada exitosamente',
+			duplicateError: 'Ya existe una cuenta con este nombre y tipo',
 		},
 		edit: {
 			title: 'Editar cuenta',
 			submitButton: 'Actualizar',
+			successToast: 'Cuenta actualizada exitosamente',
+			notFoundError: 'Cuenta no encontrada',
+			accountWithIdNotFoundError: 'Cuenta con id {{id}} no encontrada',
+			duplicateError: 'Ya existe una cuenta con este nombre y tipo',
 		},
 	},
 	details: {
@@ -32,5 +38,9 @@ export default {
 		deleteTooltip: 'Eliminar una cuenta no se puede deshacer y elimina todas las transacciones, transferencias o intercambios asociados.',
 		currencyBalancesTitle: 'Balances por moneda',
 		emptyBalances: 'Aún no tienes actividad en esta cuenta.',
+		notFoundError: 'Cuenta no encontrada',
+		successToast: 'Cuenta {{name}} eliminada',
+		deleteErrorToast: 'No se pudo eliminar la cuenta',
+		deleteErrorToastDescription: 'Por favor intenta de nuevo',
 	},
 } satisfies typeof en

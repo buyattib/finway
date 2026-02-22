@@ -6,6 +6,8 @@ import type { Route } from './+types/edit'
 
 import { account as accountTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+
 import { dbContext, userContext } from '~/lib/context'
 import { ACTION_EDITION } from '~/lib/constants'
 
@@ -54,6 +56,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'accounts')
 
 	const account = await db.query.account.findFirst({
 		where: (account, { eq }) => eq(account.id, accountId),
@@ -66,7 +69,7 @@ export async function loader({
 		},
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response('Account not found', { status: 404 })
+		throw new Response(t('form.edit.notFoundError'), { status: 404 })
 	}
 
 	const { ownerId, ...accountData } = account
@@ -76,6 +79,7 @@ export async function loader({
 export async function action({ context, request }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'accounts')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
@@ -96,7 +100,9 @@ export async function action({ context, request }: Route.ActionArgs) {
 			if (!account || account.ownerId !== user.id) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: `Account with id ${data.id} not found`,
+					message: t('form.edit.accountWithIdNotFoundError', {
+						id: data.id,
+					}),
 				})
 			}
 
@@ -112,8 +118,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 			if (existingAccountsCount > 0) {
 				return ctx.addIssue({
 					code: 'custom',
-					message:
-						'An account with this name and type already exists',
+					message: t('form.edit.duplicateError'),
 				})
 			}
 		}),
@@ -133,7 +138,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 
 	return await redirectWithToast(`/app/accounts/${id}`, request, {
 		type: 'success',
-		title: 'Account updated successfully',
+		title: t('form.edit.successToast'),
 	})
 }
 
