@@ -1,5 +1,9 @@
 export default {
 	index: {
+		meta: {
+			title: 'Accounts | Finway',
+			description: 'Your accounts',
+		},
 		title: 'Accounts',
 		addAccountLabel: 'Account',
 		searchPlaceholder: 'Search accounts by name',
@@ -17,12 +21,21 @@ export default {
 		accountTypePlaceholder: 'Select an option',
 		resetButton: 'Reset',
 		create: {
+			meta: {
+				title: 'Create an Account | Finway',
+				description: 'Create an account to track your transactions',
+			},
 			title: 'Create an account',
 			submitButton: 'Create',
 			successToast: 'Account created successfully',
 			duplicateError: 'An account with this name and type already exists',
 		},
 		edit: {
+			meta: {
+				title: 'Edit Account {{name}} | Finway',
+				notFoundTitle: 'Account {{accountId}} not found | Finway',
+				description: 'Edit account {{name}}',
+			},
 			title: 'Edit account',
 			submitButton: 'Update',
 			successToast: 'Account updated successfully',
@@ -32,6 +45,11 @@ export default {
 		},
 	},
 	details: {
+		meta: {
+			title: 'Account {{name}} | Finway',
+			notFoundTitle: 'Account {{accountId}} not found | Finway',
+			description: 'Account {{name}}',
+		},
 		deleteAriaLabel: 'Delete account {{name}}',
 		deleteTooltip: 'Deleting an account cannot be undone and it deletes all transactions, transfers or exchanges associated with it.',
 		currencyBalancesTitle: 'Currency balances',

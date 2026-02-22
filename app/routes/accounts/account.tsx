@@ -30,39 +30,14 @@ import {
 
 import { DeleteAccountFormSchema } from './lib/schemas'
 
-export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
-	if (!loaderData?.account) {
-		return [
-			{
-				title: `Account ${accountId} not found | Finway`,
-			},
-			{
-				property: 'og:title',
-				content: `Account ${accountId} not found | Finway`,
-			},
-			{
-				name: 'description',
-				content: `Account ${accountId} not found | Finway`,
-			},
-		]
-	}
-
-	const {
-		account: { name },
-	} = loaderData
-
+export function meta({ loaderData }: Route.MetaArgs) {
+	const title = loaderData?.account
+		? loaderData.meta.title
+		: loaderData?.meta.notFoundTitle
 	return [
-		{
-			title: `Account ${name} | Finway`,
-		},
-		{
-			property: 'og:title',
-			content: `Account ${name} | Finway`,
-		},
-		{
-			name: 'description',
-			content: `Account ${name} | Finway`,
-		},
+		{ title },
+		{ property: 'og:title', content: title },
+		{ name: 'description', content: loaderData?.meta.description ?? title },
 	]
 }
 
@@ -72,7 +47,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
-	const t = getServerT(context, 'accounts')
+	const t = getServerT(context, 'accounts', 'details')
 
 	const account = await db.query.account.findFirst({
 		where: eq(accountTable.id, accountId),
@@ -85,20 +60,27 @@ export async function loader({
 		},
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response(t('details.notFoundError'), { status: 404 })
+		throw new Response(t('notFoundError'), { status: 404 })
 	}
 
 	const balances = await getBalances({ db, ownerId: user.id, accountId })
 
 	const { ownerId, ...accountData } = account
 
-	return { account: { ...accountData, balances } }
+	return {
+		account: { ...accountData, balances },
+		meta: {
+			title: t('meta.title', { name: account.name }),
+			notFoundTitle: t('meta.notFoundTitle', { accountId }),
+			description: t('meta.description', { name: account.name }),
+		},
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
-	const t = getServerT(context, 'accounts')
+	const t = getServerT(context, 'accounts', 'details')
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -108,8 +90,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (submission.status !== 'success') {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: t('details.deleteErrorToast'),
-			description: t('details.deleteErrorToastDescription'),
+			title: t('deleteErrorToast'),
+			description: t('deleteErrorToastDescription'),
 		})
 
 		return data({}, { headers: toastHeaders })
@@ -121,14 +103,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 		columns: { name: true, ownerId: true },
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response(t('details.notFoundError'), { status: 404 })
+		throw new Response(t('notFoundError'), { status: 404 })
 	}
 
 	await db.delete(accountTable).where(eq(accountTable.id, accountId))
 
 	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',
-		title: t('details.successToast', { name: account.name }),
+		title: t('successToast', { name: account.name }),
 	})
 }
 

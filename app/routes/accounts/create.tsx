@@ -15,22 +15,16 @@ import type { TAccountType } from '~/lib/types'
 import { AccountFormSchema } from './lib/schemas'
 import { AccountForm } from './components/form'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Create an Account | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Create an Account | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Create an account to track your transactions',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, context }: Route.LoaderArgs) {
+	const t = getServerT(context, 'accounts', 'form.create')
 	const url = new URL(request.url)
 	const redirectTo = url.searchParams.get('redirectTo') || ''
 	return {
@@ -40,13 +34,17 @@ export async function loader({ request }: Route.LoaderArgs) {
 			accountType: '' as TAccountType,
 			description: '',
 		},
+		meta: {
+			title: t('meta.title'),
+			description: t('meta.description'),
+		},
 	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
-	const t = getServerT(context, 'accounts')
+	const t = getServerT(context, 'accounts', 'form.create')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
@@ -63,7 +61,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			if (existingAccountsCount > 0) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: t('form.create.duplicateError'),
+					message: t('duplicateError'),
 				})
 			}
 		}),
@@ -89,7 +87,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		request,
 		{
 			type: 'success',
-			title: t('form.create.successToast'),
+			title: t('successToast'),
 		},
 	)
 }

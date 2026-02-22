@@ -18,6 +18,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
+import { getServerT } from '~/utils-server/i18n.server'
 import { account as accountTable } from '~/database/schema'
 import { formatNumber, getCurrencyData } from '~/lib/utils'
 import { getBalances } from '~/lib/queries'
@@ -37,24 +38,18 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { Spinner } from '~/components/ui/spinner'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Accounts | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Accounts | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Your accounts',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'accounts', 'index')
 
 	const url = new URL(request.url)
 	const search = url.searchParams.get('search')
@@ -98,7 +93,14 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			.slice(0, 3),
 	}))
 
-	return { accounts, search }
+	return {
+		accounts,
+		search,
+		meta: {
+			title: t('meta.title'),
+			description: t('meta.description'),
+		},
+	}
 }
 
 export default function Accounts({

@@ -14,39 +14,14 @@ import { ACTION_EDITION } from '~/lib/constants'
 import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
 
-export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
-	if (!loaderData?.initialData) {
-		return [
-			{
-				title: `Account ${accountId} not found | Finway`,
-			},
-			{
-				property: 'og:title',
-				content: `Account ${accountId} not found | Finway`,
-			},
-			{
-				name: 'description',
-				content: `Account ${accountId} not found | Finway`,
-			},
-		]
-	}
-
-	const {
-		initialData: { name },
-	} = loaderData
-
+export function meta({ loaderData }: Route.MetaArgs) {
+	const title = loaderData?.initialData
+		? loaderData.meta.title
+		: loaderData?.meta.notFoundTitle
 	return [
-		{
-			title: `Edit Account ${name} | Finway`,
-		},
-		{
-			property: 'og:title',
-			content: `Edit Account ${name} | Finway`,
-		},
-		{
-			name: 'description',
-			content: `Edit Account ${name} | Finway`,
-		},
+		{ title },
+		{ property: 'og:title', content: title },
+		{ name: 'description', content: loaderData?.meta.description ?? title },
 	]
 }
 
@@ -56,7 +31,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
-	const t = getServerT(context, 'accounts')
+	const t = getServerT(context, 'accounts', 'form.edit')
 
 	const account = await db.query.account.findFirst({
 		where: (account, { eq }) => eq(account.id, accountId),
@@ -69,17 +44,24 @@ export async function loader({
 		},
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response(t('form.edit.notFoundError'), { status: 404 })
+		throw new Response(t('notFoundError'), { status: 404 })
 	}
 
 	const { ownerId, ...accountData } = account
-	return { initialData: accountData }
+	return {
+		initialData: accountData,
+		meta: {
+			title: t('meta.title', { name: account.name }),
+			notFoundTitle: t('meta.notFoundTitle', { accountId }),
+			description: t('meta.description', { name: account.name }),
+		},
+	}
 }
 
 export async function action({ context, request }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
-	const t = getServerT(context, 'accounts')
+	const t = getServerT(context, 'accounts', 'form.edit')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
@@ -100,7 +82,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 			if (!account || account.ownerId !== user.id) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: t('form.edit.accountWithIdNotFoundError', {
+					message: t('accountWithIdNotFoundError', {
 						id: data.id,
 					}),
 				})
@@ -118,7 +100,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 			if (existingAccountsCount > 0) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: t('form.edit.duplicateError'),
+					message: t('duplicateError'),
 				})
 			}
 		}),
@@ -138,7 +120,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 
 	return await redirectWithToast(`/app/accounts/${id}`, request, {
 		type: 'success',
-		title: t('form.edit.successToast'),
+		title: t('successToast'),
 	})
 }
 

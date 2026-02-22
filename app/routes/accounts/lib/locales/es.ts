@@ -2,6 +2,10 @@ import type en from './en'
 
 export default {
 	index: {
+		meta: {
+			title: 'Cuentas | Finway',
+			description: 'Tus cuentas',
+		},
 		title: 'Cuentas',
 		addAccountLabel: 'Cuenta',
 		searchPlaceholder: 'Buscar cuentas por nombre',
@@ -19,12 +23,21 @@ export default {
 		accountTypePlaceholder: 'Selecciona una opción',
 		resetButton: 'Restablecer',
 		create: {
+			meta: {
+				title: 'Crear una Cuenta | Finway',
+				description: 'Crea una cuenta para rastrear tus transacciones',
+			},
 			title: 'Crear una cuenta',
 			submitButton: 'Crear',
 			successToast: 'Cuenta creada exitosamente',
 			duplicateError: 'Ya existe una cuenta con este nombre y tipo',
 		},
 		edit: {
+			meta: {
+				title: 'Editar Cuenta {{name}} | Finway',
+				notFoundTitle: 'Cuenta {{accountId}} no encontrada | Finway',
+				description: 'Editar cuenta {{name}}',
+			},
 			title: 'Editar cuenta',
 			submitButton: 'Actualizar',
 			successToast: 'Cuenta actualizada exitosamente',
@@ -34,6 +47,11 @@ export default {
 		},
 	},
 	details: {
+		meta: {
+			title: 'Cuenta {{name}} | Finway',
+			notFoundTitle: 'Cuenta {{accountId}} no encontrada | Finway',
+			description: 'Cuenta {{name}}',
+		},
 		deleteAriaLabel: 'Eliminar cuenta {{name}}',
 		deleteTooltip: 'Eliminar una cuenta no se puede deshacer y elimina todas las transacciones, transferencias o intercambios asociados.',
 		currencyBalancesTitle: 'Balances por moneda',
