@@ -44,14 +44,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
-import {
-	Pagination,
-	PaginationContent,
-	PaginationItem,
-	PaginationLink,
-	PaginationNext,
-	PaginationPrevious,
-} from '~/components/ui/pagination'
+import { TablePagination } from '~/components/table-pagination'
 
 import { CreditCardHeader } from './components/credit-card-header'
 import {
@@ -519,41 +512,7 @@ export default function CreditCardDetails({
 					</TableBody>
 				</Table>
 
-				{pagination.pages > 1 && (
-					<Pagination>
-						<PaginationContent>
-							<PaginationItem>
-								<PaginationPrevious
-									prefetch='intent'
-									to={{
-										search: `?page=${pagination.page === 1 ? 1 : pagination.page - 1}`,
-									}}
-								/>
-							</PaginationItem>
-							{Array.from(Array(pagination.pages).keys()).map(
-								v => (
-									<PaginationItem key={v}>
-										<PaginationLink
-											prefetch='intent'
-											to={{ search: `?page=${v + 1}` }}
-											isActive={pagination.page === v + 1}
-										>
-											{v + 1}
-										</PaginationLink>
-									</PaginationItem>
-								),
-							)}
-							<PaginationItem>
-								<PaginationNext
-									prefetch='intent'
-									to={{
-										search: `?page=${pagination.page === pagination.pages ? pagination.pages : pagination.page + 1}`,
-									}}
-								/>
-							</PaginationItem>
-						</PaginationContent>
-					</Pagination>
-				)}
+				<TablePagination page={pagination.page} pages={pagination.pages} />
 			</section>
 		</div>
 	)
