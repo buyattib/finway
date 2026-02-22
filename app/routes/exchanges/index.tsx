@@ -29,6 +29,7 @@ import {
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
+import { TablePagination } from '~/components/table-pagination'
 
 import { getBalances } from '~/lib/queries'
 
@@ -49,14 +50,19 @@ export function meta() {
 	]
 }
 
-export async function loader({ context }: Route.LoaderArgs) {
+const PAGE_SIZE = 20
+
+export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+
+	const url = new URL(request.url)
+	const page = Number(url.searchParams.get('page') ?? '1')
 
 	const fromCurrencyAlias = alias(currencyTable, 'fromCurrency')
 	const toCurrencyAlias = alias(currencyTable, 'toCurrency')
 
-	const exchanges = await db
+	const query = db
 		.select({
 			id: exchangeTable.id,
 			date: exchangeTable.date,
@@ -83,7 +89,15 @@ export async function loader({ context }: Route.LoaderArgs) {
 		.where(eq(accountTable.ownerId, user.id))
 		.orderBy(desc(exchangeTable.date), desc(exchangeTable.createdAt))
 
-	return { exchanges }
+	const total = await db.$count(query)
+	const exchanges = await query
+		.limit(PAGE_SIZE)
+		.offset((page - 1) * PAGE_SIZE)
+
+	return {
+		exchanges,
+		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -152,7 +166,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function Exchanges({
-	loaderData: { exchanges },
+	loaderData: { exchanges, pagination },
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
@@ -292,6 +306,8 @@ export default function Exchanges({
 					)}
 				</TableBody>
 			</Table>
+
+			<TablePagination page={pagination.page} pages={pagination.pages} />
 		</section>
 	)
 }
