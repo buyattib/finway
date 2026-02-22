@@ -8,7 +8,7 @@ import {
 } from 'react-router'
 import { SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and } from 'drizzle-orm'
 
 import type { Route } from './+types/credit-card'
 
@@ -19,7 +19,9 @@ import {
 	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
+import type { TCCTransactionType } from '~/lib/types'
 import { formatDate, formatNumber } from '~/lib/utils'
+import { getSelectData } from '~/lib/queries'
 import {
 	createToastHeaders,
 	redirectWithToast,
@@ -47,6 +49,7 @@ import {
 import { TablePagination } from '~/components/table-pagination'
 
 import { CreditCardHeader } from './components/credit-card-header'
+import { CreditCardTransactionFilters } from './components/filters'
 import {
 	DeleteCreditCardFormSchema,
 	DeleteCreditCardTransactionFormSchema,
@@ -127,7 +130,23 @@ export async function loader({
 	} = creditCard
 
 	const url = new URL(request.url)
-	const page = Number(url.searchParams.get('page') ?? '1')
+	const searchParams = url.searchParams
+
+	const page = Number(searchParams.get('page') ?? '1')
+	const type = (searchParams.get('type') as TCCTransactionType) ?? ''
+	const categoryId = searchParams.get('categoryId') ?? ''
+
+	const selectData = await getSelectData(db, user.id)
+
+	const filters = [eq(creditCardTransactionTable.creditCardId, creditCardId)]
+	if (type) {
+		filters.push(eq(creditCardTransactionTable.type, type))
+	}
+	if (categoryId) {
+		filters.push(
+			eq(creditCardTransactionTable.transactionCategoryId, categoryId),
+		)
+	}
 
 	const transactionsQuery = db
 		.select({
@@ -160,7 +179,7 @@ export async function loader({
 				creditCardTransactionInstallmentTable.creditCardTransactionId,
 			),
 		)
-		.where(eq(creditCardTransactionTable.creditCardId, creditCardId))
+		.where(and(...filters))
 		.groupBy(creditCardTransactionTable.id)
 		.orderBy(
 			desc(creditCardTransactionTable.date),
@@ -183,6 +202,8 @@ export async function loader({
 			amount: String(t.amount / 100),
 		})),
 		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
+		filters: { type, categoryId },
+		selectData,
 	}
 }
 
@@ -285,7 +306,13 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreditCardDetails({
-	loaderData: { creditCard, transactions, pagination },
+	loaderData: {
+		creditCard,
+		transactions,
+		pagination,
+		filters,
+		selectData,
+	},
 }: Route.ComponentProps) {
 	const {
 		id,
@@ -299,6 +326,11 @@ export default function CreditCardDetails({
 	const location = useLocation()
 	const navigation = useNavigation()
 	const navigate = useNavigate()
+
+	const isLoading =
+		navigation.state === 'loading' &&
+		navigation.location &&
+		navigation.location.search
 
 	const isDeletingCard =
 		navigation.formMethod === 'POST' &&
@@ -392,6 +424,15 @@ export default function CreditCardDetails({
 							</span>
 						</Link>
 					</Button>
+				</div>
+
+				<CreditCardTransactionFilters
+					filters={filters}
+					selectData={selectData}
+				/>
+
+				<div className='h-6'>
+					{isLoading && <Spinner size='md' className='mx-auto' />}
 				</div>
 
 				<Table>
@@ -512,7 +553,10 @@ export default function CreditCardDetails({
 					</TableBody>
 				</Table>
 
-				<TablePagination page={pagination.page} pages={pagination.pages} />
+				<TablePagination
+					page={pagination.page}
+					pages={pagination.pages}
+				/>
 			</section>
 		</div>
 	)
