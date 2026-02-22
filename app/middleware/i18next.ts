@@ -30,7 +30,7 @@ export async function getLocaleHeaders(locale: string) {
 // This adds type-safety to the `t` function
 declare module 'i18next' {
 	interface CustomTypeOptions {
-		defaultNS: 'translation'
+		defaultNS: false
 		resources: typeof resources.en // Use `en` as source of truth for the types
 	}
 }

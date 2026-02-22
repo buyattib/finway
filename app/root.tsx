@@ -114,7 +114,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-	const { i18n, t } = useTranslation()
+	const { i18n } = useTranslation()
 	const theme = useTheme()
 
 	const { locale, ...rest } = loaderData
@@ -166,6 +166,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
 export function ErrorBoundary() {
 	const error = useRouteError()
+	const { i18n } = useTranslation()
 
 	let status = 500
 	let message = 'An unexpected error occurred.'
@@ -179,7 +180,7 @@ export function ErrorBoundary() {
 	}
 
 	return (
-		<html lang='en'>
+		<html lang={i18n.language}>
 			<head>
 				<meta charSet='utf-8' />
 				<meta
