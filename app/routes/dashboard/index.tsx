@@ -151,7 +151,7 @@ export default function Dashboard({
 				monthExpenses={summary.monthExpenses}
 			/>
 			<ExpensesByMonth expensesByMonth={expensesByMonth} />
-			<MonthInstallments monthInstallmentsList={monthInstallments} />
+			<MonthInstallments monthInstallments={monthInstallments} />
 		</section>
 	)
 }

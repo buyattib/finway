@@ -12,27 +12,25 @@ import type { Route } from '../+types'
 
 type LoaderData = Route.ComponentProps['loaderData']
 
-type Props = Pick<LoaderData, 'monthInstallmentsList'>
+type Props = Pick<LoaderData, 'monthInstallments'>
 
-export function MonthInstallments({
-	monthInstallmentsList: installments,
-}: Props) {
+export function MonthInstallments({ monthInstallments }: Props) {
 	return (
 		<section
 			className='flex flex-col gap-4'
 			aria-labelledby='dashboard-installments'
 		>
 			<Title id='dashboard-installments' level='h3'>
-				This month installments ({installments.length})
+				This month installments ({monthInstallments.length})
 			</Title>
 
-			{installments.length === 0 ? (
+			{monthInstallments.length === 0 ? (
 				<Text alignment='center' className='italic'>
 					No installments due this month
 				</Text>
 			) : (
 				<div className='flex flex-col gap-2'>
-					{installments.map(
+					{monthInstallments.map(
 						({
 							installmentId,
 							installmentNumber,
