@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
 	createSearchParams,
 	Form,
@@ -12,13 +13,15 @@ import {
 	SquarePenIcon,
 } from 'lucide-react'
 import { desc, eq, and, like, sql } from 'drizzle-orm'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
 import { account as accountTable } from '~/database/schema'
 import { formatNumber, getCurrencyData } from '~/lib/utils'
+import { getBalances } from '~/lib/queries'
+import type { TAccountBalance } from '~/lib/types'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -32,11 +35,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
-
-import { getBalances } from '~/lib/queries'
-import { ACCOUNT_TYPE_LABEL } from '~/lib/constants'
-import type { TAccountBalance } from '~/lib/types'
-import { useEffect } from 'react'
 import { Spinner } from '~/components/ui/spinner'
 
 export function meta() {
@@ -108,7 +106,7 @@ export default function Accounts({
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
 	const submit = useSubmit()
-	const { t } = useTranslation('accounts')
+	const { t } = useTranslation(['accounts', 'components'])
 
 	useEffect(() => {
 		const searchField = document.getElementById('search')
@@ -129,13 +127,14 @@ export default function Accounts({
 		>
 			<div className='flex items-center justify-between'>
 				<Title id='accounts-section' level='h3'>
-					Accounts
-					{t('title')}
+					{t('index.title')}
 				</Title>
 				<Button asChild variant='default' autoFocus>
 					<Link to='create' prefetch='intent'>
 						<PlusIcon aria-hidden />
-						<span className='sm:inline hidden'>Account</span>
+						<span className='sm:inline hidden'>
+							{t('index.addAccountLabel')}
+						</span>
 					</Link>
 				</Button>
 			</div>
@@ -150,11 +149,11 @@ export default function Accounts({
 			>
 				<Input
 					className='px-6'
-					aria-label='Search accounts'
 					id='search'
 					name='search'
-					placeholder='Search by account name'
 					type='search'
+					aria-label={t('index.searchPlaceholder')}
+					placeholder={t('index.searchPlaceholder')}
 					defaultValue={search ?? ''}
 				/>
 			</Form>
@@ -167,15 +166,17 @@ export default function Accounts({
 				<div className='my-2'>
 					{!search ? (
 						<Text size='md' weight='medium' alignment='center'>
-							You have not created any accounts yet. Start
-							creating them{' '}
-							<Link to='create' className='text-primary'>
-								here
-							</Link>
+							<Trans ns='accounts' i18nKey='index.emptyMessage'>
+								You have not created any accounts yet. Start
+								creating them{' '}
+								<Link to='create' className='text-primary'>
+									here
+								</Link>
+							</Trans>
 						</Text>
 					) : (
 						<Text size='md' weight='medium' alignment='center'>
-							No accounts found for the search {search}
+							{t('index.emptySearchMessage', { search })}
 						</Text>
 					)}
 				</div>
@@ -198,16 +199,14 @@ export default function Accounts({
 										accountType={accountType}
 									/>
 									<div className='flex flex-col sm:gap-2 gap-4'>
-										<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
+										<div className='flex flex-col gap-1'>
 											<Title id={id} level='h5'>
 												{name}
 											</Title>
 											<Text size='sm' theme='primary'>
-												{
-													ACCOUNT_TYPE_LABEL[
-														accountType
-													]
-												}
+												{t(
+													`components:accountType.${accountType}`,
+												)}
 											</Text>
 										</div>
 										{description && (
@@ -280,7 +279,9 @@ export default function Accounts({
 								<DropdownMenuContent>
 									<DropdownMenuItem>
 										<SquarePenIcon />
-										<Link to={`${id}/edit`}>Edit</Link>
+										<Link to={`${id}/edit`}>
+											{t('index.editAction')}
+										</Link>
 									</DropdownMenuItem>
 									<DropdownMenuItem>
 										<BanknoteArrowDownIcon />
@@ -293,7 +294,7 @@ export default function Accounts({
 												}).toString(),
 											}}
 										>
-											Transaction
+											{t('index.transactionAction')}
 										</Link>
 									</DropdownMenuItem>
 								</DropdownMenuContent>

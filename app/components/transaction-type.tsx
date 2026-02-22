@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { cva, type VariantProps } from 'class-variance-authority'
 import {
 	BanknoteArrowDownIcon,
@@ -48,6 +49,8 @@ export function TransactionType({
 	className,
 	variant,
 }: TransactionTypeProps) {
+	const { t } = useTranslation('components')
+
 	const {
 		icon: Icon,
 		label,
@@ -55,22 +58,22 @@ export function TransactionType({
 	} = {
 		[TRANSACTION_TYPE_EXPENSE]: {
 			icon: BanknoteArrowUpIcon,
-			label: 'Expense',
+			label: t(`transactionType.${TRANSACTION_TYPE_EXPENSE}`),
 			textCn: 'text-red',
 		},
 		[TRANSACTION_TYPE_INCOME]: {
 			icon: BanknoteArrowDownIcon,
-			label: 'Income',
+			label: t(`transactionType.${TRANSACTION_TYPE_INCOME}`),
 			textCn: 'text-green',
 		},
 		[CC_TRANSACTION_TYPE_CHARGE]: {
 			icon: BanknoteArrowUpIcon,
-			label: 'Charge',
+			label: t(`ccTransactionType.${CC_TRANSACTION_TYPE_CHARGE}`),
 			textCn: 'text-red',
 		},
 		[CC_TRANSACTION_TYPE_REFUND]: {
 			icon: BanknoteArrowDownIcon,
-			label: 'Refund',
+			label: t(`ccTransactionType.${CC_TRANSACTION_TYPE_REFUND}`),
 			textCn: 'text-green',
 		},
 	}[transactionType]
