@@ -1,5 +1,7 @@
-import type en from './en'
+import type { ResourceLanguage } from 'i18next'
+
+import accounts from '~/routes/accounts/lib/locales/es'
 
 export default {
-	title: 'algun titulo',
-} satisfies typeof en
+	accounts,
+} satisfies ResourceLanguage

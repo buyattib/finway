@@ -12,6 +12,7 @@ import {
 	SquarePenIcon,
 } from 'lucide-react'
 import { desc, eq, and, like, sql } from 'drizzle-orm'
+import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
@@ -107,6 +108,7 @@ export default function Accounts({
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
 	const submit = useSubmit()
+	const { t } = useTranslation('accounts')
 
 	useEffect(() => {
 		const searchField = document.getElementById('search')
@@ -128,6 +130,7 @@ export default function Accounts({
 			<div className='flex items-center justify-between'>
 				<Title id='accounts-section' level='h3'>
 					Accounts
+					{t('title')}
 				</Title>
 				<Button asChild variant='default' autoFocus>
 					<Link to='create' prefetch='intent'>

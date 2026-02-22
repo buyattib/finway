@@ -2,16 +2,19 @@ import { PassThrough } from 'node:stream'
 import { isbot } from 'isbot'
 import { createReadableStreamFromReadable } from '@react-router/node'
 import {
-	RouterContextProvider,
 	ServerRouter,
+	type RouterContextProvider,
 	type EntryContext,
 } from 'react-router'
 import {
 	renderToPipeableStream,
 	type RenderToPipeableStreamOptions,
 } from 'react-dom/server'
+import { I18nextProvider } from 'react-i18next'
+
 import './utils-server/env.server'
 
+import { getInstance } from './middleware/i18next'
 import { globalContext } from './lib/context'
 
 export const streamTimeout = 5_000
@@ -20,8 +23,8 @@ export default function handleRequest(
 	request: Request,
 	responseStatusCode: number,
 	responseHeaders: Headers,
-	routerContext: EntryContext,
-	loadContext: RouterContextProvider,
+	entryContext: EntryContext,
+	routerContext: RouterContextProvider,
 ) {
 	return new Promise((resolve, reject) => {
 		let shellRendered = false
@@ -30,7 +33,7 @@ export default function handleRequest(
 		// Ensure requests from bots and SPA Mode renders wait for all content to load before responding
 		// https://react.dev/reference/react-dom/server/renderToPipeableStream#waiting-for-all-content-to-load-for-crawlers-and-static-generation
 		let readyOption: keyof RenderToPipeableStreamOptions =
-			(userAgent && isbot(userAgent)) || routerContext.isSpaMode
+			(userAgent && isbot(userAgent)) || entryContext.isSpaMode
 				? 'onAllReady'
 				: 'onShellReady'
 
@@ -41,13 +44,15 @@ export default function handleRequest(
 			streamTimeout + 1000,
 		)
 
-		const ctx = loadContext.get(globalContext)
+		const ctx = routerContext.get(globalContext)
 		const { pipe, abort } = renderToPipeableStream(
-			<ServerRouter
-				nonce={ctx.cspNonce}
-				context={routerContext}
-				url={request.url}
-			/>,
+			<I18nextProvider i18n={getInstance(routerContext)}>
+				<ServerRouter
+					nonce={ctx.cspNonce}
+					context={entryContext}
+					url={request.url}
+				/>
+			</I18nextProvider>,
 			{
 				[readyOption]() {
 					shellRendered = true
