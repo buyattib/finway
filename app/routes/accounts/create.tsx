@@ -10,7 +10,8 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 
 import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
-import { ACTION_CREATION } from './lib/constants'
+import { ACTION_CREATION } from '~/lib/constants'
+import type { TAccountType } from '~/lib/types'
 
 export function meta() {
 	return [
@@ -30,7 +31,14 @@ export function meta() {
 export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const redirectTo = url.searchParams.get('redirectTo') || ''
-	return { redirectTo }
+	return {
+		redirectTo,
+		initialData: {
+			name: '',
+			accountType: '' as TAccountType,
+			description: '',
+		},
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -86,12 +94,13 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 export default function CreateAccount({
 	actionData,
-	loaderData: { redirectTo },
+	loaderData: { initialData, redirectTo },
 }: Route.ComponentProps) {
 	return (
 		<AccountForm
 			action={ACTION_CREATION}
 			lastResult={actionData?.submission}
+			initialData={initialData}
 			redirectTo={redirectTo}
 		/>
 	)

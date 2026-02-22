@@ -2,15 +2,18 @@ import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
-import type { TCurrency } from '~/routes/accounts/lib/types'
-
+import { getBalances } from '~/lib/queries'
+import type { TCurrency } from '~/lib/types'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
+} from '~/lib/constants'
 
-import { getMonthTransactions } from './lib/queries'
+import {
+	getMonthTransactions,
+	getMonthCreditCardTotals,
+	getMonthInstallments,
+} from './lib/queries'
 import type {
 	CategoryResponse,
 	CurrencyResponse,
@@ -20,6 +23,7 @@ import type {
 import { SummaryCards } from './components/summary-cards'
 import { ExpensesByCategory } from './components/expenses-by-category'
 import { ExpensesByMonth } from './components/expenses-by-month'
+import { MonthInstallments } from './components/month-installments'
 
 export function meta() {
 	return [
@@ -47,11 +51,13 @@ export async function loader({ context }: Route.LoaderArgs) {
 				ownerId: user.id,
 				group: 'currency',
 			})
-		).map(({ currency, currencyId, balance }) => ({
-			currencyId,
-			currency,
-			amount: balance,
-		})),
+		)
+			.filter(({ balance }) => Number(balance) > 0)
+			.map(({ currency, currencyId, balance }) => ({
+				currencyId,
+				currency,
+				amount: balance,
+			})),
 		monthExpenses: await getMonthTransactions({
 			db,
 			ownerId: user.id,
@@ -64,7 +70,16 @@ export async function loader({ context }: Route.LoaderArgs) {
 			transactionType: TRANSACTION_TYPE_INCOME,
 			group: 'currency',
 		}),
+		monthCreditCardTotals: await getMonthCreditCardTotals({
+			db,
+			ownerId: user.id,
+		}),
 	}
+
+	const monthInstallments = await getMonthInstallments({
+		db,
+		ownerId: user.id,
+	})
 
 	const expensesByCategory = (
 		await getMonthTransactions({
@@ -112,11 +127,21 @@ export async function loader({ context }: Route.LoaderArgs) {
 		>,
 	)
 
-	return { summary, expensesByCategory, expensesByMonth }
+	return {
+		summary,
+		expensesByCategory,
+		expensesByMonth,
+		monthInstallments,
+	}
 }
 
 export default function Dashboard({
-	loaderData: { summary, expensesByCategory, expensesByMonth },
+	loaderData: {
+		summary,
+		expensesByCategory,
+		expensesByMonth,
+		monthInstallments,
+	},
 }: Route.ComponentProps) {
 	return (
 		<section className='space-y-8'>
@@ -126,6 +151,7 @@ export default function Dashboard({
 				monthExpenses={summary.monthExpenses}
 			/>
 			<ExpensesByMonth expensesByMonth={expensesByMonth} />
+			<MonthInstallments monthInstallments={monthInstallments} />
 		</section>
 	)
 }

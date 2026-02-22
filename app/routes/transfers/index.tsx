@@ -28,11 +28,13 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
+import { TablePagination } from '~/components/table-pagination'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
+import { getBalances } from '~/lib/queries'
 
 import { DeleteTransferFormSchema } from './lib/schemas'
 import { AccountTypeIcon } from '~/components/account-type-icon'
+import { PAGE_SIZE } from '~/lib/constants'
 
 export function meta() {
 	return [
@@ -49,14 +51,17 @@ export function meta() {
 	]
 }
 
-export async function loader({ context }: Route.LoaderArgs) {
+export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+
+	const url = new URL(request.url)
+	const page = Number(url.searchParams.get('page') ?? '1')
 
 	const fromAccountAlias = alias(accountTable, 'fromAccount')
 	const toAccountAlias = alias(accountTable, 'toAccount')
 
-	const transfers = await db
+	const query = db
 		.select({
 			id: transferTable.id,
 
@@ -91,7 +96,15 @@ export async function loader({ context }: Route.LoaderArgs) {
 		)
 		.orderBy(desc(transferTable.date), desc(transferTable.createdAt))
 
-	return { transfers }
+	const total = await db.$count(query)
+	const transfers = await query
+		.limit(PAGE_SIZE)
+		.offset((page - 1) * PAGE_SIZE)
+
+	return {
+		transfers,
+		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -167,7 +180,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function Transfers({
-	loaderData: { transfers },
+	loaderData: { transfers, pagination },
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
 
@@ -302,6 +315,8 @@ export default function Transfers({
 					)}
 				</TableBody>
 			</Table>
+
+			<TablePagination page={pagination.page} pages={pagination.pages} />
 		</section>
 	)
 }

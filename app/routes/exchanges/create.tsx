@@ -29,14 +29,13 @@ import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
 	ComboboxField,
-	NumberField,
+	AmountField,
 	DateField,
 } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
-import { getSelectData } from '~/routes/transactions/lib/queries'
+import { getBalances, getSelectData } from '~/lib/queries'
 
 import { CreateExchangeFormSchema } from './lib/schemas'
 
@@ -244,11 +243,11 @@ export default function CreateExchange({
 							</div>
 
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-								<NumberField
+								<AmountField
 									label='From Amount'
 									field={fields.fromAmount}
 								/>
-								<NumberField
+								<AmountField
 									label='To Amount'
 									field={fields.toAmount}
 								/>

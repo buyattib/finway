@@ -2,7 +2,11 @@ import { z } from 'zod'
 
 import { removeCommas } from '~/lib/utils'
 
-import { TRANSACTION_TYPES, ACTION_CREATION, ACTION_EDITION } from './constants'
+import {
+	TRANSACTION_TYPES,
+	ACTION_CREATION,
+	ACTION_EDITION,
+} from '~/lib/constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({

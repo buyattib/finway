@@ -1,4 +1,4 @@
-import type { TCurrency } from '~/routes/accounts/lib/types'
+import type { TCurrency } from '~/lib/types'
 
 export type CurrencyResponse = {
 	currencyId: string

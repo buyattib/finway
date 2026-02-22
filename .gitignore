@@ -1,5 +1,7 @@
 .DS_Store
 .env*
+# don't ignore .env.example
+!.env.example
 /node_modules/
 *.tsbuildinfo
 

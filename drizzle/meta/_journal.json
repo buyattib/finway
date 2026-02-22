@@ -64,6 +64,27 @@
       "when": 1767899503677,
       "tag": "0008_add_more_currencies",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1769132317208,
+      "tag": "0009_credit_cards_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1771685405991,
+      "tag": "0010_credit_card_transactions_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1771712064866,
+      "tag": "0011_credit_card_transaction_installments_table",
+      "breakpoints": true
     }
   ]
 }

@@ -19,8 +19,8 @@ import {
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
 
-import type { TCurrency } from '~/routes/accounts/lib/types'
-import { CURRENCY_DISPLAY } from '~/routes/accounts/lib/constants'
+import type { TCurrency } from '~/lib/types'
+import { getCurrencyData } from '~/lib/utils'
 
 type Props = Pick<Route.ComponentProps['loaderData'], 'expensesByMonth'>
 
@@ -48,6 +48,8 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 	const [selectedCurrency, setSelectedCurrency] = useState<TCurrency>(
 		currencies[0],
 	)
+
+	const currencyData = getCurrencyData(selectedCurrency)
 
 	if (currencies.length === 0) {
 		return (
@@ -135,7 +137,7 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 							fontSize={14}
 							className='font-semibold'
 							formatter={(amount: string) =>
-								`${CURRENCY_DISPLAY[selectedCurrency].symbol} ${formatNumber(amount)}`
+								`${currencyData.symbol} ${formatNumber(amount)}`
 							}
 						/>
 					</Bar>

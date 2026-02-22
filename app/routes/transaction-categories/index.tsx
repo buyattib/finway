@@ -182,8 +182,7 @@ export default function TransactionCategories({
 							</Form>
 							<TooltipContent>
 								Deleting a category cannot be undone and
-								transactions associated with it will become
-								uncategorized.
+								transactions associated with it will be deleted.
 							</TooltipContent>
 						</Tooltip>
 					</li>

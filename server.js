@@ -26,7 +26,7 @@ app.get('/*splat', (req, res, next) => {
 // middleware to gzip responses and improve performance
 app.use(compression())
 
-// // Helmet is a middleware function that sets security-related HTTP response headers: https://expressjs.com/es/advanced/best-practice-security.html
+// Helmet is a middleware function that sets security-related HTTP response headers: https://expressjs.com/es/advanced/best-practice-security.html
 app.use((req, res, next) => {
 	const nonce = crypto.randomBytes(32).toString('base64')
 	res.locals.cspNonce = nonce

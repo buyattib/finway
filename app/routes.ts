@@ -50,5 +50,24 @@ export default [
 			index('routes/exchanges/index.tsx'),
 			route('create', 'routes/exchanges/create.tsx'),
 		]),
+
+		// credit cards
+		...prefix('credit-cards', [
+			index('routes/credit-cards/index.tsx'),
+			route('create', 'routes/credit-cards/create.tsx'),
+
+			...prefix(':creditCardId', [
+				index('routes/credit-cards/credit-card.tsx'),
+				route('edit', 'routes/credit-cards/edit.tsx'),
+				route(
+					'transactions/create',
+					'routes/credit-cards/transactions/create.tsx',
+				),
+				route(
+					'transactions/:transactionId',
+					'routes/credit-cards/transactions/transaction.tsx',
+				),
+			]),
+		]),
 	]),
 ] satisfies RouteConfig

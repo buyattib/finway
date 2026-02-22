@@ -27,22 +27,27 @@ import {
 	TextField,
 	SelectField,
 	ComboboxField,
-	NumberField,
+	AmountField,
 	DateField,
 } from '~/components/forms'
-import { TransactionTypeIcon } from '~/components/transaction-type-icon'
+import { TransactionType } from '~/components/transaction-type'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { ACTION_CREATION, ACTION_EDITION } from '../lib/constants'
+import {
+	ACTION_CREATION,
+	ACTION_EDITION,
+	TRANSACTION_TYPES,
+	TRANSACTION_TYPE_LABEL,
+} from '~/lib/constants'
+import type { TSelectData } from '~/lib/types'
+
 import { TransactionFormSchema } from '../lib/schemas'
-import { TRANSACTION_TYPES, TRANSACTION_TYPE_DISPLAY } from '../lib/constants'
-import type { getSelectData } from '../lib/queries'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
 type Props = {
-	selectData: Awaited<ReturnType<typeof getSelectData>>
+	selectData: TSelectData
 	lastResult?: SubmissionResult
 	initialData: Partial<TInitialData>
 	action: typeof ACTION_CREATION | typeof ACTION_EDITION
@@ -62,7 +67,7 @@ export function TransactionForm({
 
 	const { accounts, currencies, transactionCategories } = selectData
 
-	const { defaultValue, title, buttonLabel } = {
+	const { defaultValue, title, buttonLabel, to } = {
 		[ACTION_CREATION]: {
 			defaultValue: {
 				date: initializeDate().toISOString(),
@@ -70,11 +75,13 @@ export function TransactionForm({
 			},
 			title: 'Create a transaction',
 			buttonLabel: 'Create',
+			to: '..',
 		},
 		[ACTION_EDITION]: {
 			defaultValue: initialData,
 			title: 'Edit transaction',
 			buttonLabel: 'Update',
+			to: '../..',
 		},
 	}[action]
 
@@ -92,9 +99,9 @@ export function TransactionForm({
 	})
 
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
-		icon: <TransactionTypeIcon size='sm' transactionType={i} />,
+		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: TRANSACTION_TYPE_DISPLAY[i].label,
+		label: TRANSACTION_TYPE_LABEL[i], // when using i18n this would just be t(i)
 	}))
 
 	const accountOptions = accounts.map(({ id, name, accountType }) => ({
@@ -121,7 +128,7 @@ export function TransactionForm({
 			<CardHeader>
 				<div className='flex items-center gap-4'>
 					<Button asChild variant='link' width='fit' size='icon'>
-						<Link to='/app/transactions' relative='path'>
+						<Link to={to} relative='path'>
 							<ArrowLeftIcon />
 						</Link>
 					</Button>
@@ -193,7 +200,7 @@ export function TransactionForm({
 						</Text>
 					)}
 
-					<NumberField label='Amount' field={fields.amount} />
+					<AmountField label='Amount' field={fields.amount} />
 
 					{transactionCategories.length !== 0 ? (
 						<ComboboxField

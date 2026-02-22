@@ -12,7 +12,7 @@ import {
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
-import { cn, formatDate, formatNumber } from '~/lib/utils'
+import { formatDate, formatNumber } from '~/lib/utils'
 import { createToastHeaders } from '~/utils-server/toast.server'
 
 import { Button } from '~/components/ui/button'
@@ -27,24 +27,17 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
-import {
-	Pagination,
-	PaginationContent,
-	PaginationItem,
-	PaginationLink,
-	PaginationNext,
-	PaginationPrevious,
-} from '~/components/ui/pagination'
+import { TablePagination } from '~/components/table-pagination'
 import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
+import { getBalances, getSelectData } from '~/lib/queries'
+import type { TTransactionType } from '~/lib/types'
 
+import { TransactionType } from '~/components/transaction-type'
 import { TransactionsFilters } from './components/filters'
-import { TRANSACTION_TYPE_DISPLAY } from './lib/constants'
 import { DeleteTransactionFormSchema } from './lib/schemas'
-import { getSelectData } from './lib/queries'
-import type { TTransactionType } from './lib/types'
+import { PAGE_SIZE } from '~/lib/constants'
 
 export function meta() {
 	return [
@@ -69,7 +62,6 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const searchParams = url.searchParams
 
 	const page = Number(searchParams.get('page') ?? '1')
-	const pageSize = 20
 
 	const accountId = searchParams.get('accountId') ?? ''
 	const currencyId = searchParams.get('currencyId') ?? ''
@@ -129,10 +121,10 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 	const total = await db.$count(query)
 	const transactions = await query
-		.limit(pageSize)
-		.offset((page - 1) * pageSize)
+		.limit(PAGE_SIZE)
+		.offset((page - 1) * PAGE_SIZE)
 
-	const pages = Math.ceil(total / pageSize)
+	const pages = Math.ceil(total / PAGE_SIZE)
 
 	const selectData = await getSelectData(db, user.id)
 
@@ -282,13 +274,13 @@ export default function Transactions({
 					<TableHeader>
 						<TableRow>
 							<TableHead>Date</TableHead>
-							<TableHead className='text-right'>
+							<TableHead className='text-center'>
 								Account
 							</TableHead>
-							<TableHead className='text-right'>
+							<TableHead className='text-center'>
 								Category
 							</TableHead>
-							<TableHead className='text-right'>Type</TableHead>
+							<TableHead className='text-center'>Type</TableHead>
 							<TableHead className='text-right'>Amount</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
@@ -306,16 +298,13 @@ export default function Transactions({
 							accountType,
 							transactionCategory,
 						}) => {
-							const { label: typeLabel, color: typeColor } =
-								TRANSACTION_TYPE_DISPLAY[type]
-
 							return (
 								<TableRow key={id}>
 									<TableCell className='w-30'>
 										{formatDate(new Date(date))}
 									</TableCell>
 									<TableCell>
-										<div className='flex justify-end items-center gap-2'>
+										<div className='flex justify-center items-center gap-2'>
 											<AccountTypeIcon
 												size='xs'
 												accountType={accountType}
@@ -323,16 +312,14 @@ export default function Transactions({
 											{account}
 										</div>
 									</TableCell>
-									<TableCell className='text-right'>
+									<TableCell className='text-center'>
 										{transactionCategory ?? '-'}
 									</TableCell>
-									<TableCell
-										className={cn(
-											'text-right',
-											`text-${typeColor}`,
-										)}
-									>
-										{typeLabel}
+									<TableCell className='text-center'>
+										<TransactionType
+											variant='text'
+											transactionType={type}
+										/>
 									</TableCell>
 									<TableCell className='text-right'>
 										<b>{currency}</b> {formatNumber(amount)}
@@ -384,39 +371,7 @@ export default function Transactions({
 				</TableBody>
 			</Table>
 
-			{pagination.pages > 1 && (
-				<Pagination>
-					<PaginationContent>
-						<PaginationItem>
-							<PaginationPrevious
-								prefetch='intent'
-								to={{
-									search: `?page=${pagination.page === 1 ? 1 : pagination.page - 1}`,
-								}}
-							/>
-						</PaginationItem>
-						{Array.from(Array(pagination.pages).keys()).map(v => (
-							<PaginationItem key={v}>
-								<PaginationLink
-									prefetch='intent'
-									to={{ search: `?page=${v + 1}` }}
-									isActive={pagination.page === v + 1}
-								>
-									{v + 1}
-								</PaginationLink>
-							</PaginationItem>
-						))}
-						<PaginationItem>
-							<PaginationNext
-								prefetch='intent'
-								to={{
-									search: `?page=${pagination.page === pagination.pages ? pagination.pages : pagination.page + 1}`,
-								}}
-							/>
-						</PaginationItem>
-					</PaginationContent>
-				</Pagination>
-			)}
+			<TablePagination page={pagination.page} pages={pagination.pages} />
 		</section>
 	)
 }

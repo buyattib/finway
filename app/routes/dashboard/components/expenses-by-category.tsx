@@ -19,8 +19,8 @@ import {
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
 
-import { CURRENCY_DISPLAY } from '~/routes/accounts/lib/constants'
-import type { TCurrency } from '~/routes/accounts/lib/types'
+import type { TCurrency } from '~/lib/types'
+import { getCurrencyData } from '~/lib/utils'
 
 const colorPalette = [
 	'#8884d8',
@@ -163,7 +163,8 @@ export function ExpensesByCategory({
 									10 * 100 * (payload.amount / total),
 								) / 10
 
-							const label = `${payload.transactionCategory}: ${CURRENCY_DISPLAY[selectedCurrency].symbol} ${formatNumber(payload.amount)} (%${perc})`
+							const { symbol } = getCurrencyData(selectedCurrency)
+							const label = `${payload.transactionCategory}: ${symbol} ${formatNumber(payload.amount)} (%${perc})`
 							return (
 								<text
 									cx={props.cx}

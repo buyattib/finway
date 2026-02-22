@@ -8,8 +8,12 @@ import {
 	index,
 } from 'drizzle-orm/sqlite-core'
 
-import { CURRENCIES, ACCOUNT_TYPES } from '~/routes/accounts/lib/constants'
-import { TRANSACTION_TYPES } from '~/routes/transactions/lib/constants'
+import {
+	CURRENCIES,
+	ACCOUNT_TYPES,
+	TRANSACTION_TYPES,
+	CC_TRANSACTION_TYPES,
+} from '~/lib/constants'
 
 const base = {
 	createdAt: text()
@@ -191,6 +195,91 @@ export const exchange = sqliteTable(
 	],
 )
 
+export const creditCard = sqliteTable(
+	'credit_cards',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+
+		brand: text().notNull(),
+		last4: text().notNull(),
+		expiryMonth: text().notNull(),
+		expiryYear: text().notNull(),
+
+		accountId: text().notNull(),
+		currencyId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'credit_cards_accounts_fk',
+			columns: [table.accountId],
+			foreignColumns: [account.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'credit_cards_currencies_fk',
+			columns: [table.currencyId],
+			foreignColumns: [currency.id],
+		}).onDelete('cascade'),
+		index('credit_cards_accountId_currencyId_idx').on(
+			table.accountId,
+			table.currencyId,
+		),
+	],
+)
+
+export const creditCardTransaction = sqliteTable(
+	'credit_card_transactions',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		date: text().notNull(),
+		amount: integer().notNull(),
+		description: text().default(''),
+		type: text({ enum: CC_TRANSACTION_TYPES }).notNull(),
+
+		creditCardId: text().notNull(),
+		transactionCategoryId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'credit_card_transactions_credit_cards_fk',
+			columns: [table.creditCardId],
+			foreignColumns: [creditCard.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'credit_card_transactions_transaction_categories_fk',
+			columns: [table.transactionCategoryId],
+			foreignColumns: [transactionCategory.id],
+		}).onDelete('cascade'),
+		index('credit_card_transactions_creditCardId_idx').on(
+			table.creditCardId,
+		),
+	],
+)
+
+export const creditCardTransactionInstallment = sqliteTable(
+	'credit_card_transaction_installments',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		installmentNumber: integer().notNull(),
+		amount: integer().notNull(),
+		date: text().notNull(),
+
+		creditCardTransactionId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'credit_card_transaction_installments_credit_card_transactions_fk',
+			columns: [table.creditCardTransactionId],
+			foreignColumns: [creditCardTransaction.id],
+		}).onDelete('cascade'),
+		index(
+			'credit_card_transaction_installments_creditCardTransactionId_idx',
+		).on(table.creditCardTransactionId),
+	],
+)
+
 // ORM Relations
 
 export const transactionRelations = relations(transaction, ({ one }) => ({
@@ -237,3 +326,38 @@ export const exchangeRelations = relations(exchange, ({ one }) => ({
 		references: [currency.id],
 	}),
 }))
+
+export const creditCardRelations = relations(creditCard, ({ one, many }) => ({
+	account: one(account, {
+		fields: [creditCard.accountId],
+		references: [account.id],
+	}),
+	currency: one(currency, {
+		fields: [creditCard.currencyId],
+		references: [currency.id],
+	}),
+}))
+
+export const creditCardTransactionRelations = relations(
+	creditCardTransaction,
+	({ one }) => ({
+		creditCard: one(creditCard, {
+			fields: [creditCardTransaction.creditCardId],
+			references: [creditCard.id],
+		}),
+		transactionCategory: one(transactionCategory, {
+			fields: [creditCardTransaction.transactionCategoryId],
+			references: [transactionCategory.id],
+		}),
+	}),
+)
+
+export const creditCardTransactionInstallmentRelations = relations(
+	creditCardTransactionInstallment,
+	({ one }) => ({
+		creditCardTransaction: one(creditCardTransaction, {
+			fields: [creditCardTransactionInstallment.creditCardTransactionId],
+			references: [creditCardTransaction.id],
+		}),
+	}),
+)

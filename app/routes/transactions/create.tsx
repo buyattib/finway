@@ -7,11 +7,10 @@ import { transaction as transactionTable } from '~/database/schema'
 import { removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
 
-import { getBalances } from '~/routes/accounts/lib/queries'
+import { getBalances, getSelectData } from '~/lib/queries'
+import { TRANSACTION_TYPE_EXPENSE, ACTION_CREATION } from '~/lib/constants'
 
 import { TransactionFormSchema } from './lib/schemas'
-import { TRANSACTION_TYPE_EXPENSE, ACTION_CREATION } from './lib/constants'
-import { getSelectData } from './lib/queries'
 import { TransactionForm } from './components/form'
 
 export function meta() {

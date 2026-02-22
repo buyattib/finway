@@ -1,0 +1,9 @@
+- Finish credit cards
+- Suggest default categories to automatically create
+- Add a linter?
+- Ask agent what is needed to be production ready
+- Improve styling and a design system?
+- Internationalization
+- Sessions for auth?
+- Investment porfolio tracking
+- MCP server to comunicate through llms

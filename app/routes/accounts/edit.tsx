@@ -10,10 +10,10 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 
 import { AccountForm } from './components/form'
 import { AccountFormSchema } from './lib/schemas'
-import { ACTION_EDITION } from './lib/constants'
+import { ACTION_EDITION } from '~/lib/constants'
 
 export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
-	if (!loaderData?.account) {
+	if (!loaderData?.initialData) {
 		return [
 			{
 				title: `Account ${accountId} not found | Finway`,
@@ -30,7 +30,7 @@ export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
 	}
 
 	const {
-		account: { name },
+		initialData: { name },
 	} = loaderData
 
 	return [
@@ -70,7 +70,7 @@ export async function loader({
 	}
 
 	const { ownerId, ...accountData } = account
-	return { account: accountData }
+	return { initialData: accountData }
 }
 
 export async function action({ context, request }: Route.ActionArgs) {
@@ -138,13 +138,13 @@ export async function action({ context, request }: Route.ActionArgs) {
 }
 
 export default function EditAccount({
-	loaderData: { account },
+	loaderData: { initialData },
 	actionData,
 }: Route.ComponentProps) {
 	return (
 		<AccountForm
 			action={ACTION_EDITION}
-			account={account}
+			initialData={initialData}
 			lastResult={actionData?.submission}
 		/>
 	)

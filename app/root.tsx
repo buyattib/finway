@@ -141,7 +141,6 @@ export default function App({ loaderData }: Route.ComponentProps) {
 	)
 }
 
-
 export function ErrorBoundary() {
 	const error = useRouteError()
 
