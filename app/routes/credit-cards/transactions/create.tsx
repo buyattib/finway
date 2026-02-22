@@ -16,11 +16,11 @@ import {
 	ACTION_CREATION,
 	CC_TRANSACTION_TYPE_CHARGE,
 	CC_TRANSACTION_TYPES,
+	CC_TRANSACTION_TYPE_LABEL,
 } from '~/lib/constants'
 import { getSelectData } from '~/lib/queries'
 
 import { Button } from '~/components/ui/button'
-import { Text } from '~/components/ui/text'
 import {
 	Card,
 	CardContent,
@@ -234,7 +234,7 @@ export default function CreateCreditCardTransaction({
 	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: i === 'CHARGE' ? 'Charge' : 'Refund',
+		label: CC_TRANSACTION_TYPE_LABEL[i],
 	}))
 
 	const transactionCategoryOptions = transactionCategories.map(

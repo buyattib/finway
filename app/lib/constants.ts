@@ -82,6 +82,11 @@ export const TRANSACTION_TYPES = [
 	TRANSACTION_TYPE_INCOME,
 ] as const
 
+export const TRANSACTION_TYPE_LABEL = {
+	[TRANSACTION_TYPE_EXPENSE]: 'Expense',
+	[TRANSACTION_TYPE_INCOME]: 'Income',
+}
+
 // Credit Cards
 
 export const CC_TRANSACTION_TYPE_CHARGE = 'CHARGE'
@@ -92,3 +97,7 @@ export const CC_TRANSACTION_TYPES = [
 	CC_TRANSACTION_TYPE_REFUND,
 ] as const
 
+export const CC_TRANSACTION_TYPE_LABEL = {
+	[CC_TRANSACTION_TYPE_CHARGE]: 'Charge',
+	[CC_TRANSACTION_TYPE_REFUND]: 'Refund',
+}

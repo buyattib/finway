@@ -38,6 +38,7 @@ import {
 	ACTION_CREATION,
 	ACTION_EDITION,
 	TRANSACTION_TYPES,
+	TRANSACTION_TYPE_LABEL,
 } from '~/lib/constants'
 import type { TSelectData } from '~/lib/types'
 
@@ -100,7 +101,7 @@ export function TransactionForm({
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: i === 'EXPENSE' ? 'Expense' : 'Income', // when using i18n this would just be t(i)
+		label: TRANSACTION_TYPE_LABEL[i], // when using i18n this would just be t(i)
 	}))
 
 	const accountOptions = accounts.map(({ id, name, accountType }) => ({

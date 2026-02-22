@@ -6,9 +6,8 @@ import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { Combobox } from '~/components/ui/combobox'
-import { Select } from '~/components/select'
 
-import { TRANSACTION_TYPES } from '~/lib/constants'
+import { TRANSACTION_TYPES, TRANSACTION_TYPE_LABEL } from '~/lib/constants'
 
 export function TransactionsFilters({
 	filters,
@@ -23,7 +22,7 @@ export function TransactionsFilters({
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: i === 'EXPENSE' ? 'Expense' : 'Income',
+		label: TRANSACTION_TYPE_LABEL[i],
 	}))
 
 	const accountOptions = selectData.accounts.map(
