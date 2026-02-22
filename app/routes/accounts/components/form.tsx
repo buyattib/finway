@@ -38,7 +38,9 @@ export function AccountForm({
 }: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['accounts', 'components'])
+	const { t } = useTranslation(['accounts', 'components'], {
+		keyPrefix: 'form',
+	})
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
@@ -46,12 +48,12 @@ export function AccountForm({
 
 	const { title, buttonLabel } = {
 		[ACTION_CREATION]: {
-			title: t('form.create.title'),
-			buttonLabel: t('form.create.submitButton'),
+			title: t('create.title'),
+			buttonLabel: t('create.submitButton'),
 		},
 		[ACTION_EDITION]: {
-			title: t('form.edit.title'),
-			buttonLabel: t('form.edit.submitButton'),
+			title: t('edit.title'),
+			buttonLabel: t('edit.submitButton'),
 		},
 	}[action]
 
@@ -79,7 +81,7 @@ export function AccountForm({
 					</Button>
 					<CardTitle>{title}</CardTitle>
 				</div>
-				<CardDescription>{t('form.description')}</CardDescription>
+				<CardDescription>{t('description')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form
@@ -112,21 +114,23 @@ export function AccountForm({
 
 					<TextField
 						autoFocus
-						label={t('form.nameLabel')}
+						label={t('nameLabel')}
 						field={fields.name}
 					/>
 					<TextField
-						label={t('form.descriptionLabel')}
+						label={t('descriptionLabel')}
 						field={fields.description}
 					/>
 					<SelectField
-						label={t('form.accountTypeLabel')}
+						label={t('accountTypeLabel')}
 						field={fields.accountType}
-						placeholder={t('form.accountTypePlaceholder')}
+						placeholder={t('accountTypePlaceholder')}
 						items={ACCOUNT_TYPES.map(i => ({
 							icon: <AccountTypeIcon size='sm' accountType={i} />,
 							value: i,
-							label: t(`components:accountType.${i}`),
+							label: t(`components:accountType.${i}`, {
+								keyPrefix: '',
+							}),
 						}))}
 					/>
 				</Form>
@@ -137,7 +141,7 @@ export function AccountForm({
 					variant='outline'
 					{...form.reset.getButtonProps()}
 				>
-					{t('form.resetButton')}
+					{t('resetButton')}
 				</Button>
 				<Button
 					width='full'
