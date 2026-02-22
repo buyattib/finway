@@ -34,6 +34,7 @@ import { getBalances } from '~/lib/queries'
 
 import { DeleteTransferFormSchema } from './lib/schemas'
 import { AccountTypeIcon } from '~/components/account-type-icon'
+import { PAGE_SIZE } from '~/lib/constants'
 
 export function meta() {
 	return [
@@ -49,8 +50,6 @@ export function meta() {
 		},
 	]
 }
-
-const PAGE_SIZE = 20
 
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)

@@ -54,8 +54,7 @@ import {
 	DeleteCreditCardFormSchema,
 	DeleteCreditCardTransactionFormSchema,
 } from './lib/schemas'
-
-const PAGE_SIZE = 20
+import { PAGE_SIZE } from '~/lib/constants'
 
 export function meta({ loaderData, params: { creditCardId } }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
@@ -306,13 +305,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreditCardDetails({
-	loaderData: {
-		creditCard,
-		transactions,
-		pagination,
-		filters,
-		selectData,
-	},
+	loaderData: { creditCard, transactions, pagination, filters, selectData },
 }: Route.ComponentProps) {
 	const {
 		id,
@@ -351,7 +344,7 @@ export default function CreditCardDetails({
 	return (
 		<div className='flex flex-col gap-6'>
 			<div className='flex flex-col gap-4'>
-				<div className='flex items-center gap-4'>
+				<div className='flex sm:items-center gap-4'>
 					<CreditCardHeader
 						{...{
 							brand,
@@ -363,7 +356,7 @@ export default function CreditCardDetails({
 						}}
 					/>
 
-					<div className='flex items-center gap-2 ml-auto'>
+					<div className='flex sm:items-center gap-2 ml-auto'>
 						<Button size='icon' variant='outline' asChild>
 							<Link to='edit' prefetch='intent'>
 								<SquarePenIcon />

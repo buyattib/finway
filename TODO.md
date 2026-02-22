@@ -1,7 +1,4 @@
 - Finish credit cards
-
-- Create a pagination component
-
 - Suggest default categories to automatically create
 - Add a linter?
 - Ask agent what is needed to be production ready

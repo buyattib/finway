@@ -1,3 +1,7 @@
+// Pagination
+
+export const PAGE_SIZE = 10
+
 // Actions
 
 export const ACTION_CREATION = 'CREATION'

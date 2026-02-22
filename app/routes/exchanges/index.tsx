@@ -34,6 +34,7 @@ import { TablePagination } from '~/components/table-pagination'
 import { getBalances } from '~/lib/queries'
 
 import { DeleteExchangeFormSchema } from './lib/schemas'
+import { PAGE_SIZE } from '~/lib/constants'
 
 export function meta() {
 	return [
@@ -49,8 +50,6 @@ export function meta() {
 		},
 	]
 }
-
-const PAGE_SIZE = 20
 
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)

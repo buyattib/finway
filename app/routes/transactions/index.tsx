@@ -37,6 +37,7 @@ import type { TTransactionType } from '~/lib/types'
 import { TransactionType } from '~/components/transaction-type'
 import { TransactionsFilters } from './components/filters'
 import { DeleteTransactionFormSchema } from './lib/schemas'
+import { PAGE_SIZE } from '~/lib/constants'
 
 export function meta() {
 	return [
@@ -61,7 +62,6 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const searchParams = url.searchParams
 
 	const page = Number(searchParams.get('page') ?? '1')
-	const pageSize = 20
 
 	const accountId = searchParams.get('accountId') ?? ''
 	const currencyId = searchParams.get('currencyId') ?? ''
@@ -121,10 +121,10 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 	const total = await db.$count(query)
 	const transactions = await query
-		.limit(pageSize)
-		.offset((page - 1) * pageSize)
+		.limit(PAGE_SIZE)
+		.offset((page - 1) * PAGE_SIZE)
 
-	const pages = Math.ceil(total / pageSize)
+	const pages = Math.ceil(total / PAGE_SIZE)
 
 	const selectData = await getSelectData(db, user.id)
 
