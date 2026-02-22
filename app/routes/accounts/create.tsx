@@ -12,7 +12,7 @@ import { dbContext, userContext } from '~/lib/context'
 import { ACTION_CREATION } from '~/lib/constants'
 import type { TAccountType } from '~/lib/types'
 
-import { AccountFormSchema } from './lib/schemas'
+import { createAccountFormSchema } from './lib/schemas'
 import { AccountForm } from './components/form'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -24,7 +24,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-	const t = getServerT(context, 'accounts', 'form.create')
+	const t = getServerT(context, 'accounts', 'form')
 	const url = new URL(request.url)
 	const redirectTo = url.searchParams.get('redirectTo') || ''
 	return {
@@ -35,8 +35,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 			description: '',
 		},
 		meta: {
-			title: t('meta.title'),
-			description: t('meta.description'),
+			title: t('create.meta.title'),
+			description: t('create.meta.description'),
 		},
 	}
 }
@@ -44,12 +44,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
-	const t = getServerT(context, 'accounts', 'form.create')
+	const t = getServerT(context, 'accounts', 'form')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
 		async: true,
-		schema: AccountFormSchema.superRefine(async (data, ctx) => {
+		schema: createAccountFormSchema(t).superRefine(async (data, ctx) => {
 			const existingAccountsCount = await db.$count(
 				accountTable,
 				and(
@@ -61,7 +61,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			if (existingAccountsCount > 0) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: t('duplicateError'),
+					message: t('create.duplicateError'),
 				})
 			}
 		}),
@@ -87,7 +87,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		request,
 		{
 			type: 'success',
-			title: t('successToast'),
+			title: t('create.successToast'),
 		},
 	)
 }

@@ -20,6 +20,10 @@ export default {
 		accountTypeLabel: 'Account Type',
 		accountTypePlaceholder: 'Select an option',
 		resetButton: 'Reset',
+		schema: {
+			nameRequired: 'Name is required',
+			accountTypeRequired: 'Account type is required',
+		},
 		create: {
 			meta: {
 				title: 'Create an Account | Finway',

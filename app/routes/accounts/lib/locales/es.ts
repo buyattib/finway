@@ -22,6 +22,10 @@ export default {
 		accountTypeLabel: 'Tipo de cuenta',
 		accountTypePlaceholder: 'Selecciona una opción',
 		resetButton: 'Restablecer',
+		schema: {
+			nameRequired: 'El nombre es requerido',
+			accountTypeRequired: 'El tipo de cuenta es requerido',
+		},
 		create: {
 			meta: {
 				title: 'Crear una Cuenta | Finway',
