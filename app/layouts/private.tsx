@@ -24,6 +24,7 @@ import { cn } from '~/lib/utils'
 import { FinwayLink } from '~/components/finway-link'
 import { LogoutButton } from '~/components/logout-button'
 import { ThemeToggle } from '~/components/theme-toggle'
+import { LocaleToggle } from '~/components/locale-toggle'
 import {
 	Sidebar,
 	SidebarContent,
@@ -154,6 +155,7 @@ function PrivateLayoutContent({
 						{user.email}
 					</p>
 					<div className='flex items-center gap-2'>
+						<LocaleToggle />
 						<ThemeToggle />
 						<LogoutButton />
 					</div>

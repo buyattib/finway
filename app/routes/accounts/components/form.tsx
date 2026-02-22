@@ -19,7 +19,7 @@ import {
 import { ErrorList, TextField, SelectField } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
-import { AccountFormSchema } from '../lib/schemas'
+import { createAccountFormSchema } from '../lib/schemas'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
@@ -54,6 +54,8 @@ export function AccountForm({
 			buttonLabel: t('form.edit.submitButton'),
 		},
 	}[action]
+
+	const AccountFormSchema = createAccountFormSchema(t)
 
 	const [form, fields] = useForm({
 		lastResult,
