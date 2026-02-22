@@ -12,7 +12,7 @@ import {
 import {
 	getMonthTransactions,
 	getMonthCreditCardTotals,
-	getMonthInstallmentsList,
+	getMonthInstallments,
 } from './lib/queries'
 import type {
 	CategoryResponse,
@@ -76,7 +76,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		}),
 	}
 
-	const monthInstallmentsList = await getMonthInstallmentsList({
+	const monthInstallments = await getMonthInstallments({
 		db,
 		ownerId: user.id,
 	})
@@ -131,7 +131,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		summary,
 		expensesByCategory,
 		expensesByMonth,
-		monthInstallmentsList,
+		monthInstallments,
 	}
 }
 
@@ -140,7 +140,7 @@ export default function Dashboard({
 		summary,
 		expensesByCategory,
 		expensesByMonth,
-		monthInstallmentsList,
+		monthInstallments,
 	},
 }: Route.ComponentProps) {
 	return (
@@ -151,7 +151,7 @@ export default function Dashboard({
 				monthExpenses={summary.monthExpenses}
 			/>
 			<ExpensesByMonth expensesByMonth={expensesByMonth} />
-			<MonthInstallments monthInstallmentsList={monthInstallmentsList} />
+			<MonthInstallments monthInstallmentsList={monthInstallments} />
 		</section>
 	)
 }

@@ -186,7 +186,7 @@ export async function getMonthCreditCardTotals({
 		.orderBy(desc(sql`amount`))
 }
 
-export async function getMonthInstallmentsList({
+export async function getMonthInstallments({
 	db,
 	ownerId,
 }: {
