@@ -23,14 +23,6 @@ export const ACCOUNT_TYPES = [
 	ACCOUNT_TYPE_BROKER,
 ] as const
 
-export const ACCOUNT_TYPE_LABEL = {
-	[ACCOUNT_TYPE_BANK]: 'Bank',
-	[ACCOUNT_TYPE_CASH]: 'Cash',
-	[ACCOUNT_TYPE_DIGITAL_WALLET]: 'Digital Wallet',
-	[ACCOUNT_TYPE_CRYPTO_WALLET]: 'Crypto Wallet',
-	[ACCOUNT_TYPE_BROKER]: 'Broker',
-}
-
 // Currencies
 
 export const CURRENCY_USD = 'USD'

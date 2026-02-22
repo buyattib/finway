@@ -27,4 +27,10 @@ export default {
 			submitButton: 'Actualizar',
 		},
 	},
+	details: {
+		deleteAriaLabel: 'Eliminar cuenta {{name}}',
+		deleteTooltip: 'Eliminar una cuenta no se puede deshacer y elimina todas las transacciones, transferencias o intercambios asociados.',
+		currencyBalancesTitle: 'Balances por moneda',
+		emptyBalances: 'Aún no tienes actividad en esta cuenta.',
+	},
 } satisfies typeof en

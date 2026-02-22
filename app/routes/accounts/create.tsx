@@ -5,13 +5,13 @@ import { safeRedirect } from 'remix-utils/safe-redirect'
 import type { Route } from './+types/create'
 
 import { account as accountTable } from '~/database/schema'
-import { dbContext, userContext } from '~/lib/context'
 import { redirectWithToast } from '~/utils-server/toast.server'
-
-import { AccountForm } from './components/form'
+import { dbContext, userContext } from '~/lib/context'
 import { AccountFormSchema } from './lib/schemas'
 import { ACTION_CREATION } from '~/lib/constants'
 import type { TAccountType } from '~/lib/types'
+
+import { AccountForm } from './components/form'
 
 export function meta() {
 	return [

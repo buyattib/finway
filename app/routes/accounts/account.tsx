@@ -2,15 +2,17 @@ import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq } from 'drizzle-orm'
+import { useTranslation } from 'react-i18next'
 import type { Route } from './+types/account'
 
-import { dbContext, userContext } from '~/lib/context'
 import { account as accountTable } from '~/database/schema'
-import { formatNumber, getCurrencyData } from '~/lib/utils'
 import {
 	createToastHeaders,
 	redirectWithToast,
 } from '~/utils-server/toast.server'
+import { dbContext, userContext } from '~/lib/context'
+import { formatNumber, getCurrencyData } from '~/lib/utils'
+import { getBalances } from '~/lib/queries'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -24,8 +26,6 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
-import { getBalances } from '~/lib/queries'
-import { ACCOUNT_TYPE_LABEL } from '~/lib/constants'
 import { DeleteAccountFormSchema } from './lib/schemas'
 
 export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
@@ -135,6 +135,7 @@ export default function AccountDetails({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation(['accounts', 'components'])
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname &&
@@ -150,7 +151,7 @@ export default function AccountDetails({
 							{name}
 						</Title>
 						<Text size='sm' theme='primary'>
-							{ACCOUNT_TYPE_LABEL[accountType]}
+							{t(`components:accountType.${accountType}`)}
 						</Text>
 					</div>
 					<div className='flex items-center gap-2 ml-auto'>
@@ -181,15 +182,15 @@ export default function AccountDetails({
 											<TrashIcon aria-hidden />
 										)}
 										<span className='sr-only'>
-											Delete account {name}
+											{t('details.deleteAriaLabel', {
+												name,
+											})}
 										</span>
 									</Button>
 								</TooltipTrigger>
 							</Form>
 							<TooltipContent>
-								Deleting an account cannot be undone and it
-								deletes all transactions, transfers or exchanges
-								associated with it.
+								{t('details.deleteTooltip')}
 							</TooltipContent>
 						</Tooltip>
 					</div>
@@ -200,13 +201,11 @@ export default function AccountDetails({
 			<div className='flex flex-col gap-2'>
 				<div className='border-b border-b-accent py-2'>
 					<Title id={id} level='h3'>
-						Currency balances
+						{t('details.currencyBalancesTitle')}
 					</Title>
 				</div>
 				{balances.length === 0 ? (
-					<Text alignment='center'>
-						You dont have any activity in this account yet.
-					</Text>
+					<Text alignment='center'>{t('details.emptyBalances')}</Text>
 				) : (
 					<ul className='flex flex-col gap-2' aria-labelledby={id}>
 						{balances.map(({ currencyId, balance, currency }) => {

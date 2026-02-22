@@ -25,4 +25,10 @@ export default {
 			submitButton: 'Update',
 		},
 	},
+	details: {
+		deleteAriaLabel: 'Delete account {{name}}',
+		deleteTooltip: 'Deleting an account cannot be undone and it deletes all transactions, transfers or exchanges associated with it.',
+		currencyBalancesTitle: 'Currency balances',
+		emptyBalances: 'You don\'t have any activity in this account yet.',
+	},
 }

@@ -58,7 +58,7 @@ export function AccountForm({
 	const [form, fields] = useForm({
 		lastResult,
 		id: 'account-form',
-		shouldValidate: 'onInput',
+		shouldValidate: 'onBlur',
 		defaultValue: initialData,
 		constraint: getZodConstraint(AccountFormSchema),
 		onValidate({ formData }) {
