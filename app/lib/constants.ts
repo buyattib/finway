@@ -45,7 +45,7 @@ export const CURRENCIES = [
 	CURRENCY_DAI,
 ] as const
 
-export const CURRENCY_DISPLAY = {
+export const CURRENCY_DATA = {
 	[CURRENCY_USD]: {
 		label: 'US Dollar (USD)',
 		symbol: '$',

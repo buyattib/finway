@@ -16,7 +16,7 @@ import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { CURRENCY_DISPLAY } from '~/lib/constants'
+import { getCurrencyData } from '~/lib/utils'
 
 export function meta() {
 	return [
@@ -100,7 +100,7 @@ export default function CreditCards({
 							currencyCode,
 							accountName,
 						}) => {
-							const { label } = CURRENCY_DISPLAY[currencyCode]
+							const { label } = getCurrencyData(currencyCode)
 							return (
 								<li
 									key={id}

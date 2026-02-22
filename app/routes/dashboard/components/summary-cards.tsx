@@ -5,13 +5,11 @@ import {
 	WalletIcon,
 } from 'lucide-react'
 
-import { formatNumber } from '~/lib/utils'
+import { formatNumber, getCurrencyData } from '~/lib/utils'
 
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
 import { CurrencyIcon } from '~/components/currency-icon'
-
-import { CURRENCY_DISPLAY } from '~/lib/constants'
 
 export function SummaryCards({
 	summary,
@@ -52,24 +50,26 @@ export function SummaryCards({
 							</Text>
 						)}
 						<ul className='flex flex-col gap-2'>
-							{data.map(({ currencyId, currency, amount }) => (
-								<li
-									key={currencyId}
-									className='flex items-center justify-between gap-2'
-								>
-									<Text className='flex items-center gap-2'>
-										<CurrencyIcon
-											currency={currency}
-											size='sm'
-										/>
-										{currency}
-									</Text>
-									<Text>
-										{CURRENCY_DISPLAY[currency].symbol}{' '}
-										{formatNumber(amount)}
-									</Text>
-								</li>
-							))}
+							{data.map(({ currencyId, currency, amount }) => {
+								const { symbol } = getCurrencyData(currency)
+								return (
+									<li
+										key={currencyId}
+										className='flex items-center justify-between gap-2'
+									>
+										<Text className='flex items-center gap-2'>
+											<CurrencyIcon
+												currency={currency}
+												size='sm'
+											/>
+											{currency}
+										</Text>
+										<Text>
+											{symbol} {formatNumber(amount)}
+										</Text>
+									</li>
+								)
+							})}
 						</ul>
 					</CardContent>
 				</Card>

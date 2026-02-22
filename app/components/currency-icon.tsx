@@ -1,4 +1,4 @@
-import { cn } from '~/lib/utils'
+import { cn, getCurrencyData } from '~/lib/utils'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import USDIcon from '~/assets/currencies/usd.svg'
@@ -15,7 +15,6 @@ import {
 	CURRENCY_USDT,
 	CURRENCY_USDC,
 	CURRENCY_DAI,
-	CURRENCY_DISPLAY,
 } from '~/lib/constants'
 import type { TCurrency } from '~/lib/types'
 
@@ -57,7 +56,7 @@ export function CurrencyIcon({
 		<img
 			{...props}
 			src={src}
-			alt={CURRENCY_DISPLAY[currency].label}
+			alt={getCurrencyData(currency).label}
 			className={cn(currencyIconVariants({ size, className }))}
 		/>
 	)

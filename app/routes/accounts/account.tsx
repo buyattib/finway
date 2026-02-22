@@ -6,7 +6,7 @@ import type { Route } from './+types/account'
 
 import { dbContext, userContext } from '~/lib/context'
 import { account as accountTable } from '~/database/schema'
-import { formatNumber } from '~/lib/utils'
+import { formatNumber, getCurrencyData } from '~/lib/utils'
 import {
 	createToastHeaders,
 	redirectWithToast,
@@ -25,7 +25,7 @@ import {
 } from '~/components/ui/tooltip'
 
 import { getBalances } from '~/lib/queries'
-import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from '~/lib/constants'
+import { ACCOUNT_TYPE_LABEL } from '~/lib/constants'
 import { DeleteAccountFormSchema } from './lib/schemas'
 
 export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
@@ -210,7 +210,7 @@ export default function AccountDetails({
 				) : (
 					<ul className='flex flex-col gap-2' aria-labelledby={id}>
 						{balances.map(({ currencyId, balance, currency }) => {
-							const { symbol, label } = CURRENCY_DISPLAY[currency]
+							const { symbol, label } = getCurrencyData(currency)
 							return (
 								<li
 									key={currencyId}

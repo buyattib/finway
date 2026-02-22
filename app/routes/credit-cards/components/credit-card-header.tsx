@@ -1,7 +1,7 @@
 import { CreditCardIcon } from 'lucide-react'
 
 import type { TCurrency } from '~/lib/types'
-import { CURRENCY_DISPLAY } from '~/lib/constants'
+import { getCurrencyData } from '~/lib/utils'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
@@ -24,7 +24,7 @@ export function CreditCardHeader({
 	accountName,
 	currency,
 }: Props) {
-	const { label } = CURRENCY_DISPLAY[currency]
+	const { label } = getCurrencyData(currency)
 
 	return (
 		<div className='flex flex-col sm:gap-2 gap-4'>

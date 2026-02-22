@@ -1,6 +1,13 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
+import { CURRENCY_DATA } from '~/lib/constants'
+import type { TCurrency } from '~/lib/types'
+
+export function getCurrencyData(currency: TCurrency) {
+	return CURRENCY_DATA[currency]
+}
+
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }

@@ -19,12 +19,11 @@ import {
 	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
-import { CURRENCY_DISPLAY } from '~/lib/constants'
+import { formatDate, formatNumber } from '~/lib/utils'
 import {
 	createToastHeaders,
 	redirectWithToast,
 } from '~/utils-server/toast.server'
-import { formatDate, formatNumber } from '~/lib/utils'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -304,7 +303,6 @@ export default function CreditCardDetails({
 		accountName,
 		currencyCode,
 	} = creditCard
-	const { label } = CURRENCY_DISPLAY[currencyCode]
 	const location = useLocation()
 	const navigation = useNavigation()
 	const navigate = useNavigate()

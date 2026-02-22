@@ -17,7 +17,7 @@ import type { Route } from './+types'
 
 import { dbContext, userContext } from '~/lib/context'
 import { account as accountTable } from '~/database/schema'
-import { formatNumber } from '~/lib/utils'
+import { formatNumber, getCurrencyData } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -33,7 +33,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 
 import { getBalances } from '~/lib/queries'
-import { ACCOUNT_TYPE_LABEL, CURRENCY_DISPLAY } from '~/lib/constants'
+import { ACCOUNT_TYPE_LABEL } from '~/lib/constants'
 import type { TAccountBalance } from '~/lib/types'
 import { useEffect } from 'react'
 import { Spinner } from '~/components/ui/spinner'
@@ -226,8 +226,7 @@ export default function Accounts({
 												balance,
 												currency,
 											}) => {
-												const { symbol } =
-													CURRENCY_DISPLAY[currency]
+												const { symbol } = getCurrencyData(currency)
 												const [, currencyId] =
 													bId.split('-')
 												return (
