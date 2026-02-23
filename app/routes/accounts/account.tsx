@@ -129,7 +129,7 @@ export default function AccountDetails({
 
 	return (
 		<div className='flex flex-col gap-6'>
-			<div className='flex flex-col gap-4'>
+			<section className='flex flex-col gap-4'>
 				<div className='flex items-center gap-4'>
 					<AccountTypeIcon accountType={accountType} />
 					<div className='flex flex-col gap-2'>
@@ -182,9 +182,9 @@ export default function AccountDetails({
 					</div>
 				</div>
 				<Text theme='muted'>{description}</Text>
-			</div>
+			</section>
 
-			<div className='flex flex-col gap-2'>
+			<section className='flex flex-col gap-2'>
 				<div className='border-b border-b-accent py-2'>
 					<Title id={id} level='h3'>
 						{t('details.currencyBalancesTitle')}
@@ -216,7 +216,7 @@ export default function AccountDetails({
 						})}
 					</ul>
 				)}
-			</div>
+			</section>
 		</div>
 	)
 }

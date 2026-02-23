@@ -127,7 +127,7 @@ export default function Accounts({
 			className='flex flex-col gap-4'
 			aria-labelledby='accounts-section'
 		>
-			<div className='flex items-center justify-between'>
+			<header className='flex items-center justify-between'>
 				<Title id='accounts-section' level='h3'>
 					{t('index.title')}
 				</Title>
@@ -139,7 +139,7 @@ export default function Accounts({
 						</span>
 					</Link>
 				</Button>
-			</div>
+			</header>
 
 			<Form
 				id='search-accounts'
