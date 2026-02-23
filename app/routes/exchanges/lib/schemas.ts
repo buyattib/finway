@@ -1,67 +1,70 @@
 import { z } from 'zod'
+import type { TFunction } from 'i18next'
 
 import { removeCommas } from '~/lib/utils'
 
-const BaseExchangeFormSchema = z.object({
-	date: z.iso.datetime('Date is required'),
-	fromAmount: z
-		.string({ message: 'Amount is required' })
-		.refine(
-			value => {
-				const formatted = removeCommas(value)
-				return !isNaN(Number(formatted))
-			},
-			{
-				message: 'Amount must be a valid number',
-			},
-		)
-		.refine(
-			value => {
-				const formatted = removeCommas(value)
-				return Number(formatted) > 0
-			},
-			{
-				message: 'Amount must be greater than zero',
-			},
-		),
-	toAmount: z
-		.string({ message: 'Amount is required' })
-		.refine(
-			value => {
-				const formatted = removeCommas(value)
-				return !isNaN(Number(formatted))
-			},
-			{
-				message: 'Amount must be a valid number',
-			},
-		)
-		.refine(
-			value => {
-				const formatted = removeCommas(value)
-				return Number(formatted) > 0
-			},
-			{
-				message: 'Amount must be greater than zero',
-			},
-		),
+export function createExchangeFormSchema(t: TFunction<'exchanges'>) {
+	const BaseExchangeFormSchema = z.object({
+		date: z.iso.datetime(t('form.schema.dateRequired')),
+		fromAmount: z
+			.string({ message: t('form.schema.amountRequired') })
+			.refine(
+				value => {
+					const formatted = removeCommas(value)
+					return !isNaN(Number(formatted))
+				},
+				{
+					message: t('form.schema.amountInvalid'),
+				},
+			)
+			.refine(
+				value => {
+					const formatted = removeCommas(value)
+					return Number(formatted) > 0
+				},
+				{
+					message: t('form.schema.amountPositive'),
+				},
+			),
+		toAmount: z
+			.string({ message: t('form.schema.amountRequired') })
+			.refine(
+				value => {
+					const formatted = removeCommas(value)
+					return !isNaN(Number(formatted))
+				},
+				{
+					message: t('form.schema.amountInvalid'),
+				},
+			)
+			.refine(
+				value => {
+					const formatted = removeCommas(value)
+					return Number(formatted) > 0
+				},
+				{
+					message: t('form.schema.amountPositive'),
+				},
+			),
 
-	fromCurrencyId: z.string('From currency is required'),
-	toCurrencyId: z.string('To currency is required'),
+		fromCurrencyId: z.string(t('form.schema.fromCurrencyRequired')),
+		toCurrencyId: z.string(t('form.schema.toCurrencyRequired')),
 
-	accountId: z.string('Account is required'),
-})
+		accountId: z.string(t('form.schema.accountRequired')),
+	})
 
-export const CreateExchangeFormSchema = BaseExchangeFormSchema.extend(
-	{},
-).refine(
-	data => {
-		return data.fromCurrencyId !== data.toCurrencyId
-	},
-	{
-		message: 'An exchange can only be done between different currencies',
-		path: ['toCurrencyId'],
-	},
-)
+	return BaseExchangeFormSchema.extend({}).refine(
+		data => {
+			return data.fromCurrencyId !== data.toCurrencyId
+		},
+		{
+			message: t('form.schema.sameCurrencyError'),
+			path: ['toCurrencyId'],
+		},
+	)
+}
+
+export type CreateExchangeFormSchema = ReturnType<typeof createExchangeFormSchema>
 
 export const DeleteExchangeFormSchema = z.object({
 	exchangeId: z.string(),
