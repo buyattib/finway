@@ -3,6 +3,7 @@ import type { ResourceLanguage } from 'i18next'
 import accounts from '~/routes/accounts/lib/locales/es'
 import exchanges from '~/routes/exchanges/lib/locales/es'
 import transfers from '~/routes/transfers/lib/locales/es'
+import transactionCategories from '~/routes/transaction-categories/lib/locales/es'
 import components from './components'
 
 export default {
@@ -10,4 +11,5 @@ export default {
 	accounts,
 	exchanges,
 	transfers,
+	'transaction-categories': transactionCategories,
 } satisfies ResourceLanguage

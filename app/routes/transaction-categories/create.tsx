@@ -3,11 +3,14 @@ import { getFormProps, useForm } from '@conform-to/react'
 import { data, Link, Form, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
 import { eq, and } from 'drizzle-orm'
+import { useTranslation } from 'react-i18next'
+import { safeRedirect } from 'remix-utils/safe-redirect'
 import type { Route } from './+types/create'
 
-import { dbContext, userContext } from '~/lib/context'
 import { transactionCategory as transactionCategoryTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+import { dbContext, userContext } from '~/lib/context'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -20,40 +23,39 @@ import {
 } from '~/components/ui/card'
 import { ErrorList, TextField } from '~/components/forms'
 
-import { CreateTransactionCategoryFormSchema } from './lib/schemas'
-import { safeRedirect } from 'remix-utils/safe-redirect'
+import { createTransactionCategoryFormSchema } from './lib/schemas'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Create Transaction Categories | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Create TransactionCategories | Finway',
-		},
-		{
-			name: 'description',
-			content:
-				'Create transaction categories to assign to your transactions',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, context }: Route.LoaderArgs) {
+	const t = getServerT(context, 'transaction-categories')
 	const url = new URL(request.url)
 	const redirectTo = url.searchParams.get('redirectTo') || ''
 
-	return { redirectTo }
+	return {
+		redirectTo,
+		meta: {
+			title: t('form.create.meta.title'),
+			description: t('form.create.meta.description'),
+		},
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'transaction-categories')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
 		async: true,
-		schema: CreateTransactionCategoryFormSchema.superRefine(
+		schema: createTransactionCategoryFormSchema(t).superRefine(
 			async (data, ctx) => {
 				const existingTransactionCategoriesCount = await db.$count(
 					transactionCategoryTable,
@@ -66,8 +68,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 				if (existingTransactionCategoriesCount > 0) {
 					return ctx.addIssue({
 						code: 'custom',
-						message:
-							'A transaction category with this name already exists',
+						message: t('form.create.action.duplicateError'),
 					})
 				}
 			},
@@ -90,7 +91,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		request,
 		{
 			type: 'success',
-			title: 'Transaction category created',
+			title: t('form.create.action.successToast'),
 		},
 	)
 }
@@ -101,22 +102,26 @@ export default function CreateTransactionCategory({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation('transaction-categories')
+
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
+	const schema = createTransactionCategoryFormSchema(t)
+
 	const [form, fields] = useForm({
 		lastResult: actionData?.submission,
 		id: 'create-transaction-category-form',
-		shouldValidate: 'onInput',
+		shouldValidate: 'onBlur',
 		defaultValue: {
 			name: '',
 			description: '',
 		},
-		constraint: getZodConstraint(CreateTransactionCategoryFormSchema),
+		constraint: getZodConstraint(schema),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: CreateTransactionCategoryFormSchema,
+				schema,
 			})
 		},
 	})
@@ -130,12 +135,9 @@ export default function CreateTransactionCategory({
 							<ArrowLeftIcon />
 						</Link>
 					</Button>
-					<CardTitle>Create a transaction category</CardTitle>
+					<CardTitle>{t('form.create.title')}</CardTitle>
 				</div>
-				<CardDescription>
-					Transaction categories are used to classify your expenses
-					and incomes
-				</CardDescription>
+				<CardDescription>{t('form.description')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form
@@ -151,9 +153,13 @@ export default function CreateTransactionCategory({
 
 					<input type='hidden' name='redirectTo' value={redirectTo} />
 
-					<TextField autoFocus label='Name' field={fields.name} />
 					<TextField
-						label='Description (Optional)'
+						autoFocus
+						label={t('form.nameLabel')}
+						field={fields.name}
+					/>
+					<TextField
+						label={t('form.descriptionLabel')}
 						field={fields.description}
 					/>
 				</Form>
@@ -166,7 +172,7 @@ export default function CreateTransactionCategory({
 					disabled={isSubmitting}
 					loading={isSubmitting}
 				>
-					Create
+					{t('form.create.submitButton')}
 				</Button>
 			</CardFooter>
 		</Card>
