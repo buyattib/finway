@@ -14,6 +14,7 @@ import {
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber } from '~/lib/utils'
 import { createToastHeaders } from '~/utils-server/toast.server'
+import { PAGE_SIZE } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -37,7 +38,6 @@ import type { TTransactionType } from '~/lib/types'
 import { TransactionType } from '~/components/transaction-type'
 import { TransactionsFilters } from './components/filters'
 import { DeleteTransactionFormSchema } from './lib/schemas'
-import { PAGE_SIZE } from '~/lib/constants'
 
 export function meta() {
 	return [
