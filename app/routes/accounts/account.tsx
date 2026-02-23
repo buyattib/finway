@@ -47,7 +47,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
-	const t = getServerT(context, 'accounts', 'details')
+	const t = getServerT(context, 'accounts')
 
 	const account = await db.query.account.findFirst({
 		where: eq(accountTable.id, accountId),
@@ -60,7 +60,7 @@ export async function loader({
 		},
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response(t('notFoundError'), { status: 404 })
+		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
 
 	const balances = await getBalances({ db, ownerId: user.id, accountId })
@@ -70,9 +70,9 @@ export async function loader({
 	return {
 		account: { ...accountData, balances },
 		meta: {
-			title: t('meta.title', { name: account.name }),
-			notFoundTitle: t('meta.notFoundTitle', { accountId }),
-			description: t('meta.description', { name: account.name }),
+			title: t('details.meta.title', { name: account.name }),
+			notFoundTitle: t('details.meta.notFoundTitle', { accountId }),
+			description: t('details.meta.description', { name: account.name }),
 		},
 	}
 }
@@ -80,7 +80,7 @@ export async function loader({
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
-	const t = getServerT(context, 'accounts', 'details')
+	const t = getServerT(context, 'accounts')
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -90,8 +90,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (submission.status !== 'success') {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: t('deleteErrorToast'),
-			description: t('deleteErrorToastDescription'),
+			title: t('details.action.deleteErrorToast'),
+			description: t('details.action.deleteErrorToastDescription'),
 		})
 
 		return data({}, { headers: toastHeaders })
@@ -103,14 +103,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 		columns: { name: true, ownerId: true },
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response(t('notFoundError'), { status: 404 })
+		throw new Response(t('details.action.notFoundError'), { status: 404 })
 	}
 
 	await db.delete(accountTable).where(eq(accountTable.id, accountId))
 
 	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',
-		title: t('successToast', { name: account.name }),
+		title: t('details.action.successToast', { name: account.name }),
 	})
 }
 

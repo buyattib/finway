@@ -31,7 +31,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
-	const t = getServerT(context, 'accounts', 'form')
+	const t = getServerT(context, 'accounts')
 
 	const account = await db.query.account.findFirst({
 		where: (account, { eq }) => eq(account.id, accountId),
@@ -44,16 +44,16 @@ export async function loader({
 		},
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response(t('edit.notFoundError'), { status: 404 })
+		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
 
 	const { ownerId, ...accountData } = account
 	return {
 		initialData: accountData,
 		meta: {
-			title: t('edit.meta.title', { name: account.name }),
-			notFoundTitle: t('edit.meta.notFoundTitle', { accountId }),
-			description: t('edit.meta.description', { name: account.name }),
+			title: t('form.edit.meta.title', { name: account.name }),
+			notFoundTitle: t('form.edit.meta.notFoundTitle', { accountId }),
+			description: t('form.edit.meta.description', { name: account.name }),
 		},
 	}
 }
@@ -61,7 +61,7 @@ export async function loader({
 export async function action({ context, request }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
-	const t = getServerT(context, 'accounts', 'form')
+	const t = getServerT(context, 'accounts')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
@@ -82,7 +82,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 			if (!account || account.ownerId !== user.id) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: t('edit.accountWithIdNotFoundError', {
+					message: t('form.edit.action.accountWithIdNotFoundError', {
 						id: data.id,
 					}),
 				})
@@ -100,7 +100,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 			if (existingAccountsCount > 0) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: t('edit.duplicateError'),
+					message: t('form.edit.action.duplicateError'),
 				})
 			}
 		}),
@@ -120,7 +120,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 
 	return await redirectWithToast(`/app/accounts/${id}`, request, {
 		type: 'success',
-		title: t('edit.successToast'),
+		title: t('form.edit.action.successToast'),
 	})
 }
 

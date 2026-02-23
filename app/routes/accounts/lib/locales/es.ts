@@ -31,10 +31,12 @@ export default {
 				title: 'Crear una Cuenta | Finway',
 				description: 'Crea una cuenta para rastrear tus transacciones',
 			},
+			action: {
+				successToast: 'Cuenta creada exitosamente',
+				duplicateError: 'Ya existe una cuenta con este nombre y tipo',
+			},
 			title: 'Crear una cuenta',
 			submitButton: 'Crear',
-			successToast: 'Cuenta creada exitosamente',
-			duplicateError: 'Ya existe una cuenta con este nombre y tipo',
 		},
 		edit: {
 			meta: {
@@ -42,12 +44,16 @@ export default {
 				notFoundTitle: 'Cuenta {{accountId}} no encontrada | Finway',
 				description: 'Editar cuenta {{name}}',
 			},
+			loader: {
+				notFoundError: 'Cuenta no encontrada',
+			},
+			action: {
+				successToast: 'Cuenta actualizada exitosamente',
+				accountWithIdNotFoundError: 'Cuenta con id {{id}} no encontrada',
+				duplicateError: 'Ya existe una cuenta con este nombre y tipo',
+			},
 			title: 'Editar cuenta',
 			submitButton: 'Actualizar',
-			successToast: 'Cuenta actualizada exitosamente',
-			notFoundError: 'Cuenta no encontrada',
-			accountWithIdNotFoundError: 'Cuenta con id {{id}} no encontrada',
-			duplicateError: 'Ya existe una cuenta con este nombre y tipo',
 		},
 	},
 	details: {
@@ -56,13 +62,18 @@ export default {
 			notFoundTitle: 'Cuenta {{accountId}} no encontrada | Finway',
 			description: 'Cuenta {{name}}',
 		},
+		loader: {
+			notFoundError: 'Cuenta no encontrada',
+		},
+		action: {
+			notFoundError: 'Cuenta no encontrada',
+			successToast: 'Cuenta {{name}} eliminada',
+			deleteErrorToast: 'No se pudo eliminar la cuenta',
+			deleteErrorToastDescription: 'Por favor intenta de nuevo',
+		},
 		deleteAriaLabel: 'Eliminar cuenta {{name}}',
 		deleteTooltip: 'Eliminar una cuenta no se puede deshacer y elimina todas las transacciones, transferencias o intercambios asociados.',
 		currencyBalancesTitle: 'Balances por moneda',
 		emptyBalances: 'Aún no tienes actividad en esta cuenta.',
-		notFoundError: 'Cuenta no encontrada',
-		successToast: 'Cuenta {{name}} eliminada',
-		deleteErrorToast: 'No se pudo eliminar la cuenta',
-		deleteErrorToastDescription: 'Por favor intenta de nuevo',
 	},
 } satisfies typeof en

@@ -24,7 +24,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-	const t = getServerT(context, 'accounts', 'form')
+	const t = getServerT(context, 'accounts')
 	const url = new URL(request.url)
 	const redirectTo = url.searchParams.get('redirectTo') || ''
 	return {
@@ -35,8 +35,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 			description: '',
 		},
 		meta: {
-			title: t('create.meta.title'),
-			description: t('create.meta.description'),
+			title: t('form.create.meta.title'),
+			description: t('form.create.meta.description'),
 		},
 	}
 }
@@ -44,7 +44,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
-	const t = getServerT(context, 'accounts', 'form')
+	const t = getServerT(context, 'accounts')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
@@ -61,7 +61,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			if (existingAccountsCount > 0) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: t('create.duplicateError'),
+					message: t('form.create.action.duplicateError'),
 				})
 			}
 		}),
@@ -87,7 +87,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		request,
 		{
 			type: 'success',
-			title: t('create.successToast'),
+			title: t('form.create.action.successToast'),
 		},
 	)
 }

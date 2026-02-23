@@ -13,13 +13,13 @@ const ActionSchema = z.discriminatedUnion('action', [
 	}),
 ])
 
-export function createAccountFormSchema(t: TFunction<'accounts', 'form'>) {
+export function createAccountFormSchema(t: TFunction<'accounts'>) {
 	return z
 		.object({
 			name: z
-				.string(t('schema.nameRequired'))
+				.string(t('form.schema.nameRequired'))
 				.transform(value => value.trim()),
-			accountType: z.enum(ACCOUNT_TYPES, t('schema.accountTypeRequired')),
+			accountType: z.enum(ACCOUNT_TYPES, t('form.schema.accountTypeRequired')),
 			description: z
 				.string()
 				.default('')

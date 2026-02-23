@@ -49,7 +49,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
-	const t = getServerT(context, 'accounts', 'index')
+	const t = getServerT(context, 'accounts')
 
 	const url = new URL(request.url)
 	const search = url.searchParams.get('search')
@@ -97,8 +97,8 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		accounts,
 		search,
 		meta: {
-			title: t('meta.title'),
-			description: t('meta.description'),
+			title: t('index.meta.title'),
+			description: t('index.meta.description'),
 		},
 	}
 }
