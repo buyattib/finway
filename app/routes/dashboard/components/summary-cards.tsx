@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Route } from '../+types'
 import {
 	BanknoteArrowDownIcon,
@@ -15,30 +16,32 @@ import { CurrencyIcon } from '~/components/currency-icon'
 export function SummaryCards({
 	summary,
 }: Pick<Route.ComponentProps['loaderData'], 'summary'>) {
+	const { t } = useTranslation('dashboard')
+
 	const cards = [
 		{
-			title: 'Total balances',
+			title: t('index.summaryCards.totalBalances'),
 			icon: <WalletIcon />,
 			data: summary.balances,
-			empty: 'No balances',
+			empty: t('index.summaryCards.noBalances'),
 		},
 		{
-			title: 'This month expenses',
+			title: t('index.summaryCards.monthExpenses'),
 			icon: <BanknoteArrowDownIcon />,
 			data: summary.monthExpenses,
-			empty: 'No expenses',
+			empty: t('index.summaryCards.noExpenses'),
 		},
 		{
-			title: 'This month incomes',
+			title: t('index.summaryCards.monthIncomes'),
 			icon: <BanknoteArrowUpIcon />,
 			data: summary.monthIncomes,
-			empty: 'No incomes',
+			empty: t('index.summaryCards.noIncomes'),
 		},
 		{
-			title: 'This month credit card totals',
+			title: t('index.summaryCards.monthCreditCardTotals'),
 			icon: <CreditCardIcon />,
 			data: summary.monthCreditCardTotals,
-			empty: 'No installments',
+			empty: t('index.summaryCards.noInstallments'),
 		},
 	]
 

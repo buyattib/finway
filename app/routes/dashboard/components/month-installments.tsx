@@ -1,5 +1,8 @@
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { CreditCardIcon } from 'lucide-react'
+
+import type { Route } from '../+types'
 
 import { formatDate, formatNumber, getCurrencyData } from '~/lib/utils'
 
@@ -8,28 +11,30 @@ import { Text } from '~/components/ui/text'
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import type { Route } from '../+types'
-
 type LoaderData = Route.ComponentProps['loaderData']
 
 type Props = Pick<LoaderData, 'monthInstallments'>
 
 export function MonthInstallments({ monthInstallments }: Props) {
+	const { t } = useTranslation('dashboard')
+
 	return (
 		<section
 			className='flex flex-col gap-4'
 			aria-labelledby='dashboard-installments'
 		>
 			<Title id='dashboard-installments' level='h3'>
-				This month installments ({monthInstallments.length})
+				{t('index.monthInstallments.title', {
+					count: monthInstallments.length,
+				})}
 			</Title>
 
 			{monthInstallments.length === 0 ? (
 				<Text alignment='center' className='italic'>
-					No installments due this month
+					{t('index.monthInstallments.noInstallments')}
 				</Text>
 			) : (
-				<div className='flex flex-col gap-2'>
+				<ul className='flex flex-col gap-2'>
 					{monthInstallments.map(
 						({
 							installmentId,
@@ -39,7 +44,6 @@ export function MonthInstallments({ monthInstallments }: Props) {
 							ccTransactionId,
 							ccTransactionDate,
 							ccTransactionType,
-							ccTransactionDescription,
 							totalInstallments,
 							ccTransactionCategory,
 							creditCardId,
@@ -49,98 +53,99 @@ export function MonthInstallments({ monthInstallments }: Props) {
 						}) => {
 							const { symbol } = getCurrencyData(currency)
 							return (
-								<Link
+								<li
 									key={installmentId}
-									to={`/app/credit-cards/${creditCardId}/transactions/${ccTransactionId}`}
-									className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-lg border p-3 hover:bg-muted/50 transition-colors'
+									className='rounded-lg border p-3 hover:bg-muted/50 transition-colors'
 								>
-									<Text size='sm' theme='muted'>
-										{installmentNumber} /{' '}
-										{totalInstallments}
-									</Text>
-
-									<div className='flex items-center gap-2 text-muted-foreground'>
-										<CreditCardIcon className='size-4 shrink-0' />
+									<Link
+										to={`/app/credit-cards/${creditCardId}/transactions/${ccTransactionId}`}
+										className='grid grid-cols-2 md:grid-cols-7 items-center md:gap-4'
+									>
 										<Text size='sm' theme='muted'>
-											{creditCardBrand} ••••{' '}
-											{creditCardLast4}
+											{installmentNumber} /{' '}
+											{totalInstallments}
 										</Text>
-									</div>
 
-									<TransactionType
-										variant='icon-text'
-										size='sm'
-										transactionType={ccTransactionType}
-									/>
+										<TransactionType
+											variant='icon-text'
+											size='sm'
+											transactionType={ccTransactionType}
+										/>
 
-									<div className='flex flex-col gap-1'>
-										<Text size='sm' theme='muted'>
-											Transaction date
-										</Text>
-										<Text size='sm' theme='foreground'>
-											{formatDate(
-												new Date(ccTransactionDate),
-											)}
-										</Text>
-									</div>
-
-									<div className='flex flex-col gap-1'>
-										<Text size='sm' theme='muted'>
-											Due date
-										</Text>
-										<Text size='sm' theme='foreground'>
-											{formatDate(
-												new Date(installmentDate),
-											)}
-										</Text>
-									</div>
-
-									<div className='flex flex-col gap-1'>
-										<Text size='sm' theme='muted'>
-											Category
-										</Text>
-										<Text size='sm' theme='foreground'>
-											{ccTransactionCategory}
-										</Text>
-									</div>
-
-									{ccTransactionDescription && (
-										<div className='flex flex-col gap-1'>
+										<div className='flex items-center gap-2 text-muted-foreground'>
+											<CreditCardIcon className='size-4 shrink-0' />
 											<Text size='sm' theme='muted'>
-												Description
-											</Text>
-											<Text size='sm' theme='foreground'>
-												{ccTransactionDescription}
+												{creditCardBrand} ••••{' '}
+												{creditCardLast4}
 											</Text>
 										</div>
-									)}
 
-									<div className='flex flex-col gap-1'>
-										<Text size='sm' theme='muted'>
-											Installment amount
-										</Text>
-										<div className='flex items-center gap-1'>
-											<CurrencyIcon
-												currency={currency}
-												size='sm'
-											/>
-											<Text
-												size='md'
-												theme='foreground'
-												weight='medium'
-											>
-												{symbol}{' '}
-												{formatNumber(
-													installmentAmount,
+										<div className='flex flex-col gap-1'>
+											<Text size='sm' theme='muted'>
+												{t(
+													'index.monthInstallments.transactionDate',
+												)}
+											</Text>
+											<Text size='sm' theme='foreground'>
+												{formatDate(
+													new Date(ccTransactionDate),
 												)}
 											</Text>
 										</div>
-									</div>
-								</Link>
+
+										<div className='flex flex-col gap-1'>
+											<Text size='sm' theme='muted'>
+												{t(
+													'index.monthInstallments.dueDate',
+												)}
+											</Text>
+											<Text size='sm' theme='foreground'>
+												{formatDate(
+													new Date(installmentDate),
+												)}
+											</Text>
+										</div>
+
+										<div className='flex flex-col gap-1'>
+											<Text size='sm' theme='muted'>
+												{t(
+													'index.monthInstallments.category',
+												)}
+											</Text>
+											<Text size='sm' theme='foreground'>
+												{ccTransactionCategory}
+											</Text>
+										</div>
+
+										<div className='flex flex-col gap-1'>
+											<Text size='sm' theme='muted'>
+												{t(
+													'index.monthInstallments.installmentAmount',
+												)}
+											</Text>
+											<div className='flex items-center gap-1'>
+												<CurrencyIcon
+													currency={currency}
+													size='sm'
+												/>
+												<Text
+													size='md'
+													theme='foreground'
+													weight='medium'
+												>
+													{symbol}{' '}
+													{formatNumber(
+														installmentAmount,
+													)}
+												</Text>
+											</div>
+										</div>
+									</Link>
+								</li>
 							)
 						},
 					)}
-				</div>
+				</ul>
 			)}
 		</section>
 	)

@@ -1,10 +1,14 @@
 import { Link } from 'react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Pie, PieChart } from 'recharts'
 import { ChartPieIcon, PlusIcon } from 'lucide-react'
+
 import type { Route } from '../+types'
 
 import { formatNumber } from '~/lib/utils'
+import type { TCurrency } from '~/lib/types'
+import { getCurrencyData } from '~/lib/utils'
 
 import { type ChartConfig, ChartContainer } from '~/components/ui/chart'
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
@@ -18,9 +22,6 @@ import {
 	SelectValue,
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
-
-import type { TCurrency } from '~/lib/types'
-import { getCurrencyData } from '~/lib/utils'
 
 const colorPalette = [
 	'#8884d8',
@@ -52,14 +53,16 @@ type Props = Pick<LoaderData, 'expensesByCategory'> &
 function Layout({
 	children,
 	select,
+	title,
 }: {
 	children: React.ReactNode
 	select?: React.ReactNode
+	title: string
 }) {
 	return (
 		<Card className='flex flex-col'>
 			<CardHeader className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2'>
-				<CardTitle>Expenses by category</CardTitle>
+				<CardTitle>{title}</CardTitle>
 				{!!select && select}
 			</CardHeader>
 			<CardContent>{children}</CardContent>
@@ -71,6 +74,7 @@ export function ExpensesByCategory({
 	expensesByCategory,
 	monthExpenses,
 }: Props) {
+	const { t } = useTranslation('dashboard')
 	const currencies = Object.keys(expensesByCategory) as Array<TCurrency>
 
 	const [selectedCurrency, setSelectedCurrency] = useState<TCurrency>(
@@ -79,24 +83,28 @@ export function ExpensesByCategory({
 
 	if (currencies.length === 0) {
 		return (
-			<Layout>
+			<Layout title={t('index.expensesByCategory.title')}>
 				<div className='flex items-center justify-center'>
 					<div className='flex flex-col items-center gap-2'>
 						<ChartPieIcon className='text-muted-foreground w-10 h-10' />
 						<Text size='sm' theme='muted'>
-							No expenses
+							{t('index.expensesByCategory.noExpenses')}
 						</Text>
 						<div className='flex items-center gap-4'>
 							<Button asChild variant='outline'>
 								<Link to='/app/accounts'>
 									<PlusIcon />
-									Create Account
+									{t(
+										'index.expensesByCategory.createAccount',
+									)}
 								</Link>
 							</Button>
 							<Button asChild variant='default'>
 								<Link to='/app/transactions'>
 									<PlusIcon />
-									Create Transaction
+									{t(
+										'index.expensesByCategory.createTransaction',
+									)}
 								</Link>
 							</Button>
 						</div>
@@ -132,6 +140,7 @@ export function ExpensesByCategory({
 
 	return (
 		<Layout
+			title={t('index.expensesByCategory.title')}
 			select={
 				<Select
 					value={selectedCurrency}
