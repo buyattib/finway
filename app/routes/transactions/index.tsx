@@ -2,6 +2,7 @@ import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { PlusIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq, desc, sql, and } from 'drizzle-orm'
+import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
@@ -11,10 +12,13 @@ import {
 	transaction as transactionTable,
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
+import { createToastHeaders } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber } from '~/lib/utils'
-import { createToastHeaders } from '~/utils-server/toast.server'
 import { PAGE_SIZE } from '~/lib/constants'
+import { getBalances, getSelectData } from '~/lib/queries'
+import type { TTransactionType } from '~/lib/types'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -31,32 +35,23 @@ import {
 import { TablePagination } from '~/components/table-pagination'
 import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
-
-import { getBalances, getSelectData } from '~/lib/queries'
-import type { TTransactionType } from '~/lib/types'
-
 import { TransactionType } from '~/components/transaction-type'
+
 import { TransactionsFilters } from './components/filters'
 import { DeleteTransactionFormSchema } from './lib/schemas'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Transactions | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Transactions | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Your Transactions',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'transactions')
 
 	const url = new URL(request.url)
 	const searchParams = url.searchParams
@@ -138,12 +133,17 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			transactionType,
 		},
 		selectData,
+		meta: {
+			title: t('index.meta.title'),
+			description: t('index.meta.description'),
+		},
 	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'transactions')
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -155,8 +155,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'Could not delete transaction',
-			description: 'Please try again',
+			title: t('index.action.deleteErrorToast'),
+			description: t('index.action.deleteErrorToastDescription'),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -171,7 +171,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (!transaction || transaction.account.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: `Transaction ${transactionId} not found`,
+			title: t('index.action.notFoundError', { transactionId }),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -188,7 +188,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (balance < transaction.amount) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'Cannot delete transaction as account would hold a negative balance',
+			title: t('index.action.negativeBalanceError'),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -199,7 +199,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
-		title: 'Transaction deleted',
+		title: t('index.action.successToast'),
 	})
 	return data({}, { headers: toastHeaders })
 }
@@ -209,6 +209,8 @@ export default function Transactions({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation(['transactions', 'components'])
+
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname + '?index' &&
@@ -229,9 +231,9 @@ export default function Transactions({
 			className='flex flex-col gap-4'
 			aria-labelledby='transactions-section'
 		>
-			<div className='flex items-center justify-between'>
+			<header className='flex items-center justify-between'>
 				<Title id='transactions-section' level='h3'>
-					Transactions ({pagination.total})
+					{t('index.title', { total: pagination.total })}
 				</Title>
 				<Button
 					asChild
@@ -241,10 +243,12 @@ export default function Transactions({
 				>
 					<Link to='create' prefetch='intent'>
 						<PlusIcon aria-hidden />
-						<span className='sm:inline hidden'>Transaction</span>
+						<span className='sm:inline hidden'>
+							{t('index.addTransactionLabel')}
+						</span>
 					</Link>
 				</Button>
-			</div>
+			</header>
 
 			<TransactionsFilters filters={filters} selectData={selectData} />
 
@@ -257,15 +261,18 @@ export default function Transactions({
 					<TableCaption>
 						<Text size='md' weight='medium' alignment='center'>
 							{!hasFilters ? (
-								<>
+								<Trans
+									ns='transactions'
+									i18nKey='index.emptyMessage'
+								>
 									You have not created any transactions yet.
 									Start creating them{' '}
 									<Link to='create' className='text-primary'>
 										here
 									</Link>
-								</>
+								</Trans>
 							) : (
-								'No transactions found with applied filters'
+								t('index.emptyFilteredMessage')
 							)}
 						</Text>
 					</TableCaption>
@@ -273,15 +280,19 @@ export default function Transactions({
 				{transactions.length !== 0 && (
 					<TableHeader>
 						<TableRow>
-							<TableHead>Date</TableHead>
+							<TableHead>{t('index.table.date')}</TableHead>
 							<TableHead className='text-center'>
-								Account
+								{t('index.table.account')}
 							</TableHead>
 							<TableHead className='text-center'>
-								Category
+								{t('index.table.category')}
 							</TableHead>
-							<TableHead className='text-center'>Type</TableHead>
-							<TableHead className='text-right'>Amount</TableHead>
+							<TableHead className='text-center'>
+								{t('index.table.type')}
+							</TableHead>
+							<TableHead className='text-right'>
+								{t('index.table.amount')}
+							</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
 					</TableHeader>
@@ -359,7 +370,7 @@ export default function Transactions({
 													<TrashIcon aria-hidden />
 												)}
 												<span className='sr-only'>
-													Delete transaction
+													{t('index.deleteAriaLabel')}
 												</span>
 											</Button>
 										</Form>
