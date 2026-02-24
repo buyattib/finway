@@ -55,28 +55,51 @@ export function MonthInstallments({ monthInstallments }: Props) {
 							return (
 								<li
 									key={installmentId}
-									className='rounded-lg border p-3 hover:bg-muted/50 transition-colors'
+									className='relative rounded-lg border p-3 hover:bg-muted/50 transition-colors'
 								>
+									<Text
+										size='xs'
+										theme='muted'
+										className='absolute top-3 left-3'
+									>
+										{installmentNumber} /{' '}
+										{totalInstallments}
+									</Text>
 									<Link
 										to={`/app/credit-cards/${creditCardId}/transactions/${ccTransactionId}`}
-										className='grid grid-cols-2 md:grid-cols-7 items-center md:gap-4'
+										className='grid grid-cols-2 items-center gap-4 pt-6'
 									>
-										<Text size='sm' theme='muted'>
-											{installmentNumber} /{' '}
-											{totalInstallments}
-										</Text>
+										<div className='flex flex-col gap-1'>
+											<div className='flex items-center gap-2 text-muted-foreground whitespace-nowrap'>
+												<CreditCardIcon className='size-4 shrink-0' />
+												<Text size='sm' theme='muted'>
+													{creditCardBrand} ••••{' '}
+													{creditCardLast4}
+												</Text>
+											</div>
+											<TransactionType
+												variant='icon-text'
+												size='xs'
+												transactionType={
+													ccTransactionType
+												}
+											/>
+										</div>
 
-										<TransactionType
-											variant='icon-text'
-											size='sm'
-											transactionType={ccTransactionType}
-										/>
-
-										<div className='flex items-center gap-2 text-muted-foreground'>
-											<CreditCardIcon className='size-4 shrink-0' />
-											<Text size='sm' theme='muted'>
-												{creditCardBrand} ••••{' '}
-												{creditCardLast4}
+										<div className='flex items-center gap-1 whitespace-nowrap'>
+											<CurrencyIcon
+												currency={currency}
+												size='sm'
+											/>
+											<Text
+												size='md'
+												theme='foreground'
+												weight='medium'
+											>
+												{symbol}{' '}
+												{formatNumber(
+													installmentAmount,
+												)}
 											</Text>
 										</div>
 
@@ -115,30 +138,6 @@ export function MonthInstallments({ monthInstallments }: Props) {
 											<Text size='sm' theme='foreground'>
 												{ccTransactionCategory}
 											</Text>
-										</div>
-
-										<div className='flex flex-col gap-1'>
-											<Text size='sm' theme='muted'>
-												{t(
-													'index.monthInstallments.installmentAmount',
-												)}
-											</Text>
-											<div className='flex items-center gap-1'>
-												<CurrencyIcon
-													currency={currency}
-													size='sm'
-												/>
-												<Text
-													size='md'
-													theme='foreground'
-													weight='medium'
-												>
-													{symbol}{' '}
-													{formatNumber(
-														installmentAmount,
-													)}
-												</Text>
-											</div>
 										</div>
 									</Link>
 								</li>

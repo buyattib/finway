@@ -281,8 +281,5 @@ export async function getMonthInstallments({
 				),
 			),
 		)
-		.orderBy(
-			asc(creditCardTransactionInstallmentTable.date),
-			asc(creditCardTransactionTable.id),
-		)
+		.orderBy(desc(creditCardTransactionInstallmentTable.date))
 }

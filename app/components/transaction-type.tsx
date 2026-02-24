@@ -18,6 +18,7 @@ import type { TCCTransactionType, TTransactionType } from '~/lib/types'
 const iconVariants = cva('', {
 	variants: {
 		size: {
+			xs: 'w-5 h-5',
 			sm: 'w-6 h-6',
 			md: 'w-6 h-6',
 			lg: 'w-8 h-8',
@@ -94,6 +95,11 @@ export function TransactionType({
 				'rounded-md w-fit flex items-center gap-1',
 				textCn,
 				className,
+				{
+					'text-sm': size === 'sm' || size === 'xs',
+					'text-base': size === 'md',
+					'text-lg': size === 'lg',
+				},
 			)}
 		>
 			<Icon className={cn(iconVariants({ size }))} />
