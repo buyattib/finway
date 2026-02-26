@@ -1,4 +1,5 @@
 import { CreditCardIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import type { TCurrency } from '~/lib/types'
 import { getCurrencyData } from '~/lib/utils'
@@ -25,6 +26,7 @@ export function CreditCardHeader({
 	currency,
 }: Props) {
 	const { label } = getCurrencyData(currency)
+	const { t } = useTranslation('credit-cards')
 
 	return (
 		<div className='flex flex-col sm:gap-2 gap-4'>
@@ -36,7 +38,10 @@ export function CreditCardHeader({
 			</div>
 			<div className='flex flex-col sm:flex-row sm:items-center gap-4'>
 				<Text size='md' theme='primary'>
-					Expires {expiryMonth}/{expiryYear}
+					{t('header.expires', {
+						month: expiryMonth,
+						year: expiryYear,
+					})}
 				</Text>
 				<Text size='sm' theme='muted' className='hidden sm:block'>
 					·

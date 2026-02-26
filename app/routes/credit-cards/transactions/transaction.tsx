@@ -1,27 +1,29 @@
 import { Link } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
 import { eq, asc } from 'drizzle-orm'
+import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/transaction'
 
-import { dbContext, userContext } from '~/lib/context'
 import { creditCardTransactionInstallment as creditCardTransactionInstallmentTable } from '~/database/schema'
+import { getServerT } from '~/utils-server/i18n.server'
+import { dbContext, userContext } from '~/lib/context'
 import { cn, formatDate, formatNumber } from '~/lib/utils'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
-import { CreditCardHeader } from '../components/credit-card-header'
 import { TransactionType } from '~/components/transaction-type'
+
+import { CreditCardHeader } from '../components/credit-card-header'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
-		return [{ title: 'Transaction not found | Finway' }]
+		const title = loaderData?.meta.notFoundTitle
+		return [{ title }]
 	}
 
-	const { brand, last4 } = loaderData.creditCard
-	const title = `Transaction · ${brand} •••• ${last4} | Finway`
-
+	const title = loaderData?.meta.title
 	return [
 		{ title },
 		{ property: 'og:title', content: title },
@@ -35,6 +37,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'credit-cards')
 
 	const creditCard = await db.query.creditCard.findFirst({
 		where: (creditCard, { eq }) => eq(creditCard.id, creditCardId),
@@ -119,6 +122,13 @@ export async function loader({
 			...i,
 			amount: String(i.amount / 100),
 		})),
+		meta: {
+			title: t('transaction.details.meta.title', {
+				brand: creditCardData.brand,
+				last4: creditCardData.last4,
+			}),
+			notFoundTitle: t('transaction.details.meta.notFoundTitle'),
+		},
 	}
 }
 
@@ -127,8 +137,8 @@ export default function CreditCardTransaction({
 }: Route.ComponentProps) {
 	const { brand, last4, expiryMonth, expiryYear, accountName, currencyCode } =
 		creditCard
-
 	const { date, type, amount, description, categoryName } = transaction
+	const { t } = useTranslation('credit-cards')
 
 	return (
 		<div className='flex flex-col gap-6'>
@@ -136,7 +146,9 @@ export default function CreditCardTransaction({
 				<Button asChild variant='ghost' size='icon' className='mr-auto'>
 					<Link to='../..' relative='path'>
 						<ArrowLeftIcon />
-						<span className='sr-only'>Back to credit card</span>
+						<span className='sr-only'>
+							{t('transaction.details.backAriaLabel')}
+						</span>
 					</Link>
 				</Button>
 				<CreditCardHeader
@@ -159,7 +171,7 @@ export default function CreditCardTransaction({
 			>
 				<div className='flex flex-col gap-1'>
 					<Text size='sm' theme='muted'>
-						Date
+						{t('transaction.details.date')}
 					</Text>
 					<Text size='md' theme='foreground'>
 						{formatDate(new Date(date))}
@@ -167,7 +179,7 @@ export default function CreditCardTransaction({
 				</div>
 				<div className='flex flex-col gap-1'>
 					<Text size='sm' theme='muted'>
-						Type
+						{t('transaction.details.type')}
 					</Text>
 					<TransactionType
 						variant='icon-text'
@@ -177,7 +189,7 @@ export default function CreditCardTransaction({
 				</div>
 				<div className='flex flex-col gap-1'>
 					<Text size='sm' theme='muted'>
-						Amount
+						{t('transaction.details.amount')}
 					</Text>
 					<Text size='md' theme='foreground'>
 						{currencyCode} {formatNumber(amount)}
@@ -185,7 +197,7 @@ export default function CreditCardTransaction({
 				</div>
 				<div className='flex flex-col gap-1'>
 					<Text size='sm' theme='muted'>
-						Category
+						{t('transaction.details.category')}
 					</Text>
 					<Text size='md' theme='foreground'>
 						{categoryName}
@@ -194,7 +206,7 @@ export default function CreditCardTransaction({
 				{description && (
 					<div className='flex flex-col gap-1'>
 						<Text size='sm' theme='muted'>
-							Description
+							{t('transaction.details.description')}
 						</Text>
 						<Text size='md' theme='foreground'>
 							{description}
@@ -208,7 +220,9 @@ export default function CreditCardTransaction({
 				aria-labelledby='installments-section'
 			>
 				<Title id='installments-section' level='h3'>
-					Installments ({installments.length})
+					{t('transaction.details.installmentsTitle', {
+						count: installments.length,
+					})}
 				</Title>
 
 				<div className='flex flex-col gap-2'>
@@ -229,7 +243,7 @@ export default function CreditCardTransaction({
 							</Text>
 							<div className='flex flex-col gap-1'>
 								<Text size='sm' theme='muted'>
-									Due Date
+									{t('transaction.details.dueDate')}
 								</Text>
 								<Text size='sm' theme='foreground'>
 									{formatDate(new Date(date))}
@@ -238,7 +252,7 @@ export default function CreditCardTransaction({
 
 							<div className='flex flex-col gap-1 sm:ml-auto'>
 								<Text size='sm' theme='muted'>
-									Installment Amount
+									{t('transaction.details.installmentAmount')}
 								</Text>
 								<Text
 									size='md'

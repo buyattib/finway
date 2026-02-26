@@ -2,16 +2,18 @@ import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm } from '@conform-to/react'
 import { ArrowLeftIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Route } from './+types/create'
 
-import { dbContext, userContext } from '~/lib/context'
 import {
 	creditCardTransaction as creditCardTransactionTable,
 	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
 } from '~/database/schema'
-import { removeCommas, initializeDate, formatNumber } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
 
+import { dbContext, userContext } from '~/lib/context'
+import { removeCommas, initializeDate, formatNumber } from '~/lib/utils'
 import {
 	ACTION_CREATION,
 	CC_TRANSACTION_TYPE_CHARGE,
@@ -39,19 +41,13 @@ import {
 } from '~/components/forms'
 import { TransactionType } from '~/components/transaction-type'
 
-import { CreditCardTransactionFormSchema } from '../lib/schemas'
+import { createCreditCardTransactionFormSchema } from '../lib/schemas'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Create a credit card transaction | Finway' },
-		{
-			property: 'og:title',
-			content: 'Create a credit card transaction | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Create a credit card transaction',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
@@ -61,6 +57,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'credit-cards')
 
 	const creditCard = await db.query.creditCard.findFirst({
 		where: (creditCard, { eq }) => eq(creditCard.id, creditCardId),
@@ -85,51 +82,65 @@ export async function loader({
 			transactionCategoryId:
 				selectData.transactionCategories?.[0]?.id || '',
 		} as const,
+		meta: {
+			title: t('transaction.create.meta.title'),
+			description: t('transaction.create.meta.description'),
+		},
 	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
 		async: true,
-		schema: CreditCardTransactionFormSchema.transform(data => ({
-			...data,
-			amount: Number(removeCommas(data.amount)) * 100,
-		})).superRefine(async (data, ctx) => {
-			const creditCard = await db.query.creditCard.findFirst({
-				where: (creditCard, { eq }) =>
-					eq(creditCard.id, data.creditCardId),
-				columns: { id: true },
-				with: { account: { columns: { ownerId: true } } },
-			})
-			if (!creditCard || creditCard.account.ownerId !== user.id) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'Credit card not found',
-					path: ['creditCardId'],
+		schema: createCreditCardTransactionFormSchema(t)
+			.transform(data => ({
+				...data,
+				amount: Number(removeCommas(data.amount)) * 100,
+			}))
+			.superRefine(async (data, ctx) => {
+				const creditCard = await db.query.creditCard.findFirst({
+					where: (creditCard, { eq }) =>
+						eq(creditCard.id, data.creditCardId),
+					columns: { id: true },
+					with: { account: { columns: { ownerId: true } } },
 				})
-			}
+				if (!creditCard || creditCard.account.ownerId !== user.id) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t(
+							'transaction.create.action.creditCardNotFound',
+						),
+						path: ['creditCardId'],
+					})
+				}
 
-			const transactionCategory =
-				await db.query.transactionCategory.findFirst({
-					where: (transactionCategory, { eq }) =>
-						eq(transactionCategory.id, data.transactionCategoryId),
-					columns: { ownerId: true },
-				})
-			if (
-				!transactionCategory ||
-				transactionCategory.ownerId !== user.id
-			) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'Transaction category not found',
-					path: ['transactionCategoryId'],
-				})
-			}
-		}),
+				const transactionCategory =
+					await db.query.transactionCategory.findFirst({
+						where: (transactionCategory, { eq }) =>
+							eq(
+								transactionCategory.id,
+								data.transactionCategoryId,
+							),
+						columns: { ownerId: true },
+					})
+				if (
+					!transactionCategory ||
+					transactionCategory.ownerId !== user.id
+				) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t(
+							'transaction.create.action.categoryNotFound',
+						),
+						path: ['transactionCategoryId'],
+					})
+				}
+			}),
 	})
 
 	if (submission.status !== 'success') {
@@ -186,7 +197,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		request,
 		{
 			type: 'success',
-			title: 'Transaction created successfully',
+			title: t('transaction.create.action.successToast'),
 		},
 	)
 }
@@ -201,6 +212,8 @@ export default function CreateCreditCardTransaction({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation('credit-cards')
+
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
@@ -214,10 +227,10 @@ export default function CreateCreditCardTransaction({
 			firstInstallmentDate: initializeDate().toISOString(),
 			...initialData,
 		},
-		constraint: getZodConstraint(CreditCardTransactionFormSchema),
+		constraint: getZodConstraint(createCreditCardTransactionFormSchema(t)),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: CreditCardTransactionFormSchema,
+				schema: createCreditCardTransactionFormSchema(t),
 			})
 		},
 	})
@@ -253,11 +266,13 @@ export default function CreateCreditCardTransaction({
 							<ArrowLeftIcon />
 						</Link>
 					</Button>
-					<CardTitle>Create a transaction</CardTitle>
+					<CardTitle>{t('transaction.create.title')}</CardTitle>
 				</div>
 				<CardDescription>
-					Record a charge or refund on your {creditCard.brand} ••••{' '}
-					{creditCard.last4} card.
+					{t('transaction.create.description', {
+						brand: creditCard.brand,
+						last4: creditCard.last4,
+					})}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -287,33 +302,42 @@ export default function CreateCreditCardTransaction({
 					/>
 
 					<SelectField
-						label='Transaction Type'
+						label={t('transaction.create.transactionTypeLabel')}
 						field={fields.type}
-						placeholder='Select a transaction type'
+						placeholder={t(
+							'transaction.create.transactionTypePlaceholder',
+						)}
 						items={transactionTypeOptions}
 					/>
 
 					<div className='grid grid-cols-1 md:grid-cols-5 gap-2'>
 						<AmountField
 							className='md:col-span-4'
-							label='Amount'
+							label={t('transaction.create.amountLabel')}
 							field={fields.amount}
 							{...(hasInstallments &&
 								amountValue > 0 && {
-									description: `${formatNumber(
-										amountValue / installmentCount,
+									description: t(
+										'transaction.create.perInstallment',
 										{
-											maximumFractionDigits: 2,
+											amount: formatNumber(
+												amountValue / installmentCount,
+												{
+													maximumFractionDigits: 2,
+												},
+											),
 										},
-									)} per installment`,
+									),
 								})}
 						/>
 
 						<SelectField
 							className='md:col-span-1'
-							label='Installments'
+							label={t('transaction.create.installmentsLabel')}
 							field={fields.totalInstallments}
-							placeholder='Select installments'
+							placeholder={t(
+								'transaction.create.installmentsPlaceholder',
+							)}
 							items={[
 								{ value: '1', label: '1' },
 								{ value: '3', label: '3' },
@@ -327,25 +351,32 @@ export default function CreateCreditCardTransaction({
 					</div>
 
 					<ComboboxField
-						label='Transaction Category'
+						label={t('transaction.create.categoryLabel')}
 						field={fields.transactionCategoryId}
-						buttonPlaceholder='Select a transaction category'
+						buttonPlaceholder={t(
+							'transaction.create.categoryPlaceholder',
+						)}
 						options={transactionCategoryOptions}
 					/>
 
-					<DateField label='Date' field={fields.date} />
+					<DateField
+						label={t('transaction.create.dateLabel')}
+						field={fields.date}
+					/>
 
 					<DateField
 						label={
 							hasInstallments
-								? 'First Installment Date'
-								: 'Charge Date'
+								? t(
+										'transaction.create.firstInstallmentDateLabel',
+									)
+								: t('transaction.create.chargeDateLabel')
 						}
 						field={fields.firstInstallmentDate}
 					/>
 
 					<TextField
-						label='Description (Optional)'
+						label={t('transaction.create.descriptionLabel')}
 						field={fields.description}
 					/>
 				</Form>
@@ -356,7 +387,7 @@ export default function CreateCreditCardTransaction({
 					variant='outline'
 					{...form.reset.getButtonProps()}
 				>
-					Reset
+					{t('transaction.create.resetButton')}
 				</Button>
 				<Button
 					width='full'
@@ -365,7 +396,7 @@ export default function CreateCreditCardTransaction({
 					disabled={isSubmitting}
 					loading={isSubmitting}
 				>
-					Create
+					{t('transaction.create.submitButton')}
 				</Button>
 			</CardFooter>
 		</Card>

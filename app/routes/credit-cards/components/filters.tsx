@@ -1,15 +1,16 @@
 import { useRef } from 'react'
 import { Form, useSubmit } from 'react-router'
+import { useTranslation } from 'react-i18next'
 
 import type { Route } from '../+types/credit-card'
-
-import { TransactionType } from '~/components/transaction-type'
-import { Combobox } from '~/components/ui/combobox'
 
 import {
 	CC_TRANSACTION_TYPES,
 	CC_TRANSACTION_TYPE_LABEL,
 } from '~/lib/constants'
+
+import { TransactionType } from '~/components/transaction-type'
+import { Combobox } from '~/components/ui/combobox'
 
 export function CreditCardTransactionFilters({
 	filters,
@@ -20,6 +21,7 @@ export function CreditCardTransactionFilters({
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)
+	const { t } = useTranslation('credit-cards')
 
 	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
@@ -43,7 +45,7 @@ export function CreditCardTransactionFilters({
 				options={transactionTypeOptions}
 				name='type'
 				defaultValue={filters.type}
-				buttonPlaceholder='Filter by type'
+				buttonPlaceholder={t('filters.type')}
 				onValueChange={() => {
 					if (!form.current) return
 					submit(form.current)
@@ -53,7 +55,7 @@ export function CreditCardTransactionFilters({
 				options={transactionCategoryOptions}
 				name='categoryId'
 				defaultValue={filters.categoryId}
-				buttonPlaceholder='Filter by category'
+				buttonPlaceholder={t('filters.category')}
 				onValueChange={() => {
 					if (!form.current) return
 					submit(form.current)

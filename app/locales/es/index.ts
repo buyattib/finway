@@ -6,6 +6,7 @@ import exchanges from '~/routes/exchanges/lib/locales/es'
 import transfers from '~/routes/transfers/lib/locales/es'
 import transactionCategories from '~/routes/transaction-categories/lib/locales/es'
 import transactions from '~/routes/transactions/lib/locales/es'
+import creditCards from '~/routes/credit-cards/lib/locales/es'
 import components from './components'
 
 export default {
@@ -16,4 +17,5 @@ export default {
 	transfers,
 	'transaction-categories': transactionCategories,
 	transactions,
+	'credit-cards': creditCards,
 } satisfies ResourceLanguage
