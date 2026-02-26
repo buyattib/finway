@@ -58,7 +58,7 @@ export async function loader({
 		},
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response('Transaction not found', { status: 404 })
+		throw new Response(t('transaction.details.loader.creditCardNotFoundError'), { status: 404 })
 	}
 
 	const transaction = await db.query.creditCardTransaction.findFirst({
@@ -80,7 +80,7 @@ export async function loader({
 		},
 	})
 	if (!transaction || transaction.creditCard.id !== creditCardId) {
-		throw new Response('Transaction not found', { status: 404 })
+		throw new Response(t('transaction.details.loader.notFoundError'), { status: 404 })
 	}
 
 	const installments = await db

@@ -18,7 +18,6 @@ import {
 	ACTION_CREATION,
 	CC_TRANSACTION_TYPE_CHARGE,
 	CC_TRANSACTION_TYPES,
-	CC_TRANSACTION_TYPE_LABEL,
 } from '~/lib/constants'
 import { getSelectData } from '~/lib/queries'
 
@@ -65,7 +64,7 @@ export async function loader({
 		with: { account: { columns: { ownerId: true } } },
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response('Credit card not found', { status: 404 })
+		throw new Response(t('transaction.create.loader.notFoundError'), { status: 404 })
 	}
 
 	const selectData = await getSelectData(db, user.id)
@@ -148,7 +147,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	if (submission.value.action !== ACTION_CREATION) {
-		throw new Response('Invalid action', { status: 422 })
+		throw new Response(t('transaction.create.action.invalidActionError'), { status: 422 })
 	}
 
 	const {
@@ -212,7 +211,7 @@ export default function CreateCreditCardTransaction({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation('credit-cards')
+	const { t } = useTranslation(['credit-cards', 'components'])
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
@@ -239,15 +238,11 @@ export default function CreateCreditCardTransaction({
 	const hasInstallments = installmentCount > 1
 
 	const amountValue = Number(removeCommas(fields.amount.value ?? '0'))
-	const perInstallmentAmount =
-		hasInstallments && amountValue > 0
-			? formatNumber(amountValue / installmentCount)
-			: null
 
 	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: CC_TRANSACTION_TYPE_LABEL[i],
+		label: t(`components:ccTransactionType.${i}`),
 	}))
 
 	const transactionCategoryOptions = transactionCategories.map(

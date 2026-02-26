@@ -105,7 +105,7 @@ export async function loader({
 		},
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response('Credit card not found', { status: 404 })
+		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
 
 	const {
@@ -232,7 +232,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			},
 		})
 		if (!creditCard || creditCard.account.ownerId !== user.id) {
-			throw new Response('Credit card not found', { status: 404 })
+			throw new Response(t('details.action.notFoundError'), { status: 404 })
 		}
 
 		await db

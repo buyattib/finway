@@ -14,4 +14,7 @@ export default {
 		CHARGE: 'Charge',
 		REFUND: 'Refund',
 	},
+	currency: {
+		USD: 'US Dollar (USD)',
+	},
 }

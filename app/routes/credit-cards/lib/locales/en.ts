@@ -15,6 +15,9 @@ export default {
 			title: 'Credit Card {{brand}} •••• {{last4}} | Finway',
 			notFoundTitle: 'Credit card {{creditCardId}} not found | Finway',
 		},
+		loader: {
+			notFoundError: 'Credit card not found',
+		},
 		editAriaLabel: 'Edit {{brand}} •••• {{last4}}',
 		deleteAriaLabel: 'Delete credit card {{brand}} •••• {{last4}}',
 		deleteTooltip: 'Deleting a credit card cannot be undone.',
@@ -30,6 +33,7 @@ export default {
 		},
 		deleteTransactionAriaLabel: 'Delete transaction',
 		action: {
+			notFoundError: 'Credit card not found',
 			deleteCardErrorToast: 'Could not delete credit card',
 			deleteCardErrorDescription: 'Please try again',
 			deleteCardSuccessToast:
@@ -87,6 +91,7 @@ export default {
 			title: 'Create a credit card',
 			submitButton: 'Create',
 			action: {
+				invalidActionError: 'Invalid action',
 				successToast: 'Credit card created successfully',
 				accountNotFound: 'Account not found',
 				currencyNotFound: 'Currency not found',
@@ -100,7 +105,11 @@ export default {
 			},
 			title: 'Edit credit card',
 			submitButton: 'Update',
+			loader: {
+				notFoundError: 'Credit card not found',
+			},
 			action: {
+				invalidActionError: 'Invalid action',
 				successToast: 'Credit card updated successfully',
 				creditCardNotFound: 'Credit card not found',
 			},
@@ -111,6 +120,9 @@ export default {
 			meta: {
 				title: 'Create a credit card transaction | Finway',
 				description: 'Create a credit card transaction',
+			},
+			loader: {
+				notFoundError: 'Credit card not found',
 			},
 			title: 'Create a transaction',
 			description:
@@ -130,6 +142,7 @@ export default {
 			resetButton: 'Reset',
 			submitButton: 'Create',
 			action: {
+				invalidActionError: 'Invalid action',
 				successToast: 'Transaction created successfully',
 				creditCardNotFound: 'Credit card not found',
 				categoryNotFound: 'Transaction category not found',
@@ -149,6 +162,10 @@ export default {
 			meta: {
 				title: 'Transaction · {{brand}} •••• {{last4}} | Finway',
 				notFoundTitle: 'Transaction not found | Finway',
+			},
+			loader: {
+				creditCardNotFoundError: 'Credit card not found',
+				notFoundError: 'Transaction not found',
 			},
 			backAriaLabel: 'Back to credit card',
 			date: 'Date',

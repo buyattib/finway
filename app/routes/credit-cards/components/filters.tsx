@@ -4,10 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { Route } from '../+types/credit-card'
 
-import {
-	CC_TRANSACTION_TYPES,
-	CC_TRANSACTION_TYPE_LABEL,
-} from '~/lib/constants'
+import { CC_TRANSACTION_TYPES } from '~/lib/constants'
 
 import { TransactionType } from '~/components/transaction-type'
 import { Combobox } from '~/components/ui/combobox'
@@ -21,12 +18,12 @@ export function CreditCardTransactionFilters({
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)
-	const { t } = useTranslation('credit-cards')
+	const { t } = useTranslation(['credit-cards', 'components'])
 
 	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: CC_TRANSACTION_TYPE_LABEL[i],
+		label: t(`components:ccTransactionType.${i}`),
 	}))
 
 	const transactionCategoryOptions = selectData.transactionCategories.map(
