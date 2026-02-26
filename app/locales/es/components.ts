@@ -16,4 +16,12 @@ export default {
 		CHARGE: 'Cargo',
 		REFUND: 'Reembolso',
 	},
+	currency: {
+		USD: 'Dólar Estadounidense (USD)',
+		EUR: 'Euro (EUR)',
+		ARS: 'Peso Argentino (ARS)',
+		USDT: 'Tether (USDT)',
+		USDC: 'USD Coin (USDC)',
+		DAI: 'Dai (DAI)',
+	},
 } satisfies typeof en

@@ -2,6 +2,8 @@
 - Setup libraries and BE + FE
 - Do the translations
 
+- Ask to check if the translations and the patterns are used in the same way throughout the app
+
 # Add default categories:
 - Have a hardcoded list of some common categories for transactions to suggest users
 so they dont have to manually create all of them. The UI should be a list and users

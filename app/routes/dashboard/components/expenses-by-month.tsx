@@ -8,7 +8,7 @@ import type { Route } from '../+types'
 
 import { formatNumber, formatDate } from '~/lib/utils'
 import type { TCurrency } from '~/lib/types'
-import { getCurrencyData } from '~/lib/utils'
+import { getCurrencySymbol } from '~/lib/utils'
 
 import { type ChartConfig, ChartContainer } from '~/components/ui/chart'
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
@@ -53,7 +53,7 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 		currencies[0],
 	)
 
-	const currencyData = getCurrencyData(selectedCurrency)
+	const currencySymbol = getCurrencySymbol(selectedCurrency)
 
 	if (currencies.length === 0) {
 		return (
@@ -144,7 +144,7 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 							fontSize={14}
 							className='font-semibold'
 							formatter={(amount: string) =>
-								`${currencyData.symbol} ${formatNumber(amount)}`
+								`${currencySymbol} ${formatNumber(amount)}`
 							}
 						/>
 					</Bar>

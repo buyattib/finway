@@ -41,33 +41,6 @@ export const CURRENCIES = [
 	CURRENCY_DAI,
 ] as const
 
-export const CURRENCY_DATA = {
-	[CURRENCY_USD]: {
-		label: 'US Dollar (USD)',
-		symbol: '$',
-	},
-	[CURRENCY_EUR]: {
-		label: 'Euro (EUR)',
-		symbol: '€',
-	},
-	[CURRENCY_ARS]: {
-		label: 'Argentine Peso (ARS)',
-		symbol: '$',
-	},
-	[CURRENCY_USDT]: {
-		label: 'Tether (USDT)',
-		symbol: '$',
-	},
-	[CURRENCY_USDC]: {
-		label: 'USD Coin (USDC)',
-		symbol: '$',
-	},
-	[CURRENCY_DAI]: {
-		label: 'Dai (DAI)',
-		symbol: '$',
-	},
-}
-
 // Transactions
 
 export const TRANSACTION_TYPE_EXPENSE = 'EXPENSE'

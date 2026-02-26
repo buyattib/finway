@@ -12,7 +12,6 @@ import {
 } from '~/database/schema'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { getCurrencyData } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -63,7 +62,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 export default function CreditCards({
 	loaderData: { creditCards },
 }: Route.ComponentProps) {
-	const { t } = useTranslation('credit-cards')
+	const { t } = useTranslation(['credit-cards', 'components'])
 
 	return (
 		<section
@@ -112,7 +111,7 @@ export default function CreditCards({
 							currencyCode,
 							accountName,
 						}) => {
-							const { label } = getCurrencyData(currencyCode)
+							const label = t(`components:currency.${currencyCode}`)
 							return (
 								<li
 									key={id}

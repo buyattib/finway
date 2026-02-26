@@ -16,5 +16,10 @@ export default {
 	},
 	currency: {
 		USD: 'US Dollar (USD)',
+		EUR: 'Euro (EUR)',
+		ARS: 'Argentine Peso (ARS)',
+		USDT: 'Tether (USDT)',
+		USDC: 'USD Coin (USDC)',
+		DAI: 'Dai (DAI)',
 	},
 }

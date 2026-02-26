@@ -4,7 +4,7 @@ import { CreditCardIcon } from 'lucide-react'
 
 import type { Route } from '../+types'
 
-import { formatDate, formatNumber, getCurrencyData } from '~/lib/utils'
+import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
@@ -51,7 +51,7 @@ export function MonthInstallments({ monthInstallments }: Props) {
 							creditCardLast4,
 							currency,
 						}) => {
-							const { symbol } = getCurrencyData(currency)
+							const symbol = getCurrencySymbol(currency)
 							return (
 								<li
 									key={installmentId}

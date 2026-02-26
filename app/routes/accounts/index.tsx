@@ -20,7 +20,7 @@ import type { Route } from './+types'
 import { dbContext, userContext } from '~/lib/context'
 import { getServerT } from '~/utils-server/i18n.server'
 import { account as accountTable } from '~/database/schema'
-import { formatNumber, getCurrencyData } from '~/lib/utils'
+import { formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { getBalances } from '~/lib/queries'
 import type { TAccountBalance } from '~/lib/types'
 
@@ -230,8 +230,8 @@ export default function Accounts({
 												balance,
 												currency,
 											}) => {
-												const { symbol } =
-													getCurrencyData(currency)
+												const symbol =
+													getCurrencySymbol(currency)
 												const [, currencyId] =
 													bId.split('-')
 												return (

@@ -8,7 +8,7 @@ import type { Route } from '../+types'
 
 import { formatNumber } from '~/lib/utils'
 import type { TCurrency } from '~/lib/types'
-import { getCurrencyData } from '~/lib/utils'
+import { getCurrencySymbol } from '~/lib/utils'
 
 import { type ChartConfig, ChartContainer } from '~/components/ui/chart'
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
@@ -172,7 +172,7 @@ export function ExpensesByCategory({
 									10 * 100 * (payload.amount / total),
 								) / 10
 
-							const { symbol } = getCurrencyData(selectedCurrency)
+							const symbol = getCurrencySymbol(selectedCurrency)
 							const label = `${payload.transactionCategory}: ${symbol} ${formatNumber(payload.amount)} (%${perc})`
 							return (
 								<text

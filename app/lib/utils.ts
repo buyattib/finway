@@ -1,11 +1,26 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-import { CURRENCY_DATA } from '~/lib/constants'
 import type { TCurrency } from '~/lib/types'
+import {
+	CURRENCY_USD,
+	CURRENCY_EUR,
+	CURRENCY_ARS,
+	CURRENCY_USDT,
+	CURRENCY_USDC,
+	CURRENCY_DAI,
+} from '~/lib/constants'
 
-export function getCurrencyData(currency: TCurrency) {
-	return CURRENCY_DATA[currency]
+export function getCurrencySymbol(currency: TCurrency) {
+	const symbols = {
+		[CURRENCY_USD]: '$',
+		[CURRENCY_EUR]: '€',
+		[CURRENCY_ARS]: '$',
+		[CURRENCY_USDT]: '$',
+		[CURRENCY_USDC]: '$',
+		[CURRENCY_DAI]: '$',
+	}
+	return symbols[currency]
 }
 
 export function cn(...inputs: ClassValue[]) {

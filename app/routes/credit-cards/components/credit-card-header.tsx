@@ -2,7 +2,6 @@ import { CreditCardIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { TCurrency } from '~/lib/types'
-import { getCurrencyData } from '~/lib/utils'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
@@ -25,8 +24,7 @@ export function CreditCardHeader({
 	accountName,
 	currency,
 }: Props) {
-	const { label } = getCurrencyData(currency)
-	const { t } = useTranslation('credit-cards')
+	const { t } = useTranslation(['credit-cards', 'components'])
 
 	return (
 		<div className='flex flex-col sm:gap-2 gap-4'>
@@ -58,7 +56,7 @@ export function CreditCardHeader({
 					className='flex items-center gap-1'
 				>
 					<CurrencyIcon currency={currency} size='sm' />
-					{label}
+					{t(`components:currency.${currency}`)}
 				</Text>
 			</div>
 		</div>

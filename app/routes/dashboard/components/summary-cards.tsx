@@ -7,7 +7,7 @@ import {
 	CreditCardIcon,
 } from 'lucide-react'
 
-import { formatNumber, getCurrencyData } from '~/lib/utils'
+import { formatNumber, getCurrencySymbol } from '~/lib/utils'
 
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
@@ -61,7 +61,7 @@ export function SummaryCards({
 						)}
 						<ul className='flex flex-col gap-2'>
 							{data.map(({ currencyId, currency, amount }) => {
-								const { symbol } = getCurrencyData(currency)
+								const symbol = getCurrencySymbol(currency)
 								return (
 									<li
 										key={currencyId}

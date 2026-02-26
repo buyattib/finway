@@ -13,7 +13,7 @@ import {
 import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
-import { formatNumber, getCurrencyData } from '~/lib/utils'
+import { formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { getBalances } from '~/lib/queries'
 
 import { Spinner } from '~/components/ui/spinner'
@@ -195,7 +195,7 @@ export default function AccountDetails({
 				) : (
 					<ul className='flex flex-col gap-2' aria-labelledby={id}>
 						{balances.map(({ currencyId, balance, currency }) => {
-							const { symbol, label } = getCurrencyData(currency)
+							const symbol = getCurrencySymbol(currency)
 							return (
 								<li
 									key={currencyId}
@@ -206,7 +206,7 @@ export default function AccountDetails({
 											currency={currency}
 											size='md'
 										/>
-										{label}
+										{t(`components:currency.${currency}`)}
 									</Text>
 									<Text>
 										{`${symbol} ${formatNumber(balance)}`}
