@@ -1,4 +1,15 @@
 export default {
+	root: {
+		meta: {
+			title: 'Finway',
+			errorTitle: 'Error | Finway',
+			description: 'The hub for your finances',
+		},
+		error: {
+			unexpected: 'An unexpected error occurred.',
+			notFound: 'The page you were looking for could not be found.',
+		},
+	},
 	layout: {
 		nav: {
 			dashboard: 'Dashboard',

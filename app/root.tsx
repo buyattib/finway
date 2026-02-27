@@ -32,6 +32,7 @@ import { honeypot } from './utils-server/honeypot.server'
 import { getToast } from './utils-server/toast.server'
 import { combineHeaders } from './utils-server/headers.server'
 
+import { getServerT } from './utils-server/i18n.server'
 import { getHints, getClientHintCheckScript } from './utils-client/client-hints'
 
 import faviconAssetUrl from './assets/favicon.svg?url'
@@ -80,16 +81,20 @@ export const links: Route.LinksFunction = () => [
 	},
 ]
 
-export function meta({ error }: Route.MetaArgs) {
+export function meta({ data, error }: Route.MetaArgs) {
 	return [
-		{ title: !error ? 'Finway' : 'Error | Finway' },
+		{
+			title: !error
+				? (data?.meta.title ?? 'Finway')
+				: (data?.meta.errorTitle ?? 'Error | Finway'),
+		},
 		{
 			property: 'og:title',
-			content: 'Finway',
+			content: data?.meta.title ?? 'Finway',
 		},
 		{
 			name: 'description',
-			content: 'The hub for your finances',
+			content: data?.meta.description ?? 'The hub for your finances',
 		},
 	]
 }
@@ -99,6 +104,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const { toast, headers: toastHeaders } = await getToast(request)
 	const locale = getLocale(context)
 	const localeHeaders = await getLocaleHeaders(locale)
+	const t = getServerT(context, 'components')
 
 	return data(
 		{
@@ -108,6 +114,11 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 			toast,
 			hints: getHints(),
 			theme: await getTheme(request),
+			meta: {
+				title: t('root.meta.title'),
+				errorTitle: t('root.meta.errorTitle'),
+				description: t('root.meta.description'),
+			},
 		},
 		{ headers: combineHeaders(toastHeaders, localeHeaders) },
 	)
@@ -166,16 +177,16 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
 export function ErrorBoundary() {
 	const error = useRouteError()
-	const { i18n } = useTranslation()
+	const { i18n, t } = useTranslation('components')
 
 	let status = 500
-	let message = 'An unexpected error occurred.'
+	let message = t('root.error.unexpected')
 
 	if (isRouteErrorResponse(error)) {
 		status = error.status
 		message =
 			status === 404
-				? 'The page you were looking for could not be found.'
+				? t('root.error.notFound')
 				: (error.data?.message ?? error.statusText)
 	}
 

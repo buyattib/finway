@@ -1,6 +1,17 @@
 import type en from '../en/components'
 
 export default {
+	root: {
+		meta: {
+			title: 'Finway',
+			errorTitle: 'Error | Finway',
+			description: 'El centro de tus finanzas',
+		},
+		error: {
+			unexpected: 'Ocurrió un error inesperado.',
+			notFound: 'La página que buscabas no fue encontrada.',
+		},
+	},
 	layout: {
 		nav: {
 			dashboard: 'Panel',
