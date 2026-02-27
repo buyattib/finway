@@ -105,7 +105,7 @@ export default function TransactionCategories({
 	loaderData: { transactionCategories },
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
-	const { t } = useTranslation(['transaction-categories', 'components'])
+	const { t } = useTranslation('transaction-categories')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&

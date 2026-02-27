@@ -156,7 +156,7 @@ export default function CreateTransfer({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['transfers', 'components'])
+	const { t } = useTranslation('transfers')
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&

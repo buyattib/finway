@@ -155,7 +155,7 @@ export default function CreateExchange({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['exchanges', 'components'])
+	const { t } = useTranslation('exchanges')
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&

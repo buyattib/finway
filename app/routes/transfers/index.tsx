@@ -183,7 +183,7 @@ export default function Transfers({
 	loaderData: { transfers, pagination },
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
-	const { t } = useTranslation(['transfers', 'components'])
+	const { t } = useTranslation('transfers')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&

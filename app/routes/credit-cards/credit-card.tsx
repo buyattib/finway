@@ -320,7 +320,7 @@ export default function CreditCardDetails({
 	const location = useLocation()
 	const navigation = useNavigation()
 	const navigate = useNavigate()
-	const { t } = useTranslation(['credit-cards', 'components'])
+	const { t } = useTranslation('credit-cards')
 
 	const isLoading =
 		navigation.state === 'loading' &&

@@ -102,7 +102,7 @@ export default function CreateTransactionCategory({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['transaction-categories', 'components'])
+	const { t } = useTranslation('transaction-categories')
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&

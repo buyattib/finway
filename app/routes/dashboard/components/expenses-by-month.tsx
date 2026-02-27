@@ -46,7 +46,7 @@ function Layout({
 }
 
 export function ExpensesByMonth({ expensesByMonth }: Props) {
-	const { t } = useTranslation(['dashboard', 'components'])
+	const { t } = useTranslation('dashboard')
 	const currencies = Object.keys(expensesByMonth) as Array<TCurrency>
 
 	const [selectedCurrency, setSelectedCurrency] = useState<TCurrency>(
