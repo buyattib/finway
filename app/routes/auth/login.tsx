@@ -25,7 +25,7 @@ import {
 import { Button } from '~/components/ui/button'
 import { CheckboxField, ErrorList, TextField } from '~/components/forms'
 
-import { LoginEmail } from '~/emails/login'
+import LoginEmail from '~/emails/login'
 
 import { createMagicLink } from './server/magic-link.server'
 import { createLoginFormSchema } from './lib/schemas'
@@ -88,7 +88,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const result = await sendEmail({
 		to: email,
 		subject: t('login.action.emailSubject'),
-		react: <LoginEmail url={magicLink.toString()} />,
+		react: (
+			<LoginEmail
+				url={magicLink.toString()}
+				t={getServerT(context, 'emails')}
+			/>
+		),
 	})
 	if (result.status === 'error') {
 		console.error(result.error)

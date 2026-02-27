@@ -1,8 +1,13 @@
-import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { Button, Html } from '@react-email/components'
 
-export function LoginEmail({ url }: { url: string }) {
-	const { t } = useTranslation('emails')
+export default async function LoginEmail({
+	url,
+	t,
+}: {
+	url: string
+	t: TFunction<'emails'>
+}) {
 	return (
 		<Html>
 			<Button

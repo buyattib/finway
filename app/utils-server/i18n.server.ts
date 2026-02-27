@@ -11,12 +11,18 @@ export async function localeAction(formData: FormData) {
 	})
 
 	if (!submission.success) {
-		return data({ status: 'error' }, { status: 400 })
+		return data({ status: 'error', submission: undefined }, { status: 400 })
 	}
 
 	return data(
-		{ status: 'success' },
-		{ headers: { 'Set-Cookie': await localeCookie.serialize(submission.data.locale) } },
+		{ status: 'success', submission: undefined },
+		{
+			headers: {
+				'Set-Cookie': await localeCookie.serialize(
+					submission.data.locale,
+				),
+			},
+		},
 	)
 }
 
