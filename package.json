@@ -16,7 +16,7 @@
 		"db:drop": "dotenv -e .env.development -- drizzle-kit drop",
 		"db:push": "dotenv -e .env.development -- drizzle-kit push",
 		"db:studio": "dotenv -e .env.development -- drizzle-kit studio --port 6001 --verbose",
-		"email": "email dev --dir app/emails --port 6000",
+		"email": "email dev --dir app/emails --port 3001",
 		"typecheck": "react-router typegen && tsc -b",
 		"format": "pnpm exec prettier . --write"
 	},

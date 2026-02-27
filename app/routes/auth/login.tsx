@@ -143,9 +143,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
 		<Card className='mx-auto w-full max-w-lg gap-4'>
 			<CardHeader>
 				<CardTitle>{t('login.title')}</CardTitle>
-				<CardDescription>
-					{t('login.description')}
-				</CardDescription>
+				<CardDescription>{t('login.description')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form method='post' {...getFormProps(form)}>

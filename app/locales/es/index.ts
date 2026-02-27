@@ -1,6 +1,7 @@
 import type { ResourceLanguage } from 'i18next'
 
 import auth from '~/routes/auth/lib/locales/es'
+import emails from '~/emails/lib/locales/es'
 import accounts from '~/routes/accounts/lib/locales/es'
 import dashboard from '~/routes/dashboard/lib/locales/es'
 import exchanges from '~/routes/exchanges/lib/locales/es'
@@ -13,6 +14,7 @@ import components from './components'
 export default {
 	components,
 	auth,
+	emails,
 	accounts,
 	dashboard,
 	exchanges,
