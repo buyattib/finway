@@ -75,6 +75,7 @@ export default {
 				categoryNotFound: 'Transaction category not found',
 				insufficientBalance:
 					'Insufficient balance for the selected account and currency',
+				invalidActionError: 'Invalid action',
 			},
 			title: 'Create a transaction',
 			submitButton: 'Create',
@@ -84,6 +85,9 @@ export default {
 				title: 'Edit transaction {{transactionId}} | Finway',
 				description: 'Edit transaction {{transactionId}} | Finway',
 			},
+			loader: {
+				notFoundError: 'Transaction not found',
+			},
 			action: {
 				successToast: 'Transaction edited successfully',
 				transactionNotFound: 'Transaction not found',
@@ -92,6 +96,7 @@ export default {
 				categoryNotFound: 'Transaction category not found',
 				insufficientBalance:
 					'Insufficient balance for the selected account and currency',
+				invalidActionError: 'Invalid action',
 			},
 			title: 'Edit transaction',
 			submitButton: 'Update',

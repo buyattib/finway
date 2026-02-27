@@ -34,6 +34,7 @@ export default {
 			action: {
 				successToast: 'Cuenta creada exitosamente',
 				duplicateError: 'Ya existe una cuenta con este nombre y tipo',
+				invalidActionError: 'Acción inválida',
 			},
 			title: 'Crear una cuenta',
 			submitButton: 'Crear',
@@ -51,6 +52,7 @@ export default {
 				successToast: 'Cuenta actualizada exitosamente',
 				accountWithIdNotFoundError: 'Cuenta con id {{id}} no encontrada',
 				duplicateError: 'Ya existe una cuenta con este nombre y tipo',
+				invalidActionError: 'Acción inválida',
 			},
 			title: 'Editar cuenta',
 			submitButton: 'Actualizar',

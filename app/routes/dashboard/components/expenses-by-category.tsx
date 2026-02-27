@@ -74,7 +74,7 @@ export function ExpensesByCategory({
 	expensesByCategory,
 	monthExpenses,
 }: Props) {
-	const { t } = useTranslation('dashboard')
+	const { t } = useTranslation(['dashboard', 'components'])
 	const currencies = Object.keys(expensesByCategory) as Array<TCurrency>
 
 	const [selectedCurrency, setSelectedCurrency] = useState<TCurrency>(

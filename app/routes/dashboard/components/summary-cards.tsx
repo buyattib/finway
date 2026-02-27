@@ -16,7 +16,7 @@ import { CurrencyIcon } from '~/components/currency-icon'
 export function SummaryCards({
 	summary,
 }: Pick<Route.ComponentProps['loaderData'], 'summary'>) {
-	const { t } = useTranslation('dashboard')
+	const { t } = useTranslation(['dashboard', 'components'])
 
 	const cards = [
 		{

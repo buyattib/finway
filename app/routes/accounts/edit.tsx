@@ -111,7 +111,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 	}
 
 	if (submission.value.action !== ACTION_EDITION) {
-		throw new Response('Invalid action', { status: 422 })
+		throw new Response(t('form.edit.action.invalidActionError'), { status: 422 })
 	}
 
 	const { action, id, ...body } = submission.value

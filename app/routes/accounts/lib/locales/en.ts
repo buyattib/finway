@@ -32,6 +32,7 @@ export default {
 			action: {
 				successToast: 'Account created successfully',
 				duplicateError: 'An account with this name and type already exists',
+				invalidActionError: 'Invalid action',
 			},
 			title: 'Create an account',
 			submitButton: 'Create',
@@ -49,6 +50,7 @@ export default {
 				successToast: 'Account updated successfully',
 				accountWithIdNotFoundError: 'Account with id {{id}} not found',
 				duplicateError: 'An account with this name and type already exists',
+				invalidActionError: 'Invalid action',
 			},
 			title: 'Edit account',
 			submitButton: 'Update',

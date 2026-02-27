@@ -78,6 +78,7 @@ export default {
 				categoryNotFound: 'Categoría de transacción no encontrada',
 				insufficientBalance:
 					'Saldo insuficiente para la cuenta y moneda seleccionadas',
+				invalidActionError: 'Acción inválida',
 			},
 			title: 'Crear una transacción',
 			submitButton: 'Crear',
@@ -87,6 +88,9 @@ export default {
 				title: 'Editar transacción {{transactionId}} | Finway',
 				description: 'Editar transacción {{transactionId}} | Finway',
 			},
+			loader: {
+				notFoundError: 'Transacción no encontrada',
+			},
 			action: {
 				successToast: 'Transacción editada exitosamente',
 				transactionNotFound: 'Transacción no encontrada',
@@ -95,6 +99,7 @@ export default {
 				categoryNotFound: 'Categoría de transacción no encontrada',
 				insufficientBalance:
 					'Saldo insuficiente para la cuenta y moneda seleccionadas',
+				invalidActionError: 'Acción inválida',
 			},
 			title: 'Editar transacción',
 			submitButton: 'Actualizar',

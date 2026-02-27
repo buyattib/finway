@@ -138,7 +138,7 @@ export default function CreditCardTransaction({
 	const { brand, last4, expiryMonth, expiryYear, accountName, currencyCode } =
 		creditCard
 	const { date, type, amount, description, categoryName } = transaction
-	const { t } = useTranslation('credit-cards')
+	const { t } = useTranslation(['credit-cards', 'components'])
 
 	return (
 		<div className='flex flex-col gap-6'>

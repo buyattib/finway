@@ -169,7 +169,7 @@ export default function Exchanges({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation('exchanges')
+	const { t } = useTranslation(['exchanges', 'components'])
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&

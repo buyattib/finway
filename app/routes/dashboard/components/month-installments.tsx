@@ -16,7 +16,7 @@ type LoaderData = Route.ComponentProps['loaderData']
 type Props = Pick<LoaderData, 'monthInstallments'>
 
 export function MonthInstallments({ monthInstallments }: Props) {
-	const { t } = useTranslation('dashboard')
+	const { t } = useTranslation(['dashboard', 'components'])
 
 	return (
 		<section

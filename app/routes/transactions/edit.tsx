@@ -57,7 +57,7 @@ export async function loader({
 	})
 
 	if (!transaction || transaction.account.ownerId !== user.id) {
-		throw new Response('Transaction not found', { status: 404 })
+		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
 
 	const { account, ...transactionData } = transaction
@@ -198,7 +198,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	if (submission.value.action !== ACTION_EDITION) {
-		throw new Response('Invalid action', { status: 422 })
+		throw new Response(t('form.edit.action.invalidActionError'), { status: 422 })
 	}
 
 	const { action, id: transactionId, ...transactionData } = submission.value

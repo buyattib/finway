@@ -47,7 +47,7 @@ export function CreditCardForm({
 }: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation('credit-cards')
+	const { t } = useTranslation(['credit-cards', 'components'])
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
