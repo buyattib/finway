@@ -4,6 +4,7 @@ import {
 	useNavigation,
 	type MiddlewareFunction,
 } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import {
 	ArrowRightLeftIcon,
 	ArrowUpDownIcon,
@@ -49,37 +50,37 @@ export async function loader({ context }: Route.LoaderArgs) {
 const links = [
 	{
 		to: '/app/dashboard',
-		labelKey: 'Dashboard',
+		labelKey: 'layout.nav.dashboard' as const,
 		icon: <LayoutDashboard />,
 	},
 	{
 		to: '/app/accounts',
-		labelKey: 'Accounts',
+		labelKey: 'layout.nav.accounts' as const,
 		icon: <WalletIcon />,
 	},
 	{
 		to: '/app/transactions',
-		labelKey: 'Transactions',
+		labelKey: 'layout.nav.transactions' as const,
 		icon: <BanknoteArrowDownIcon />,
 	},
 	{
 		to: '/app/credit-cards',
-		labelKey: 'Credit Cards',
+		labelKey: 'layout.nav.creditCards' as const,
 		icon: <CreditCardIcon />,
 	},
 	{
 		to: '/app/transfers',
-		labelKey: 'Transfers',
+		labelKey: 'layout.nav.transfers' as const,
 		icon: <ArrowRightLeftIcon />,
 	},
 	{
 		to: '/app/exchanges',
-		labelKey: 'Exchanges',
+		labelKey: 'layout.nav.exchanges' as const,
 		icon: <ArrowUpDownIcon />,
 	},
 	{
 		to: '/app/transaction-categories',
-		labelKey: 'Transaction Categories',
+		labelKey: 'layout.nav.transactionCategories' as const,
 		icon: <ListIcon />,
 	},
 ]
@@ -99,6 +100,7 @@ function PrivateLayoutContent({
 }: {
 	user: Route.ComponentProps['loaderData']['user']
 }) {
+	const { t } = useTranslation('components')
 	const navigation = useNavigation()
 	const isLoading =
 		navigation.state === 'loading' &&
@@ -133,7 +135,7 @@ function PrivateLayoutContent({
 													onClick={closeSidebar}
 												>
 													{link.icon}
-													{link.labelKey}
+													{t(link.labelKey)}
 												</SidebarMenuButton>
 											)}
 										</NavLink>

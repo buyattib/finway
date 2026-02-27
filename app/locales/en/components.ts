@@ -1,4 +1,16 @@
 export default {
+	layout: {
+		nav: {
+			dashboard: 'Dashboard',
+			accounts: 'Accounts',
+			transactions: 'Transactions',
+			creditCards: 'Credit Cards',
+			transfers: 'Transfers',
+			exchanges: 'Exchanges',
+			transactionCategories: 'Transaction Categories',
+		},
+		logoutButton: 'Logout',
+	},
 	accountType: {
 		bank: 'Bank',
 		cash: 'Cash',
