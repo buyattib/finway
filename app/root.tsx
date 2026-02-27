@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
 	data,
 	isRouteErrorResponse,
@@ -15,6 +16,12 @@ import { subscribeToSchemeChange } from '@epic-web/client-hints/color-scheme'
 
 import type { Route } from './+types/root'
 
+import {
+	i18nextMiddleware,
+	getLocale,
+	getLocaleHeaders,
+} from './middleware/i18next'
+
 import { Toaster } from './components/ui/sonner'
 import { useTheme } from './components/theme-toggle'
 import { ShowToast } from './components/show-toast'
@@ -25,11 +32,14 @@ import { honeypot } from './utils-server/honeypot.server'
 import { getToast } from './utils-server/toast.server'
 import { combineHeaders } from './utils-server/headers.server'
 
+import { getServerT } from './utils-server/i18n.server'
 import { getHints, getClientHintCheckScript } from './utils-client/client-hints'
 
 import faviconAssetUrl from './assets/favicon.svg?url'
 import fontsCssHref from './styles/fonts.css?url'
 import tailwindCssHref from './styles/tailwind.css?url'
+
+export const middleware = [i18nextMiddleware]
 
 export const links: Route.LinksFunction = () => [
 	{
@@ -71,16 +81,20 @@ export const links: Route.LinksFunction = () => [
 	},
 ]
 
-export function meta({ error }: Route.MetaArgs) {
+export function meta({ data, error }: Route.MetaArgs) {
 	return [
-		{ title: !error ? 'Finway' : 'Error | Finway' },
+		{
+			title: !error
+				? (data?.meta.title ?? 'Finway')
+				: (data?.meta.errorTitle ?? 'Error | Finway'),
+		},
 		{
 			property: 'og:title',
-			content: 'Finway',
+			content: data?.meta.title ?? 'Finway',
 		},
 		{
 			name: 'description',
-			content: 'The hub for your finances',
+			content: data?.meta.description ?? 'The hub for your finances',
 		},
 	]
 }
@@ -88,28 +102,48 @@ export function meta({ error }: Route.MetaArgs) {
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const { cspNonce } = context.get(globalContext)
 	const { toast, headers: toastHeaders } = await getToast(request)
+	const locale = getLocale(context)
+	const localeHeaders = await getLocaleHeaders(locale)
+	const t = getServerT(context, 'components')
 
 	return data(
 		{
+			locale,
 			cspNonce,
 			honeyProps: await honeypot.getInputProps(),
 			toast,
 			hints: getHints(),
 			theme: await getTheme(request),
+			meta: {
+				title: t('root.meta.title'),
+				errorTitle: t('root.meta.errorTitle'),
+				description: t('root.meta.description'),
+			},
 		},
-		{ headers: combineHeaders(toastHeaders) },
+		{ headers: combineHeaders(toastHeaders, localeHeaders) },
 	)
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-	const nonce = loaderData?.cspNonce
+	const { i18n } = useTranslation()
 	const theme = useTheme()
+
+	const { locale, ...rest } = loaderData
+	const nonce = rest?.cspNonce
 
 	const { revalidate } = useRevalidator()
 	useEffect(() => subscribeToSchemeChange(() => revalidate()), [revalidate])
 
+	useEffect(() => {
+		if (i18n.language !== locale) i18n.changeLanguage(locale)
+	}, [locale, i18n])
+
 	return (
-		<html lang='en' className={theme}>
+		<html
+			lang={i18n.language}
+			dir={i18n.dir(i18n.language)}
+			className={theme}
+		>
 			<head>
 				<meta charSet='utf-8' />
 				<meta
@@ -143,20 +177,21 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
 export function ErrorBoundary() {
 	const error = useRouteError()
+	const { i18n, t } = useTranslation('components')
 
 	let status = 500
-	let message = 'An unexpected error occurred.'
+	let message = t('root.error.unexpected')
 
 	if (isRouteErrorResponse(error)) {
 		status = error.status
 		message =
 			status === 404
-				? 'The page you were looking for could not be found.'
+				? t('root.error.notFound')
 				: (error.data?.message ?? error.statusText)
 	}
 
 	return (
-		<html lang='en'>
+		<html lang={i18n.language}>
 			<head>
 				<meta charSet='utf-8' />
 				<meta

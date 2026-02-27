@@ -1,29 +1,29 @@
 import { z } from 'zod'
+import type { TFunction } from 'i18next'
+
 import { encrypt, decrypt } from './encryption.server'
 
 const tokenKey = 'token'
 export const magicLinkExpirationTime = 1000 * 60 * 15 // 15 minutes
 
-const MagicLinkPayloadSchema = z.object({
-	emailAddress: z.string(
-		'Sign in link invalid (email is not a string). Please request a new one.',
-	),
-	creationDate: z
-		.string(
-			'Sign in link invalid (link expiration is not a string). Please request a new one.',
-		)
-		.refine(
-			val => {
-				const linkCreationDate = new Date(val)
-				const expirationTime =
-					linkCreationDate.getTime() + magicLinkExpirationTime
-				return Date.now() < expirationTime
-			},
-			{ error: 'Magic link expired. Please request a new one.' },
-		),
-})
+function createMagicLinkPayloadSchema(t: TFunction<'auth'>) {
+	return z.object({
+		emailAddress: z.string(t('magicLink.invalidEmail')),
+		creationDate: z
+			.string(t('magicLink.invalidExpiration'))
+			.refine(
+				val => {
+					const linkCreationDate = new Date(val)
+					const expirationTime =
+						linkCreationDate.getTime() + magicLinkExpirationTime
+					return Date.now() < expirationTime
+				},
+				{ error: t('magicLink.expired') },
+			),
+	})
+}
 
-type MagicLinkPayload = z.infer<typeof MagicLinkPayloadSchema>
+type MagicLinkPayload = z.infer<ReturnType<typeof createMagicLinkPayloadSchema>>
 
 export function createMagicLink({
 	emailAddress,
@@ -45,7 +45,10 @@ export function createMagicLink({
 	return url
 }
 
-export async function validateMagicLink(link: string) {
+export async function validateMagicLink(
+	link: string,
+	t: TFunction<'auth'>,
+) {
 	const url = new URL(link)
 	const linkCode = url.searchParams.get(tokenKey) ?? ''
 
@@ -55,12 +58,10 @@ export async function validateMagicLink(link: string) {
 		parsed = JSON.parse(decryptedString)
 	} catch (error: unknown) {
 		console.error(error)
-		throw new Error(
-			'Sign in link invalid (link payload is invalid). Please request a new one.',
-		)
+		throw new Error(t('magicLink.invalidPayload'))
 	}
 
-	const payload = MagicLinkPayloadSchema.safeParse(parsed)
+	const payload = createMagicLinkPayloadSchema(t).safeParse(parsed)
 	if (!payload.success) throw new Error(payload.error.message)
 
 	return payload.data.emailAddress

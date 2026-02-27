@@ -1,13 +1,15 @@
 import { useRef } from 'react'
 import { Form, useSubmit } from 'react-router'
+import { useTranslation } from 'react-i18next'
+
 import type { Route } from '../+types'
+
+import { TRANSACTION_TYPES } from '~/lib/constants'
 
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { Combobox } from '~/components/ui/combobox'
-
-import { TRANSACTION_TYPES, TRANSACTION_TYPE_LABEL } from '~/lib/constants'
 
 export function TransactionsFilters({
 	filters,
@@ -18,11 +20,12 @@ export function TransactionsFilters({
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)
+	const { t } = useTranslation(['transactions', 'components'])
 
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: TRANSACTION_TYPE_LABEL[i],
+		label: t(`components:transactionType.${i}`),
 	}))
 
 	const accountOptions = selectData.accounts.map(
@@ -57,7 +60,7 @@ export function TransactionsFilters({
 					options={accountOptions}
 					name='accountId'
 					defaultValue={filters.accountId}
-					buttonPlaceholder='Filter by account'
+					buttonPlaceholder={t('filters.account')}
 					onValueChange={() => {
 						if (!form.current) return
 						submit(form.current)
@@ -67,7 +70,7 @@ export function TransactionsFilters({
 					options={currencyOptions}
 					name='currencyId'
 					defaultValue={filters.currencyId}
-					buttonPlaceholder='Filter by currency'
+					buttonPlaceholder={t('filters.currency')}
 					onValueChange={() => {
 						if (!form.current) return
 						submit(form.current)
@@ -77,7 +80,7 @@ export function TransactionsFilters({
 					options={transactionCategoryOptions}
 					name='transactionCategoryId'
 					defaultValue={filters.transactionCategoryId}
-					buttonPlaceholder='Filter by category'
+					buttonPlaceholder={t('filters.category')}
 					onValueChange={() => {
 						if (!form.current) return
 						submit(form.current)
@@ -87,7 +90,7 @@ export function TransactionsFilters({
 					options={transactionTypeOptions}
 					name='transactionType'
 					defaultValue={filters.transactionType}
-					buttonPlaceholder='Filter by type'
+					buttonPlaceholder={t('filters.type')}
 					onValueChange={() => {
 						if (!form.current) return
 						submit(form.current)

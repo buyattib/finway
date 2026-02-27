@@ -1,7 +1,7 @@
 import type { Route } from './+types'
 
+import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-
 import { getBalances } from '~/lib/queries'
 import type { TCurrency } from '~/lib/types'
 import {
@@ -25,24 +25,18 @@ import { ExpensesByCategory } from './components/expenses-by-category'
 import { ExpensesByMonth } from './components/expenses-by-month'
 import { MonthInstallments } from './components/month-installments'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Dashboard | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Dashboard | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Your financial dashboard',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'dashboard')
 
 	const summary = {
 		balances: (
@@ -128,6 +122,10 @@ export async function loader({ context }: Route.LoaderArgs) {
 	)
 
 	return {
+		meta: {
+			title: t('index.meta.title'),
+			description: t('index.meta.description'),
+		},
 		summary,
 		expensesByCategory,
 		expensesByMonth,

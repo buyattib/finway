@@ -10,17 +10,19 @@ import {
 	requireAnonymous,
 } from '~/utils-server/auth.server'
 import { redirectWithToast } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
 
 import { validateMagicLink } from './server/magic-link.server'
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'auth')
 
 	await requireAnonymous(request, db)
 
 	let email
 	try {
-		email = await validateMagicLink(request.url)
+		email = await validateMagicLink(request.url, t)
 	} catch (err) {
 		const authHeaders = await removeAuthSession(request)
 		return await redirectWithToast(
@@ -28,7 +30,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 			request,
 			{
 				type: 'error',
-				title: 'Error logging in',
+				title: t('authenticate.action.errorToast'),
 				description: String(err),
 			},
 			{ headers: authHeaders },
@@ -64,8 +66,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		request,
 		{
 			type: 'success',
-			title: 'Logged in!',
-			description: 'You were successfully logged in',
+			title: t('authenticate.action.successToast'),
+			description: t('authenticate.action.successDescription'),
 		},
 		{ headers: authHeaders },
 	)

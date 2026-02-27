@@ -2,15 +2,19 @@ import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq } from 'drizzle-orm'
+import { useTranslation } from 'react-i18next'
 import type { Route } from './+types/account'
 
-import { dbContext, userContext } from '~/lib/context'
 import { account as accountTable } from '~/database/schema'
-import { formatNumber, getCurrencyData } from '~/lib/utils'
 import {
 	createToastHeaders,
 	redirectWithToast,
 } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+
+import { dbContext, userContext } from '~/lib/context'
+import { formatNumber, getCurrencySymbol } from '~/lib/utils'
+import { getBalances } from '~/lib/queries'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -24,43 +28,16 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
-import { getBalances } from '~/lib/queries'
-import { ACCOUNT_TYPE_LABEL } from '~/lib/constants'
 import { DeleteAccountFormSchema } from './lib/schemas'
 
-export function meta({ loaderData, params: { accountId } }: Route.MetaArgs) {
-	if (!loaderData?.account) {
-		return [
-			{
-				title: `Account ${accountId} not found | Finway`,
-			},
-			{
-				property: 'og:title',
-				content: `Account ${accountId} not found | Finway`,
-			},
-			{
-				name: 'description',
-				content: `Account ${accountId} not found | Finway`,
-			},
-		]
-	}
-
-	const {
-		account: { name },
-	} = loaderData
-
+export function meta({ loaderData }: Route.MetaArgs) {
+	const title = loaderData?.account
+		? loaderData.meta.title
+		: loaderData?.meta.notFoundTitle
 	return [
-		{
-			title: `Account ${name} | Finway`,
-		},
-		{
-			property: 'og:title',
-			content: `Account ${name} | Finway`,
-		},
-		{
-			name: 'description',
-			content: `Account ${name} | Finway`,
-		},
+		{ title },
+		{ property: 'og:title', content: title },
+		{ name: 'description', content: loaderData?.meta.description ?? title },
 	]
 }
 
@@ -70,6 +47,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'accounts')
 
 	const account = await db.query.account.findFirst({
 		where: eq(accountTable.id, accountId),
@@ -82,19 +60,27 @@ export async function loader({
 		},
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response('Account not found', { status: 404 })
+		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
 
 	const balances = await getBalances({ db, ownerId: user.id, accountId })
 
 	const { ownerId, ...accountData } = account
 
-	return { account: { ...accountData, balances } }
+	return {
+		account: { ...accountData, balances },
+		meta: {
+			title: t('details.meta.title', { name: account.name }),
+			notFoundTitle: t('details.meta.notFoundTitle', { accountId }),
+			description: t('details.meta.description', { name: account.name }),
+		},
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'accounts')
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -104,8 +90,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (submission.status !== 'success') {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'Could not delete account',
-			description: 'Please try again',
+			title: t('details.action.deleteErrorToast'),
+			description: t('details.action.deleteErrorToastDescription'),
 		})
 
 		return data({}, { headers: toastHeaders })
@@ -117,14 +103,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 		columns: { name: true, ownerId: true },
 	})
 	if (!account || account.ownerId !== user.id) {
-		throw new Response('Account not found', { status: 404 })
+		throw new Response(t('details.action.notFoundError'), { status: 404 })
 	}
 
 	await db.delete(accountTable).where(eq(accountTable.id, accountId))
 
 	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',
-		title: `Account ${account.name} deleted`,
+		title: t('details.action.successToast', { name: account.name }),
 	})
 }
 
@@ -135,6 +121,7 @@ export default function AccountDetails({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation(['accounts', 'components'])
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname &&
@@ -142,7 +129,7 @@ export default function AccountDetails({
 
 	return (
 		<div className='flex flex-col gap-6'>
-			<div className='flex flex-col gap-4'>
+			<section className='flex flex-col gap-4'>
 				<div className='flex items-center gap-4'>
 					<AccountTypeIcon accountType={accountType} />
 					<div className='flex flex-col gap-2'>
@@ -150,7 +137,7 @@ export default function AccountDetails({
 							{name}
 						</Title>
 						<Text size='sm' theme='primary'>
-							{ACCOUNT_TYPE_LABEL[accountType]}
+							{t(`components:accountType.${accountType}`)}
 						</Text>
 					</div>
 					<div className='flex items-center gap-2 ml-auto'>
@@ -181,36 +168,34 @@ export default function AccountDetails({
 											<TrashIcon aria-hidden />
 										)}
 										<span className='sr-only'>
-											Delete account {name}
+											{t('details.deleteAriaLabel', {
+												name,
+											})}
 										</span>
 									</Button>
 								</TooltipTrigger>
 							</Form>
 							<TooltipContent>
-								Deleting an account cannot be undone and it
-								deletes all transactions, transfers or exchanges
-								associated with it.
+								{t('details.deleteTooltip')}
 							</TooltipContent>
 						</Tooltip>
 					</div>
 				</div>
 				<Text theme='muted'>{description}</Text>
-			</div>
+			</section>
 
-			<div className='flex flex-col gap-2'>
+			<section className='flex flex-col gap-2'>
 				<div className='border-b border-b-accent py-2'>
 					<Title id={id} level='h3'>
-						Currency balances
+						{t('details.currencyBalancesTitle')}
 					</Title>
 				</div>
 				{balances.length === 0 ? (
-					<Text alignment='center'>
-						You dont have any activity in this account yet.
-					</Text>
+					<Text alignment='center'>{t('details.emptyBalances')}</Text>
 				) : (
 					<ul className='flex flex-col gap-2' aria-labelledby={id}>
 						{balances.map(({ currencyId, balance, currency }) => {
-							const { symbol, label } = getCurrencyData(currency)
+							const symbol = getCurrencySymbol(currency)
 							return (
 								<li
 									key={currencyId}
@@ -221,7 +206,7 @@ export default function AccountDetails({
 											currency={currency}
 											size='md'
 										/>
-										{label}
+										{t(`components:currency.${currency}`)}
 									</Text>
 									<Text>
 										{`${symbol} ${formatNumber(balance)}`}
@@ -231,7 +216,7 @@ export default function AccountDetails({
 						})}
 					</ul>
 				)}
-			</div>
+			</section>
 		</div>
 	)
 }

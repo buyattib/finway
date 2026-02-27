@@ -9,12 +9,14 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm } from '@conform-to/react'
 import { ArrowLeftIcon } from 'lucide-react'
+import { Trans, useTranslation } from 'react-i18next'
 import type { Route } from './+types/create'
 
-import { dbContext, userContext } from '~/lib/context'
 import { exchange as exchangeTable } from '~/database/schema'
-import { initializeDate, removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+import { dbContext, userContext } from '~/lib/context'
+import { initializeDate, removeCommas } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -36,100 +38,103 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 import { getBalances, getSelectData } from '~/lib/queries'
+import { createExchangeFormSchema } from './lib/schemas'
 
-import { CreateExchangeFormSchema } from './lib/schemas'
-
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Create an exchange | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Create an exchange | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Create a currency exchange to track your money',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'exchanges')
 
 	const { accounts, currencies } = await getSelectData(db, user.id)
 
-	return { accounts, currencies }
+	return {
+		accounts,
+		currencies,
+		meta: {
+			title: t('form.create.meta.title'),
+			description: t('form.create.meta.description'),
+		},
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'exchanges')
 
 	const formData = await request.formData()
 
 	const submission = await parseWithZod(formData, {
 		async: true,
-		schema: CreateExchangeFormSchema.transform(data => ({
-			...data,
-			fromAmount: Number(removeCommas(data.fromAmount)) * 100,
-			toAmount: Number(removeCommas(data.toAmount)) * 100,
-		})).superRefine(async (data, ctx) => {
-			const account = await db.query.account.findFirst({
-				where: (account, { eq }) => eq(account.id, data.accountId),
-				columns: { ownerId: true },
-			})
-			if (!account || account.ownerId !== user.id) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'Account not found',
-					path: ['accountId'],
+		schema: createExchangeFormSchema(t)
+			.transform(data => ({
+				...data,
+				fromAmount: Number(removeCommas(data.fromAmount)) * 100,
+				toAmount: Number(removeCommas(data.toAmount)) * 100,
+			}))
+			.superRefine(async (data, ctx) => {
+				const account = await db.query.account.findFirst({
+					where: (account, { eq }) => eq(account.id, data.accountId),
+					columns: { ownerId: true },
 				})
-			}
+				if (!account || account.ownerId !== user.id) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t('form.create.action.accountNotFound'),
+						path: ['accountId'],
+					})
+				}
 
-			const fromCurrency = await db.query.currency.findFirst({
-				where: (currency, { eq }) =>
-					eq(currency.id, data.fromCurrencyId),
-				columns: { id: true },
-			})
-			if (!fromCurrency) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'From currency not found',
-					path: ['fromCurrencyId'],
+				const fromCurrency = await db.query.currency.findFirst({
+					where: (currency, { eq }) =>
+						eq(currency.id, data.fromCurrencyId),
+					columns: { id: true },
 				})
-			}
+				if (!fromCurrency) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t('form.create.action.fromCurrencyNotFound'),
+						path: ['fromCurrencyId'],
+					})
+				}
 
-			const toCurrency = await db.query.currency.findFirst({
-				where: (currency, { eq }) => eq(currency.id, data.toCurrencyId),
-				columns: { id: true },
-			})
-			if (!toCurrency) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'to currency not found',
-					path: ['toCurrencyId'],
+				const toCurrency = await db.query.currency.findFirst({
+					where: (currency, { eq }) =>
+						eq(currency.id, data.toCurrencyId),
+					columns: { id: true },
 				})
-			}
+				if (!toCurrency) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t('form.create.action.toCurrencyNotFound'),
+						path: ['toCurrencyId'],
+					})
+				}
 
-			const { accountId, fromCurrencyId: currencyId } = data
-			const [result] = await getBalances({
-				db,
-				ownerId: user.id,
-				accountId,
-				currencyId,
-				parseBalance: false,
-			})
-			if (!result || result.balance < data.fromAmount) {
-				return ctx.addIssue({
-					code: 'custom',
-					message:
-						'Insufficient balance in the selected from currency',
-					path: ['fromAmount'],
+				const { accountId, fromCurrencyId: currencyId } = data
+				const [result] = await getBalances({
+					db,
+					ownerId: user.id,
+					accountId,
+					currencyId,
+					parseBalance: false,
 				})
-			}
-		}),
+				if (!result || result.balance < data.fromAmount) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t('form.create.action.insufficientBalance'),
+						path: ['fromAmount'],
+					})
+				}
+			}),
 	})
 
 	if (submission.status !== 'success') {
@@ -140,7 +145,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	return await redirectWithToast(`/app/exchanges`, request, {
 		type: 'success',
-		title: 'Exchange created successfully',
+		title: t('form.create.action.successToast'),
 	})
 }
 
@@ -150,14 +155,18 @@ export default function CreateExchange({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation('exchanges')
+
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
+	const schema = createExchangeFormSchema(t)
+
 	const [form, fields] = useForm({
 		lastResult: actionData?.submission,
 		id: 'create-exchange-form',
-		shouldValidate: 'onInput',
+		shouldValidate: 'onBlur',
 		defaultValue: {
 			date: initializeDate().toISOString(),
 			fromAmount: '0',
@@ -166,10 +175,10 @@ export default function CreateExchange({
 			toCurrencyId: '',
 			accountId: '',
 		},
-		constraint: getZodConstraint(CreateExchangeFormSchema),
+		constraint: getZodConstraint(schema),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: CreateExchangeFormSchema,
+				schema,
 			})
 		},
 	})
@@ -195,12 +204,9 @@ export default function CreateExchange({
 							<ArrowLeftIcon />
 						</Link>
 					</Button>
-					<CardTitle>Create an exchange</CardTitle>
+					<CardTitle>{t('form.create.title')}</CardTitle>
 				</div>
-				<CardDescription>
-					Exchanges will affect your account balances and be used to
-					track your finances.
-				</CardDescription>
+				<CardDescription>{t('form.description')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form
@@ -217,56 +223,67 @@ export default function CreateExchange({
 						id={form.errorId}
 					/>
 
-					<DateField label='Date' field={fields.date} />
+					<DateField
+						label={t('form.dateLabel')}
+						field={fields.date}
+					/>
 
 					{accounts.length !== 0 ? (
 						<>
 							<ComboboxField
-								label='Account'
+								label={t('form.accountLabel')}
 								field={fields.accountId}
-								buttonPlaceholder='Select an account'
+								buttonPlaceholder={t('form.accountPlaceholder')}
 								options={accountOptions}
 							/>
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 								<ComboboxField
-									label='From Currency'
+									label={t('form.fromCurrencyLabel')}
 									field={fields.fromCurrencyId}
-									buttonPlaceholder='Select a currency'
+									buttonPlaceholder={t(
+										'form.currencyPlaceholder',
+									)}
 									options={currencyOptions}
 								/>
 								<ComboboxField
-									label='To Currency'
+									label={t('form.toCurrencyLabel')}
 									field={fields.toCurrencyId}
-									buttonPlaceholder='Select a currency'
+									buttonPlaceholder={t(
+										'form.currencyPlaceholder',
+									)}
 									options={currencyOptions}
 								/>
 							</div>
 
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 								<AmountField
-									label='From Amount'
+									label={t('form.fromAmountLabel')}
 									field={fields.fromAmount}
 								/>
 								<AmountField
-									label='To Amount'
+									label={t('form.toAmountLabel')}
 									field={fields.toAmount}
 								/>
 							</div>
 						</>
 					) : (
 						<Text size='sm' theme='muted' alignment='center'>
-							You need to create an account first. Do it{' '}
-							<Link
-								to={{
-									pathname: '/app/accounts/create',
-									search: createSearchParams({
-										redirectTo: location.pathname,
-									}).toString(),
-								}}
-								className='text-primary'
-							>
-								here
-							</Link>
+							<Trans
+								i18nKey='form.noAccountMessage'
+								ns='exchanges'
+								components={[
+									<Link
+										key='0'
+										to={{
+											pathname: '/app/accounts/create',
+											search: createSearchParams({
+												redirectTo: location.pathname,
+											}).toString(),
+										}}
+										className='text-primary'
+									/>,
+								]}
+							/>
 						</Text>
 					)}
 				</Form>
@@ -277,7 +294,7 @@ export default function CreateExchange({
 					variant='outline'
 					{...form.reset.getButtonProps()}
 				>
-					Reset
+					{t('form.resetButton')}
 				</Button>
 				<Button
 					width='full'
@@ -286,7 +303,7 @@ export default function CreateExchange({
 					disabled={isSubmitting}
 					loading={isSubmitting}
 				>
-					Create
+					{t('form.create.submitButton')}
 				</Button>
 			</CardFooter>
 		</Card>

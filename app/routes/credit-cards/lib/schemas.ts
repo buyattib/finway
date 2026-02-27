@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import type { TFunction } from 'i18next'
+
 import {
 	ACTION_CREATION,
 	ACTION_EDITION,
@@ -16,77 +18,111 @@ const ActionSchema = z.discriminatedUnion('action', [
 	}),
 ])
 
-export const CreditCardFormSchema = z
-	.object({
-		brand: z.string('Brand is required'),
-		last4: z
-			.string('Last 4 digits are required')
-			.regex(/^\d{4}$/, 'Must be exactly 4 digits'),
-		expiryMonth: z
-			.string('Expiry month is required')
-			.regex(/^\d{1,2}$/, 'Must be a valid month')
-			.refine(
-				value => {
-					const month = Number(value)
-					return month >= 1 && month <= 12
-				},
-				{ message: 'Must be between 1 and 12' },
-			),
-		expiryYear: z
-			.string('Expiry year is required')
-			.regex(/^\d{4}$/, 'Must be a 4-digit year')
-			.refine(
-				value => {
-					const year = Number(value)
-					return year >= new Date().getFullYear()
-				},
-				{ message: 'Must be a valid year in the future' },
-			),
+export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
+	return z
+		.object({
+			brand: z.string(t('form.schema.brandRequired')),
+			last4: z
+				.string(t('form.schema.last4Required'))
+				.regex(/^\d{4}$/, t('form.schema.last4Invalid')),
+			expiryMonth: z
+				.string(t('form.schema.expiryMonthRequired'))
+				.regex(/^\d{1,2}$/, t('form.schema.expiryMonthInvalid'))
+				.refine(
+					value => {
+						const month = Number(value)
+						return month >= 1 && month <= 12
+					},
+					{ message: t('form.schema.expiryMonthRange') },
+				),
+			expiryYear: z
+				.string(t('form.schema.expiryYearRequired'))
+				.regex(/^\d{4}$/, t('form.schema.expiryYearInvalid'))
+				.refine(
+					value => {
+						const year = Number(value)
+						return year >= new Date().getFullYear()
+					},
+					{ message: t('form.schema.expiryYearFuture') },
+				),
 
-		accountId: z.string('Account is required'),
-		currencyId: z.string('Currency is required'),
-	})
-	.and(ActionSchema)
+			accountId: z.string(t('form.schema.accountRequired')),
+			currencyId: z.string(t('form.schema.currencyRequired')),
+		})
+		.and(ActionSchema)
+}
+
+export type CreditCardFormSchema = ReturnType<typeof createCreditCardFormSchema>
 
 export const DeleteCreditCardFormSchema = z.object({
 	creditCardId: z.string(),
 	intent: z.literal('delete-card'),
 })
 
-export const CreditCardTransactionFormSchema = z
-	.object({
-		date: z.iso.datetime('Date is required'),
-		type: z.enum(CC_TRANSACTION_TYPES, 'Transaction type is required'),
-		amount: z
-			.string({ message: 'Amount is required' })
-			.refine(
-				value => {
-					const formatted = removeCommas(value)
-					return !isNaN(Number(formatted))
-				},
-				{ message: 'Amount must be a valid number' },
-			)
-			.refine(
-				value => {
-					const formatted = removeCommas(value)
-					return Number(formatted) > 0
-				},
-				{ message: 'Amount must be greater than zero' },
+export function createCreditCardTransactionFormSchema(
+	t: TFunction<'credit-cards'>,
+) {
+	return z
+		.object({
+			date: z.iso.datetime(t('transaction.create.schema.dateRequired')),
+			type: z.enum(
+				CC_TRANSACTION_TYPES,
+				t('transaction.create.schema.transactionTypeRequired'),
 			),
-		totalInstallments: z
-			.string()
-			.refine(value => !isNaN(Number(value)) && Number(value) >= 1, {
-				message: 'Must be at least 1',
-			}),
-		firstInstallmentDate: z.iso.datetime(),
-		description: z
-			.string()
-			.default('')
-			.transform(value => value?.trim()),
-		transactionCategoryId: z.string('Category is required'),
-		creditCardId: z.string('Credit card is required'),
-	})
-	.and(ActionSchema)
+			amount: z
+				.string({
+					message: t('transaction.create.schema.amountRequired'),
+				})
+				.refine(
+					value => {
+						const formatted = removeCommas(value)
+						return !isNaN(Number(formatted))
+					},
+					{
+						message: t(
+							'transaction.create.schema.amountInvalid',
+						),
+					},
+				)
+				.refine(
+					value => {
+						const formatted = removeCommas(value)
+						return Number(formatted) > 0
+					},
+					{
+						message: t(
+							'transaction.create.schema.amountPositive',
+						),
+					},
+				),
+			totalInstallments: z
+				.string()
+				.refine(
+					value => !isNaN(Number(value)) && Number(value) >= 1,
+					{
+						message: t(
+							'transaction.create.schema.installmentsMin',
+						),
+					},
+				),
+			firstInstallmentDate: z.iso.datetime(),
+			description: z
+				.string()
+				.default('')
+				.transform(value => value?.trim()),
+			transactionCategoryId: z.string(
+				t('transaction.create.schema.categoryRequired'),
+			),
+			creditCardId: z.string(
+				t('transaction.create.schema.creditCardRequired'),
+			),
+		})
+		.and(ActionSchema)
+}
+
+export type CreditCardTransactionFormSchema = ReturnType<
+	typeof createCreditCardTransactionFormSchema
+>
 
 export const DeleteCreditCardTransactionFormSchema = z.object({
 	creditCardTransactionId: z.string(),

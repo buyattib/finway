@@ -2,32 +2,28 @@ import { data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
 import type { Route } from './+types/create'
 
-import { dbContext, userContext } from '~/lib/context'
 import { creditCard as creditCardTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+import { dbContext, userContext } from '~/lib/context'
 import { getSelectData } from '~/lib/queries'
-
-import { CreditCardForm } from './components/form'
-import { CreditCardFormSchema } from './lib/schemas'
 import { ACTION_CREATION } from '~/lib/constants'
 
-export function meta() {
+import { CreditCardForm } from './components/form'
+import { createCreditCardFormSchema } from './lib/schemas'
+
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Create a credit card | Finway' },
-		{
-			property: 'og:title',
-			content: 'Create a credit card | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Create a credit card to track your expenses',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'credit-cards')
 
 	const url = new URL(request.url)
 	const accountIdParam = url.searchParams.get('accountId')
@@ -54,17 +50,22 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			accountId,
 			currencyId,
 		},
+		meta: {
+			title: t('form.create.meta.title'),
+			description: t('form.create.meta.description'),
+		},
 	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
 	const submission = await parseWithZod(formData, {
 		async: true,
-		schema: CreditCardFormSchema.superRefine(async (data, ctx) => {
+		schema: createCreditCardFormSchema(t).superRefine(async (data, ctx) => {
 			const account = await db.query.account.findFirst({
 				where: (account, { eq }) => eq(account.id, data.accountId),
 				columns: { ownerId: true },
@@ -72,7 +73,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			if (!account || account.ownerId !== user.id) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: 'Account not found',
+					message: t('form.create.action.accountNotFound'),
 					path: ['accountId'],
 				})
 			}
@@ -84,7 +85,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			if (!currency) {
 				return ctx.addIssue({
 					code: 'custom',
-					message: 'Currency not found',
+					message: t('form.create.action.currencyNotFound'),
 					path: ['currencyId'],
 				})
 			}
@@ -96,7 +97,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	if (submission.value.action !== ACTION_CREATION) {
-		throw new Response('Invalid action', { status: 422 })
+		throw new Response(t('form.create.action.invalidActionError'), { status: 422 })
 	}
 
 	const { action, ...creditCardData } = submission.value
@@ -105,7 +106,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	return await redirectWithToast('/app/credit-cards', request, {
 		type: 'success',
-		title: 'Credit card created successfully',
+		title: t('form.create.action.successToast'),
 	})
 }
 

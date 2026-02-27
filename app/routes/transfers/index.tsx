@@ -3,6 +3,7 @@ import { PlusIcon, TrashIcon } from 'lucide-react'
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { parseWithZod } from '@conform-to/zod/v4'
+import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
@@ -11,9 +12,12 @@ import {
 	account as accountTable,
 	transfer as transferTable,
 } from '~/database/schema'
+import { createToastHeaders } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber } from '~/lib/utils'
-import { createToastHeaders } from '~/utils-server/toast.server'
+import { getBalances } from '~/lib/queries'
+import { PAGE_SIZE } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -28,32 +32,23 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
+import { AccountTypeIcon } from '~/components/account-type-icon'
 import { TablePagination } from '~/components/table-pagination'
 
-import { getBalances } from '~/lib/queries'
-
 import { DeleteTransferFormSchema } from './lib/schemas'
-import { AccountTypeIcon } from '~/components/account-type-icon'
-import { PAGE_SIZE } from '~/lib/constants'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Transfers | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Transfers | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Your transfers between accounts',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'transfers')
 
 	const url = new URL(request.url)
 	const page = Number(url.searchParams.get('page') ?? '1')
@@ -104,12 +99,17 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	return {
 		transfers,
 		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
+		meta: {
+			title: t('index.meta.title'),
+			description: t('index.meta.description'),
+		},
 	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'transfers')
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -121,8 +121,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'Could not delete transfer',
-			description: 'Please try again',
+			title: t('index.action.deleteErrorToast'),
+			description: t('index.action.deleteErrorToastDescription'),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -149,7 +149,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: `Transfer ${transferId} not found`,
+			title: t('index.action.notFoundError', { transferId }),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -165,7 +165,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (balance < transfer.amount) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'Cannot delete transfer as account would hold a negative balance',
+			title: t('index.action.negativeBalanceError'),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -174,7 +174,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
-		title: 'Transfer deleted',
+		title: t('index.action.successToast'),
 	})
 	return data({}, { headers: toastHeaders })
 }
@@ -183,6 +183,7 @@ export default function Transfers({
 	loaderData: { transfers, pagination },
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
+	const { t } = useTranslation('transfers')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
@@ -197,9 +198,9 @@ export default function Transfers({
 			className='flex flex-col gap-4'
 			aria-labelledby='transfers-section'
 		>
-			<div className='flex items-center justify-between'>
+			<header className='flex items-center justify-between'>
 				<Title id='transfers-section' level='h3'>
-					Transfers
+					{t('index.title')}
 				</Title>
 				<Button
 					asChild
@@ -209,33 +210,43 @@ export default function Transfers({
 				>
 					<Link to='create' prefetch='intent'>
 						<PlusIcon aria-hidden />
-						<span className='sm:inline hidden'>Transfer</span>
+						<span className='sm:inline hidden'>
+							{t('index.addTransferLabel')}
+						</span>
 					</Link>
 				</Button>
-			</div>
+			</header>
 
 			<Table>
 				{transfers.length === 0 && (
 					<TableCaption>
 						<Text size='md' weight='medium' alignment='center'>
-							You have not created any transfer yet. Start
-							creating them{' '}
-							<Link to='create' className='text-primary'>
-								here
-							</Link>
+							<Trans
+								i18nKey='index.emptyMessage'
+								ns='transfers'
+								components={[
+									<Link
+										key='0'
+										to='create'
+										className='text-primary'
+									/>,
+								]}
+							/>
 						</Text>
 					</TableCaption>
 				)}
 				{transfers.length !== 0 && (
 					<TableHeader>
 						<TableRow>
-							<TableHead>Date</TableHead>
-							<TableHead className='text-right'>Amount</TableHead>
+							<TableHead>{t('index.table.date')}</TableHead>
 							<TableHead className='text-right'>
-								From Account
+								{t('index.table.amount')}
 							</TableHead>
 							<TableHead className='text-right'>
-								To Account
+								{t('index.table.fromAccount')}
+							</TableHead>
+							<TableHead className='text-right'>
+								{t('index.table.toAccount')}
 							</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
@@ -304,7 +315,7 @@ export default function Transfers({
 													<TrashIcon aria-hidden />
 												)}
 												<span className='sr-only'>
-													Delete transfer
+													{t('index.deleteAriaLabel')}
 												</span>
 											</Button>
 										</Form>

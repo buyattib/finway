@@ -1,10 +1,14 @@
 import { Link } from 'react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BarChart, CartesianGrid, XAxis, Bar, LabelList } from 'recharts'
 import { ChartColumnIcon, PlusIcon } from 'lucide-react'
+
 import type { Route } from '../+types'
 
 import { formatNumber, formatDate } from '~/lib/utils'
+import type { TCurrency } from '~/lib/types'
+import { getCurrencySymbol } from '~/lib/utils'
 
 import { type ChartConfig, ChartContainer } from '~/components/ui/chart'
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
@@ -19,22 +23,21 @@ import {
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
 
-import type { TCurrency } from '~/lib/types'
-import { getCurrencyData } from '~/lib/utils'
-
 type Props = Pick<Route.ComponentProps['loaderData'], 'expensesByMonth'>
 
 function Layout({
 	children,
 	select,
+	title,
 }: {
 	children: React.ReactNode
 	select?: React.ReactNode
+	title: string
 }) {
 	return (
 		<Card className='flex flex-col'>
 			<CardHeader className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2'>
-				<CardTitle>Expenses a year back</CardTitle>
+				<CardTitle>{title}</CardTitle>
 				{!!select && select}
 			</CardHeader>
 			<CardContent>{children}</CardContent>
@@ -43,34 +46,37 @@ function Layout({
 }
 
 export function ExpensesByMonth({ expensesByMonth }: Props) {
+	const { t } = useTranslation('dashboard')
 	const currencies = Object.keys(expensesByMonth) as Array<TCurrency>
 
 	const [selectedCurrency, setSelectedCurrency] = useState<TCurrency>(
 		currencies[0],
 	)
 
-	const currencyData = getCurrencyData(selectedCurrency)
+	const currencySymbol = getCurrencySymbol(selectedCurrency)
 
 	if (currencies.length === 0) {
 		return (
-			<Layout>
+			<Layout title={t('index.expensesByMonth.title')}>
 				<div className='flex items-center justify-center'>
 					<div className='flex flex-col items-center gap-2'>
 						<ChartColumnIcon className='text-muted-foreground w-10 h-10' />
 						<Text size='sm' theme='muted'>
-							No expenses
+							{t('index.expensesByMonth.noExpenses')}
 						</Text>
 						<div className='flex items-center gap-4'>
 							<Button asChild variant='outline'>
 								<Link to='/accounts'>
 									<PlusIcon />
-									Create Account
+									{t('index.expensesByMonth.createAccount')}
 								</Link>
 							</Button>
 							<Button asChild variant='default'>
 								<Link to='/transactions'>
 									<PlusIcon />
-									Create Transaction
+									{t(
+										'index.expensesByMonth.createTransaction',
+									)}
 								</Link>
 							</Button>
 						</div>
@@ -92,6 +98,7 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 
 	return (
 		<Layout
+			title={t('index.expensesByMonth.title')}
 			select={
 				<Select
 					value={selectedCurrency}
@@ -137,7 +144,7 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 							fontSize={14}
 							className='font-semibold'
 							formatter={(amount: string) =>
-								`${currencyData.symbol} ${formatNumber(amount)}`
+								`${currencySymbol} ${formatNumber(amount)}`
 							}
 						/>
 					</Bar>

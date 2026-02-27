@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next'
 import { Button, Html } from '@react-email/components'
 
 export function LoginEmail({ url }: { url: string }) {
+	const { t } = useTranslation('emails')
 	return (
 		<Html>
 			<Button
@@ -11,7 +13,7 @@ export function LoginEmail({ url }: { url: string }) {
 					padding: '12px 20px',
 				}}
 			>
-				Log In
+				{t('login.button')}
 			</Button>
 		</Html>
 	)

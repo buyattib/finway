@@ -23,14 +23,6 @@ export const ACCOUNT_TYPES = [
 	ACCOUNT_TYPE_BROKER,
 ] as const
 
-export const ACCOUNT_TYPE_LABEL = {
-	[ACCOUNT_TYPE_BANK]: 'Bank',
-	[ACCOUNT_TYPE_CASH]: 'Cash',
-	[ACCOUNT_TYPE_DIGITAL_WALLET]: 'Digital Wallet',
-	[ACCOUNT_TYPE_CRYPTO_WALLET]: 'Crypto Wallet',
-	[ACCOUNT_TYPE_BROKER]: 'Broker',
-}
-
 // Currencies
 
 export const CURRENCY_USD = 'USD'
@@ -49,33 +41,6 @@ export const CURRENCIES = [
 	CURRENCY_DAI,
 ] as const
 
-export const CURRENCY_DATA = {
-	[CURRENCY_USD]: {
-		label: 'US Dollar (USD)',
-		symbol: '$',
-	},
-	[CURRENCY_EUR]: {
-		label: 'Euro (EUR)',
-		symbol: '€',
-	},
-	[CURRENCY_ARS]: {
-		label: 'Argentine Peso (ARS)',
-		symbol: '$',
-	},
-	[CURRENCY_USDT]: {
-		label: 'Tether (USDT)',
-		symbol: '$',
-	},
-	[CURRENCY_USDC]: {
-		label: 'USD Coin (USDC)',
-		symbol: '$',
-	},
-	[CURRENCY_DAI]: {
-		label: 'Dai (DAI)',
-		symbol: '$',
-	},
-}
-
 // Transactions
 
 export const TRANSACTION_TYPE_EXPENSE = 'EXPENSE'
@@ -86,11 +51,6 @@ export const TRANSACTION_TYPES = [
 	TRANSACTION_TYPE_INCOME,
 ] as const
 
-export const TRANSACTION_TYPE_LABEL = {
-	[TRANSACTION_TYPE_EXPENSE]: 'Expense',
-	[TRANSACTION_TYPE_INCOME]: 'Income',
-}
-
 // Credit Cards
 
 export const CC_TRANSACTION_TYPE_CHARGE = 'CHARGE'
@@ -100,8 +60,3 @@ export const CC_TRANSACTION_TYPES = [
 	CC_TRANSACTION_TYPE_CHARGE,
 	CC_TRANSACTION_TYPE_REFUND,
 ] as const
-
-export const CC_TRANSACTION_TYPE_LABEL = {
-	[CC_TRANSACTION_TYPE_CHARGE]: 'Charge',
-	[CC_TRANSACTION_TYPE_REFUND]: 'Refund',
-}

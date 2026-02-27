@@ -1,40 +1,35 @@
 import { Link } from 'react-router'
 import { CreditCardIcon, PlusIcon } from 'lucide-react'
 import { desc, eq } from 'drizzle-orm'
+import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
-import { dbContext, userContext } from '~/lib/context'
 import {
 	creditCard as creditCardTable,
 	account as accountTable,
 	currency as currencyTable,
 } from '~/database/schema'
+import { getServerT } from '~/utils-server/i18n.server'
+import { dbContext, userContext } from '~/lib/context'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { getCurrencyData } from '~/lib/utils'
-
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Credit Cards | Finway' },
-		{
-			property: 'og:title',
-			content: 'Credit Cards | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Your credit cards',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'credit-cards')
 
 	const creditCards = await db
 		.select({
@@ -55,12 +50,20 @@ export async function loader({ context }: Route.LoaderArgs) {
 		.where(eq(accountTable.ownerId, user.id))
 		.orderBy(desc(creditCardTable.createdAt))
 
-	return { creditCards }
+	return {
+		creditCards,
+		meta: {
+			title: t('index.meta.title'),
+			description: t('index.meta.description'),
+		},
+	}
 }
 
 export default function CreditCards({
 	loaderData: { creditCards },
 }: Route.ComponentProps) {
+	const { t } = useTranslation(['credit-cards', 'components'])
+
 	return (
 		<section
 			className='flex flex-col gap-4'
@@ -68,12 +71,14 @@ export default function CreditCards({
 		>
 			<div className='flex items-center justify-between'>
 				<Title id='credit-cards-section' level='h3'>
-					Credit Cards
+					{t('index.title')}
 				</Title>
 				<Button asChild variant='default' autoFocus>
 					<Link to='create' prefetch='intent'>
 						<PlusIcon aria-hidden />
-						<span className='sm:inline hidden'>Credit Card</span>
+						<span className='sm:inline hidden'>
+							{t('index.addCreditCardLabel')}
+						</span>
 					</Link>
 				</Button>
 			</div>
@@ -81,11 +86,17 @@ export default function CreditCards({
 			{creditCards.length === 0 ? (
 				<div className='my-2'>
 					<Text size='md' weight='medium' alignment='center'>
-						You have not created any credit cards yet. Start
-						creating them{' '}
-						<Link to='create' className='text-primary'>
-							here
-						</Link>
+						<Trans
+							i18nKey='index.emptyMessage'
+							ns='credit-cards'
+							components={[
+								<Link
+									key='0'
+									to='create'
+									className='text-primary'
+								/>,
+							]}
+						/>
 					</Text>
 				</div>
 			) : (
@@ -100,7 +111,7 @@ export default function CreditCards({
 							currencyCode,
 							accountName,
 						}) => {
-							const { label } = getCurrencyData(currencyCode)
+							const label = t(`components:currency.${currencyCode}`)
 							return (
 								<li
 									key={id}
@@ -117,8 +128,10 @@ export default function CreditCards({
 												{brand} •••• {last4}
 											</Text>
 											<Text size='sm' theme='muted'>
-												Expires {expiryMonth}/
-												{expiryYear}
+												{t('index.expires', {
+													month: expiryMonth,
+													year: expiryYear,
+												})}
 											</Text>
 										</div>
 									</Link>

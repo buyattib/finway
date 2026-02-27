@@ -2,7 +2,10 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Link, Form, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Route as EditRoute } from '../+types/edit'
+
+import { ACCOUNT_TYPES, ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -16,13 +19,7 @@ import {
 import { ErrorList, TextField, SelectField } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
-import {
-	ACCOUNT_TYPES,
-	ACCOUNT_TYPE_LABEL,
-	ACTION_CREATION,
-	ACTION_EDITION,
-} from '~/lib/constants'
-import { AccountFormSchema } from '../lib/schemas'
+import { createAccountFormSchema } from '../lib/schemas'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
@@ -41,25 +38,29 @@ export function AccountForm({
 }: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation(['accounts', 'components'])
+
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
 	const { title, buttonLabel } = {
 		[ACTION_CREATION]: {
-			title: 'Create an account',
-			buttonLabel: 'Create',
+			title: t('form.create.title'),
+			buttonLabel: t('form.create.submitButton'),
 		},
 		[ACTION_EDITION]: {
-			title: 'Edit account',
-			buttonLabel: 'Update',
+			title: t('form.edit.title'),
+			buttonLabel: t('form.edit.submitButton'),
 		},
 	}[action]
+
+	const AccountFormSchema = createAccountFormSchema(t)
 
 	const [form, fields] = useForm({
 		lastResult,
 		id: 'account-form',
-		shouldValidate: 'onInput',
+		shouldValidate: 'onBlur',
 		defaultValue: initialData,
 		constraint: getZodConstraint(AccountFormSchema),
 		onValidate({ formData }) {
@@ -78,10 +79,7 @@ export function AccountForm({
 					</Button>
 					<CardTitle>{title}</CardTitle>
 				</div>
-				<CardDescription>
-					Accounts represent your real world accounts where your money
-					is.
-				</CardDescription>
+				<CardDescription>{t('form.description')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form
@@ -112,19 +110,23 @@ export function AccountForm({
 						id={form.errorId}
 					/>
 
-					<TextField autoFocus label='Name' field={fields.name} />
 					<TextField
-						label='Description (Optional)'
+						autoFocus
+						label={t('form.nameLabel')}
+						field={fields.name}
+					/>
+					<TextField
+						label={t('form.descriptionLabel')}
 						field={fields.description}
 					/>
 					<SelectField
-						label='Account Type'
+						label={t('form.accountTypeLabel')}
 						field={fields.accountType}
-						placeholder='Select an option'
+						placeholder={t('form.accountTypePlaceholder')}
 						items={ACCOUNT_TYPES.map(i => ({
 							icon: <AccountTypeIcon size='sm' accountType={i} />,
 							value: i,
-							label: ACCOUNT_TYPE_LABEL[i],
+							label: t(`components:accountType.${i}`),
 						}))}
 					/>
 				</Form>
@@ -135,7 +137,7 @@ export function AccountForm({
 					variant='outline'
 					{...form.reset.getButtonProps()}
 				>
-					Reset
+					{t('form.resetButton')}
 				</Button>
 				<Button
 					width='full'

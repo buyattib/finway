@@ -2,12 +2,14 @@ import { Link, Form, useNavigation, data } from 'react-router'
 import { PlusIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq } from 'drizzle-orm'
+import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
 import { transactionCategory as transactionCategoryTable } from '~/database/schema'
-import { dbContext, userContext } from '~/lib/context'
 import { createToastHeaders } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+import { dbContext, userContext } from '~/lib/context'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Button } from '~/components/ui/button'
@@ -21,24 +23,18 @@ import {
 
 import { DeleteTransactionCategoryFormSchema } from './lib/schemas'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Transaction categories | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Transaction categories | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Your Transaction categories',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'transaction-categories')
 
 	const transactionCategories = await db.query.transactionCategory.findMany({
 		orderBy: (transactionCategory, { desc }) => [
@@ -49,12 +45,19 @@ export async function loader({ context }: Route.LoaderArgs) {
 		columns: { id: true, name: true, description: true },
 	})
 
-	return { transactionCategories }
+	return {
+		transactionCategories,
+		meta: {
+			title: t('index.meta.title'),
+			description: t('index.meta.description'),
+		},
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'transaction-categories')
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -66,8 +69,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'Could not delete transaction category',
-			description: 'Please try again',
+			title: t('index.action.deleteErrorToast'),
+			description: t('index.action.deleteErrorToastDescription'),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -82,7 +85,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (!transactionCategory || transactionCategory.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: `Transaction category ${transactionCategoryId} not found`,
+			title: t('index.action.notFoundError', { transactionCategoryId }),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -93,7 +96,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
-		title: 'Transaction category deleted',
+		title: t('index.action.successToast'),
 	})
 	return data({}, { headers: toastHeaders })
 }
@@ -102,6 +105,7 @@ export default function TransactionCategories({
 	loaderData: { transactionCategories },
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
+	const { t } = useTranslation('transaction-categories')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
@@ -116,26 +120,34 @@ export default function TransactionCategories({
 			className='flex flex-col gap-4'
 			aria-labelledby='transaction-categories-section'
 		>
-			<div className='flex items-center justify-between'>
+			<header className='flex items-center justify-between'>
 				<Title id='transaction-categories-section' level='h3'>
-					Transaction Categories
+					{t('index.title')}
 				</Title>
 				<Button asChild variant='default' autoFocus>
 					<Link to='create' prefetch='intent'>
 						<PlusIcon aria-hidden />
-						<span className='sm:inline hidden'>Category</span>
+						<span className='sm:inline hidden'>
+							{t('index.addCategoryLabel')}
+						</span>
 					</Link>
 				</Button>
-			</div>
+			</header>
 
 			{transactionCategories.length === 0 && (
 				<div className='my-2'>
 					<Text size='md' weight='medium' alignment='center'>
-						You have not created any transaction category yet. Start
-						creating them{' '}
-						<Link to='create' className='text-primary'>
-							here
-						</Link>
+						<Trans
+							i18nKey='index.emptyMessage'
+							ns='transaction-categories'
+							components={[
+								<Link
+									key='0'
+									to='create'
+									className='text-primary'
+								/>,
+							]}
+						/>
 					</Text>
 				</div>
 			)}
@@ -175,14 +187,15 @@ export default function TransactionCategories({
 											<TrashIcon aria-hidden />
 										)}
 										<span className='sr-only'>
-											Delete category {name}
+											{t('index.deleteAriaLabel', {
+												name,
+											})}
 										</span>
 									</Button>
 								</TooltipTrigger>
 							</Form>
 							<TooltipContent>
-								Deleting a category cannot be undone and
-								transactions associated with it will be deleted.
+								{t('index.deleteTooltip')}
 							</TooltipContent>
 						</Tooltip>
 					</li>

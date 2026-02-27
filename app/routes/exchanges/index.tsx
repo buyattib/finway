@@ -3,6 +3,7 @@ import { PlusIcon, TrashIcon } from 'lucide-react'
 import { eq, desc, sql } from 'drizzle-orm'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { alias } from 'drizzle-orm/sqlite-core'
+import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
@@ -11,9 +12,12 @@ import {
 	account as accountTable,
 	exchange as exchangeTable,
 } from '~/database/schema'
+import { createToastHeaders } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber } from '~/lib/utils'
-import { createToastHeaders } from '~/utils-server/toast.server'
+import { getBalances } from '~/lib/queries'
+import { PAGE_SIZE } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -31,29 +35,20 @@ import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { TablePagination } from '~/components/table-pagination'
 
-import { getBalances } from '~/lib/queries'
-
 import { DeleteExchangeFormSchema } from './lib/schemas'
-import { PAGE_SIZE } from '~/lib/constants'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Exchanges | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Exchanges | Finway',
-		},
-		{
-			name: 'description',
-			content: 'Your currency exchanges',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'exchanges')
 
 	const url = new URL(request.url)
 	const page = Number(url.searchParams.get('page') ?? '1')
@@ -96,12 +91,17 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	return {
 		exchanges,
 		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
+		meta: {
+			title: t('index.meta.title'),
+			description: t('index.meta.description'),
+		},
 	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'exchanges')
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -113,8 +113,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'Could not delete exchange',
-			description: 'Please try again',
+			title: t('index.action.deleteErrorToast'),
+			description: t('index.action.deleteErrorToastDescription'),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -134,7 +134,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (!exchange || exchange.account.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: `Exchange ${exchangeId} not found`,
+			title: t('index.action.notFoundError', { exchangeId }),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -150,7 +150,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (balance < exchange.toAmount) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'Cannot delete exchange as account would hold a negative balance',
+			title: t('index.action.negativeBalanceError'),
 		})
 		return data({}, { headers: toastHeaders })
 	}
@@ -159,7 +159,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
-		title: 'Exchange deleted',
+		title: t('index.action.successToast'),
 	})
 	return data({}, { headers: toastHeaders })
 }
@@ -169,6 +169,7 @@ export default function Exchanges({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation('exchanges')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
@@ -183,9 +184,9 @@ export default function Exchanges({
 			className='flex flex-col gap-4'
 			aria-labelledby='exchanges-section'
 		>
-			<div className='flex items-center justify-between'>
+			<header className='flex items-center justify-between'>
 				<Title id='exchanges-section' level='h3'>
-					Exchanges
+					{t('index.title')}
 				</Title>
 				<Button
 					asChild
@@ -195,33 +196,47 @@ export default function Exchanges({
 				>
 					<Link to='create' prefetch='intent'>
 						<PlusIcon aria-hidden />
-						<span className='sm:inline hidden'>Exchange</span>
+						<span className='sm:inline hidden'>
+							{t('index.addExchangeLabel')}
+						</span>
 					</Link>
 				</Button>
-			</div>
+			</header>
 
 			<Table>
 				{exchanges.length === 0 && (
 					<TableCaption>
 						<Text size='md' weight='medium' alignment='center'>
-							You have not created any exchange yet. Start
-							creating them{' '}
-							<Link to='create' className='text-primary'>
-								here
-							</Link>
+							<Trans
+								i18nKey='index.emptyMessage'
+								ns='exchanges'
+								components={[
+									<Link
+										key='0'
+										to='create'
+										className='text-primary'
+									/>,
+								]}
+							/>
 						</Text>
 					</TableCaption>
 				)}
 				{exchanges.length !== 0 && (
 					<TableHeader>
 						<TableRow>
-							<TableHead>Date</TableHead>
+							<TableHead>{t('index.table.date')}</TableHead>
 							<TableHead className='text-right'>
-								Account
+								{t('index.table.account')}
 							</TableHead>
-							<TableHead className='text-right'>From</TableHead>
-							<TableHead className='text-right'>To</TableHead>
-							<TableHead className='text-right'>Rate</TableHead>
+							<TableHead className='text-right'>
+								{t('index.table.from')}
+							</TableHead>
+							<TableHead className='text-right'>
+								{t('index.table.to')}
+							</TableHead>
+							<TableHead className='text-right'>
+								{t('index.table.rate')}
+							</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
 					</TableHeader>
@@ -294,7 +309,7 @@ export default function Exchanges({
 													<TrashIcon aria-hidden />
 												)}
 												<span className='sr-only'>
-													Delete exchange
+													{t('index.deleteAriaLabel')}
 												</span>
 											</Button>
 										</Form>

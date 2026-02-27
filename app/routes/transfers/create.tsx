@@ -9,12 +9,15 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm } from '@conform-to/react'
 import { ArrowLeftIcon } from 'lucide-react'
+import { Trans, useTranslation } from 'react-i18next'
 import type { Route } from './+types/create'
 
-import { dbContext, userContext } from '~/lib/context'
 import { transfer as transferTable } from '~/database/schema'
-import { initializeDate, removeCommas } from '~/lib/utils'
 import { redirectWithToast } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+import { dbContext, userContext } from '~/lib/context'
+import { initializeDate, removeCommas } from '~/lib/utils'
+import { getBalances, getSelectData } from '~/lib/queries'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -35,101 +38,104 @@ import {
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { getBalances, getSelectData } from '~/lib/queries'
+import { createTransferFormSchema } from './lib/schemas'
 
-import { CreateTransferFormSchema } from './lib/schemas'
-
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Create a transfer | Finway' },
-
-		{
-			property: 'og:title',
-			content: 'Create a transfer | Finway',
-		},
-		{
-			name: 'description',
-			content:
-				'Create a transfer between accounts to track your money movements',
-		},
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
+		{ name: 'description', content: loaderData?.meta.description },
 	]
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'transfers')
 
 	const { accounts, currencies } = await getSelectData(db, user.id)
 
-	return { accounts, currencies }
+	return {
+		accounts,
+		currencies,
+		meta: {
+			title: t('form.create.meta.title'),
+			description: t('form.create.meta.description'),
+		},
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'transfers')
 
 	const formData = await request.formData()
 
 	const submission = await parseWithZod(formData, {
 		async: true,
-		schema: CreateTransferFormSchema.transform(data => ({
-			...data,
-			amount: Number(removeCommas(data.amount)) * 100,
-		})).superRefine(async (data, ctx) => {
-			const fromAccount = await db.query.account.findFirst({
-				where: (account, { eq }) => eq(account.id, data.fromAccountId),
-				columns: { ownerId: true },
-			})
-			const toAccount = await db.query.account.findFirst({
-				where: (account, { eq }) => eq(account.id, data.toAccountId),
-				columns: { ownerId: true },
-			})
-
-			if (!fromAccount || fromAccount.ownerId !== user.id) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'From account not found',
-					path: ['fromAccountId'],
+		schema: createTransferFormSchema(t)
+			.transform(data => ({
+				...data,
+				amount: Number(removeCommas(data.amount)) * 100,
+			}))
+			.superRefine(async (data, ctx) => {
+				const fromAccount = await db.query.account.findFirst({
+					where: (account, { eq }) =>
+						eq(account.id, data.fromAccountId),
+					columns: { ownerId: true },
 				})
-			}
-
-			if (!toAccount || toAccount.ownerId !== user.id) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'To account not found',
-					path: ['toAccountId'],
+				const toAccount = await db.query.account.findFirst({
+					where: (account, { eq }) =>
+						eq(account.id, data.toAccountId),
+					columns: { ownerId: true },
 				})
-			}
 
-			const currency = await db.query.currency.findFirst({
-				where: (currency, { eq }) => eq(currency.id, data.currencyId),
-				columns: { id: true },
-			})
-			if (!currency) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: 'Currency not found',
-					path: ['currencyId'],
-				})
-			}
+				if (!fromAccount || fromAccount.ownerId !== user.id) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t('form.create.action.fromAccountNotFound'),
+						path: ['fromAccountId'],
+					})
+				}
 
-			const { fromAccountId: accountId, currencyId } = data
-			const [result] = await getBalances({
-				db,
-				ownerId: user.id,
-				accountId,
-				currencyId,
-				parseBalance: false,
-			})
-			if (!result || result.balance < data.amount) {
-				return ctx.addIssue({
-					code: 'custom',
-					message:
-						'Insufficient balance in the selected currency on the from account',
-					path: ['amount'],
+				if (!toAccount || toAccount.ownerId !== user.id) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t('form.create.action.toAccountNotFound'),
+						path: ['toAccountId'],
+					})
+				}
+
+				const currency = await db.query.currency.findFirst({
+					where: (currency, { eq }) =>
+						eq(currency.id, data.currencyId),
+					columns: { id: true },
 				})
-			}
-		}),
+				if (!currency) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t('form.create.action.currencyNotFound'),
+						path: ['currencyId'],
+					})
+				}
+
+				const { fromAccountId: accountId, currencyId } = data
+				const [result] = await getBalances({
+					db,
+					ownerId: user.id,
+					accountId,
+					currencyId,
+					parseBalance: false,
+				})
+				if (!result || result.balance < data.amount) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t('form.create.action.insufficientBalance'),
+						path: ['amount'],
+					})
+				}
+			}),
 	})
 
 	if (submission.status !== 'success') {
@@ -140,7 +146,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	return await redirectWithToast(`/app/transfers`, request, {
 		type: 'success',
-		title: 'Transfer created successfully',
+		title: t('form.create.action.successToast'),
 	})
 }
 
@@ -150,14 +156,18 @@ export default function CreateTransfer({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation('transfers')
+
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
+	const schema = createTransferFormSchema(t)
+
 	const [form, fields] = useForm({
 		lastResult: actionData?.submission,
 		id: 'create-transfer-form',
-		shouldValidate: 'onInput',
+		shouldValidate: 'onBlur',
 		defaultValue: {
 			date: initializeDate().toISOString(),
 			amount: '0',
@@ -165,10 +175,10 @@ export default function CreateTransfer({
 			fromAccountId: '',
 			toAccountId: '',
 		},
-		constraint: getZodConstraint(CreateTransferFormSchema),
+		constraint: getZodConstraint(schema),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: CreateTransferFormSchema,
+				schema,
 			})
 		},
 	})
@@ -194,12 +204,9 @@ export default function CreateTransfer({
 							<ArrowLeftIcon />
 						</Link>
 					</Button>
-					<CardTitle>Create a transfer</CardTitle>
+					<CardTitle>{t('form.create.title')}</CardTitle>
 				</div>
-				<CardDescription>
-					Transfers will affect your account balances and used to
-					track your finances.
-				</CardDescription>
+				<CardDescription>{t('form.description')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form
@@ -216,53 +223,66 @@ export default function CreateTransfer({
 						id={form.errorId}
 					/>
 
-					<DateField label='Date' field={fields.date} />
+					<DateField
+						label={t('form.dateLabel')}
+						field={fields.date}
+					/>
 
 					{accounts.length !== 0 ? (
 						<>
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 								<ComboboxField
-									label='From Account'
+									label={t('form.fromAccountLabel')}
 									field={fields.fromAccountId}
-									buttonPlaceholder='Select an account'
+									buttonPlaceholder={t(
+										'form.accountPlaceholder',
+									)}
 									options={accountOptions}
 								/>
 
 								<ComboboxField
-									label='To Account'
+									label={t('form.toAccountLabel')}
 									field={fields.toAccountId}
-									buttonPlaceholder='Select an account'
+									buttonPlaceholder={t(
+										'form.accountPlaceholder',
+									)}
 									options={accountOptions}
 								/>
 							</div>
 
 							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 								<ComboboxField
-									label='Currency'
+									label={t('form.currencyLabel')}
 									field={fields.currencyId}
-									buttonPlaceholder='Select a currency'
+									buttonPlaceholder={t(
+										'form.currencyPlaceholder',
+									)}
 									options={currencyOptions}
 								/>
 								<AmountField
-									label='Amount'
+									label={t('form.amountLabel')}
 									field={fields.amount}
 								/>
 							</div>
 						</>
 					) : (
 						<Text size='sm' theme='muted' alignment='center'>
-							You need to create an account first. Do it{' '}
-							<Link
-								to={{
-									pathname: '/app/accounts/create',
-									search: createSearchParams({
-										redirectTo: location.pathname,
-									}).toString(),
-								}}
-								className='text-primary'
-							>
-								here
-							</Link>
+							<Trans
+								i18nKey='form.noAccountMessage'
+								ns='transfers'
+								components={[
+									<Link
+										key='0'
+										to={{
+											pathname: '/app/accounts/create',
+											search: createSearchParams({
+												redirectTo: location.pathname,
+											}).toString(),
+										}}
+										className='text-primary'
+									/>,
+								]}
+							/>
 						</Text>
 					)}
 				</Form>
@@ -273,7 +293,7 @@ export default function CreateTransfer({
 					variant='outline'
 					{...form.reset.getButtonProps()}
 				>
-					Reset
+					{t('form.resetButton')}
 				</Button>
 				<Button
 					width='full'
@@ -282,7 +302,7 @@ export default function CreateTransfer({
 					disabled={isSubmitting}
 					loading={isSubmitting}
 				>
-					Create
+					{t('form.create.submitButton')}
 				</Button>
 			</CardFooter>
 		</Card>

@@ -1,4 +1,5 @@
 import { data, Form, useNavigation, useSearchParams } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
@@ -11,6 +12,7 @@ import { createToastHeaders } from '~/utils-server/toast.server'
 import { requireAnonymous } from '~/utils-server/auth.server'
 import { getDomainUrl } from '~/utils-server/misc.server'
 import { sendEmail } from '~/utils-server/email.server'
+import { getServerT } from '~/utils-server/i18n.server'
 
 import {
 	Card,
@@ -26,21 +28,29 @@ import { CheckboxField, ErrorList, TextField } from '~/components/forms'
 import { LoginEmail } from '~/emails/login'
 
 import { createMagicLink } from './server/magic-link.server'
-import { LoginFormSchema } from './lib/schemas'
+import { createLoginFormSchema } from './lib/schemas'
 
-export function meta() {
+export function meta({ loaderData }: Route.MetaArgs) {
 	return [
-		{ title: 'Login to Finway' },
-		{ property: 'og:title', content: 'Login to Finway' },
+		{ title: loaderData?.meta.title },
+		{ property: 'og:title', content: loaderData?.meta.title },
 	]
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	await requireAnonymous(request, context.get(dbContext))
+	const t = getServerT(context, 'auth')
+
+	return {
+		meta: {
+			title: t('login.meta.title'),
+		},
+	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'auth')
 
 	await requireAnonymous(request, db)
 
@@ -48,7 +58,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	await checkHoneypot(formData)
 
 	const submission = await parseWithZod(formData, {
-		schema: LoginFormSchema,
+		schema: createLoginFormSchema(t),
 		async: true,
 	})
 	if (submission.status !== 'success') {
@@ -77,7 +87,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const result = await sendEmail({
 		to: email,
-		subject: 'Welcome to Finway - Your Login Link',
+		subject: t('login.action.emailSubject'),
 		react: <LoginEmail url={magicLink.toString()} />,
 	})
 	if (result.status === 'error') {
@@ -85,8 +95,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
-			title: 'There was an error sending the login link',
-			description: 'Please try again',
+			title: t('login.action.errorToast'),
+			description: t('login.action.errorDescription'),
 		})
 		return data(
 			{ submission: submission.reply() },
@@ -96,8 +106,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
-		title: user ? 'Welcome back!' : 'Welcome to Finway!',
-		description: 'We sent you an email with a link to log in',
+		title: user
+			? t('login.action.welcomeBackToast')
+			: t('login.action.welcomeToast'),
+		description: t('login.action.successDescription'),
 	})
 
 	return data(
@@ -107,6 +119,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function Login({ actionData }: Route.ComponentProps) {
+	const { t } = useTranslation('auth')
 	const [searchParams] = useSearchParams()
 	const redirectTo = searchParams.get('redirectTo')
 
@@ -114,31 +127,30 @@ export default function Login({ actionData }: Route.ComponentProps) {
 	const isSubmitting =
 		navigation.formAction === '/login' && navigation.state === 'submitting'
 
+	const schema = createLoginFormSchema(t)
 	const [form, fields] = useForm({
 		id: 'login-form',
-		constraint: getZodConstraint(LoginFormSchema),
+		constraint: getZodConstraint(schema),
 		lastResult: actionData?.submission,
 		defaultValue: { redirectTo },
 		shouldRevalidate: 'onBlur',
 		onValidate({ formData }) {
-			return parseWithZod(formData, { schema: LoginFormSchema })
+			return parseWithZod(formData, { schema })
 		},
 	})
 
 	return (
 		<Card className='mx-auto w-full max-w-lg gap-4'>
 			<CardHeader>
-				<CardTitle>Welcome!</CardTitle>
-				<CardDescription>
-					We are going to send you an email with a login link
-				</CardDescription>
+				<CardTitle>{t('login.title')}</CardTitle>
+				<CardDescription>{t('login.description')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form method='post' {...getFormProps(form)}>
 					<HoneypotInputs label='Please leave this field blank' />
 
 					<TextField
-						label='Email'
+						label={t('login.emailLabel')}
 						field={fields.email}
 						autoFocus
 						autoComplete='email'
@@ -147,7 +159,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
 					/>
 
 					<CheckboxField
-						label='Remember me'
+						label={t('login.rememberLabel')}
 						field={fields.remember}
 					/>
 
@@ -168,7 +180,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
 					disabled={isSubmitting}
 					loading={isSubmitting}
 				>
-					Submit
+					{t('login.submitButton')}
 				</Button>
 			</CardFooter>
 		</Card>

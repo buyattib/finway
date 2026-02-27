@@ -1,5 +1,6 @@
-import { cn, getCurrencyData } from '~/lib/utils'
+import { cn } from '~/lib/utils'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { useTranslation } from 'react-i18next'
 
 import USDIcon from '~/assets/currencies/usd.svg'
 import EURIcon from '~/assets/currencies/eur.svg'
@@ -52,11 +53,12 @@ export function CurrencyIcon({
 	...props
 }: CurrencyIconProps) {
 	const src = CURRENCY_ICONS[currency]
+	const { t } = useTranslation('components')
 	return (
 		<img
 			{...props}
 			src={src}
-			alt={getCurrencyData(currency).label}
+			alt={t(`currency.${currency}`)}
 			className={cn(currencyIconVariants({ size, className }))}
 		/>
 	)

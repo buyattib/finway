@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { TFunction } from 'i18next'
 import { ACCOUNT_TYPES, ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
@@ -12,16 +13,22 @@ const ActionSchema = z.discriminatedUnion('action', [
 	}),
 ])
 
-export const AccountFormSchema = z
-	.object({
-		name: z.string('Name is required').transform(value => value.trim()),
-		accountType: z.enum(ACCOUNT_TYPES, 'Account type is required'),
-		description: z
-			.string()
-			.default('')
-			.transform(value => value?.trim()),
-	})
-	.and(ActionSchema)
+export function createAccountFormSchema(t: TFunction<'accounts'>) {
+	return z
+		.object({
+			name: z
+				.string(t('form.schema.nameRequired'))
+				.transform(value => value.trim()),
+			accountType: z.enum(ACCOUNT_TYPES, t('form.schema.accountTypeRequired')),
+			description: z
+				.string()
+				.default('')
+				.transform(value => value?.trim()),
+		})
+		.and(ActionSchema)
+}
+
+export type AccountFormSchema = ReturnType<typeof createAccountFormSchema>
 
 export const DeleteAccountFormSchema = z.object({
 	accountId: z.string(),

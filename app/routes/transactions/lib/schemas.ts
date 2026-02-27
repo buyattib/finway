@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { TFunction } from 'i18next'
 
 import { removeCommas } from '~/lib/utils'
 
@@ -18,40 +19,44 @@ const ActionSchema = z.discriminatedUnion('action', [
 	}),
 ])
 
-export const TransactionFormSchema = z
-	.object({
-		date: z.iso.datetime('Date is required'),
-		type: z.enum(TRANSACTION_TYPES, 'Transaction type is required'),
-		amount: z
-			.string({ message: 'Amount is required' })
-			.refine(
-				value => {
-					const formatted = removeCommas(value)
-					return !isNaN(Number(formatted))
-				},
-				{
-					message: 'Amount must be a valid number',
-				},
-			)
-			.refine(
-				value => {
-					const formatted = removeCommas(value)
-					return Number(formatted) > 0
-				},
-				{
-					message: 'Amount must be greater than zero',
-				},
-			),
-		description: z
-			.string()
-			.default('')
-			.transform(value => value?.trim()),
+export function createTransactionFormSchema(t: TFunction<'transactions'>) {
+	return z
+		.object({
+			date: z.iso.datetime(t('form.schema.dateRequired')),
+			type: z.enum(TRANSACTION_TYPES, t('form.schema.transactionTypeRequired')),
+			amount: z
+				.string({ message: t('form.schema.amountRequired') })
+				.refine(
+					value => {
+						const formatted = removeCommas(value)
+						return !isNaN(Number(formatted))
+					},
+					{
+						message: t('form.schema.amountInvalid'),
+					},
+				)
+				.refine(
+					value => {
+						const formatted = removeCommas(value)
+						return Number(formatted) > 0
+					},
+					{
+						message: t('form.schema.amountPositive'),
+					},
+				),
+			description: z
+				.string()
+				.default('')
+				.transform(value => value?.trim()),
 
-		accountId: z.string('Account is required'),
-		currencyId: z.string('Currency is required'),
-		transactionCategoryId: z.string('Category is required'),
-	})
-	.and(ActionSchema)
+			accountId: z.string(t('form.schema.accountRequired')),
+			currencyId: z.string(t('form.schema.currencyRequired')),
+			transactionCategoryId: z.string(t('form.schema.categoryRequired')),
+		})
+		.and(ActionSchema)
+}
+
+export type TransactionFormSchema = ReturnType<typeof createTransactionFormSchema>
 
 export const DeleteTransactionFormSchema = z.object({
 	transactionId: z.string(),

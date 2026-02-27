@@ -1,8 +1,12 @@
-- Suggest default categories to automatically create
+# Add default categories:
+- Have a hardcoded list of some common categories for transactions to suggest users
+so they dont have to manually create all of them. The UI should be a list and users
+should be able to check the desired categories.
+
+- Fix type errors
 - Add a linter?
 - Ask agent what is needed to be production ready
 - Improve styling and a design system?
-- Internationalization
 - Sessions for auth?
 - Investment porfolio tracking
 - MCP server to comunicate through llms

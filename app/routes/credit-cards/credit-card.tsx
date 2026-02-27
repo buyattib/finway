@@ -9,23 +9,27 @@ import {
 import { SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq, desc, and } from 'drizzle-orm'
+import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/credit-card'
 
-import { dbContext, userContext } from '~/lib/context'
 import {
 	creditCard as creditCardTable,
 	creditCardTransaction as creditCardTransactionTable,
 	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
-import type { TCCTransactionType } from '~/lib/types'
-import { formatDate, formatNumber } from '~/lib/utils'
-import { getSelectData } from '~/lib/queries'
 import {
 	createToastHeaders,
 	redirectWithToast,
 } from '~/utils-server/toast.server'
+import { getServerT } from '~/utils-server/i18n.server'
+
+import { dbContext, userContext } from '~/lib/context'
+import type { TCCTransactionType } from '~/lib/types'
+import { formatDate, formatNumber } from '~/lib/utils'
+import { getSelectData } from '~/lib/queries'
+import { PAGE_SIZE } from '~/lib/constants'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -54,41 +58,22 @@ import {
 	DeleteCreditCardFormSchema,
 	DeleteCreditCardTransactionFormSchema,
 } from './lib/schemas'
-import { PAGE_SIZE } from '~/lib/constants'
 
-export function meta({ loaderData, params: { creditCardId } }: Route.MetaArgs) {
+export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
+		const title = loaderData?.meta.notFoundTitle
 		return [
-			{
-				title: `Credit card ${creditCardId} not found | Finway`,
-			},
-			{
-				property: 'og:title',
-				content: `Credit card ${creditCardId} not found | Finway`,
-			},
-			{
-				name: 'description',
-				content: `Credit card ${creditCardId} not found | Finway`,
-			},
+			{ title },
+			{ property: 'og:title', content: title },
+			{ name: 'description', content: title },
 		]
 	}
 
-	const {
-		creditCard: { brand, last4 },
-	} = loaderData
-
+	const title = loaderData?.meta.title
 	return [
-		{
-			title: `Credit Card ${brand} •••• ${last4} | Finway`,
-		},
-		{
-			property: 'og:title',
-			content: `Credit Card ${brand} •••• ${last4} | Finway`,
-		},
-		{
-			name: 'description',
-			content: `Credit Card ${brand} •••• ${last4} | Finway`,
-		},
+		{ title },
+		{ property: 'og:title', content: title },
+		{ name: 'description', content: title },
 	]
 }
 
@@ -99,6 +84,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const t = getServerT(context, 'credit-cards')
 
 	const creditCard = await db.query.creditCard.findFirst({
 		where: (creditCard, { eq }) => eq(creditCard.id, creditCardId),
@@ -119,7 +105,7 @@ export async function loader({
 		},
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response('Credit card not found', { status: 404 })
+		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
 
 	const {
@@ -203,12 +189,22 @@ export async function loader({
 		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
 		filters: { type, categoryId },
 		selectData,
+		meta: {
+			title: t('details.meta.title', {
+				brand: creditCardData.brand,
+				last4: creditCardData.last4,
+			}),
+			notFoundTitle: t('details.meta.notFoundTitle', {
+				creditCardId,
+			}),
+		},
 	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
 	const intent = formData.get('intent')
@@ -221,8 +217,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 		if (submission.status !== 'success') {
 			const toastHeaders = await createToastHeaders(request, {
 				type: 'error',
-				title: 'Could not delete credit card',
-				description: 'Please try again',
+				title: t('details.action.deleteCardErrorToast'),
+				description: t('details.action.deleteCardErrorDescription'),
 			})
 			return data({}, { headers: toastHeaders })
 		}
@@ -236,7 +232,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			},
 		})
 		if (!creditCard || creditCard.account.ownerId !== user.id) {
-			throw new Response('Credit card not found', { status: 404 })
+			throw new Response(t('details.action.notFoundError'), { status: 404 })
 		}
 
 		await db
@@ -245,7 +241,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		return await redirectWithToast('/app/credit-cards', request, {
 			type: 'success',
-			title: `Credit card ${creditCard.brand} •••• ${creditCard.last4} deleted`,
+			title: t('details.action.deleteCardSuccessToast', {
+				brand: creditCard.brand,
+				last4: creditCard.last4,
+			}),
 		})
 	}
 
@@ -257,8 +256,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 		if (submission.status !== 'success') {
 			const toastHeaders = await createToastHeaders(request, {
 				type: 'error',
-				title: 'Could not delete transaction',
-				description: 'Please try again',
+				title: t('details.action.deleteTransactionErrorToast'),
+				description: t(
+					'details.action.deleteTransactionErrorDescription',
+				),
 			})
 			return data({}, { headers: toastHeaders })
 		}
@@ -281,7 +282,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		) {
 			const toastHeaders = await createToastHeaders(request, {
 				type: 'error',
-				title: `Transaction not found`,
+				title: t('details.action.transactionNotFoundToast'),
 			})
 			return data({}, { headers: toastHeaders })
 		}
@@ -292,14 +293,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'success',
-			title: 'Transaction deleted',
+			title: t('details.action.deleteTransactionSuccessToast'),
 		})
 		return data({}, { headers: toastHeaders })
 	}
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'error',
-		title: 'Unknown action',
+		title: t('details.action.unknownActionToast'),
 	})
 	return data({}, { headers: toastHeaders })
 }
@@ -319,6 +320,7 @@ export default function CreditCardDetails({
 	const location = useLocation()
 	const navigation = useNavigation()
 	const navigate = useNavigate()
+	const { t } = useTranslation('credit-cards')
 
 	const isLoading =
 		navigation.state === 'loading' &&
@@ -361,7 +363,10 @@ export default function CreditCardDetails({
 							<Link to='edit' prefetch='intent'>
 								<SquarePenIcon />
 								<span className='sr-only'>
-									Edit {brand} •••• {last4}
+									{t('details.editAriaLabel', {
+										brand,
+										last4,
+									})}
 								</span>
 							</Link>
 						</Button>
@@ -387,14 +392,16 @@ export default function CreditCardDetails({
 											<TrashIcon aria-hidden />
 										)}
 										<span className='sr-only'>
-											Delete credit card {brand} ••••{' '}
-											{last4}
+											{t('details.deleteAriaLabel', {
+												brand,
+												last4,
+											})}
 										</span>
 									</Button>
 								</TooltipTrigger>
 							</Form>
 							<TooltipContent>
-								Deleting a credit card cannot be undone.
+								{t('details.deleteTooltip')}
 							</TooltipContent>
 						</Tooltip>
 					</div>
@@ -407,13 +414,15 @@ export default function CreditCardDetails({
 			>
 				<div className='flex items-center justify-between'>
 					<Title id='cc-transactions-section' level='h3'>
-						Transactions ({pagination.total})
+						{t('details.transactionsTitle', {
+							total: pagination.total,
+						})}
 					</Title>
 					<Button asChild variant='default'>
 						<Link to='transactions/create' prefetch='intent'>
 							<PlusIcon aria-hidden />
 							<span className='sm:inline hidden'>
-								Transaction
+								{t('details.addTransactionLabel')}
 							</span>
 						</Link>
 					</Button>
@@ -432,31 +441,35 @@ export default function CreditCardDetails({
 					{transactions.length === 0 && (
 						<TableCaption>
 							<Text size='md' weight='medium' alignment='center'>
-								No transactions yet.{' '}
-								<Link
-									to='transactions/create'
-									className='text-primary'
-								>
-									Create one
-								</Link>
+								<Trans
+									i18nKey='details.emptyMessage'
+									ns='credit-cards'
+									components={[
+										<Link
+											key='0'
+											to='transactions/create'
+											className='text-primary'
+										/>,
+									]}
+								/>
 							</Text>
 						</TableCaption>
 					)}
 					{transactions.length !== 0 && (
 						<TableHeader>
 							<TableRow>
-								<TableHead>Date</TableHead>
+								<TableHead>{t('details.table.date')}</TableHead>
 								<TableHead className='text-center'>
-									Category
+									{t('details.table.category')}
 								</TableHead>
 								<TableHead className='text-center'>
-									Type
+									{t('details.table.type')}
 								</TableHead>
 								<TableHead className='text-center'>
-									Amount
+									{t('details.table.amount')}
 								</TableHead>
 								<TableHead className='text-center'>
-									Installments
+									{t('details.table.installments')}
 								</TableHead>
 								<TableHead></TableHead>
 							</TableRow>
@@ -534,7 +547,9 @@ export default function CreditCardDetails({
 														/>
 													)}
 													<span className='sr-only'>
-														Delete transaction
+														{t(
+															'details.deleteTransactionAriaLabel',
+														)}
 													</span>
 												</Button>
 											</Form>

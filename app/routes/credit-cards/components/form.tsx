@@ -2,8 +2,12 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Link, Form, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
+import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route as EditRoute } from '../+types/edit'
+
+import type { TSelectData } from '~/lib/types'
+import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -24,10 +28,7 @@ import {
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import type { TSelectData } from '~/lib/types'
-import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-
-import { CreditCardFormSchema } from '../lib/schemas'
+import { createCreditCardFormSchema } from '../lib/schemas'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
@@ -46,6 +47,8 @@ export function CreditCardForm({
 }: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
+	const { t } = useTranslation('credit-cards')
+
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
@@ -55,12 +58,12 @@ export function CreditCardForm({
 
 	const { title, buttonLabel } = {
 		[ACTION_CREATION]: {
-			title: 'Create a credit card',
-			buttonLabel: 'Create',
+			title: t('form.create.title'),
+			buttonLabel: t('form.create.submitButton'),
 		},
 		[ACTION_EDITION]: {
-			title: 'Edit credit card',
-			buttonLabel: 'Update',
+			title: t('form.edit.title'),
+			buttonLabel: t('form.edit.submitButton'),
 		},
 	}[action]
 
@@ -69,10 +72,10 @@ export function CreditCardForm({
 		id: 'credit-card-form',
 		shouldValidate: 'onInput',
 		defaultValue: initialData,
-		constraint: getZodConstraint(CreditCardFormSchema),
+		constraint: getZodConstraint(createCreditCardFormSchema(t)),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: CreditCardFormSchema,
+				schema: createCreditCardFormSchema(t),
 			})
 		},
 	})
@@ -100,9 +103,7 @@ export function CreditCardForm({
 					</Button>
 					<CardTitle>{title}</CardTitle>
 				</div>
-				<CardDescription>
-					Add a credit card to track expenses associated with it.
-				</CardDescription>
+				<CardDescription>{t('form.description')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form
@@ -127,29 +128,29 @@ export function CreditCardForm({
 
 					<TextField
 						autoFocus
-						label='Brand'
+						label={t('form.brandLabel')}
 						field={fields.brand}
-						placeholder='Visa, Mastercard, etc.'
+						placeholder={t('form.brandPlaceholder')}
 					/>
 
 					<NumberField
-						label='Last 4 digits'
+						label={t('form.last4Label')}
 						field={fields.last4}
 						maxLength={4}
-						placeholder='1234'
+						placeholder={t('form.last4Placeholder')}
 					/>
 
 					<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 						<NumberField
-							label='Expiry Month'
+							label={t('form.expiryMonthLabel')}
 							field={fields.expiryMonth}
-							placeholder='MM'
+							placeholder={t('form.expiryMonthPlaceholder')}
 							maxLength={2}
 						/>
 						<NumberField
-							label='Expiry Year'
+							label={t('form.expiryYearLabel')}
 							field={fields.expiryYear}
-							placeholder='YYYY'
+							placeholder={t('form.expiryYearPlaceholder')}
 							maxLength={4}
 						/>
 					</div>
@@ -157,30 +158,36 @@ export function CreditCardForm({
 					{accounts.length !== 0 ? (
 						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 							<ComboboxField
-								label='Account'
+								label={t('form.accountLabel')}
 								field={fields.accountId}
-								buttonPlaceholder='Select an account'
+								buttonPlaceholder={t('form.accountPlaceholder')}
 								options={accountOptions}
 								disabled={isEditing}
 							/>
 
 							<ComboboxField
-								label='Currency'
+								label={t('form.currencyLabel')}
 								field={fields.currencyId}
-								buttonPlaceholder='Select a currency'
+								buttonPlaceholder={t(
+									'form.currencyPlaceholder',
+								)}
 								options={currencyOptions}
 								disabled={isEditing}
 							/>
 						</div>
 					) : (
 						<Text size='sm' theme='muted' alignment='center'>
-							You need to create an account first. Do it{' '}
-							<Link
-								to='/app/accounts/create'
-								className='text-primary'
-							>
-								here
-							</Link>
+							<Trans
+								i18nKey='form.noAccountMessage'
+								ns='credit-cards'
+								components={[
+									<Link
+										key='0'
+										to='/app/accounts/create'
+										className='text-primary'
+									/>,
+								]}
+							/>
 						</Text>
 					)}
 				</Form>
@@ -191,7 +198,7 @@ export function CreditCardForm({
 					variant='outline'
 					{...form.reset.getButtonProps()}
 				>
-					Reset
+					{t('form.resetButton')}
 				</Button>
 				<Button
 					width='full'
