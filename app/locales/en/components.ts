@@ -45,4 +45,16 @@ export default {
 		USDC: 'USD Coin (USDC)',
 		DAI: 'Dai (DAI)',
 	},
+	ui: {
+		close: 'Close',
+		toggleSidebar: 'Toggle Sidebar',
+		sidebarTitle: 'Sidebar',
+		sidebarDescription: 'Displays the mobile sidebar.',
+		morePages: 'More pages',
+		goToPreviousPage: 'Go to previous page',
+		goToNextPage: 'Go to next page',
+		themeToggle: 'Theme toggle',
+		toggleLanguage: 'Toggle language',
+		clear: 'Clear',
+	},
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useFetcher, useFetchers } from 'react-router'
 import { z } from 'zod'
 
@@ -11,6 +12,7 @@ export const LocaleFormSchema = z.object({
 })
 
 export function LocaleToggle() {
+	const { t } = useTranslation('components')
 	const currentLocale = useLocale()
 	const fetcher = useFetcher<typeof action>()
 
@@ -33,7 +35,7 @@ export function LocaleToggle() {
 				<span className='text-sm font-semibold'>
 					{nextLocale?.toUpperCase()}
 				</span>
-				<span className='sr-only'>Toggle language</span>
+				<span className='sr-only'>{t('ui.toggleLanguage')}</span>
 			</Button>
 		</fetcher.Form>
 	)

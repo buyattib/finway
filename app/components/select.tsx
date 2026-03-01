@@ -1,5 +1,6 @@
 import { flushSync } from 'react-dom'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import {
 	Select as ShadcnSelect,
@@ -29,6 +30,7 @@ export function Select({
 	onValueChange,
 	clearable,
 }: SelectProps) {
+	const { t } = useTranslation('components')
 	const [value, setValue] = useState(defaultValue ?? '')
 
 	return (
@@ -56,7 +58,7 @@ export function Select({
 				{clearable && (
 					<>
 						<SelectSeparator />
-						<SelectItem value='clear'>Clear</SelectItem>
+						<SelectItem value='clear'>{t('ui.clear')}</SelectItem>
 					</>
 				)}
 			</SelectContent>

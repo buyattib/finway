@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useFetcher, useFetchers } from 'react-router'
 import { getFormProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod/v4'
@@ -16,6 +17,7 @@ export const ThemeFormSchema = z.object({
 export type Theme = z.infer<typeof ThemeFormSchema>['theme']
 
 export function ThemeToggle() {
+	const { t } = useTranslation('components')
 	const currentTheme = useTheme()
 	const fetcher = useFetcher<typeof action>()
 
@@ -44,7 +46,7 @@ export function ThemeToggle() {
 			>
 				<SunIcon className='scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90' />
 				<MoonIcon className='absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0' />
-				<span className='sr-only'>Theme toggle</span>
+				<span className='sr-only'>{t('ui.themeToggle')}</span>
 			</Button>
 		</fetcher.Form>
 	)

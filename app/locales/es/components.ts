@@ -47,4 +47,16 @@ export default {
 		USDC: 'USD Coin (USDC)',
 		DAI: 'Dai (DAI)',
 	},
+	ui: {
+		close: 'Cerrar',
+		toggleSidebar: 'Alternar barra lateral',
+		sidebarTitle: 'Barra lateral',
+		sidebarDescription: 'Muestra la barra lateral móvil.',
+		morePages: 'Más páginas',
+		goToPreviousPage: 'Ir a la página anterior',
+		goToNextPage: 'Ir a la página siguiente',
+		themeToggle: 'Cambiar tema',
+		toggleLanguage: 'Cambiar idioma',
+		clear: 'Limpiar',
+	},
 } satisfies typeof en
