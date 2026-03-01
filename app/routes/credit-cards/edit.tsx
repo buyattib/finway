@@ -14,7 +14,7 @@ import { ACTION_EDITION } from '~/lib/constants'
 import { CreditCardForm } from './components/form'
 import { createCreditCardFormSchema } from './lib/schemas'
 
-export function meta({ loaderData, params: { creditCardId } }: Route.MetaArgs) {
+export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.initialData) {
 		const title = loaderData?.meta.notFoundTitle
 		return [
@@ -61,7 +61,7 @@ export async function loader({
 		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
 
-	const { account, ...initialData } = creditCard
+	const { account: _account, ...initialData } = creditCard
 	const selectData = await getSelectData(db, user.id)
 
 	return {
@@ -104,7 +104,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 					})
 				}
 			})
-			.transform(({ accountId, currencyId, ...rest }) => rest),
+			.transform(
+				({ accountId: _accountId, currencyId: _currencyId, ...rest }) =>
+					rest,
+			),
 	})
 
 	if (submission.status !== 'success') {
@@ -112,10 +115,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	if (submission.value.action !== ACTION_EDITION) {
-		throw new Response(t('form.edit.action.invalidActionError'), { status: 422 })
+		throw new Response(t('form.edit.action.invalidActionError'), {
+			status: 422,
+		})
 	}
 
-	const { action, id, ...body } = submission.value
+	const { action: _action, id, ...body } = submission.value
 
 	await db.update(creditCardTable).set(body).where(eq(creditCardTable.id, id))
 

@@ -62,7 +62,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 export default function CreditCards({
 	loaderData: { creditCards },
 }: Route.ComponentProps) {
-	const { t } = useTranslation(['credit-cards', 'components'])
+	const { t } = useTranslation(['credit-cards', 'constants'])
 
 	return (
 		<section

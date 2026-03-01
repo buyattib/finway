@@ -60,7 +60,7 @@ export async function loader({
 		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
 
-	const { account, ...transactionData } = transaction
+	const { account: _account, ...transactionData } = transaction
 
 	const selectData = await getSelectData(db, user.id)
 	return {
@@ -201,7 +201,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		throw new Response(t('form.edit.action.invalidActionError'), { status: 422 })
 	}
 
-	const { action, id: transactionId, ...transactionData } = submission.value
+	const { action: _action, id: transactionId, ...transactionData } = submission.value
 
 	await db
 		.update(transactionTable)

@@ -108,7 +108,7 @@ export default function Accounts({
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
 	const submit = useSubmit()
-	const { t } = useTranslation(['accounts', 'components'])
+	const { t } = useTranslation(['accounts', 'constants'])
 
 	useEffect(() => {
 		const searchField = document.getElementById('search')

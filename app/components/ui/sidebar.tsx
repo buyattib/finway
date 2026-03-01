@@ -171,6 +171,7 @@ function Sidebar({
 	collapsible?: 'offcanvas' | 'icon' | 'none'
 }) {
 	const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+	const { t } = useTranslation('components')
 
 	if (collapsible === 'none') {
 		return (
@@ -186,8 +187,6 @@ function Sidebar({
 			</div>
 		)
 	}
-
-	const { t } = useTranslation('components')
 
 	if (isMobile) {
 		return (

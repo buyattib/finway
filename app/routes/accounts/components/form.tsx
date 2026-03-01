@@ -38,7 +38,7 @@ export function AccountForm({
 }: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['accounts', 'components'])
+	const { t } = useTranslation(['accounts', 'constants'])
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&

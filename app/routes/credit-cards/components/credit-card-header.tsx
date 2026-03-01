@@ -24,7 +24,7 @@ export function CreditCardHeader({
 	accountName,
 	currency,
 }: Props) {
-	const { t } = useTranslation(['credit-cards', 'components'])
+	const { t } = useTranslation(['credit-cards', 'constants'])
 
 	return (
 		<div className='flex flex-col sm:gap-2 gap-4'>

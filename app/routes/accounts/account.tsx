@@ -65,7 +65,7 @@ export async function loader({
 
 	const balances = await getBalances({ db, ownerId: user.id, accountId })
 
-	const { ownerId, ...accountData } = account
+	const { ownerId: _ownerId, ...accountData } = account
 
 	return {
 		account: { ...accountData, balances },
@@ -121,7 +121,7 @@ export default function AccountDetails({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['accounts', 'components'])
+	const { t } = useTranslation(['accounts', 'constants'])
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname &&

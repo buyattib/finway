@@ -75,7 +75,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		throw new Response(t('form.create.action.invalidActionError'), { status: 422 })
 	}
 
-	const { action, redirectTo, ...accountData } = submission.value
+	const { action: _action, redirectTo, ...accountData } = submission.value
 
 	const [{ id: accountId }] = await db
 		.insert(accountTable)

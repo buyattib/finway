@@ -47,7 +47,7 @@ export async function loader({
 		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
 
-	const { ownerId, ...accountData } = account
+	const { ownerId: _ownerId, ...accountData } = account
 	return {
 		initialData: accountData,
 		meta: {
@@ -114,7 +114,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 		throw new Response(t('form.edit.action.invalidActionError'), { status: 422 })
 	}
 
-	const { action, id, ...body } = submission.value
+	const { action: _action, id, ...body } = submission.value
 
 	await db.update(accountTable).set(body).where(eq(accountTable.id, id))
 

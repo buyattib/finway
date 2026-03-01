@@ -151,7 +151,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const {
-		action,
+		action: _action,
 		creditCardId,
 		totalInstallments,
 		firstInstallmentDate,
@@ -211,7 +211,7 @@ export default function CreateCreditCardTransaction({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['credit-cards', 'components'])
+	const { t } = useTranslation(['credit-cards', 'constants'])
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&

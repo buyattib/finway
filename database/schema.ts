@@ -327,7 +327,7 @@ export const exchangeRelations = relations(exchange, ({ one }) => ({
 	}),
 }))
 
-export const creditCardRelations = relations(creditCard, ({ one, many }) => ({
+export const creditCardRelations = relations(creditCard, ({ one }) => ({
 	account: one(account, {
 		fields: [creditCard.accountId],
 		references: [account.id],
