@@ -9,7 +9,6 @@ import {
 	ArrowRightLeftIcon,
 	ArrowUpDownIcon,
 	BanknoteArrowDownIcon,
-	CreditCard,
 	CreditCardIcon,
 	LayoutDashboard,
 	ListIcon,

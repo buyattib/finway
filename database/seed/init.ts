@@ -1,4 +1,4 @@
 import * as schema from '../schema'
 import { getDb } from './db'
 
-const db = getDb(schema)
+const _db = getDb(schema)

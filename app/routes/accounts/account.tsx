@@ -65,7 +65,7 @@ export async function loader({
 
 	const balances = await getBalances({ db, ownerId: user.id, accountId })
 
-	const { ownerId, ...accountData } = account
+	const { ownerId: _ownerId, ...accountData } = account
 
 	return {
 		account: { ...accountData, balances },

@@ -109,7 +109,7 @@ export async function loader({
 	}
 
 	const {
-		account: { ownerId, ...account },
+		account: { ownerId: _ownerId, ...account },
 		currency,
 		...creditCardData
 	} = creditCard

@@ -151,7 +151,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const {
-		action,
+		action: _action,
 		creditCardId,
 		totalInstallments,
 		firstInstallmentDate,

@@ -100,7 +100,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		throw new Response(t('form.create.action.invalidActionError'), { status: 422 })
 	}
 
-	const { action, ...creditCardData } = submission.value
+	const { action: _action, ...creditCardData } = submission.value
 
 	await db.insert(creditCardTable).values(creditCardData)
 

@@ -100,7 +100,7 @@ export async function loader({
 		.orderBy(asc(creditCardTransactionInstallmentTable.installmentNumber))
 
 	const {
-		account: { ownerId, ...account },
+		account: { ownerId: _ownerId, ...account },
 		currency,
 		...creditCardData
 	} = creditCard

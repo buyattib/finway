@@ -136,7 +136,7 @@ export function ExpensesByCategory({
 		Number(
 			monthExpenses.find(item => item.currency === selectedCurrency)
 				?.amount,
-		) ?? 0
+		) || 0
 
 	return (
 		<Layout
