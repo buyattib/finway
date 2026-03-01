@@ -1,4 +1,5 @@
 import { type JSX } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
 	isRouteErrorResponse,
 	useParams,
@@ -34,7 +35,7 @@ export function getErrorMessage(error: unknown) {
 		return error.error
 	}
 	console.error('Unable to get error message for error', error)
-	return 'Unknown Error'
+	return null
 }
 
 export function GeneralErrorBoundary({
@@ -42,6 +43,7 @@ export function GeneralErrorBoundary({
 }: {
 	statusHandlers?: Record<number, StatusHandler>
 }) {
+	const { t } = useTranslation('components')
 	const error = useRouteError()
 	const params = useParams()
 
@@ -52,7 +54,7 @@ export function GeneralErrorBoundary({
 	if (!isRouteErrorResponse(error)) {
 		return (
 			<AlertContainer>
-				<p>{getErrorMessage(error)}</p>
+				<p>{getErrorMessage(error) ?? t('ui.unknownError')}</p>
 			</AlertContainer>
 		)
 	}
@@ -72,10 +74,12 @@ export function GeneralErrorBoundary({
 }
 
 export function AlertContainer({ children }: { children: React.ReactNode }) {
+	const { t } = useTranslation('components')
+
 	return (
 		<Alert variant='destructive'>
 			<AlertCircleIcon />
-			<AlertTitle>Oh oh! There was an error</AlertTitle>
+			<AlertTitle>{t('ui.errorTitle')}</AlertTitle>
 			<AlertDescription>{children}</AlertDescription>
 		</Alert>
 	)

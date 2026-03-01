@@ -56,5 +56,7 @@ export default {
 		themeToggle: 'Cambiar tema',
 		toggleLanguage: 'Cambiar idioma',
 		clear: 'Limpiar',
+		errorTitle: '¡Oh oh! Hubo un error',
+		unknownError: 'Error desconocido',
 	},
 } satisfies typeof en

@@ -54,5 +54,7 @@ export default {
 		themeToggle: 'Theme toggle',
 		toggleLanguage: 'Toggle language',
 		clear: 'Clear',
+		errorTitle: 'Oh oh! There was an error',
+		unknownError: 'Unknown Error',
 	},
 }

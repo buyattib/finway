@@ -10,6 +10,7 @@ export default {
 		emailLabel: 'Correo electrónico',
 		rememberLabel: 'Recordarme',
 		submitButton: 'Enviar',
+		honeypotLabel: 'Por favor deja este campo en blanco',
 		schema: {
 			emailInvalid: 'El correo electrónico es inválido',
 			emailTooShort: 'El correo electrónico es muy corto',

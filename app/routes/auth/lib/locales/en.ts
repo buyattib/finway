@@ -8,6 +8,7 @@ export default {
 		emailLabel: 'Email',
 		rememberLabel: 'Remember me',
 		submitButton: 'Submit',
+		honeypotLabel: 'Please leave this field blank',
 		schema: {
 			emailInvalid: 'Email is invalid',
 			emailTooShort: 'Email is too short',

@@ -152,7 +152,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
 			</CardHeader>
 			<CardContent>
 				<Form method='post' {...getFormProps(form)}>
-					<HoneypotInputs label='Please leave this field blank' />
+					<HoneypotInputs label={t('login.honeypotLabel')} />
 
 					<TextField
 						label={t('login.emailLabel')}
