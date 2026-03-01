@@ -111,7 +111,7 @@ export default function CreditCards({
 							currencyCode,
 							accountName,
 						}) => {
-							const label = t(`components:currency.${currencyCode}`)
+							const label = t(`constants:currency.${currencyCode}`)
 							return (
 								<li
 									key={id}

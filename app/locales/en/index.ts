@@ -10,9 +10,11 @@ import transactionCategories from '~/routes/transaction-categories/lib/locales/e
 import transactions from '~/routes/transactions/lib/locales/en'
 import creditCards from '~/routes/credit-cards/lib/locales/en'
 import components from './components'
+import constants from './constants'
 
 export default {
 	components,
+	constants,
 	auth,
 	emails,
 	accounts,

@@ -126,7 +126,7 @@ export function AccountForm({
 						items={ACCOUNT_TYPES.map(i => ({
 							icon: <AccountTypeIcon size='sm' accountType={i} />,
 							value: i,
-							label: t(`components:accountType.${i}`),
+							label: t(`constants:accountType.${i}`),
 						}))}
 					/>
 				</Form>

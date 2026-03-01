@@ -207,7 +207,7 @@ export default function Accounts({
 											</Title>
 											<Text size='sm' theme='primary'>
 												{t(
-													`components:accountType.${accountType}`,
+													`constants:accountType.${accountType}`,
 												)}
 											</Text>
 										</div>

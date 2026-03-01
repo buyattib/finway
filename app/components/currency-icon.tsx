@@ -53,7 +53,7 @@ export function CurrencyIcon({
 	...props
 }: CurrencyIconProps) {
 	const src = CURRENCY_ICONS[currency]
-	const { t } = useTranslation('components')
+	const { t } = useTranslation('constants')
 	return (
 		<img
 			{...props}

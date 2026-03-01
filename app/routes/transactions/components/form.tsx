@@ -105,7 +105,7 @@ export function TransactionForm({
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: t(`components:transactionType.${i}`),
+		label: t(`constants:transactionType.${i}`),
 	}))
 
 	const accountOptions = accounts.map(({ id, name, accountType }) => ({

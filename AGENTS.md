@@ -114,9 +114,9 @@ Meta is translated in the loader and passed through `loaderData` — the `meta()
 ### Client-Side
 
 ```ts
-const { t } = useTranslation(['accounts', 'components'])
+const { t } = useTranslation(['accounts', 'constants'])
 t('index.title')                              // primary namespace
-t(`components:accountType.${accountType}`)    // cross-namespace with prefix
+t(`constants:accountType.${accountType}`)     // cross-namespace with prefix
 ```
 
 ### Zod Schema Factory

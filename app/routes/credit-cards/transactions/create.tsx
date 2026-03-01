@@ -242,7 +242,7 @@ export default function CreateCreditCardTransaction({
 	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: t(`components:ccTransactionType.${i}`),
+		label: t(`constants:ccTransactionType.${i}`),
 	}))
 
 	const transactionCategoryOptions = transactionCategories.map(

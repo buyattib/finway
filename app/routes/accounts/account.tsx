@@ -137,7 +137,7 @@ export default function AccountDetails({
 							{name}
 						</Title>
 						<Text size='sm' theme='primary'>
-							{t(`components:accountType.${accountType}`)}
+							{t(`constants:accountType.${accountType}`)}
 						</Text>
 					</div>
 					<div className='flex items-center gap-2 ml-auto'>
@@ -206,7 +206,7 @@ export default function AccountDetails({
 											currency={currency}
 											size='md'
 										/>
-										{t(`components:currency.${currency}`)}
+										{t(`constants:currency.${currency}`)}
 									</Text>
 									<Text>
 										{`${symbol} ${formatNumber(balance)}`}

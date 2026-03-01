@@ -50,7 +50,7 @@ export function TransactionType({
 	className,
 	variant,
 }: TransactionTypeProps) {
-	const { t } = useTranslation('components')
+	const { t } = useTranslation('constants')
 
 	const {
 		icon: Icon,

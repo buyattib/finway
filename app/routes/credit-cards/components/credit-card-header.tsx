@@ -56,7 +56,7 @@ export function CreditCardHeader({
 					className='flex items-center gap-1'
 				>
 					<CurrencyIcon currency={currency} size='sm' />
-					{t(`components:currency.${currency}`)}
+					{t(`constants:currency.${currency}`)}
 				</Text>
 			</div>
 		</div>
