@@ -3,8 +3,7 @@
 so they dont have to manually create all of them. The UI should be a list and users
 should be able to check the desired categories.
 
-- Fix type errors
-- Add a linter?
+- translated emails in the email server?
 - Ask agent what is needed to be production ready
 - Improve styling and a design system?
 - Sessions for auth?
