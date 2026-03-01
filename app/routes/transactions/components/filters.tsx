@@ -20,7 +20,7 @@ export function TransactionsFilters({
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)
-	const { t } = useTranslation(['transactions', 'components'])
+	const { t } = useTranslation(['transactions', 'constants'])
 
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,

@@ -61,7 +61,7 @@ export function TransactionForm({
 }: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['transactions', 'components'])
+	const { t } = useTranslation(['transactions', 'constants'])
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&

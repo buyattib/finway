@@ -209,7 +209,7 @@ export default function Transactions({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['transactions', 'components'])
+	const { t } = useTranslation(['transactions', 'constants'])
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&

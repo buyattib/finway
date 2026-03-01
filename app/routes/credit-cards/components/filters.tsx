@@ -18,7 +18,7 @@ export function CreditCardTransactionFilters({
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)
-	const { t } = useTranslation(['credit-cards', 'components'])
+	const { t } = useTranslation(['credit-cards', 'constants'])
 
 	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
