@@ -143,8 +143,8 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 							offset={6}
 							fontSize={14}
 							className='font-semibold'
-							formatter={(amount: string) =>
-								`${currencySymbol} ${formatNumber(amount)}`
+							formatter={amount =>
+								`${currencySymbol} ${formatNumber(String(amount))}`
 							}
 						/>
 					</Bar>
