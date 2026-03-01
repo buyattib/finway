@@ -50,37 +50,37 @@ export async function loader({ context }: Route.LoaderArgs) {
 const links = [
 	{
 		to: '/app/dashboard',
-		labelKey: 'layout.nav.dashboard' as const,
+		labelKey: 'layout.dashboard' as const,
 		icon: <LayoutDashboard />,
 	},
 	{
 		to: '/app/accounts',
-		labelKey: 'layout.nav.accounts' as const,
+		labelKey: 'layout.accounts' as const,
 		icon: <WalletIcon />,
 	},
 	{
 		to: '/app/transactions',
-		labelKey: 'layout.nav.transactions' as const,
+		labelKey: 'layout.transactions' as const,
 		icon: <BanknoteArrowDownIcon />,
 	},
 	{
 		to: '/app/credit-cards',
-		labelKey: 'layout.nav.creditCards' as const,
+		labelKey: 'layout.creditCards' as const,
 		icon: <CreditCardIcon />,
 	},
 	{
 		to: '/app/transfers',
-		labelKey: 'layout.nav.transfers' as const,
+		labelKey: 'layout.transfers' as const,
 		icon: <ArrowRightLeftIcon />,
 	},
 	{
 		to: '/app/exchanges',
-		labelKey: 'layout.nav.exchanges' as const,
+		labelKey: 'layout.exchanges' as const,
 		icon: <ArrowUpDownIcon />,
 	},
 	{
 		to: '/app/transaction-categories',
-		labelKey: 'layout.nav.transactionCategories' as const,
+		labelKey: 'layout.transactionCategories' as const,
 		icon: <ListIcon />,
 	},
 ]

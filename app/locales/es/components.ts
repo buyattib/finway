@@ -13,15 +13,13 @@ export default {
 		},
 	},
 	layout: {
-		nav: {
-			dashboard: 'Panel',
-			accounts: 'Cuentas',
-			transactions: 'Transacciones',
-			creditCards: 'Tarjetas de Crédito',
-			transfers: 'Transferencias',
-			exchanges: 'Intercambios',
-			transactionCategories: 'Categorías de Transacción',
-		},
+		dashboard: 'Panel',
+		accounts: 'Cuentas',
+		transactions: 'Transacciones',
+		creditCards: 'Tarjetas de Crédito',
+		transfers: 'Transferencias',
+		exchanges: 'Intercambios',
+		transactionCategories: 'Categorías de Transacción',
 		logoutButton: 'Cerrar sesión',
 	},
 	accountType: {
