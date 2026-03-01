@@ -3,7 +3,6 @@ import { PlusIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq } from 'drizzle-orm'
 import { Trans, useTranslation } from 'react-i18next'
-
 import type { Route } from './+types'
 
 import { transactionCategory as transactionCategoryTable } from '~/database/schema'
@@ -21,7 +20,8 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
-import { DeleteTransactionCategoryFormSchema } from './lib/schemas'
+import { AddSuggestionsSchema, DeleteTransactionCategoryFormSchema } from './lib/schemas'
+import { SuggestedCategoriesDialog } from './components/suggested-categories-dialog'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -60,6 +60,57 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const t = getServerT(context, 'transaction-categories')
 
 	const formData = await request.formData()
+	const intent = formData.get('intent')
+
+	if (intent === 'add-suggestions') {
+		const parsed = AddSuggestionsSchema.safeParse({
+			intent,
+			categoryNames: formData.getAll('categoryNames'),
+		})
+
+		if (!parsed.success) {
+			const toastHeaders = await createToastHeaders(request, {
+				type: 'error',
+				title: t('index.suggestions.noneSelectedError'),
+			})
+			return data({}, { headers: toastHeaders })
+		}
+
+		const { categoryNames } = parsed.data
+
+		const existingCategories =
+			await db.query.transactionCategory.findMany({
+				where: (tc, { eq, and, inArray }) =>
+					and(
+						eq(tc.ownerId, user.id),
+						inArray(tc.name, categoryNames),
+					),
+				columns: { name: true },
+			})
+
+		const existingNames = new Set(
+			existingCategories.map(c => c.name.toLowerCase()),
+		)
+		const newCategories = categoryNames.filter(
+			name => !existingNames.has(name.toLowerCase()),
+		)
+
+		if (newCategories.length > 0) {
+			await db.insert(transactionCategoryTable).values(
+				newCategories.map(name => ({
+					name,
+					ownerId: user.id,
+				})),
+			)
+		}
+
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'success',
+			title: t('index.suggestions.successToast'),
+		})
+		return data({}, { headers: toastHeaders })
+	}
+
 	const submission = parseWithZod(formData, {
 		schema: DeleteTransactionCategoryFormSchema,
 	})
@@ -124,14 +175,21 @@ export default function TransactionCategories({
 				<Title id='transaction-categories-section' level='h3'>
 					{t('index.title')}
 				</Title>
-				<Button asChild variant='default' autoFocus>
-					<Link to='create' prefetch='intent'>
-						<PlusIcon aria-hidden />
-						<span className='sm:inline hidden'>
-							{t('index.addCategoryLabel')}
-						</span>
-					</Link>
-				</Button>
+				<div className='flex items-center gap-2'>
+					<SuggestedCategoriesDialog
+						existingCategoryNames={transactionCategories.map(
+							c => c.name,
+						)}
+					/>
+					<Button asChild variant='default' autoFocus>
+						<Link to='create' prefetch='intent'>
+							<PlusIcon aria-hidden />
+							<span className='sm:inline hidden'>
+								{t('index.addCategoryLabel')}
+							</span>
+						</Link>
+					</Button>
+				</div>
 			</header>
 
 			{transactionCategories.length === 0 && (
