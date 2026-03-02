@@ -19,7 +19,7 @@ import {
 } from '~/lib/constants'
 import type { TAccountType } from '~/lib/types'
 
-const accountTypeIconVariants = cva('text-background', {
+const accountTypeIconVariants = cva('text-white', {
 	variants: {
 		size: {
 			xs: 'w-5 h-5',
