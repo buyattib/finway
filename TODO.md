@@ -1,5 +1,3 @@
-- Improve styling and a design system?
-
 - Ask agent what is needed to be production ready
 
 - translated emails in the email server?
