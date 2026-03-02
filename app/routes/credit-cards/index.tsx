@@ -16,6 +16,7 @@ import { dbContext, userContext } from '~/lib/context'
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
+import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -65,11 +66,8 @@ export default function CreditCards({
 	const { t } = useTranslation(['credit-cards', 'constants'])
 
 	return (
-		<section
-			className='flex flex-col gap-4'
-			aria-labelledby='credit-cards-section'
-		>
-			<div className='flex items-center justify-between'>
+		<PageSection id='credit-cards-section'>
+			<PageHeader>
 				<Title id='credit-cards-section' level='h3'>
 					{t('index.title')}
 				</Title>
@@ -81,8 +79,9 @@ export default function CreditCards({
 						</span>
 					</Link>
 				</Button>
-			</div>
+			</PageHeader>
 
+			<PageContent>
 			{creditCards.length === 0 ? (
 				<div className='my-2'>
 					<Text size='md' weight='medium' alignment='center'>
@@ -153,6 +152,7 @@ export default function CreditCards({
 					)}
 				</ul>
 			)}
-		</section>
+			</PageContent>
+		</PageSection>
 	)
 }

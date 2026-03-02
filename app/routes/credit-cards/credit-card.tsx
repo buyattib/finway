@@ -35,6 +35,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
+import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { TransactionType } from '~/components/transaction-type'
 import {
 	Tooltip,
@@ -344,75 +345,70 @@ export default function CreditCardDetails({
 	)
 
 	return (
-		<div className='flex flex-col gap-6'>
-			<div className='flex flex-col gap-4'>
-				<div className='flex sm:items-center gap-4'>
-					<CreditCardHeader
-						{...{
-							brand,
-							last4,
-							expiryMonth,
-							expiryYear,
-							accountName,
-							currency: currencyCode,
-						}}
-					/>
+		<PageSection id={id}>
+			<PageHeader>
+				<CreditCardHeader
+					{...{
+						brand,
+						last4,
+						expiryMonth,
+						expiryYear,
+						accountName,
+						currency: currencyCode,
+					}}
+				/>
 
-					<div className='flex sm:items-center gap-2 ml-auto'>
-						<Button size='icon' variant='outline' asChild>
-							<Link to='edit' prefetch='intent'>
-								<SquarePenIcon />
-								<span className='sr-only'>
-									{t('details.editAriaLabel', {
-										brand,
-										last4,
-									})}
-								</span>
-							</Link>
-						</Button>
-						<Tooltip>
-							<Form method='post'>
-								<input
-									type='hidden'
-									name='creditCardId'
-									value={id}
-								/>
-								<TooltipTrigger asChild>
-									<Button
-										size='icon'
-										variant='destructive-outline'
-										type='submit'
-										name='intent'
-										value='delete-card'
-										disabled={isDeletingCard}
-									>
-										{isDeletingCard ? (
-											<Spinner size='sm' />
-										) : (
-											<TrashIcon aria-hidden />
-										)}
-										<span className='sr-only'>
-											{t('details.deleteAriaLabel', {
-												brand,
-												last4,
-											})}
-										</span>
-									</Button>
-								</TooltipTrigger>
-							</Form>
-							<TooltipContent>
-								{t('details.deleteTooltip')}
-							</TooltipContent>
-						</Tooltip>
-					</div>
+				<div className='flex sm:items-center gap-2'>
+					<Button size='icon' variant='outline' asChild>
+						<Link to='edit' prefetch='intent'>
+							<SquarePenIcon />
+							<span className='sr-only'>
+								{t('details.editAriaLabel', {
+									brand,
+									last4,
+								})}
+							</span>
+						</Link>
+					</Button>
+					<Tooltip>
+						<Form method='post'>
+							<input
+								type='hidden'
+								name='creditCardId'
+								value={id}
+							/>
+							<TooltipTrigger asChild>
+								<Button
+									size='icon'
+									variant='destructive-outline'
+									type='submit'
+									name='intent'
+									value='delete-card'
+									disabled={isDeletingCard}
+								>
+									{isDeletingCard ? (
+										<Spinner size='sm' />
+									) : (
+										<TrashIcon aria-hidden />
+									)}
+									<span className='sr-only'>
+										{t('details.deleteAriaLabel', {
+											brand,
+											last4,
+										})}
+									</span>
+								</Button>
+							</TooltipTrigger>
+						</Form>
+						<TooltipContent>
+							{t('details.deleteTooltip')}
+						</TooltipContent>
+					</Tooltip>
 				</div>
-			</div>
+			</PageHeader>
 
-			<section
-				className='flex flex-col gap-4'
-				aria-labelledby='cc-transactions-section'
-			>
-				<div className='flex items-center justify-between'>
+			<PageSection id='cc-transactions-section'>
+				<PageHeader>
 					<Title id='cc-transactions-section' level='h3'>
 						{t('details.transactionsTitle', {
 							total: pagination.total,
@@ -426,7 +422,7 @@ export default function CreditCardDetails({
 							</span>
 						</Link>
 					</Button>
-				</div>
+				</PageHeader>
 
 				<CreditCardTransactionFilters
 					filters={filters}
@@ -565,7 +561,7 @@ export default function CreditCardDetails({
 					page={pagination.page}
 					pages={pagination.pages}
 				/>
-			</section>
-		</div>
+			</PageSection>
+		</PageSection>
 	)
 }

@@ -20,6 +20,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
+import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import {
@@ -128,8 +129,8 @@ export default function AccountDetails({
 		navigation.state === 'submitting'
 
 	return (
-		<div className='flex flex-col gap-6'>
-			<section className='flex flex-col gap-4'>
+		<PageSection id={id}>
+			<PageHeader>
 				<div className='flex items-center gap-4'>
 					<AccountTypeIcon accountType={accountType} />
 					<div className='flex flex-col gap-2'>
@@ -140,53 +141,53 @@ export default function AccountDetails({
 							{t(`constants:accountType.${accountType}`)}
 						</Text>
 					</div>
-					<div className='flex items-center gap-2 ml-auto'>
-						<Button size='icon' variant='outline' asChild>
-							<Link to='edit' prefetch='intent'>
-								<SquarePenIcon />
-							</Link>
-						</Button>
-						<Tooltip>
-							<Form method='post'>
-								<input
-									type='hidden'
-									name='accountId'
-									value={id}
-								/>
-								<TooltipTrigger asChild>
-									<Button
-										size='icon'
-										variant='destructive-outline'
-										type='submit'
-										name='intent'
-										value='delete'
-										disabled={isDeleting}
-									>
-										{isDeleting ? (
-											<Spinner size='sm' />
-										) : (
-											<TrashIcon aria-hidden />
-										)}
-										<span className='sr-only'>
-											{t('details.deleteAriaLabel', {
-												name,
-											})}
-										</span>
-									</Button>
-								</TooltipTrigger>
-							</Form>
-							<TooltipContent>
-								{t('details.deleteTooltip')}
-							</TooltipContent>
-						</Tooltip>
-					</div>
 				</div>
-				<Text theme='muted'>{description}</Text>
-			</section>
+				<div className='flex items-center gap-2'>
+					<Button size='icon' variant='outline' asChild>
+						<Link to='edit' prefetch='intent'>
+							<SquarePenIcon />
+						</Link>
+					</Button>
+					<Tooltip>
+						<Form method='post'>
+							<input
+								type='hidden'
+								name='accountId'
+								value={id}
+							/>
+							<TooltipTrigger asChild>
+								<Button
+									size='icon'
+									variant='destructive-outline'
+									type='submit'
+									name='intent'
+									value='delete'
+									disabled={isDeleting}
+								>
+									{isDeleting ? (
+										<Spinner size='sm' />
+									) : (
+										<TrashIcon aria-hidden />
+									)}
+									<span className='sr-only'>
+										{t('details.deleteAriaLabel', {
+											name,
+										})}
+									</span>
+								</Button>
+							</TooltipTrigger>
+						</Form>
+						<TooltipContent>
+							{t('details.deleteTooltip')}
+						</TooltipContent>
+					</Tooltip>
+				</div>
+			</PageHeader>
+			<Text theme='muted'>{description}</Text>
 
-			<section className='flex flex-col gap-2'>
+			<PageSection id={`${id}-balances`}>
 				<div className='border-b border-b-accent py-2'>
-					<Title id={id} level='h3'>
+					<Title id={`${id}-balances`} level='h3'>
 						{t('details.currencyBalancesTitle')}
 					</Title>
 				</div>
@@ -216,7 +217,7 @@ export default function AccountDetails({
 						})}
 					</ul>
 				)}
-			</section>
-		</div>
+			</PageSection>
+		</PageSection>
 	)
 }

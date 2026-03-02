@@ -27,6 +27,7 @@ import type { TAccountBalance } from '~/lib/types'
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
+import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { Input } from '~/components/ui/input'
@@ -123,11 +124,8 @@ export default function Accounts({
 		navigation.location.search.includes('search')
 
 	return (
-		<section
-			className='flex flex-col gap-4'
-			aria-labelledby='accounts-section'
-		>
-			<header className='flex items-center justify-between'>
+		<PageSection id='accounts-section'>
+			<PageHeader>
 				<Title id='accounts-section' level='h3'>
 					{t('index.title')}
 				</Title>
@@ -139,8 +137,9 @@ export default function Accounts({
 						</span>
 					</Link>
 				</Button>
-			</header>
+			</PageHeader>
 
+			<PageContent>
 			<Form
 				id='search-accounts'
 				role='search'
@@ -305,6 +304,7 @@ export default function Accounts({
 					),
 				)}
 			</ul>
-		</section>
+			</PageContent>
+		</PageSection>
 	)
 }

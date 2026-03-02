@@ -23,6 +23,7 @@ import type { TTransactionType } from '~/lib/types'
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
+import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import {
 	Table,
 	TableBody,
@@ -227,11 +228,8 @@ export default function Transactions({
 	const hasFilters = Object.values(filters).some(Boolean)
 
 	return (
-		<section
-			className='flex flex-col gap-4'
-			aria-labelledby='transactions-section'
-		>
-			<header className='flex items-center justify-between'>
+		<PageSection id='transactions-section'>
+			<PageHeader>
 				<Title id='transactions-section' level='h3'>
 					{t('index.title', { total: pagination.total })}
 				</Title>
@@ -248,8 +246,9 @@ export default function Transactions({
 						</span>
 					</Link>
 				</Button>
-			</header>
+			</PageHeader>
 
+			<PageContent>
 			<TransactionsFilters filters={filters} selectData={selectData} />
 
 			<div className='h-6'>
@@ -383,6 +382,7 @@ export default function Transactions({
 			</Table>
 
 			<TablePagination page={pagination.page} pages={pagination.pages} />
-		</section>
+			</PageContent>
+		</PageSection>
 	)
 }

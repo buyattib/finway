@@ -22,6 +22,7 @@ import { PAGE_SIZE } from '~/lib/constants'
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
+import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import {
 	Table,
 	TableBody,
@@ -194,11 +195,8 @@ export default function Transfers({
 	const deletingId = navigation.formData?.get('transferId')
 
 	return (
-		<section
-			className='flex flex-col gap-4'
-			aria-labelledby='transfers-section'
-		>
-			<header className='flex items-center justify-between'>
+		<PageSection id='transfers-section'>
+			<PageHeader>
 				<Title id='transfers-section' level='h3'>
 					{t('index.title')}
 				</Title>
@@ -215,8 +213,9 @@ export default function Transfers({
 						</span>
 					</Link>
 				</Button>
-			</header>
+			</PageHeader>
 
+			<PageContent>
 			<Table>
 				{transfers.length === 0 && (
 					<TableCaption>
@@ -328,6 +327,7 @@ export default function Transfers({
 			</Table>
 
 			<TablePagination page={pagination.page} pages={pagination.pages} />
-		</section>
+			</PageContent>
+		</PageSection>
 	)
 }

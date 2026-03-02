@@ -14,6 +14,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
+import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import {
 	Tooltip,
 	TooltipContent,
@@ -167,11 +168,8 @@ export default function TransactionCategories({
 	const deletingId = navigation.formData?.get('transactionCategoryId')
 
 	return (
-		<section
-			className='flex flex-col gap-4'
-			aria-labelledby='transaction-categories-section'
-		>
-			<header className='flex items-center justify-between'>
+		<PageSection id='transaction-categories-section'>
+			<PageHeader>
 				<Title id='transaction-categories-section' level='h3'>
 					{t('index.title')}
 				</Title>
@@ -190,8 +188,9 @@ export default function TransactionCategories({
 						</Link>
 					</Button>
 				</div>
-			</header>
+			</PageHeader>
 
+			<PageContent>
 			{transactionCategories.length === 0 && (
 				<div className='my-2'>
 					<Text size='md' weight='medium' alignment='center'>
@@ -259,6 +258,7 @@ export default function TransactionCategories({
 					</li>
 				))}
 			</ul>
-		</section>
+			</PageContent>
+		</PageSection>
 	)
 }

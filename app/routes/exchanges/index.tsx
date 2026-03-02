@@ -22,6 +22,7 @@ import { PAGE_SIZE } from '~/lib/constants'
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
+import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import {
 	Table,
 	TableBody,
@@ -180,11 +181,8 @@ export default function Exchanges({
 	const deletingId = navigation.formData?.get('exchangeId')
 
 	return (
-		<section
-			className='flex flex-col gap-4'
-			aria-labelledby='exchanges-section'
-		>
-			<header className='flex items-center justify-between'>
+		<PageSection id='exchanges-section'>
+			<PageHeader>
 				<Title id='exchanges-section' level='h3'>
 					{t('index.title')}
 				</Title>
@@ -201,8 +199,9 @@ export default function Exchanges({
 						</span>
 					</Link>
 				</Button>
-			</header>
+			</PageHeader>
 
+			<PageContent>
 			<Table>
 				{exchanges.length === 0 && (
 					<TableCaption>
@@ -322,6 +321,7 @@ export default function Exchanges({
 			</Table>
 
 			<TablePagination page={pagination.page} pages={pagination.pages} />
-		</section>
+			</PageContent>
+		</PageSection>
 	)
 }

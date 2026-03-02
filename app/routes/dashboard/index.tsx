@@ -20,6 +20,8 @@ import type {
 	MonthResponse,
 } from './lib/types'
 
+import { PageSection } from '~/components/ui/page'
+
 import { SummaryCards } from './components/summary-cards'
 import { ExpensesByCategory } from './components/expenses-by-category'
 import { ExpensesByMonth } from './components/expenses-by-month'
@@ -142,7 +144,7 @@ export default function Dashboard({
 	},
 }: Route.ComponentProps) {
 	return (
-		<section className='space-y-8'>
+		<PageSection>
 			<SummaryCards summary={summary} />
 			<ExpensesByCategory
 				expensesByCategory={expensesByCategory}
@@ -150,6 +152,6 @@ export default function Dashboard({
 			/>
 			<ExpensesByMonth expensesByMonth={expensesByMonth} />
 			<MonthInstallments monthInstallments={monthInstallments} />
-		</section>
+		</PageSection>
 	)
 }
