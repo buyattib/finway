@@ -90,7 +90,7 @@ export function ExpensesByCategory({
 						<Text size='sm' theme='muted'>
 							{t('index.expensesByCategory.noExpenses')}
 						</Text>
-						<div className='flex items-center gap-4'>
+						<div className='flex items-center gap-4 flex-wrap justify-center'>
 							<Button asChild variant='outline'>
 								<Link to='/app/accounts'>
 									<PlusIcon />

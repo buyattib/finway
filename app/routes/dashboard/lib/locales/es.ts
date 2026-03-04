@@ -31,10 +31,9 @@ export default {
 		monthInstallments: {
 			title: 'Cuotas del mes ({{count}})',
 			noInstallments: 'No hay cuotas pendientes este mes',
-			transactionDate: 'Fecha de transacción',
 			dueDate: 'Fecha de pago',
 			category: 'Categoría',
-			installmentAmount: 'Monto de cuota',
+			installmentAmount: 'Monto',
 		},
 	},
 } satisfies typeof en

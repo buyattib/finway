@@ -27,7 +27,7 @@ import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
 import type { TCCTransactionType } from '~/lib/types'
-import { formatDate, formatNumber } from '~/lib/utils'
+import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { getSelectData } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 
@@ -42,15 +42,6 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
-import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '~/components/ui/table'
 import { TablePagination } from '~/components/table-pagination'
 
 import { CreditCardHeader } from './components/credit-card-header'
@@ -433,45 +424,22 @@ export default function CreditCardDetails({
 					{isLoading && <Spinner size='md' className='mx-auto' />}
 				</div>
 
-				<Table>
-					{transactions.length === 0 && (
-						<TableCaption>
-							<Text size='md' weight='medium' alignment='center'>
-								<Trans
-									i18nKey='details.emptyMessage'
-									ns='credit-cards'
-									components={[
-										<Link
-											key='0'
-											to='transactions/create'
-											className='text-primary'
-										/>,
-									]}
-								/>
-							</Text>
-						</TableCaption>
-					)}
-					{transactions.length !== 0 && (
-						<TableHeader>
-							<TableRow>
-								<TableHead>{t('details.table.date')}</TableHead>
-								<TableHead className='text-center'>
-									{t('details.table.category')}
-								</TableHead>
-								<TableHead className='text-center'>
-									{t('details.table.type')}
-								</TableHead>
-								<TableHead className='text-center'>
-									{t('details.table.amount')}
-								</TableHead>
-								<TableHead className='text-center'>
-									{t('details.table.installments')}
-								</TableHead>
-								<TableHead></TableHead>
-							</TableRow>
-						</TableHeader>
-					)}
-					<TableBody>
+				{transactions.length === 0 ? (
+					<Text size='md' weight='medium' alignment='center'>
+						<Trans
+							i18nKey='details.emptyMessage'
+							ns='credit-cards'
+							components={[
+								<Link
+									key='0'
+									to='transactions/create'
+									className='text-primary'
+								/>,
+							]}
+						/>
+					</Text>
+				) : (
+					<ul className='flex flex-col gap-2'>
 						{transactions.map(
 							({
 								id: txId,
@@ -481,81 +449,89 @@ export default function CreditCardDetails({
 								categoryName,
 								installments,
 							}) => {
+								const symbol =
+									getCurrencySymbol(currencyCode)
 								return (
-									<TableRow
+									<li
 										key={txId}
-										className='cursor-pointer'
+										className='relative rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
 										onClick={() =>
-											navigate(`transactions/${txId}`)
+											navigate(
+												`transactions/${txId}`,
+											)
 										}
 									>
-										<TableCell className='w-30'>
-											{formatDate(new Date(date))}
-										</TableCell>
-										<TableCell className='text-center'>
-											{categoryName}
-										</TableCell>
-										<TableCell className='text-center'>
-											<TransactionType
-												variant='text'
-												transactionType={type}
+										<Form
+											method='post'
+											onClick={e =>
+												e.stopPropagation()
+											}
+											className='absolute top-3 right-3'
+										>
+											<input
+												type='hidden'
+												name='creditCardTransactionId'
+												value={txId}
 											/>
-										</TableCell>
-										<TableCell className='text-center'>
-											<b>{currencyCode}</b>{' '}
-											{formatNumber(amount)}
-										</TableCell>
-										<TableCell className='text-center'>
-											{installments}
-										</TableCell>
-										<TableCell className='flex justify-end items-center gap-2'>
-											<Form
-												method='post'
-												onClick={e =>
-													e.stopPropagation()
+											<Button
+												size='icon-xs'
+												variant='destructive-ghost'
+												type='submit'
+												name='intent'
+												value='delete-transaction'
+												disabled={
+													isDeletingTransaction
 												}
 											>
-												<input
-													type='hidden'
-													name='creditCardTransactionId'
-													value={txId}
-												/>
-												<Button
-													size='icon-xs'
-													variant='destructive-ghost'
-													type='submit'
-													name='intent'
-													value='delete-transaction'
-													disabled={
-														isDeletingTransaction
-													}
-												>
-													{isDeletingTransaction &&
-													deletingTransactionId ===
-														txId ? (
-														<Spinner
-															aria-hidden
-															size='sm'
-														/>
-													) : (
-														<TrashIcon
-															aria-hidden
-														/>
+												{isDeletingTransaction &&
+												deletingTransactionId ===
+													txId ? (
+													<Spinner
+														aria-hidden
+														size='sm'
+													/>
+												) : (
+													<TrashIcon aria-hidden />
+												)}
+												<span className='sr-only'>
+													{t(
+														'details.deleteTransactionAriaLabel',
 													)}
-													<span className='sr-only'>
-														{t(
-															'details.deleteTransactionAriaLabel',
-														)}
-													</span>
-												</Button>
-											</Form>
-										</TableCell>
-									</TableRow>
+												</span>
+											</Button>
+										</Form>
+
+										<div className='grid grid-cols-3 sm:grid-cols-5 items-center gap-4 pr-8'>
+											<Text size='sm' theme='muted'>
+												{formatDate(new Date(date))}
+											</Text>
+											<TransactionType
+												variant='icon-text'
+												size='xs'
+												transactionType={type}
+											/>
+											<Text
+												size='sm'
+												theme='foreground'
+												weight='medium'
+											>
+												{symbol}{' '}
+												{formatNumber(amount)}
+											</Text>
+											<Text size='sm' theme='muted'>
+												{categoryName}
+											</Text>
+											<Text size='xs' theme='muted'>
+												{installments}{' '}
+												{t('details.table.installments')}
+											</Text>
+										</div>
+									</li>
 								)
 							},
 						)}
-					</TableBody>
-				</Table>
+					</ul>
+				)}
 
 				<TablePagination
 					page={pagination.page}

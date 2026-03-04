@@ -29,10 +29,9 @@ export default {
 		monthInstallments: {
 			title: 'This month installments ({{count}})',
 			noInstallments: 'No installments due this month',
-			transactionDate: 'Transaction date',
 			dueDate: 'Due date',
 			category: 'Category',
-			installmentAmount: 'Installment amount',
+			installmentAmount: 'Amount',
 		},
 	},
 }

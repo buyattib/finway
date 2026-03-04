@@ -8,7 +8,7 @@ import type { Route } from './+types/transaction'
 import { creditCardTransactionInstallment as creditCardTransactionInstallmentTable } from '~/database/schema'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { cn, formatDate, formatNumber } from '~/lib/utils'
+import { cn, formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
@@ -164,7 +164,7 @@ export default function CreditCardTransaction({
 			</div>
 
 			<div
-				className={cn('grid grid-cols-2 gap-6', {
+				className={cn('grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6', {
 					'md:grid-cols-4': !description,
 					'md:grid-cols-5': !!description,
 				})}
@@ -192,7 +192,7 @@ export default function CreditCardTransaction({
 						{t('transaction.details.amount')}
 					</Text>
 					<Text size='md' theme='foreground'>
-						{currencyCode} {formatNumber(amount)}
+						{getCurrencySymbol(currencyCode)} {formatNumber(amount)}
 					</Text>
 				</div>
 				<div className='flex flex-col gap-1'>
@@ -259,7 +259,7 @@ export default function CreditCardTransaction({
 									theme='foreground'
 									weight='medium'
 								>
-									{currencyCode} {formatNumber(amount)}
+									{getCurrencySymbol(currencyCode)} {formatNumber(amount)}
 								</Text>
 							</div>
 						</div>

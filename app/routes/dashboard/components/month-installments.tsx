@@ -67,8 +67,13 @@ export function MonthInstallments({ monthInstallments }: Props) {
 									</Text>
 									<Link
 										to={`/app/credit-cards/${creditCardId}/transactions/${ccTransactionId}`}
-										className='grid grid-cols-2 items-center gap-4 pt-6'
+										className='grid grid-cols-1 sm:grid-cols-5 items-center gap-3 sm:gap-4 pt-6'
 									>
+										<Text size='sm' theme='muted'>
+											{formatDate(
+												new Date(ccTransactionDate),
+											)}
+										</Text>
 										<div className='flex flex-col gap-1'>
 											<div className='flex items-center gap-2 text-muted-foreground whitespace-nowrap'>
 												<CreditCardIcon className='size-4 shrink-0' />
@@ -80,62 +85,43 @@ export function MonthInstallments({ monthInstallments }: Props) {
 											<TransactionType
 												variant='icon-text'
 												size='xs'
-												transactionType={
-													ccTransactionType
-												}
+												transactionType={ccTransactionType}
 											/>
 										</div>
-
-										<div className='flex items-center gap-1 whitespace-nowrap'>
-											<CurrencyIcon
-												currency={currency}
-												size='sm'
-											/>
-											<Text
-												size='md'
-												theme='foreground'
-												weight='medium'
-											>
-												{symbol}{' '}
-												{formatNumber(
-													installmentAmount,
-												)}
+										<div className='flex flex-col gap-0.5'>
+											<Text size='xs' theme='muted'>
+												{t('index.monthInstallments.installmentAmount')}
 											</Text>
+											<div className='flex items-center gap-1'>
+												<CurrencyIcon
+													currency={currency}
+													size='sm'
+												/>
+												<Text
+													size='sm'
+													theme='foreground'
+													weight='medium'
+												>
+													{symbol}{' '}
+													{formatNumber(installmentAmount)}
+												</Text>
+											</div>
 										</div>
-
-										<div className='flex flex-col gap-1'>
+										<div className='flex flex-col gap-0.5'>
+											<Text size='xs' theme='muted'>
+												{t('index.monthInstallments.dueDate')}
+											</Text>
 											<Text size='sm' theme='muted'>
-												{t(
-													'index.monthInstallments.transactionDate',
-												)}
-											</Text>
-											<Text size='sm' theme='foreground'>
-												{formatDate(
-													new Date(ccTransactionDate),
-												)}
-											</Text>
-										</div>
-
-										<div className='flex flex-col gap-1'>
-											<Text size='sm' theme='muted'>
-												{t(
-													'index.monthInstallments.dueDate',
-												)}
-											</Text>
-											<Text size='sm' theme='foreground'>
 												{formatDate(
 													new Date(installmentDate),
 												)}
 											</Text>
 										</div>
-
-										<div className='flex flex-col gap-1'>
-											<Text size='sm' theme='muted'>
-												{t(
-													'index.monthInstallments.category',
-												)}
+										<div className='flex flex-col gap-0.5'>
+											<Text size='xs' theme='muted'>
+												{t('index.monthInstallments.category')}
 											</Text>
-											<Text size='sm' theme='foreground'>
+											<Text size='sm' theme='muted'>
 												{ccTransactionCategory}
 											</Text>
 										</div>
