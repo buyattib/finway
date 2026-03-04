@@ -58,7 +58,10 @@ export async function loader({
 		},
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response(t('transaction.details.loader.creditCardNotFoundError'), { status: 404 })
+		throw new Response(
+			t('transaction.details.loader.creditCardNotFoundError'),
+			{ status: 404 },
+		)
 	}
 
 	const transaction = await db.query.creditCardTransaction.findFirst({
@@ -80,7 +83,9 @@ export async function loader({
 		},
 	})
 	if (!transaction || transaction.creditCard.id !== creditCardId) {
-		throw new Response(t('transaction.details.loader.notFoundError'), { status: 404 })
+		throw new Response(t('transaction.details.loader.notFoundError'), {
+			status: 404,
+		})
 	}
 
 	const installments = await db
@@ -164,10 +169,13 @@ export default function CreditCardTransaction({
 			</div>
 
 			<div
-				className={cn('grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6', {
-					'md:grid-cols-4': !description,
-					'md:grid-cols-5': !!description,
-				})}
+				className={cn(
+					'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6',
+					{
+						'md:grid-cols-4': !description,
+						'md:grid-cols-5': !!description,
+					},
+				)}
 			>
 				<div className='flex flex-col gap-1'>
 					<Text size='sm' theme='muted'>
@@ -259,7 +267,8 @@ export default function CreditCardTransaction({
 									theme='foreground'
 									weight='medium'
 								>
-									{getCurrencySymbol(currencyCode)} {formatNumber(amount)}
+									{getCurrencySymbol(currencyCode)}{' '}
+									{formatNumber(amount)}
 								</Text>
 							</div>
 						</div>

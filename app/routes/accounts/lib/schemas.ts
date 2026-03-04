@@ -19,7 +19,10 @@ export function createAccountFormSchema(t: TFunction<'accounts'>) {
 			name: z
 				.string(t('form.schema.nameRequired'))
 				.transform(value => value.trim()),
-			accountType: z.enum(ACCOUNT_TYPES, t('form.schema.accountTypeRequired')),
+			accountType: z.enum(
+				ACCOUNT_TYPES,
+				t('form.schema.accountTypeRequired'),
+			),
 			description: z
 				.string()
 				.default('')

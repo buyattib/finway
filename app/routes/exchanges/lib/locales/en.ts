@@ -37,7 +37,8 @@ export default {
 		fromAmountLabel: 'From Amount',
 		toAmountLabel: 'To Amount',
 		resetButton: 'Reset',
-		noAccountMessage: 'You need to create an account first. Do it <0>here</0>',
+		noAccountMessage:
+			'You need to create an account first. Do it <0>here</0>',
 		schema: {
 			dateRequired: 'Date is required',
 			amountRequired: 'Amount is required',

@@ -14,7 +14,8 @@ export default {
 		transactionAction: 'Transaction',
 	},
 	form: {
-		description: 'Accounts represent your real world accounts where your money is.',
+		description:
+			'Accounts represent your real world accounts where your money is.',
 		nameLabel: 'Name',
 		descriptionLabel: 'Description (Optional)',
 		accountTypeLabel: 'Account Type',
@@ -31,7 +32,8 @@ export default {
 			},
 			action: {
 				successToast: 'Account created successfully',
-				duplicateError: 'An account with this name and type already exists',
+				duplicateError:
+					'An account with this name and type already exists',
 				invalidActionError: 'Invalid action',
 			},
 			title: 'Create an account',
@@ -49,7 +51,8 @@ export default {
 			action: {
 				successToast: 'Account updated successfully',
 				accountWithIdNotFoundError: 'Account with id {{id}} not found',
-				duplicateError: 'An account with this name and type already exists',
+				duplicateError:
+					'An account with this name and type already exists',
 				invalidActionError: 'Invalid action',
 			},
 			title: 'Edit account',
@@ -72,8 +75,9 @@ export default {
 			deleteErrorToastDescription: 'Please try again',
 		},
 		deleteAriaLabel: 'Delete account {{name}}',
-		deleteTooltip: 'Deleting an account cannot be undone and it deletes all transactions, transfers or exchanges associated with it.',
+		deleteTooltip:
+			'Deleting an account cannot be undone and it deletes all transactions, transfers or exchanges associated with it.',
 		currencyBalancesTitle: 'Currency balances',
-		emptyBalances: 'You don\'t have any activity in this account yet.',
+		emptyBalances: "You don't have any activity in this account yet.",
 	},
 }

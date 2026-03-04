@@ -216,117 +216,127 @@ export default function Transfers({
 			</PageHeader>
 
 			<PageContent>
-			<Table>
-				{transfers.length === 0 && (
-					<TableCaption>
-						<Text size='md' weight='medium' alignment='center'>
-							<Trans
-								i18nKey='index.emptyMessage'
-								ns='transfers'
-								components={[
-									<Link
-										key='0'
-										to='create'
-										className='text-primary'
-									/>,
-								]}
-							/>
-						</Text>
-					</TableCaption>
-				)}
-				{transfers.length !== 0 && (
-					<TableHeader>
-						<TableRow>
-							<TableHead>{t('index.table.date')}</TableHead>
-							<TableHead className='text-right'>
-								{t('index.table.amount')}
-							</TableHead>
-							<TableHead className='text-right'>
-								{t('index.table.fromAccount')}
-							</TableHead>
-							<TableHead className='text-right'>
-								{t('index.table.toAccount')}
-							</TableHead>
-							<TableHead></TableHead>
-						</TableRow>
-					</TableHeader>
-				)}
-				<TableBody>
-					{transfers.map(
-						({
-							id,
-							date,
-							amount,
-							currency,
-							fromAccount,
-							fromAccountType,
-							toAccount,
-							toAccountType,
-						}) => {
-							return (
-								<TableRow key={id}>
-									<TableCell className='w-30'>
-										{formatDate(new Date(date))}
-									</TableCell>
-									<TableCell className='text-right'>
-										<b>{currency}</b> {formatNumber(amount)}
-									</TableCell>
-									<TableCell>
-										<div className='flex justify-end items-center gap-2'>
-											<AccountTypeIcon
-												size='xs'
-												accountType={fromAccountType}
-											/>
-											{fromAccount}
-										</div>
-									</TableCell>
-									<TableCell>
-										<div className='flex justify-end items-center gap-2'>
-											<AccountTypeIcon
-												size='xs'
-												accountType={toAccountType}
-											/>
-											{toAccount}
-										</div>
-									</TableCell>
-									<TableCell className='flex justify-end items-center gap-2'>
-										<Form method='post'>
-											<input
-												type='hidden'
-												name='transferId'
-												value={id}
-											/>
-											<Button
-												size='icon-xs'
-												variant='destructive-ghost'
-												type='submit'
-												name='intent'
-												value='delete'
-												disabled={isDeleting}
-											>
-												{isDeleting &&
-												deletingId === id ? (
-													<Spinner
-														aria-hidden
-														size='sm'
-													/>
-												) : (
-													<TrashIcon aria-hidden />
-												)}
-												<span className='sr-only'>
-													{t('index.deleteAriaLabel')}
-												</span>
-											</Button>
-										</Form>
-									</TableCell>
-								</TableRow>
-							)
-						},
+				<Table>
+					{transfers.length === 0 && (
+						<TableCaption>
+							<Text size='md' weight='medium' alignment='center'>
+								<Trans
+									i18nKey='index.emptyMessage'
+									ns='transfers'
+									components={[
+										<Link
+											key='0'
+											to='create'
+											className='text-primary'
+										/>,
+									]}
+								/>
+							</Text>
+						</TableCaption>
 					)}
-				</TableBody>
-			</Table>
+					{transfers.length !== 0 && (
+						<TableHeader>
+							<TableRow>
+								<TableHead>{t('index.table.date')}</TableHead>
+								<TableHead className='text-right'>
+									{t('index.table.amount')}
+								</TableHead>
+								<TableHead className='text-right'>
+									{t('index.table.fromAccount')}
+								</TableHead>
+								<TableHead className='text-right'>
+									{t('index.table.toAccount')}
+								</TableHead>
+								<TableHead></TableHead>
+							</TableRow>
+						</TableHeader>
+					)}
+					<TableBody>
+						{transfers.map(
+							({
+								id,
+								date,
+								amount,
+								currency,
+								fromAccount,
+								fromAccountType,
+								toAccount,
+								toAccountType,
+							}) => {
+								return (
+									<TableRow key={id}>
+										<TableCell className='w-30'>
+											{formatDate(new Date(date))}
+										</TableCell>
+										<TableCell className='text-right'>
+											<b>{currency}</b>{' '}
+											{formatNumber(amount)}
+										</TableCell>
+										<TableCell>
+											<div className='flex justify-end items-center gap-2'>
+												<AccountTypeIcon
+													size='xs'
+													accountType={
+														fromAccountType
+													}
+												/>
+												{fromAccount}
+											</div>
+										</TableCell>
+										<TableCell>
+											<div className='flex justify-end items-center gap-2'>
+												<AccountTypeIcon
+													size='xs'
+													accountType={toAccountType}
+												/>
+												{toAccount}
+											</div>
+										</TableCell>
+										<TableCell className='flex justify-end items-center gap-2'>
+											<Form method='post'>
+												<input
+													type='hidden'
+													name='transferId'
+													value={id}
+												/>
+												<Button
+													size='icon-xs'
+													variant='destructive-ghost'
+													type='submit'
+													name='intent'
+													value='delete'
+													disabled={isDeleting}
+												>
+													{isDeleting &&
+													deletingId === id ? (
+														<Spinner
+															aria-hidden
+															size='sm'
+														/>
+													) : (
+														<TrashIcon
+															aria-hidden
+														/>
+													)}
+													<span className='sr-only'>
+														{t(
+															'index.deleteAriaLabel',
+														)}
+													</span>
+												</Button>
+											</Form>
+										</TableCell>
+									</TableRow>
+								)
+							},
+						)}
+					</TableBody>
+				</Table>
 
-			<TablePagination page={pagination.page} pages={pagination.pages} />
+				<TablePagination
+					page={pagination.page}
+					pages={pagination.pages}
+				/>
 			</PageContent>
 		</PageSection>
 	)

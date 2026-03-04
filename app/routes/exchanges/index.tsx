@@ -202,125 +202,132 @@ export default function Exchanges({
 			</PageHeader>
 
 			<PageContent>
-			<Table>
-				{exchanges.length === 0 && (
-					<TableCaption>
-						<Text size='md' weight='medium' alignment='center'>
-							<Trans
-								i18nKey='index.emptyMessage'
-								ns='exchanges'
-								components={[
-									<Link
-										key='0'
-										to='create'
-										className='text-primary'
-									/>,
-								]}
-							/>
-						</Text>
-					</TableCaption>
-				)}
-				{exchanges.length !== 0 && (
-					<TableHeader>
-						<TableRow>
-							<TableHead>{t('index.table.date')}</TableHead>
-							<TableHead className='text-right'>
-								{t('index.table.account')}
-							</TableHead>
-							<TableHead className='text-right'>
-								{t('index.table.from')}
-							</TableHead>
-							<TableHead className='text-right'>
-								{t('index.table.to')}
-							</TableHead>
-							<TableHead className='text-right'>
-								{t('index.table.rate')}
-							</TableHead>
-							<TableHead></TableHead>
-						</TableRow>
-					</TableHeader>
-				)}
-				<TableBody>
-					{exchanges.map(
-						({
-							id,
-							date,
-							fromAmount,
-							toAmount,
-							fromCurrency,
-							toCurrency,
-							account,
-							accountType,
-						}) => {
-							return (
-								<TableRow key={id}>
-									<TableCell className='w-30'>
-										{formatDate(new Date(date))}
-									</TableCell>
-									<TableCell>
-										<div className='flex justify-end items-center gap-2'>
-											<AccountTypeIcon
-												size='xs'
-												accountType={accountType}
-											/>
-											{account}
-										</div>
-									</TableCell>
-									<TableCell className='text-right'>
-										<b>{fromCurrency}</b>{' '}
-										{formatNumber(fromAmount)}
-									</TableCell>
-									<TableCell className='text-right'>
-										<b>{toCurrency}</b>{' '}
-										{formatNumber(toAmount)}
-									</TableCell>
-									<TableCell className='text-right'>
-										{formatNumber(
-											Number(fromAmount) /
-												Number(toAmount),
-										)}{' '}
-										<b>
-											{fromCurrency} / {toCurrency}
-										</b>
-									</TableCell>
-									<TableCell className='flex justify-end items-center gap-2'>
-										<Form method='post'>
-											<input
-												type='hidden'
-												name='exchangeId'
-												value={id}
-											/>
-											<Button
-												size='icon-xs'
-												variant='destructive-ghost'
-												type='submit'
-												name='intent'
-												value='delete'
-												disabled={isDeleting}
-											>
-												{isDeleting &&
-												deletingId === id ? (
-													<Spinner
-														aria-hidden
-														size='sm'
-													/>
-												) : (
-													<TrashIcon aria-hidden />
-												)}
-												<span className='sr-only'>
-													{t('index.deleteAriaLabel')}
-												</span>
-											</Button>
-										</Form>
-									</TableCell>
-								</TableRow>
-							)
-						},
+				<Table>
+					{exchanges.length === 0 && (
+						<TableCaption>
+							<Text size='md' weight='medium' alignment='center'>
+								<Trans
+									i18nKey='index.emptyMessage'
+									ns='exchanges'
+									components={[
+										<Link
+											key='0'
+											to='create'
+											className='text-primary'
+										/>,
+									]}
+								/>
+							</Text>
+						</TableCaption>
 					)}
-				</TableBody>
-			</Table>
+					{exchanges.length !== 0 && (
+						<TableHeader>
+							<TableRow>
+								<TableHead>{t('index.table.date')}</TableHead>
+								<TableHead className='text-right'>
+									{t('index.table.account')}
+								</TableHead>
+								<TableHead className='text-right'>
+									{t('index.table.from')}
+								</TableHead>
+								<TableHead className='text-right'>
+									{t('index.table.to')}
+								</TableHead>
+								<TableHead className='text-right'>
+									{t('index.table.rate')}
+								</TableHead>
+								<TableHead></TableHead>
+							</TableRow>
+						</TableHeader>
+					)}
+					<TableBody>
+						{exchanges.map(
+							({
+								id,
+								date,
+								fromAmount,
+								toAmount,
+								fromCurrency,
+								toCurrency,
+								account,
+								accountType,
+							}) => {
+								return (
+									<TableRow key={id}>
+										<TableCell className='w-30'>
+											{formatDate(new Date(date))}
+										</TableCell>
+										<TableCell>
+											<div className='flex justify-end items-center gap-2'>
+												<AccountTypeIcon
+													size='xs'
+													accountType={accountType}
+												/>
+												{account}
+											</div>
+										</TableCell>
+										<TableCell className='text-right'>
+											<b>{fromCurrency}</b>{' '}
+											{formatNumber(fromAmount)}
+										</TableCell>
+										<TableCell className='text-right'>
+											<b>{toCurrency}</b>{' '}
+											{formatNumber(toAmount)}
+										</TableCell>
+										<TableCell className='text-right'>
+											{formatNumber(
+												Number(fromAmount) /
+													Number(toAmount),
+											)}{' '}
+											<b>
+												{fromCurrency} / {toCurrency}
+											</b>
+										</TableCell>
+										<TableCell className='flex justify-end items-center gap-2'>
+											<Form method='post'>
+												<input
+													type='hidden'
+													name='exchangeId'
+													value={id}
+												/>
+												<Button
+													size='icon-xs'
+													variant='destructive-ghost'
+													type='submit'
+													name='intent'
+													value='delete'
+													disabled={isDeleting}
+												>
+													{isDeleting &&
+													deletingId === id ? (
+														<Spinner
+															aria-hidden
+															size='sm'
+														/>
+													) : (
+														<TrashIcon
+															aria-hidden
+														/>
+													)}
+													<span className='sr-only'>
+														{t(
+															'index.deleteAriaLabel',
+														)}
+													</span>
+												</Button>
+											</Form>
+										</TableCell>
+									</TableRow>
+								)
+							},
+						)}
+					</TableBody>
+				</Table>
 
-			<TablePagination page={pagination.page} pages={pagination.pages} />
+				<TablePagination
+					page={pagination.page}
+					pages={pagination.pages}
+				/>
 			</PageContent>
 		</PageSection>
 	)

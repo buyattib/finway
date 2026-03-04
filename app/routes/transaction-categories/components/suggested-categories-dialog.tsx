@@ -84,9 +84,7 @@ export function SuggestedCategoriesDialog({
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>
-						{t('index.suggestions.title')}
-					</DialogTitle>
+					<DialogTitle>{t('index.suggestions.title')}</DialogTitle>
 					<DialogDescription>
 						{t('index.suggestions.description')}
 					</DialogDescription>
@@ -99,7 +97,11 @@ export function SuggestedCategoriesDialog({
 						setOpen(false)
 					}}
 				>
-					<input type='hidden' name='intent' value='add-suggestions' />
+					<input
+						type='hidden'
+						name='intent'
+						value='add-suggestions'
+					/>
 					{Array.from(selected).map(name => (
 						<input
 							key={name}
@@ -127,7 +129,8 @@ export function SuggestedCategoriesDialog({
 									<Checkbox
 										id={id}
 										checked={
-											alreadyExists || selected.has(categoryName)
+											alreadyExists ||
+											selected.has(categoryName)
 										}
 										disabled={alreadyExists}
 										onCheckedChange={() =>

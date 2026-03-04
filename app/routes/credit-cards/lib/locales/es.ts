@@ -22,14 +22,11 @@ export default {
 			notFoundError: 'Tarjeta de crédito no encontrada',
 		},
 		editAriaLabel: 'Editar {{brand}} •••• {{last4}}',
-		deleteAriaLabel:
-			'Eliminar tarjeta de crédito {{brand}} •••• {{last4}}',
-		deleteTooltip:
-			'Eliminar una tarjeta de crédito no se puede deshacer.',
+		deleteAriaLabel: 'Eliminar tarjeta de crédito {{brand}} •••• {{last4}}',
+		deleteTooltip: 'Eliminar una tarjeta de crédito no se puede deshacer.',
 		transactionsTitle: 'Transacciones ({{total}})',
 		addTransactionLabel: 'Transacción',
-		emptyMessage:
-			'Aún no hay transacciones. <0>Crear una</0>',
+		emptyMessage: 'Aún no hay transacciones. <0>Crear una</0>',
 		table: {
 			date: 'Fecha',
 			category: 'Categoría',
@@ -40,8 +37,7 @@ export default {
 		deleteTransactionAriaLabel: 'Eliminar transacción',
 		action: {
 			notFoundError: 'Tarjeta de crédito no encontrada',
-			deleteCardErrorToast:
-				'No se pudo eliminar la tarjeta de crédito',
+			deleteCardErrorToast: 'No se pudo eliminar la tarjeta de crédito',
 			deleteCardErrorDescription: 'Por favor intenta de nuevo',
 			deleteCardSuccessToast:
 				'Tarjeta de crédito {{brand}} •••• {{last4}} eliminada',
@@ -153,13 +149,11 @@ export default {
 				invalidActionError: 'Acción inválida',
 				successToast: 'Transacción creada exitosamente',
 				creditCardNotFound: 'Tarjeta de crédito no encontrada',
-				categoryNotFound:
-					'Categoría de transacción no encontrada',
+				categoryNotFound: 'Categoría de transacción no encontrada',
 			},
 			schema: {
 				dateRequired: 'La fecha es requerida',
-				transactionTypeRequired:
-					'El tipo de transacción es requerido',
+				transactionTypeRequired: 'El tipo de transacción es requerido',
 				amountRequired: 'El monto es requerido',
 				amountInvalid: 'El monto debe ser un número válido',
 				amountPositive: 'El monto debe ser mayor a cero',

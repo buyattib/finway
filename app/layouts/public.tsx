@@ -11,7 +11,7 @@ export default function PublicLayout() {
 				<FinwayLink />
 				<div className='flex items-center gap-4'>
 					<LocaleToggle />
-				<ThemeToggle />
+					<ThemeToggle />
 				</div>
 			</header>
 			<main className='flex-1 flex flex-col container mx-auto py-6 sm:px-0 px-4'>

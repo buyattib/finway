@@ -53,8 +53,7 @@ export default {
 		category: 'Filter by category',
 	},
 	form: {
-		description:
-			'Add a credit card to track expenses associated with it.',
+		description: 'Add a credit card to track expenses associated with it.',
 		brandLabel: 'Brand',
 		brandPlaceholder: 'Visa, Mastercard, etc.',
 		last4Label: 'Last 4 digits',

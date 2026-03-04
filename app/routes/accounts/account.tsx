@@ -150,11 +150,7 @@ export default function AccountDetails({
 					</Button>
 					<Tooltip>
 						<Form method='post'>
-							<input
-								type='hidden'
-								name='accountId'
-								value={id}
-							/>
+							<input type='hidden' name='accountId' value={id} />
 							<TooltipTrigger asChild>
 								<Button
 									size='icon'

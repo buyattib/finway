@@ -6,7 +6,8 @@ export default {
 			title: 'Iniciar sesión en Finway',
 		},
 		title: '¡Bienvenido!',
-		description: 'Te enviaremos un correo electrónico con un enlace para iniciar sesión',
+		description:
+			'Te enviaremos un correo electrónico con un enlace para iniciar sesión',
 		emailLabel: 'Correo electrónico',
 		rememberLabel: 'Recordarme',
 		submitButton: 'Enviar',

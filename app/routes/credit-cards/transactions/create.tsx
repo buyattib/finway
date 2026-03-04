@@ -64,7 +64,9 @@ export async function loader({
 		with: { account: { columns: { ownerId: true } } },
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response(t('transaction.create.loader.notFoundError'), { status: 404 })
+		throw new Response(t('transaction.create.loader.notFoundError'), {
+			status: 404,
+		})
 	}
 
 	const selectData = await getSelectData(db, user.id)
@@ -147,7 +149,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	if (submission.value.action !== ACTION_CREATION) {
-		throw new Response(t('transaction.create.action.invalidActionError'), { status: 422 })
+		throw new Response(t('transaction.create.action.invalidActionError'), {
+			status: 422,
+		})
 	}
 
 	const {

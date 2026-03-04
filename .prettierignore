@@ -4,3 +4,4 @@ node_modules
 .react-router
 drizzle
 pnpm-lock.yaml
+AGENTS.md

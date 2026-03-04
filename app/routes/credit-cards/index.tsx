@@ -82,76 +82,78 @@ export default function CreditCards({
 			</PageHeader>
 
 			<PageContent>
-			{creditCards.length === 0 ? (
-				<div className='my-2'>
-					<Text size='md' weight='medium' alignment='center'>
-						<Trans
-							i18nKey='index.emptyMessage'
-							ns='credit-cards'
-							components={[
-								<Link
-									key='0'
-									to='create'
-									className='text-primary'
-								/>,
-							]}
-						/>
-					</Text>
-				</div>
-			) : (
-				<ul className='flex flex-col gap-2'>
-					{creditCards.map(
-						({
-							id,
-							last4,
-							brand,
-							expiryMonth,
-							expiryYear,
-							currencyCode,
-							accountName,
-						}) => {
-							const label = t(`constants:currency.${currencyCode}`)
-							return (
-								<li
-									key={id}
-									className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border rounded-xl'
-								>
+				{creditCards.length === 0 ? (
+					<div className='my-2'>
+						<Text size='md' weight='medium' alignment='center'>
+							<Trans
+								i18nKey='index.emptyMessage'
+								ns='credit-cards'
+								components={[
 									<Link
-										to={id}
-										prefetch='intent'
-										className='flex items-center gap-4'
+										key='0'
+										to='create'
+										className='text-primary'
+									/>,
+								]}
+							/>
+						</Text>
+					</div>
+				) : (
+					<ul className='flex flex-col gap-2'>
+						{creditCards.map(
+							({
+								id,
+								last4,
+								brand,
+								expiryMonth,
+								expiryYear,
+								currencyCode,
+								accountName,
+							}) => {
+								const label = t(
+									`constants:currency.${currencyCode}`,
+								)
+								return (
+									<li
+										key={id}
+										className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border rounded-xl'
 									>
-										<CreditCardIcon className='size-5 text-muted-foreground' />
-										<div className='flex flex-col gap-1'>
-											<Text weight='medium'>
-												{brand} •••• {last4}
+										<Link
+											to={id}
+											prefetch='intent'
+											className='flex items-center gap-4'
+										>
+											<CreditCardIcon className='size-5 text-muted-foreground' />
+											<div className='flex flex-col gap-1'>
+												<Text weight='medium'>
+													{brand} •••• {last4}
+												</Text>
+												<Text size='sm' theme='muted'>
+													{t('index.expires', {
+														month: expiryMonth,
+														year: expiryYear,
+													})}
+												</Text>
+											</div>
+										</Link>
+										<div className='flex items-center gap-4'>
+											<Text className='flex items-center gap-2'>
+												<CurrencyIcon
+													currency={currencyCode}
+													size='sm'
+												/>
+												{label}
 											</Text>
 											<Text size='sm' theme='muted'>
-												{t('index.expires', {
-													month: expiryMonth,
-													year: expiryYear,
-												})}
+												{accountName}
 											</Text>
 										</div>
-									</Link>
-									<div className='flex items-center gap-4'>
-										<Text className='flex items-center gap-2'>
-											<CurrencyIcon
-												currency={currencyCode}
-												size='sm'
-											/>
-											{label}
-										</Text>
-										<Text size='sm' theme='muted'>
-											{accountName}
-										</Text>
-									</div>
-								</li>
-							)
-						},
-					)}
-				</ul>
-			)}
+									</li>
+								)
+							},
+						)}
+					</ul>
+				)}
 			</PageContent>
 		</PageSection>
 	)

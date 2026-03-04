@@ -43,7 +43,9 @@ export function createTransferFormSchema(t: TFunction<'transfers'>) {
 	)
 }
 
-export type CreateTransferFormSchema = ReturnType<typeof createTransferFormSchema>
+export type CreateTransferFormSchema = ReturnType<
+	typeof createTransferFormSchema
+>
 
 export const DeleteTransferFormSchema = z.object({
 	transferId: z.string(),

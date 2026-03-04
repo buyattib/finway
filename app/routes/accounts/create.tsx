@@ -72,7 +72,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	if (submission.value.action !== ACTION_CREATION) {
-		throw new Response(t('form.create.action.invalidActionError'), { status: 422 })
+		throw new Response(t('form.create.action.invalidActionError'), {
+			status: 422,
+		})
 	}
 
 	const { action: _action, redirectTo, ...accountData } = submission.value

@@ -11,12 +11,14 @@ export default {
 		searchPlaceholder: 'Buscar cuentas por nombre',
 		emptyMessage:
 			'Aún no has creado ninguna cuenta. Empieza a crearlas <0>aquí</0>.',
-		emptySearchMessage: 'No se encontraron cuentas para la búsqueda {{search}}',
+		emptySearchMessage:
+			'No se encontraron cuentas para la búsqueda {{search}}',
 		editAction: 'Editar',
 		transactionAction: 'Transacción',
 	},
 	form: {
-		description: 'Las cuentas representan tus cuentas del mundo real donde está tu dinero.',
+		description:
+			'Las cuentas representan tus cuentas del mundo real donde está tu dinero.',
 		nameLabel: 'Nombre',
 		descriptionLabel: 'Descripción (Opcional)',
 		accountTypeLabel: 'Tipo de cuenta',
@@ -50,7 +52,8 @@ export default {
 			},
 			action: {
 				successToast: 'Cuenta actualizada exitosamente',
-				accountWithIdNotFoundError: 'Cuenta con id {{id}} no encontrada',
+				accountWithIdNotFoundError:
+					'Cuenta con id {{id}} no encontrada',
 				duplicateError: 'Ya existe una cuenta con este nombre y tipo',
 				invalidActionError: 'Acción inválida',
 			},
@@ -74,7 +77,8 @@ export default {
 			deleteErrorToastDescription: 'Por favor intenta de nuevo',
 		},
 		deleteAriaLabel: 'Eliminar cuenta {{name}}',
-		deleteTooltip: 'Eliminar una cuenta no se puede deshacer y elimina todas las transacciones, transferencias o intercambios asociados.',
+		deleteTooltip:
+			'Eliminar una cuenta no se puede deshacer y elimina todas las transacciones, transferencias o intercambios asociados.',
 		currencyBalancesTitle: 'Balances por moneda',
 		emptyBalances: 'Aún no tienes actividad en esta cuenta.',
 	},

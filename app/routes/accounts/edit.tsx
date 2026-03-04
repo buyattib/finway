@@ -53,7 +53,9 @@ export async function loader({
 		meta: {
 			title: t('form.edit.meta.title', { name: account.name }),
 			notFoundTitle: t('form.edit.meta.notFoundTitle', { accountId }),
-			description: t('form.edit.meta.description', { name: account.name }),
+			description: t('form.edit.meta.description', {
+				name: account.name,
+			}),
 		},
 	}
 }
@@ -111,7 +113,9 @@ export async function action({ context, request }: Route.ActionArgs) {
 	}
 
 	if (submission.value.action !== ACTION_EDITION) {
-		throw new Response(t('form.edit.action.invalidActionError'), { status: 422 })
+		throw new Response(t('form.edit.action.invalidActionError'), {
+			status: 422,
+		})
 	}
 
 	const { action: _action, id, ...body } = submission.value

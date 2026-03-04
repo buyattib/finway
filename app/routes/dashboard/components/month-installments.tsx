@@ -85,12 +85,16 @@ export function MonthInstallments({ monthInstallments }: Props) {
 											<TransactionType
 												variant='icon-text'
 												size='xs'
-												transactionType={ccTransactionType}
+												transactionType={
+													ccTransactionType
+												}
 											/>
 										</div>
 										<div className='flex flex-col gap-0.5'>
 											<Text size='xs' theme='muted'>
-												{t('index.monthInstallments.installmentAmount')}
+												{t(
+													'index.monthInstallments.installmentAmount',
+												)}
 											</Text>
 											<div className='flex items-center gap-1'>
 												<CurrencyIcon
@@ -103,13 +107,17 @@ export function MonthInstallments({ monthInstallments }: Props) {
 													weight='medium'
 												>
 													{symbol}{' '}
-													{formatNumber(installmentAmount)}
+													{formatNumber(
+														installmentAmount,
+													)}
 												</Text>
 											</div>
 										</div>
 										<div className='flex flex-col gap-0.5'>
 											<Text size='xs' theme='muted'>
-												{t('index.monthInstallments.dueDate')}
+												{t(
+													'index.monthInstallments.dueDate',
+												)}
 											</Text>
 											<Text size='sm' theme='muted'>
 												{formatDate(
@@ -119,7 +127,9 @@ export function MonthInstallments({ monthInstallments }: Props) {
 										</div>
 										<div className='flex flex-col gap-0.5'>
 											<Text size='xs' theme='muted'>
-												{t('index.monthInstallments.category')}
+												{t(
+													'index.monthInstallments.category',
+												)}
 											</Text>
 											<Text size='sm' theme='muted'>
 												{ccTransactionCategory}

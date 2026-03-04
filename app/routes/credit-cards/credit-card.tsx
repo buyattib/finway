@@ -224,7 +224,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 			},
 		})
 		if (!creditCard || creditCard.account.ownerId !== user.id) {
-			throw new Response(t('details.action.notFoundError'), { status: 404 })
+			throw new Response(t('details.action.notFoundError'), {
+				status: 404,
+			})
 		}
 
 		await db
@@ -449,23 +451,18 @@ export default function CreditCardDetails({
 								categoryName,
 								installments,
 							}) => {
-								const symbol =
-									getCurrencySymbol(currencyCode)
+								const symbol = getCurrencySymbol(currencyCode)
 								return (
 									<li
 										key={txId}
 										className='relative rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
 										onClick={() =>
-											navigate(
-												`transactions/${txId}`,
-											)
+											navigate(`transactions/${txId}`)
 										}
 									>
 										<Form
 											method='post'
-											onClick={e =>
-												e.stopPropagation()
-											}
+											onClick={e => e.stopPropagation()}
 											className='absolute top-3 right-3'
 										>
 											<input
@@ -479,9 +476,7 @@ export default function CreditCardDetails({
 												type='submit'
 												name='intent'
 												value='delete-transaction'
-												disabled={
-													isDeletingTransaction
-												}
+												disabled={isDeletingTransaction}
 											>
 												{isDeletingTransaction &&
 												deletingTransactionId ===
@@ -515,15 +510,16 @@ export default function CreditCardDetails({
 												theme='foreground'
 												weight='medium'
 											>
-												{symbol}{' '}
-												{formatNumber(amount)}
+												{symbol} {formatNumber(amount)}
 											</Text>
 											<Text size='sm' theme='muted'>
 												{categoryName}
 											</Text>
 											<Text size='xs' theme='muted'>
 												{installments}{' '}
-												{t('details.table.installments')}
+												{t(
+													'details.table.installments',
+												)}
 											</Text>
 										</div>
 									</li>

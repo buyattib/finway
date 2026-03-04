@@ -14,7 +14,8 @@ export default {
 		action: {
 			deleteErrorToast: 'Could not delete transaction category',
 			deleteErrorToastDescription: 'Please try again',
-			notFoundError: 'Transaction category {{transactionCategoryId}} not found',
+			notFoundError:
+				'Transaction category {{transactionCategoryId}} not found',
 			successToast: 'Transaction category deleted',
 		},
 		suggestions: {

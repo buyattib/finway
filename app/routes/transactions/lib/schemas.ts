@@ -23,7 +23,10 @@ export function createTransactionFormSchema(t: TFunction<'transactions'>) {
 	return z
 		.object({
 			date: z.iso.datetime(t('form.schema.dateRequired')),
-			type: z.enum(TRANSACTION_TYPES, t('form.schema.transactionTypeRequired')),
+			type: z.enum(
+				TRANSACTION_TYPES,
+				t('form.schema.transactionTypeRequired'),
+			),
 			amount: z
 				.string({ message: t('form.schema.amountRequired') })
 				.refine(
@@ -56,7 +59,9 @@ export function createTransactionFormSchema(t: TFunction<'transactions'>) {
 		.and(ActionSchema)
 }
 
-export type TransactionFormSchema = ReturnType<typeof createTransactionFormSchema>
+export type TransactionFormSchema = ReturnType<
+	typeof createTransactionFormSchema
+>
 
 export const DeleteTransactionFormSchema = z.object({
 	transactionId: z.string(),

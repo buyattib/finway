@@ -21,7 +21,10 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
-import { AddSuggestionsSchema, DeleteTransactionCategoryFormSchema } from './lib/schemas'
+import {
+	AddSuggestionsSchema,
+	DeleteTransactionCategoryFormSchema,
+} from './lib/schemas'
 import { SuggestedCategoriesDialog } from './components/suggested-categories-dialog'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -79,15 +82,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const { categoryNames } = parsed.data
 
-		const existingCategories =
-			await db.query.transactionCategory.findMany({
-				where: (tc, { eq, and, inArray }) =>
-					and(
-						eq(tc.ownerId, user.id),
-						inArray(tc.name, categoryNames),
-					),
-				columns: { name: true },
-			})
+		const existingCategories = await db.query.transactionCategory.findMany({
+			where: (tc, { eq, and, inArray }) =>
+				and(eq(tc.ownerId, user.id), inArray(tc.name, categoryNames)),
+			columns: { name: true },
+		})
 
 		const existingNames = new Set(
 			existingCategories.map(c => c.name.toLowerCase()),
@@ -191,73 +190,76 @@ export default function TransactionCategories({
 			</PageHeader>
 
 			<PageContent>
-			{transactionCategories.length === 0 && (
-				<div className='my-2'>
-					<Text size='md' weight='medium' alignment='center'>
-						<Trans
-							i18nKey='index.emptyMessage'
-							ns='transaction-categories'
-							components={[
-								<Link
-									key='0'
-									to='create'
-									className='text-primary'
-								/>,
-							]}
-						/>
-					</Text>
-				</div>
-			)}
+				{transactionCategories.length === 0 && (
+					<div className='my-2'>
+						<Text size='md' weight='medium' alignment='center'>
+							<Trans
+								i18nKey='index.emptyMessage'
+								ns='transaction-categories'
+								components={[
+									<Link
+										key='0'
+										to='create'
+										className='text-primary'
+									/>,
+								]}
+							/>
+						</Text>
+					</div>
+				)}
 
-			<ul className='flex flex-col gap-2'>
-				{transactionCategories.map(({ id, name, description }) => (
-					<li
-						key={id}
-						className='flex items-center justify-between px-4 md:px-6 py-1 border rounded-md'
-					>
-						<div className='flex items-center gap-2'>
-							<Text>{name}</Text>
-							<Text size='sm' theme='muted'>
-								{description}
-							</Text>
-						</div>
+				<ul className='flex flex-col gap-2'>
+					{transactionCategories.map(({ id, name, description }) => (
+						<li
+							key={id}
+							className='flex items-center justify-between px-4 md:px-6 py-1 border rounded-md'
+						>
+							<div className='flex items-center gap-2'>
+								<Text>{name}</Text>
+								<Text size='sm' theme='muted'>
+									{description}
+								</Text>
+							</div>
 
-						<Tooltip>
-							<Form method='post'>
-								<input
-									type='hidden'
-									name='transactionCategoryId'
-									value={id}
-								/>
-								<TooltipTrigger asChild>
-									<Button
-										size='icon'
-										variant='destructive-ghost'
-										type='submit'
-										name='intent'
-										value='delete'
-										disabled={isDeleting}
-									>
-										{isDeleting && deletingId === id ? (
-											<Spinner aria-hidden size='sm' />
-										) : (
-											<TrashIcon aria-hidden />
-										)}
-										<span className='sr-only'>
-											{t('index.deleteAriaLabel', {
-												name,
-											})}
-										</span>
-									</Button>
-								</TooltipTrigger>
-							</Form>
-							<TooltipContent>
-								{t('index.deleteTooltip')}
-							</TooltipContent>
-						</Tooltip>
-					</li>
-				))}
-			</ul>
+							<Tooltip>
+								<Form method='post'>
+									<input
+										type='hidden'
+										name='transactionCategoryId'
+										value={id}
+									/>
+									<TooltipTrigger asChild>
+										<Button
+											size='icon'
+											variant='destructive-ghost'
+											type='submit'
+											name='intent'
+											value='delete'
+											disabled={isDeleting}
+										>
+											{isDeleting && deletingId === id ? (
+												<Spinner
+													aria-hidden
+													size='sm'
+												/>
+											) : (
+												<TrashIcon aria-hidden />
+											)}
+											<span className='sr-only'>
+												{t('index.deleteAriaLabel', {
+													name,
+												})}
+											</span>
+										</Button>
+									</TooltipTrigger>
+								</Form>
+								<TooltipContent>
+									{t('index.deleteTooltip')}
+								</TooltipContent>
+							</Tooltip>
+						</li>
+					))}
+				</ul>
 			</PageContent>
 		</PageSection>
 	)

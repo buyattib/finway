@@ -9,17 +9,15 @@ export const magicLinkExpirationTime = 1000 * 60 * 15 // 15 minutes
 function createMagicLinkPayloadSchema(t: TFunction<'auth'>) {
 	return z.object({
 		emailAddress: z.string(t('magicLink.invalidEmail')),
-		creationDate: z
-			.string(t('magicLink.invalidExpiration'))
-			.refine(
-				val => {
-					const linkCreationDate = new Date(val)
-					const expirationTime =
-						linkCreationDate.getTime() + magicLinkExpirationTime
-					return Date.now() < expirationTime
-				},
-				{ error: t('magicLink.expired') },
-			),
+		creationDate: z.string(t('magicLink.invalidExpiration')).refine(
+			val => {
+				const linkCreationDate = new Date(val)
+				const expirationTime =
+					linkCreationDate.getTime() + magicLinkExpirationTime
+				return Date.now() < expirationTime
+			},
+			{ error: t('magicLink.expired') },
+		),
 	})
 }
 
@@ -45,10 +43,7 @@ export function createMagicLink({
 	return url
 }
 
-export async function validateMagicLink(
-	link: string,
-	t: TFunction<'auth'>,
-) {
+export async function validateMagicLink(link: string, t: TFunction<'auth'>) {
 	const url = new URL(link)
 	const linkCode = url.searchParams.get(tokenKey) ?? ''
 

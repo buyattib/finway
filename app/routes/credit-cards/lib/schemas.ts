@@ -79,9 +79,7 @@ export function createCreditCardTransactionFormSchema(
 						return !isNaN(Number(formatted))
 					},
 					{
-						message: t(
-							'transaction.create.schema.amountInvalid',
-						),
+						message: t('transaction.create.schema.amountInvalid'),
 					},
 				)
 				.refine(
@@ -90,21 +88,14 @@ export function createCreditCardTransactionFormSchema(
 						return Number(formatted) > 0
 					},
 					{
-						message: t(
-							'transaction.create.schema.amountPositive',
-						),
+						message: t('transaction.create.schema.amountPositive'),
 					},
 				),
 			totalInstallments: z
 				.string()
-				.refine(
-					value => !isNaN(Number(value)) && Number(value) >= 1,
-					{
-						message: t(
-							'transaction.create.schema.installmentsMin',
-						),
-					},
-				),
+				.refine(value => !isNaN(Number(value)) && Number(value) >= 1, {
+					message: t('transaction.create.schema.installmentsMin'),
+				}),
 			firstInstallmentDate: z.iso.datetime(),
 			description: z
 				.string()

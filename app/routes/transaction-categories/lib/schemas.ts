@@ -28,7 +28,5 @@ export const DeleteTransactionCategoryFormSchema = z.object({
 
 export const AddSuggestionsSchema = z.object({
 	intent: z.literal('add-suggestions'),
-	categoryNames: z
-		.array(z.string().min(1))
-		.min(1),
+	categoryNames: z.array(z.string().min(1)).min(1),
 })

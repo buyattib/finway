@@ -198,10 +198,16 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	if (submission.value.action !== ACTION_EDITION) {
-		throw new Response(t('form.edit.action.invalidActionError'), { status: 422 })
+		throw new Response(t('form.edit.action.invalidActionError'), {
+			status: 422,
+		})
 	}
 
-	const { action: _action, id: transactionId, ...transactionData } = submission.value
+	const {
+		action: _action,
+		id: transactionId,
+		...transactionData
+	} = submission.value
 
 	await db
 		.update(transactionTable)
