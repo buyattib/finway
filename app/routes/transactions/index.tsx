@@ -24,18 +24,10 @@ import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
-import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '~/components/ui/table'
 import { TablePagination } from '~/components/table-pagination'
 import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
+import { CurrencyIcon } from '~/components/currency-icon'
 import { TransactionType } from '~/components/transaction-type'
 
 import { TransactionsFilters } from './components/filters'
@@ -249,15 +241,17 @@ export default function Transactions({
 			</PageHeader>
 
 			<PageContent>
-			<TransactionsFilters filters={filters} selectData={selectData} />
+				<TransactionsFilters
+					filters={filters}
+					selectData={selectData}
+				/>
 
-			<div className='h-6'>
-				{isLoading && <Spinner size='md' className='mx-auto' />}
-			</div>
+				<div className='h-6'>
+					{isLoading && <Spinner size='md' className='mx-auto' />}
+				</div>
 
-			<Table>
 				{transactions.length === 0 && (
-					<TableCaption>
+					<div className='my-2'>
 						<Text size='md' weight='medium' alignment='center'>
 							{!hasFilters ? (
 								<Trans
@@ -274,29 +268,10 @@ export default function Transactions({
 								t('index.emptyFilteredMessage')
 							)}
 						</Text>
-					</TableCaption>
+					</div>
 				)}
-				{transactions.length !== 0 && (
-					<TableHeader>
-						<TableRow>
-							<TableHead>{t('index.table.date')}</TableHead>
-							<TableHead className='text-center'>
-								{t('index.table.account')}
-							</TableHead>
-							<TableHead className='text-center'>
-								{t('index.table.category')}
-							</TableHead>
-							<TableHead className='text-center'>
-								{t('index.table.type')}
-							</TableHead>
-							<TableHead className='text-right'>
-								{t('index.table.amount')}
-							</TableHead>
-							<TableHead></TableHead>
-						</TableRow>
-					</TableHeader>
-				)}
-				<TableBody>
+
+				<ul className='flex flex-col gap-2 min-w-0'>
 					{transactions.map(
 						({
 							id,
@@ -307,34 +282,16 @@ export default function Transactions({
 							account,
 							accountType,
 							transactionCategory,
-						}) => {
-							return (
-								<TableRow key={id}>
-									<TableCell className='w-30'>
+						}) => (
+							<li
+								key={id}
+								className='flex flex-col gap-2 xl:grid xl:grid-cols-[1fr_3fr_2fr_1fr_2fr_auto] xl:items-center xl:gap-4 border rounded-xl p-4 xl:px-6'
+							>
+								<div className='flex items-center justify-between xl:contents'>
+									<Text size='sm' theme='muted'>
 										{formatDate(new Date(date))}
-									</TableCell>
-									<TableCell>
-										<div className='flex justify-center items-center gap-2'>
-											<AccountTypeIcon
-												size='xs'
-												accountType={accountType}
-											/>
-											{account}
-										</div>
-									</TableCell>
-									<TableCell className='text-center'>
-										{transactionCategory ?? '-'}
-									</TableCell>
-									<TableCell className='text-center'>
-										<TransactionType
-											variant='text'
-											transactionType={type}
-										/>
-									</TableCell>
-									<TableCell className='text-right'>
-										<b>{currency}</b> {formatNumber(amount)}
-									</TableCell>
-									<TableCell className='flex justify-end items-center gap-2'>
+									</Text>
+									<div className='flex items-center gap-2 xl:order-last'>
 										<Button
 											asChild
 											size='icon-xs'
@@ -373,15 +330,43 @@ export default function Transactions({
 												</span>
 											</Button>
 										</Form>
-									</TableCell>
-								</TableRow>
-							)
-						},
+									</div>
+								</div>
+								<div className='flex items-center gap-2'>
+									<AccountTypeIcon
+										size='xs'
+										accountType={accountType}
+									/>
+									<Text>{account}</Text>
+								</div>
+								<Text size='sm' theme='muted'>
+									{transactionCategory ?? '-'}
+								</Text>
+								<TransactionType
+									variant='icon-text'
+									size='xs'
+									transactionType={type}
+								/>
+								<Text
+									weight='medium'
+									className='flex items-center gap-2'
+									size='sm'
+								>
+									<CurrencyIcon
+										currency={currency}
+										size='sm'
+									/>
+									<b>{currency}</b> {formatNumber(amount)}
+								</Text>
+							</li>
+						),
 					)}
-				</TableBody>
-			</Table>
+				</ul>
 
-			<TablePagination page={pagination.page} pages={pagination.pages} />
+				<TablePagination
+					page={pagination.page}
+					pages={pagination.pages}
+				/>
 			</PageContent>
 		</PageSection>
 	)
