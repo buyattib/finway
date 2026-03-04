@@ -140,170 +140,179 @@ export default function Accounts({
 			</PageHeader>
 
 			<PageContent>
-			<Form
-				id='search-accounts'
-				role='search'
-				onChange={event => {
-					const isFirstSearch = search === null
-					submit(event.currentTarget, { replace: !isFirstSearch })
-				}}
-			>
-				<Input
-					className='px-6'
-					id='search'
-					name='search'
-					type='search'
-					aria-label={t('index.searchPlaceholder')}
-					placeholder={t('index.searchPlaceholder')}
-					defaultValue={search ?? ''}
-				/>
-			</Form>
+				<Form
+					id='search-accounts'
+					role='search'
+					onChange={event => {
+						const isFirstSearch = search === null
+						submit(event.currentTarget, { replace: !isFirstSearch })
+					}}
+				>
+					<Input
+						className='px-6'
+						id='search'
+						name='search'
+						type='search'
+						aria-label={t('index.searchPlaceholder')}
+						placeholder={t('index.searchPlaceholder')}
+						defaultValue={search ?? ''}
+					/>
+				</Form>
 
-			<div className='h-4'>
-				{isSearching && <Spinner size='sm' className='mx-auto' />}
-			</div>
-
-			{accounts.length === 0 && (
-				<div className='my-2'>
-					{!search ? (
-						<Text size='md' weight='medium' alignment='center'>
-							<Trans ns='accounts' i18nKey='index.emptyMessage'>
-								You have not created any accounts yet. Start
-								creating them{' '}
-								<Link to='create' className='text-primary'>
-									here
-								</Link>
-							</Trans>
-						</Text>
-					) : (
-						<Text size='md' weight='medium' alignment='center'>
-							{t('index.emptySearchMessage', { search })}
-						</Text>
-					)}
+				<div className='h-4'>
+					{isSearching && <Spinner size='sm' className='mx-auto' />}
 				</div>
-			)}
 
-			<ul className='flex flex-col gap-2'>
-				{accounts.map(
-					({ id, name, description, accountType, balances }) => (
-						<li
-							key={id}
-							className='flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-center border rounded-xl p-4 sm:px-6 min-h-32'
-						>
-							<div className='flex flex-col sm:flex-row sm:items-center gap-4'>
-								<Link
-									to={id}
-									prefetch='intent'
-									className='flex items-center gap-4 w-3xs'
+				{accounts.length === 0 && (
+					<div className='my-2'>
+						{!search ? (
+							<Text size='md' weight='medium' alignment='center'>
+								<Trans
+									ns='accounts'
+									i18nKey='index.emptyMessage'
 								>
-									<AccountTypeIcon
-										accountType={accountType}
-									/>
-									<div className='flex flex-col sm:gap-2 gap-4'>
-										<div className='flex flex-col gap-1'>
-											<Title id={id} level='h5'>
-												{name}
-											</Title>
-											<Text size='sm' theme='primary'>
-												{t(
-													`constants:accountType.${accountType}`,
-												)}
-											</Text>
-										</div>
-										{description && (
-											<Text size='sm' theme='muted'>
-												{description}
-											</Text>
-										)}
-									</div>
-								</Link>
-								<div className='sm:h-32 sm:border-l border-b' />
-								{balances.length !== 0 && (
-									<ul
-										className='flex flex-col justify-center gap-2'
-										aria-labelledby={id}
-									>
-										{balances.map(
-											({
-												id: bId,
-												balance,
-												currency,
-											}) => {
-												const symbol =
-													getCurrencySymbol(currency)
-												const [, currencyId] =
-													bId.split('-')
-												return (
-													<li
-														key={bId}
-														className='flex items-center gap-4'
-													>
-														<Link
-															to={{
-																pathname:
-																	'../transactions/create',
-																search: createSearchParams(
-																	{
-																		accountId:
-																			id,
-																		currencyId,
-																	},
-																).toString(),
-															}}
-														>
-															<Text className='flex items-center gap-2'>
-																<CurrencyIcon
-																	currency={
-																		currency
-																	}
-																	size='sm'
-																/>
-																{currency}
-															</Text>
-														</Link>
-														<Text>
-															{`${symbol} ${formatNumber(balance)}`}
-														</Text>
-													</li>
-												)
-											},
-										)}
-									</ul>
-								)}
-							</div>
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button size='icon' variant='ghost'>
-										<EllipsisIcon />
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent>
-									<DropdownMenuItem>
-										<SquarePenIcon />
-										<Link to={`${id}/edit`}>
-											{t('index.editAction')}
-										</Link>
-									</DropdownMenuItem>
-									<DropdownMenuItem>
-										<BanknoteArrowDownIcon />
-										<Link
-											to={{
-												pathname:
-													'../transactions/create',
-												search: createSearchParams({
-													accountId: id,
-												}).toString(),
-											}}
-										>
-											{t('index.transactionAction')}
-										</Link>
-									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
-						</li>
-					),
+									You have not created any accounts yet. Start
+									creating them{' '}
+									<Link to='create' className='text-primary'>
+										here
+									</Link>
+								</Trans>
+							</Text>
+						) : (
+							<Text size='md' weight='medium' alignment='center'>
+								{t('index.emptySearchMessage', { search })}
+							</Text>
+						)}
+					</div>
 				)}
-			</ul>
+
+				<ul className='flex flex-col gap-2'>
+					{accounts.map(
+						({ id, name, description, accountType, balances }) => (
+							<li
+								key={id}
+								className='relative flex flex-col gap-6 lg:flex-row lg:justify-between lg:items-center border rounded-xl p-4 lg:px-6 min-h-32'
+							>
+								<div className='flex flex-col lg:flex-row lg:items-center gap-4 pr-10 lg:pr-0'>
+									<Link
+										to={id}
+										prefetch='intent'
+										className='flex items-center gap-4 lg:w-3xs'
+									>
+										<AccountTypeIcon
+											accountType={accountType}
+										/>
+										<div className='flex flex-col lg:gap-2 gap-4'>
+											<div className='flex flex-col gap-1'>
+												<Title id={id} level='h5'>
+													{name}
+												</Title>
+												<Text size='sm' theme='primary'>
+													{t(
+														`constants:accountType.${accountType}`,
+													)}
+												</Text>
+											</div>
+											{description && (
+												<Text size='sm' theme='muted'>
+													{description}
+												</Text>
+											)}
+										</div>
+									</Link>
+									<div className='lg:h-32 lg:border-l border-b' />
+									{balances.length !== 0 && (
+										<ul
+											className='flex flex-col justify-center gap-2'
+											aria-labelledby={id}
+										>
+											{balances.map(
+												({
+													id: bId,
+													balance,
+													currency,
+												}) => {
+													const symbol =
+														getCurrencySymbol(
+															currency,
+														)
+													const [, currencyId] =
+														bId.split('-')
+													return (
+														<li
+															key={bId}
+															className='flex items-center gap-4'
+														>
+															<Link
+																to={{
+																	pathname:
+																		'../transactions/create',
+																	search: createSearchParams(
+																		{
+																			accountId:
+																				id,
+																			currencyId,
+																		},
+																	).toString(),
+																}}
+															>
+																<Text className='flex items-center gap-2'>
+																	<CurrencyIcon
+																		currency={
+																			currency
+																		}
+																		size='sm'
+																	/>
+																	{currency}
+																</Text>
+															</Link>
+															<Text>
+																{`${symbol} ${formatNumber(balance)}`}
+															</Text>
+														</li>
+													)
+												},
+											)}
+										</ul>
+									)}
+								</div>
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											size='icon'
+											variant='ghost'
+											className='absolute top-4 right-4 lg:relative lg:top-auto lg:right-auto'
+										>
+											<EllipsisIcon />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent>
+										<DropdownMenuItem>
+											<SquarePenIcon />
+											<Link to={`${id}/edit`}>
+												{t('index.editAction')}
+											</Link>
+										</DropdownMenuItem>
+										<DropdownMenuItem>
+											<BanknoteArrowDownIcon />
+											<Link
+												to={{
+													pathname:
+														'../transactions/create',
+													search: createSearchParams({
+														accountId: id,
+													}).toString(),
+												}}
+											>
+												{t('index.transactionAction')}
+											</Link>
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							</li>
+						),
+					)}
+				</ul>
 			</PageContent>
 		</PageSection>
 	)

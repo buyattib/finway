@@ -130,11 +130,11 @@ export default function AccountDetails({
 
 	return (
 		<PageSection id={id}>
-			<PageHeader>
-				<div className='flex items-center gap-4'>
+			<PageHeader className='flex-wrap gap-4'>
+				<div className='flex items-center gap-4 min-w-0'>
 					<AccountTypeIcon accountType={accountType} />
-					<div className='flex flex-col gap-2'>
-						<Title id={id} level='h1'>
+					<div className='flex flex-col gap-2 min-w-0'>
+						<Title id={id} level='h1' className='truncate'>
 							{name}
 						</Title>
 						<Text size='sm' theme='primary'>
@@ -142,7 +142,7 @@ export default function AccountDetails({
 						</Text>
 					</div>
 				</div>
-				<div className='flex items-center gap-2'>
+				<div className='flex items-center gap-2 shrink-0'>
 					<Button size='icon' variant='outline' asChild>
 						<Link to='edit' prefetch='intent'>
 							<SquarePenIcon />
