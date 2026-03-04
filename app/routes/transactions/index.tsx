@@ -285,7 +285,7 @@ export default function Transactions({
 						}) => (
 							<li
 								key={id}
-								className='flex flex-col gap-2 xl:grid xl:grid-cols-[1fr_3fr_2fr_1fr_2fr_auto] xl:items-center xl:gap-4 border rounded-xl p-4 xl:px-6'
+								className='grid grid-cols-1 xl:grid-cols-[1fr_2fr_2fr_1fr_2fr_auto] items-center gap-4 border rounded-xl p-4 xl:px-6'
 							>
 								<div className='flex items-center justify-between xl:contents'>
 									<Text size='sm' theme='muted'>
@@ -337,16 +337,8 @@ export default function Transactions({
 										size='xs'
 										accountType={accountType}
 									/>
-									<Text>{account}</Text>
+									<Text size='sm'>{account}</Text>
 								</div>
-								<Text size='sm' theme='muted'>
-									{transactionCategory ?? '-'}
-								</Text>
-								<TransactionType
-									variant='icon-text'
-									size='xs'
-									transactionType={type}
-								/>
 								<Text
 									weight='medium'
 									className='flex items-center gap-2'
@@ -357,6 +349,14 @@ export default function Transactions({
 										size='sm'
 									/>
 									<b>{currency}</b> {formatNumber(amount)}
+								</Text>
+								<TransactionType
+									variant='icon-text'
+									size='xs'
+									transactionType={type}
+								/>
+								<Text size='sm' theme='muted'>
+									{transactionCategory ?? '-'}
 								</Text>
 							</li>
 						),

@@ -145,7 +145,7 @@ function PrivateLayoutContent({
 					</SidebarGroup>
 				</SidebarContent>
 			</Sidebar>
-			<div className='flex flex-col w-full'>
+			<div className='flex flex-col w-full min-w-0'>
 				<header
 					className={cn(
 						'flex items-center justify-between sm:justify-end gap-2 p-4 lg:px-12 border-b-2 border-b-secondary',

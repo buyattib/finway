@@ -54,7 +54,7 @@ export function TransactionsFilters({
 			<Form
 				ref={form}
 				id='transactions-filters'
-				className='flex flex-col sm:flex-row sm:items-center gap-2'
+				className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2'
 			>
 				<Combobox
 					options={accountOptions}
