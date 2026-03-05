@@ -119,7 +119,6 @@ export function createCreditCardTransactionFormSchema(
 				.refine(value => !isNaN(Number(value)) && Number(value) >= 1, {
 					message: t('transaction.create.schema.installmentsMin'),
 				}),
-			firstInstallmentDate: z.iso.datetime(),
 			description: z
 				.string()
 				.default('')

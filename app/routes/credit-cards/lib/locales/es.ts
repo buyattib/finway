@@ -154,8 +154,6 @@ export default {
 			categoryLabel: 'Categoría de Transacción',
 			categoryPlaceholder: 'Selecciona una categoría de transacción',
 			dateLabel: 'Fecha',
-			firstInstallmentDateLabel: 'Fecha de Primera Cuota',
-			chargeDateLabel: 'Fecha de Cargo',
 			descriptionLabel: 'Descripción (Opcional)',
 			resetButton: 'Restablecer',
 			submitButton: 'Crear',

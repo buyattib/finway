@@ -41,6 +41,7 @@ import {
 import { TransactionType } from '~/components/transaction-type'
 
 import { createCreditCardTransactionFormSchema } from '../lib/schemas'
+import { getFirstInstallmentDate } from '../lib/utils'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -107,7 +108,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 				const creditCard = await db.query.creditCard.findFirst({
 					where: (creditCard, { eq }) =>
 						eq(creditCard.id, data.creditCardId),
-					columns: { id: true },
+					columns: { id: true, closingDay: true, dueDay: true },
 					with: { account: { columns: { ownerId: true } } },
 				})
 				if (!creditCard || creditCard.account.ownerId !== user.id) {
@@ -158,9 +159,19 @@ export async function action({ request, context }: Route.ActionArgs) {
 		action: _action,
 		creditCardId,
 		totalInstallments,
-		firstInstallmentDate,
 		...transactionData
 	} = submission.value
+
+	const creditCard = (await db.query.creditCard.findFirst({
+		where: (creditCard, { eq }) => eq(creditCard.id, creditCardId),
+		columns: { closingDay: true, dueDay: true },
+	}))!
+
+	const firstInstallmentDate = getFirstInstallmentDate(
+		new Date(transactionData.date),
+		creditCard.closingDay,
+		creditCard.dueDay,
+	)
 
 	await db.transaction(async tx => {
 		const [{ id: creditCardTransactionId }] = await tx
@@ -227,7 +238,6 @@ export default function CreateCreditCardTransaction({
 		shouldValidate: 'onInput',
 		defaultValue: {
 			date: initializeDate().toISOString(),
-			firstInstallmentDate: initializeDate().toISOString(),
 			...initialData,
 		},
 		constraint: getZodConstraint(createCreditCardTransactionFormSchema(t)),
@@ -361,17 +371,6 @@ export default function CreateCreditCardTransaction({
 					<DateField
 						label={t('transaction.create.dateLabel')}
 						field={fields.date}
-					/>
-
-					<DateField
-						label={
-							hasInstallments
-								? t(
-										'transaction.create.firstInstallmentDateLabel',
-									)
-								: t('transaction.create.chargeDateLabel')
-						}
-						field={fields.firstInstallmentDate}
 					/>
 
 					<TextField

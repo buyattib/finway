@@ -149,8 +149,6 @@ export default {
 			categoryLabel: 'Transaction Category',
 			categoryPlaceholder: 'Select a transaction category',
 			dateLabel: 'Date',
-			firstInstallmentDateLabel: 'First Installment Date',
-			chargeDateLabel: 'Charge Date',
 			descriptionLabel: 'Description (Optional)',
 			resetButton: 'Reset',
 			submitButton: 'Create',
