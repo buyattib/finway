@@ -42,39 +42,86 @@ app.use((req, res, next) => {
 	_helmet(req, res, next)
 })
 
-if (PRODUCTION) {
-	// Add rate limiting to all requests
-	const defaultLimiter = {
-		windowMs: 15 * 60 * 1000, // 15 minutes
-		limit: 1000,
-		standardHeaders: true, // Use standard draft-6 headers of `RateLimit-Policy` `RateLimit-Limit`, and `RateLimit-Remaining`
-		legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-	}
-	const generalLimiter = rateLimit(defaultLimiter)
-	const strongLimiter = rateLimit({
-		...defaultLimiter,
-		limit: 100,
-	})
-	const strongestLimiter = rateLimit({ ...defaultLimiter, limit: 10 })
+// Add rate limiting to all requests
+const defaultLimiter = {
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: PRODUCTION ? 1000 : 5000,
+	standardHeaders: true, // Use standard draft-6 headers of `RateLimit-Policy` `RateLimit-Limit`, and `RateLimit-Remaining`
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+}
 
-	app.use((req, res, next) => {
-		const sensiblePaths = ['/login']
-		if (req.method !== 'GET' && req.method !== 'HEAD') {
-			if (sensiblePaths.some(sPath => req.path.includes(sPath))) {
-				return strongestLimiter(req, res, next)
-			}
-			return strongLimiter(req, res, next)
-		}
-
-		// the verify route is a special case because it's a GET route that
-		// can have a token in the query string
-		if (req.path.includes('/authenticate')) {
+const generalLimiter = rateLimit(defaultLimiter)
+const strongLimiter = rateLimit({
+	...defaultLimiter,
+	limit: PRODUCTION ? 100 : 500,
+})
+const strongestLimiter = rateLimit({
+	...defaultLimiter,
+	limit: PRODUCTION ? 10 : 50,
+})
+app.use((req, res, next) => {
+	const sensiblePaths = ['/login']
+	if (req.method !== 'GET' && req.method !== 'HEAD') {
+		if (sensiblePaths.some(sPath => req.path.includes(sPath))) {
 			return strongestLimiter(req, res, next)
 		}
+		return strongLimiter(req, res, next)
+	}
 
-		return generalLimiter(req, res, next)
-	})
+	// the verify route is a special case because it's a GET route that
+	// can have a token in the query string
+	if (req.path.includes('/authenticate')) {
+		return strongestLimiter(req, res, next)
+	}
+
+	return generalLimiter(req, res, next)
+})
+
+// HTTP Logger
+morgan.token('url', req => {
+	try {
+		return decodeURIComponent(req.url ?? '')
+	} catch {
+		return req.url ?? ''
+	}
+})
+
+function skip(req, res) {
+	const codeDirectories = [
+		'routes',
+		'locales',
+		'components',
+		'layouts',
+		'styles',
+		'hooks',
+		'lib',
+		'assets',
+		'root',
+		'utils',
+		'entry.client',
+	].some(p => req.path.includes(p))
+
+	const devServer =
+		req.path.startsWith('/__manifest') ||
+		req.path.startsWith('/node_modules') ||
+		req.path.includes('@')
+
+	const statusCode = res && res.statusCode === 304
+
+	return statusCode || (!PRODUCTION && (devServer || codeDirectories))
 }
+
+app.use(
+	morgan('--> :method :url', {
+		immediate: true,
+		skip,
+	}),
+)
+app.use(
+	morgan('<-- :method :url :status :response-time ms', {
+		skip,
+	}),
+)
 
 if (!PRODUCTION) {
 	console.log('Starting development server')
@@ -110,20 +157,6 @@ if (!PRODUCTION) {
 
 	// Everything else is cached for an hour
 	app.use(express.static('build/client', { maxAge: '1h' }))
-
-	// logger
-	morgan.token('url', req => {
-		try {
-			return decodeURIComponent(req.url ?? '')
-		} catch {
-			return req.url ?? ''
-		}
-	})
-	app.use(
-		morgan('tiny', {
-			skip: (req, res) => res.statusCode === 200,
-		}),
-	)
 
 	app.use(await import(BUILD_PATH).then(mod => mod.app))
 }

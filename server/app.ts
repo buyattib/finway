@@ -28,7 +28,23 @@ if (process.env.NODE_ENV === 'production') {
 
 const db = drizzle(client, {
 	schema,
-	logger: process.env.NODE_ENV === 'development',
+	logger: {
+		logQuery(query) {
+			const start = performance.now()
+			const op = query.split(/\s+/)[0].toUpperCase()
+			const table = query.match(/(?:from|into|update)\s+"?(\w+)"?/i)?.[1]
+			const where = query
+				.match(/where\s+(.+?)(?:\s+order|\s+limit|\s+group|\s*$)/i)?.[1]
+				?.replace(/["`]/g, '')
+			queueMicrotask(() => {
+				const duration = (performance.now() - start).toFixed(2)
+				const filter = where ? ` WHERE ${where}` : ''
+				console.log(
+					`  [DB] ${duration}ms - ${op} ${table ?? 'unknown'}${filter}`,
+				)
+			})
+		},
+	},
 })
 
 // RRv7 request handler (analogous to defining the endpoints in an express api)
