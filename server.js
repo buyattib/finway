@@ -109,7 +109,8 @@ function skip(req, res) {
 
 	const statusCode = res && res.statusCode === 304
 
-	return statusCode || (!PRODUCTION && (devServer || codeDirectories))
+	const staticAssets = req.path.startsWith('/assets')
+	return statusCode || staticAssets || (!PRODUCTION && (devServer || codeDirectories))
 }
 
 app.use(
