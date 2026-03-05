@@ -5,9 +5,10 @@
 	"scripts": {
 		"dev": "node --env-file=.env.development server.js",
 		"prod": "node --env-file=.env.production server.js",
-		"build": "react-router build",
-		"start.development": "node --env-file=.env.development server.js",
-		"start.production": "node --env-file=.env.production server.js",
+		"build.development": "react-router build --mode development",
+		"build.production": "react-router build --mode production",
+		"start.development": "BUILD=true node --env-file=.env.development server.js",
+		"start.production": "BUILD=true node --env-file=.env.production server.js",
 		"script.development": "tsx --env-file=.env.development",
 		"script.production": "tsx --env-file=.env.production",
 		"db:generate": "dotenv -e .env.development -- drizzle-kit generate --name",

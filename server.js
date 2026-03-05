@@ -124,7 +124,7 @@ app.use(
 	}),
 )
 
-if (!PRODUCTION) {
+if (!process.env.BUILD) {
 	console.log('Starting development server')
 	const viteDevServer = await import('vite').then(vite =>
 		vite.createServer({
