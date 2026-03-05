@@ -13,6 +13,8 @@ import {
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 
+import { formatDate } from '~/lib/utils'
+
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
@@ -39,6 +41,8 @@ export async function loader({ context }: Route.LoaderArgs) {
 			brand: creditCardTable.brand,
 			expiryMonth: creditCardTable.expiryMonth,
 			expiryYear: creditCardTable.expiryYear,
+			closingDate: creditCardTable.closingDate,
+			dueDate: creditCardTable.dueDate,
 			accountName: accountTable.name,
 			currencyCode: currencyTable.code,
 		})
@@ -107,6 +111,8 @@ export default function CreditCards({
 								brand,
 								expiryMonth,
 								expiryYear,
+								closingDate,
+								dueDate,
 								currencyCode,
 								accountName,
 							}) => {
@@ -136,17 +142,43 @@ export default function CreditCards({
 												</Text>
 											</div>
 										</Link>
-										<div className='flex items-center gap-4'>
-											<Text className='flex items-center gap-2'>
-												<CurrencyIcon
-													currency={currencyCode}
-													size='sm'
-												/>
-												{label}
-											</Text>
-											<Text size='sm' theme='muted'>
-												{accountName}
-											</Text>
+										<div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4'>
+											<div className='flex items-center gap-4'>
+												<Text className='flex items-center gap-2'>
+													<CurrencyIcon
+														currency={currencyCode}
+														size='sm'
+													/>
+													{label}
+												</Text>
+												<Text size='sm' theme='muted'>
+													{accountName}
+												</Text>
+											</div>
+											<div className='flex items-center gap-2'>
+												<Text size='xs' theme='muted'>
+													{t('index.closingDate', {
+														date: formatDate(
+															new Date(
+																closingDate,
+															),
+														),
+													})}
+												</Text>
+												<Text
+													size='xs'
+													theme='muted'
+												>
+													·
+												</Text>
+												<Text size='xs' theme='muted'>
+													{t('index.dueDate', {
+														date: formatDate(
+															new Date(dueDate),
+														),
+													})}
+												</Text>
+											</div>
 										</div>
 									</li>
 								)

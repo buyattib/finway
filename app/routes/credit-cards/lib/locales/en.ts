@@ -9,6 +9,8 @@ export default {
 		emptyMessage:
 			'You have not created any credit cards yet. Start creating them <0>here</0>',
 		expires: 'Expires {{month}}/{{year}}',
+		closingDate: 'Closes {{date}}',
+		dueDate: 'Due {{date}}',
 	},
 	details: {
 		meta: {
@@ -47,6 +49,8 @@ export default {
 	},
 	header: {
 		expires: 'Expires {{month}}/{{year}}',
+		closingDate: 'Closes {{date}}',
+		dueDate: 'Due {{date}}',
 	},
 	filters: {
 		type: 'Filter by type',
@@ -62,6 +66,8 @@ export default {
 		expiryMonthPlaceholder: 'MM',
 		expiryYearLabel: 'Expiry Year',
 		expiryYearPlaceholder: 'YYYY',
+		closingDateLabel: 'Closing Date',
+		dueDateLabel: 'Due Date',
 		accountLabel: 'Account',
 		accountPlaceholder: 'Select an account',
 		currencyLabel: 'Currency',
@@ -79,6 +85,8 @@ export default {
 			expiryYearRequired: 'Expiry year is required',
 			expiryYearInvalid: 'Must be a 4-digit year',
 			expiryYearFuture: 'Must be a valid year in the future',
+			closingDateRequired: 'Closing date is required',
+			dueDateRequired: 'Due date is required',
 			accountRequired: 'Account is required',
 			currencyRequired: 'Currency is required',
 		},

@@ -47,6 +47,8 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			brand: '',
 			expiryMonth: '',
 			expiryYear: '',
+			closingDate: '',
+			dueDate: '',
 			accountId,
 			currencyId,
 		},

@@ -47,6 +47,8 @@ export async function loader({
 			last4: true,
 			expiryMonth: true,
 			expiryYear: true,
+			closingDate: true,
+			dueDate: true,
 		},
 		with: {
 			account: {
@@ -140,8 +142,16 @@ export async function loader({
 export default function CreditCardTransaction({
 	loaderData: { creditCard, transaction, installments },
 }: Route.ComponentProps) {
-	const { brand, last4, expiryMonth, expiryYear, accountName, currencyCode } =
-		creditCard
+	const {
+		brand,
+		last4,
+		expiryMonth,
+		expiryYear,
+		closingDate,
+		dueDate,
+		accountName,
+		currencyCode,
+	} = creditCard
 	const { date, type, amount, description, categoryName } = transaction
 	const { t } = useTranslation('credit-cards')
 
@@ -162,6 +172,8 @@ export default function CreditCardTransaction({
 						last4,
 						expiryMonth,
 						expiryYear,
+						closingDate,
+						dueDate,
 						accountName,
 						currency: currencyCode,
 					}}

@@ -11,6 +11,8 @@ export default {
 		emptyMessage:
 			'Aún no has creado ninguna tarjeta de crédito. Empieza a crearlas <0>aquí</0>',
 		expires: 'Vence {{month}}/{{year}}',
+		closingDate: 'Cierra {{date}}',
+		dueDate: 'Vence {{date}}',
 	},
 	details: {
 		meta: {
@@ -50,6 +52,8 @@ export default {
 	},
 	header: {
 		expires: 'Vence {{month}}/{{year}}',
+		closingDate: 'Cierra {{date}}',
+		dueDate: 'Vence {{date}}',
 	},
 	filters: {
 		type: 'Filtrar por tipo',
@@ -66,6 +70,8 @@ export default {
 		expiryMonthPlaceholder: 'MM',
 		expiryYearLabel: 'Año de Vencimiento',
 		expiryYearPlaceholder: 'AAAA',
+		closingDateLabel: 'Fecha de Cierre',
+		dueDateLabel: 'Fecha de Vencimiento',
 		accountLabel: 'Cuenta',
 		accountPlaceholder: 'Selecciona una cuenta',
 		currencyLabel: 'Moneda',
@@ -83,6 +89,8 @@ export default {
 			expiryYearRequired: 'El año de vencimiento es requerido',
 			expiryYearInvalid: 'Debe ser un año de 4 dígitos',
 			expiryYearFuture: 'Debe ser un año válido en el futuro',
+			closingDateRequired: 'La fecha de cierre es requerida',
+			dueDateRequired: 'La fecha de vencimiento es requerida',
 			accountRequired: 'La cuenta es requerida',
 			currencyRequired: 'La moneda es requerida',
 		},

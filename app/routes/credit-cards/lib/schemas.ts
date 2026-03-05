@@ -46,6 +46,9 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 					{ message: t('form.schema.expiryYearFuture') },
 				),
 
+			closingDate: z.iso.datetime(t('form.schema.closingDateRequired')),
+			dueDate: z.iso.datetime(t('form.schema.dueDateRequired')),
+
 			accountId: z.string(t('form.schema.accountRequired')),
 			currencyId: z.string(t('form.schema.currencyRequired')),
 		})

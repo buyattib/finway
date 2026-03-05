@@ -86,6 +86,8 @@ export async function loader({
 			last4: true,
 			expiryMonth: true,
 			expiryYear: true,
+			closingDate: true,
+			dueDate: true,
 		},
 		with: {
 			account: {
@@ -308,6 +310,8 @@ export default function CreditCardDetails({
 		last4,
 		expiryMonth,
 		expiryYear,
+		closingDate,
+		dueDate,
 		accountName,
 		currencyCode,
 	} = creditCard
@@ -346,6 +350,8 @@ export default function CreditCardDetails({
 						last4,
 						expiryMonth,
 						expiryYear,
+						closingDate,
+						dueDate,
 						accountName,
 						currency: currencyCode,
 					}}

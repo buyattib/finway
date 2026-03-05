@@ -48,6 +48,8 @@ export async function loader({
 			last4: true,
 			expiryMonth: true,
 			expiryYear: true,
+			closingDate: true,
+			dueDate: true,
 			accountId: true,
 			currencyId: true,
 		},

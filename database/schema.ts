@@ -206,6 +206,9 @@ export const creditCard = sqliteTable(
 		expiryMonth: text().notNull(),
 		expiryYear: text().notNull(),
 
+		closingDate: text().notNull(),
+		dueDate: text().notNull(),
+
 		accountId: text().notNull(),
 		currencyId: text().notNull(),
 	},
