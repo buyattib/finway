@@ -86,6 +86,7 @@ morgan.token('url', req => {
 	}
 })
 
+/** @param {import('express').Request} req @param {import('express').Response} res */
 function skip(req, res) {
 	const codeDirectories = [
 		'routes',
