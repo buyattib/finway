@@ -343,7 +343,7 @@ export default function CreditCardDetails({
 
 	return (
 		<PageSection id={id}>
-			<PageHeader>
+			<PageHeader className='items-start'>
 				<CreditCardHeader
 					{...{
 						brand,
