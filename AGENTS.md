@@ -157,7 +157,6 @@ For translations containing JSX (links, bold, etc.), use `<Trans>` with `<0>` po
 pnpm dev          # Dev server
 pnpm build        # Production build
 pnpm typecheck    # Type check
-pnpm db:push      # Apply schema changes
 pnpm db:studio    # DB explorer
 pnpm email        # Email preview
 ```

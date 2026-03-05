@@ -46,8 +46,28 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 					{ message: t('form.schema.expiryYearFuture') },
 				),
 
-			closingDate: z.iso.datetime(t('form.schema.closingDateRequired')),
-			dueDate: z.iso.datetime(t('form.schema.dueDateRequired')),
+			closingDay: z
+				.string(t('form.schema.closingDayRequired'))
+				.regex(/^\d{1,2}$/, t('form.schema.closingDayInvalid'))
+				.refine(
+					value => {
+						const day = Number(value)
+						return day >= 1 && day <= 31
+					},
+					{ message: t('form.schema.closingDayRange') },
+				)
+				.transform(Number),
+			dueDay: z
+				.string(t('form.schema.dueDayRequired'))
+				.regex(/^\d{1,2}$/, t('form.schema.dueDayInvalid'))
+				.refine(
+					value => {
+						const day = Number(value)
+						return day >= 1 && day <= 31
+					},
+					{ message: t('form.schema.dueDayRange') },
+				)
+				.transform(Number),
 
 			accountId: z.string(t('form.schema.accountRequired')),
 			currencyId: z.string(t('form.schema.currencyRequired')),

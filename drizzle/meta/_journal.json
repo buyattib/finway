@@ -92,6 +92,20 @@
       "when": 1772708045484,
       "tag": "0012_cc_period_dates",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1772710020047,
+      "tag": "0013_drop_cc_dates",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1772710041285,
+      "tag": "0014_update_cc_dates",
+      "breakpoints": true
     }
   ]
 }

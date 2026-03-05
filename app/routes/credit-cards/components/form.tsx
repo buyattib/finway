@@ -23,7 +23,6 @@ import {
 	ErrorList,
 	TextField,
 	NumberField,
-	DateField,
 	ComboboxField,
 } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
@@ -157,13 +156,17 @@ export function CreditCardForm({
 					</div>
 
 					<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-						<DateField
-							label={t('form.closingDateLabel')}
-							field={fields.closingDate}
+						<NumberField
+							label={t('form.closingDayLabel')}
+							field={fields.closingDay}
+							placeholder={t('form.closingDayPlaceholder')}
+							maxLength={2}
 						/>
-						<DateField
-							label={t('form.dueDateLabel')}
-							field={fields.dueDate}
+						<NumberField
+							label={t('form.dueDayLabel')}
+							field={fields.dueDay}
+							placeholder={t('form.dueDayPlaceholder')}
+							maxLength={2}
 						/>
 					</div>
 

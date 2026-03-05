@@ -12,8 +12,7 @@ import {
 } from '~/database/schema'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-
-import { formatDate } from '~/lib/utils'
+import { formatDate, getNextDateForDay } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -41,8 +40,8 @@ export async function loader({ context }: Route.LoaderArgs) {
 			brand: creditCardTable.brand,
 			expiryMonth: creditCardTable.expiryMonth,
 			expiryYear: creditCardTable.expiryYear,
-			closingDate: creditCardTable.closingDate,
-			dueDate: creditCardTable.dueDate,
+			closingDay: creditCardTable.closingDay,
+			dueDay: creditCardTable.dueDay,
 			accountName: accountTable.name,
 			currencyCode: currencyTable.code,
 		})
@@ -111,8 +110,8 @@ export default function CreditCards({
 								brand,
 								expiryMonth,
 								expiryYear,
-								closingDate,
-								dueDate,
+								closingDay,
+								dueDay,
 								currencyCode,
 								accountName,
 							}) => {
@@ -161,16 +160,20 @@ export default function CreditCards({
 										</Link>
 										<div className='flex flex-col gap-0.5'>
 											<Text size='sm' theme='muted'>
-												{t('index.closingDate', {
+												{t('index.closingDay', {
 													date: formatDate(
-														new Date(closingDate),
+														getNextDateForDay(
+															closingDay,
+														),
 													),
 												})}
 											</Text>
 											<Text size='sm' theme='muted'>
-												{t('index.dueDate', {
+												{t('index.dueDay', {
 													date: formatDate(
-														new Date(dueDate),
+														getNextDateForDay(
+															dueDay,
+														),
 													),
 												})}
 											</Text>

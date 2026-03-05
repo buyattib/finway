@@ -54,6 +54,13 @@ export function initializeDate() {
 	return date
 }
 
+export function getNextDateForDay(day: number) {
+	const now = new Date()
+	const thisMonth = new Date(now.getFullYear(), now.getMonth(), day)
+	if (thisMonth >= now) return thisMonth
+	return new Date(now.getFullYear(), now.getMonth() + 1, day)
+}
+
 export function formatDate(
 	date: Date,
 	config: Intl.DateTimeFormatOptions = {},

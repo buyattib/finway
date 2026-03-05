@@ -2,7 +2,7 @@ import { CreditCardIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { TCurrency } from '~/lib/types'
-import { formatDate } from '~/lib/utils'
+import { formatDate, getNextDateForDay } from '~/lib/utils'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
@@ -13,8 +13,8 @@ type Props = {
 	last4: string
 	expiryMonth: string
 	expiryYear: string
-	closingDate: string
-	dueDate: string
+	closingDay: number
+	dueDay: number
 	accountName: string
 	currency: TCurrency
 }
@@ -24,8 +24,8 @@ export function CreditCardHeader({
 	last4,
 	expiryMonth,
 	expiryYear,
-	closingDate,
-	dueDate,
+	closingDay,
+	dueDay,
 	accountName,
 	currency,
 }: Props) {
@@ -66,16 +66,16 @@ export function CreditCardHeader({
 			</div>
 			<div className='flex flex-col sm:flex-row sm:items-center gap-4'>
 				<Text size='sm' theme='muted'>
-					{t('header.closingDate', {
-						date: formatDate(new Date(closingDate)),
+					{t('header.closingDay', {
+						date: formatDate(getNextDateForDay(closingDay)),
 					})}
 				</Text>
 				<Text size='sm' theme='muted' className='hidden sm:block'>
 					·
 				</Text>
 				<Text size='sm' theme='muted'>
-					{t('header.dueDate', {
-						date: formatDate(new Date(dueDate)),
+					{t('header.dueDay', {
+						date: formatDate(getNextDateForDay(dueDay)),
 					})}
 				</Text>
 			</div>
