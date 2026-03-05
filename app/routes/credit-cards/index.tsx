@@ -127,23 +127,26 @@ export default function CreditCards({
 										<Link
 											to={id}
 											prefetch='intent'
-											className='flex items-center gap-4'
+											className='flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6'
 										>
-											<CreditCardIcon className='size-5 text-muted-foreground' />
-											<div className='flex flex-col gap-1'>
-												<Text weight='medium'>
-													{brand} •••• {last4}
-												</Text>
-												<Text size='sm' theme='muted'>
-													{t('index.expires', {
-														month: expiryMonth,
-														year: expiryYear,
-													})}
-												</Text>
-											</div>
-										</Link>
-										<div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4'>
 											<div className='flex items-center gap-4'>
+												<CreditCardIcon className='size-5 text-muted-foreground' />
+												<div className='flex flex-col gap-1'>
+													<Text weight='medium'>
+														{brand} •••• {last4}
+													</Text>
+													<Text
+														size='sm'
+														theme='muted'
+													>
+														{t('index.expires', {
+															month: expiryMonth,
+															year: expiryYear,
+														})}
+													</Text>
+												</div>
+											</div>
+											<div className='flex flex-col gap-0.5'>
 												<Text className='flex items-center gap-2'>
 													<CurrencyIcon
 														currency={currencyCode}
@@ -155,30 +158,22 @@ export default function CreditCards({
 													{accountName}
 												</Text>
 											</div>
-											<div className='flex items-center gap-2'>
-												<Text size='xs' theme='muted'>
-													{t('index.closingDate', {
-														date: formatDate(
-															new Date(
-																closingDate,
-															),
-														),
-													})}
-												</Text>
-												<Text
-													size='xs'
-													theme='muted'
-												>
-													·
-												</Text>
-												<Text size='xs' theme='muted'>
-													{t('index.dueDate', {
-														date: formatDate(
-															new Date(dueDate),
-														),
-													})}
-												</Text>
-											</div>
+										</Link>
+										<div className='flex flex-col gap-0.5'>
+											<Text size='sm' theme='muted'>
+												{t('index.closingDate', {
+													date: formatDate(
+														new Date(closingDate),
+													),
+												})}
+											</Text>
+											<Text size='sm' theme='muted'>
+												{t('index.dueDate', {
+													date: formatDate(
+														new Date(dueDate),
+													),
+												})}
+											</Text>
 										</div>
 									</li>
 								)

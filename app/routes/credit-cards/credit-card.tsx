@@ -35,7 +35,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
-import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
+import { PageSection, PageHeader } from '~/components/ui/page'
 import { TransactionType } from '~/components/transaction-type'
 import {
 	Tooltip,
