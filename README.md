@@ -18,6 +18,11 @@
 - Build server with develop variables: `pnpm run start.development`
 - Build server with production variables: `pnpm run start.production`
 
+### Run with docker
+
+-Build the image: `docker build -t finway .`
+-Run the container: `docker run -p 3000:3000 --env-file .env.production finway`
+
 ## Database view
 
 - Browse the db with drizzle studio: `pnpm run db:studio` (spins a server in localhost:6001)
