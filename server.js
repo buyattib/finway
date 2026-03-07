@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 		contentSecurityPolicy: PRODUCTION
 			? {
 					directives: {
-						'script-src': ["'self'", `'nonce-${nonce}'`],
+						'script-src': ["'self'", "'unsafe-eval'", `'nonce-${nonce}'`],
 					},
 				}
 			: false,

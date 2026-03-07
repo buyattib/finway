@@ -37,14 +37,8 @@ export default function handleRequest(
 				? 'onAllReady'
 				: 'onShellReady'
 
-		// Abort the rendering stream after the `streamTimeout` so it has time to
-		// flush down the rejected boundaries
-		let timeoutId: ReturnType<typeof setTimeout> | undefined = setTimeout(
-			() => abort(),
-			streamTimeout + 1000,
-		)
-
 		const ctx = routerContext.get(globalContext)
+		let timeoutId: ReturnType<typeof setTimeout> | undefined
 		const { pipe, abort } = renderToPipeableStream(
 			<I18nextProvider i18n={getInstance(routerContext)}>
 				<ServerRouter
@@ -92,5 +86,9 @@ export default function handleRequest(
 				nonce: ctx.cspNonce,
 			},
 		)
+
+		// Abort the rendering stream after the `streamTimeout` so it has time to
+		// flush down the rejected boundaries
+		timeoutId = setTimeout(() => abort(), streamTimeout + 1000)
 	})
 }
