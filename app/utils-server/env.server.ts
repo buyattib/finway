@@ -7,6 +7,7 @@ const schema = z.object({
 	HONEYPOT_SECRET: z.string(),
 	MAGIC_LINK_SECRET: z.string(),
 	RESEND_API_KEY: z.string(),
+	FINWAY_EMAIL: z.string(),
 })
 
 declare global {
