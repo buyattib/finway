@@ -12,6 +12,8 @@ const PORT = Number.parseInt(process.env.PORT || '3000')
 
 const app = express()
 
+app.set('trust proxy', 1)
+
 // no ending slashes for SEO reasons: https://github.com/epicweb-dev/epic-stack/discussions/108
 app.get('/*splat', (req, res, next) => {
 	if (req.path.endsWith('/') && req.path.length > 1) {
@@ -118,7 +120,7 @@ function skip(req, res) {
 }
 
 app.use(
-	morgan('--> :method :url', {
+	morgan('--> :method :url :remote-addr', {
 		immediate: true,
 		skip,
 	}),
