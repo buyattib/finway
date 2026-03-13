@@ -14,6 +14,11 @@ const app = express()
 
 app.set('trust proxy', 1)
 
+app.use((req, res, next) => {
+	console.log(req.headers)
+	next()
+})
+
 // no ending slashes for SEO reasons: https://github.com/epicweb-dev/epic-stack/discussions/108
 app.get('/*splat', (req, res, next) => {
 	if (req.path.endsWith('/') && req.path.length > 1) {
@@ -120,7 +125,7 @@ function skip(req, res) {
 }
 
 app.use(
-	morgan('--> :method :url :remote-addr', {
+	morgan('--> :method :url', {
 		immediate: true,
 		skip,
 	}),
