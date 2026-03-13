@@ -115,7 +115,9 @@ function skip(req, res) {
 
 	const statusCode = res && res.statusCode === 304
 
-	const staticAssets = req.path.startsWith('/assets')
+	const staticAssets =
+		req.path.startsWith('/assets') ||
+		/\.(js|css|woff2?|ttf|ico|png|jpg|svg|map)$/.test(req.path)
 	return statusCode || staticAssets || devServer || codeDirectories
 }
 
@@ -130,6 +132,8 @@ app.use(
 		skip,
 	}),
 )
+
+app.get('/favicon.ico', (_req, res) => res.status(204).end())
 
 if (!PRODUCTION) {
 	console.log('Starting development server')
