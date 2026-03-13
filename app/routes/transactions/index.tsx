@@ -257,13 +257,14 @@ export default function Transactions({
 								<Trans
 									ns='transactions'
 									i18nKey='index.emptyMessage'
-								>
-									You have not created any transactions yet.
-									Start creating them{' '}
-									<Link to='create' className='text-primary'>
-										here
-									</Link>
-								</Trans>
+									components={[
+										<Link
+											key='0'
+											to='create'
+											className='text-primary'
+										/>,
+									]}
+								/>
 							) : (
 								t('index.emptyFilteredMessage')
 							)}

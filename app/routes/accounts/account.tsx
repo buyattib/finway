@@ -20,7 +20,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
-import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
+import { PageSection, PageHeader } from '~/components/ui/page'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import {

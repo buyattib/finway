@@ -134,9 +134,19 @@ export function createAccountFormSchema(t: TFunction<'accounts'>) {
 
 ### Rich Text (`<Trans>`)
 
-For translations containing JSX (links, bold, etc.), use `<Trans>` with `<0>` positional placeholders:
+For translations containing JSX (links, bold, etc.), use `<Trans>` with the `components` prop and `<0>` positional placeholders in the locale string. **Never pass children to `<Trans>`** — it causes duplicated text rendering:
 
 ```tsx
+// ✅ Correct — components prop, self-closing <Trans />
+<Trans
+  ns='accounts'
+  i18nKey='index.emptyMessage'
+  components={[
+    <Link key='0' to='create' className='text-primary' />,
+  ]}
+/>
+
+// ❌ Wrong — children cause duplicated text
 <Trans ns='accounts' i18nKey='index.emptyMessage'>
   ...Start creating them <Link to='create'>here</Link>
 </Trans>

@@ -170,13 +170,14 @@ export default function Accounts({
 								<Trans
 									ns='accounts'
 									i18nKey='index.emptyMessage'
-								>
-									You have not created any accounts yet. Start
-									creating them{' '}
-									<Link to='create' className='text-primary'>
-										here
-									</Link>
-								</Trans>
+									components={[
+										<Link
+											key='0'
+											to='create'
+											className='text-primary'
+										/>,
+									]}
+								/>
 							</Text>
 						) : (
 							<Text size='md' weight='medium' alignment='center'>

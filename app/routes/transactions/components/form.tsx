@@ -191,20 +191,19 @@ export function TransactionForm({
 							<Trans
 								ns='transactions'
 								i18nKey='form.noAccountMessage'
-							>
-								You need to create an account first. Do it{' '}
-								<Link
-									to={{
-										pathname: '/app/accounts/create',
-										search: createSearchParams({
-											redirectTo: location.pathname,
-										}).toString(),
-									}}
-									className='text-primary'
-								>
-									here
-								</Link>
-							</Trans>
+								components={[
+									<Link
+										key='0'
+										to={{
+											pathname: '/app/accounts/create',
+											search: createSearchParams({
+												redirectTo: location.pathname,
+											}).toString(),
+										}}
+										className='text-primary'
+									/>,
+								]}
+							/>
 						</Text>
 					)}
 
@@ -225,22 +224,20 @@ export function TransactionForm({
 							<Trans
 								ns='transactions'
 								i18nKey='form.noCategoryMessage'
-							>
-								You need to create a transaction category first.
-								Do it{' '}
-								<Link
-									to={{
-										pathname:
-											'/app/transaction-categories/create',
-										search: createSearchParams({
-											redirectTo: location.pathname,
-										}).toString(),
-									}}
-									className='text-primary'
-								>
-									here
-								</Link>
-							</Trans>
+								components={[
+									<Link
+										key='0'
+										to={{
+											pathname:
+												'/app/transaction-categories/create',
+											search: createSearchParams({
+												redirectTo: location.pathname,
+											}).toString(),
+										}}
+										className='text-primary'
+									/>,
+								]}
+							/>
 						</Text>
 					)}
 
