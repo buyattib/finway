@@ -2,26 +2,11 @@
 
 - `pnpm install`
 
-## Build the app
-
-- `pnpm run build`
-
 ## Run the app
 
-### In local development server
-
-- Development server with develop variables: `pnpm dev`
-- Development server with production variables: `pnpm prod`
-
-### In local build server
-
-- Build server with develop variables: `pnpm run start.development`
-- Build server with production variables: `pnpm run start.production`
-
-### Run with docker
-
--Build the image: `docker build -t finway .`
--Run the container: `docker run -p 3000:3000 --env-file .env.production finway`
+- Development server: `pnpm dev`
+- Build the app: `pnpm build`
+- Build server: `pnpm start`
 
 ## Database view
 
@@ -42,8 +27,7 @@ as its used to run multiple statements
 
 ## Run scripts
 
-- Development: `pnpm run script.development -- path/to/script.ts`
-- Production: `pnpm run script.production -- path/to/script.ts`
+- tsx path/to/script.ts
 
 ## Emails
 

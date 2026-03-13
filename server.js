@@ -34,7 +34,11 @@ app.use((req, res, next) => {
 		contentSecurityPolicy: PRODUCTION
 			? {
 					directives: {
-						'script-src': ["'self'", "'unsafe-eval'", `'nonce-${nonce}'`],
+						'script-src': [
+							"'self'",
+							"'unsafe-eval'",
+							`'nonce-${nonce}'`,
+						],
 					},
 				}
 			: false,
@@ -110,7 +114,7 @@ function skip(req, res) {
 	const statusCode = res && res.statusCode === 304
 
 	const staticAssets = req.path.startsWith('/assets')
-	return statusCode || staticAssets || (!PRODUCTION && (devServer || codeDirectories))
+	return statusCode || staticAssets || devServer || codeDirectories
 }
 
 app.use(
@@ -125,7 +129,7 @@ app.use(
 	}),
 )
 
-if (!process.env.BUILD) {
+if (!PRODUCTION) {
 	console.log('Starting development server')
 	const viteDevServer = await import('vite').then(vite =>
 		vite.createServer({
