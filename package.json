@@ -5,7 +5,8 @@
 	"scripts": {
 		"dev": "node --env-file=.env.development server.js",
 		"build": "react-router build",
-		"start": "node --env-file=.env.production server.js",
+		"start:local": "node --env-file=.env.production server.js",
+		"start:production": "node server.js",
 		"db:generate": "dotenv -e .env.development -- drizzle-kit generate --name",
 		"db:generate-custom": "dotenv -e .env.development -- drizzle-kit generate --custom --name",
 		"db:migrate": "dotenv -e .env.development -- drizzle-kit migrate",
