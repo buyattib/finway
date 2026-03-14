@@ -4,8 +4,10 @@ import { drizzle } from 'drizzle-orm/libsql'
 import { createClient } from '@libsql/client'
 import express from 'express'
 
-import { dbContext, globalContext } from '~/lib/context'
 import * as schema from '~/database/schema'
+import { env } from '~/utils-server/env.server'
+import { dbContext, globalContext } from '~/lib/context'
+import { STAGE_PRODUCTION } from '~/lib/constants'
 
 declare global {
 	var __libsql: ReturnType<typeof createClient> | undefined
@@ -14,15 +16,19 @@ declare global {
 // This express app is the one that handles all incoming requests through RRv7
 export const app = express()
 
-if (!process.env.DB_FILE_NAME) throw new Error('DB_FILE_NAME is required')
-
 // connect to db and add to context for loaders/actions to use
 let client
-if (process.env.NODE_ENV === 'production') {
-	client = createClient({ url: process.env.DB_FILE_NAME })
+if (env.NODE_ENV === STAGE_PRODUCTION) {
+	client = createClient({
+		url: env.DB_FILE_NAME,
+		authToken: env.TURSO_AUTH_TOKEN,
+	})
 } else {
 	client =
-		globalThis.__libsql ?? createClient({ url: process.env.DB_FILE_NAME })
+		globalThis.__libsql ??
+		createClient({
+			url: env.DB_FILE_NAME,
+		})
 	globalThis.__libsql = client
 }
 

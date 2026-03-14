@@ -119,7 +119,13 @@ function skip(req, res) {
 		req.path.startsWith('/assets') ||
 		/\.(js|css|woff2?|ttf|ico|png|jpg|svg|map)$/.test(req.path)
 	const headRequest = req.method === 'HEAD'
-	return headRequest || statusCode || staticAssets || devServer || codeDirectories
+	return (
+		headRequest ||
+		statusCode ||
+		staticAssets ||
+		devServer ||
+		codeDirectories
+	)
 }
 
 app.use(

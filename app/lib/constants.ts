@@ -1,3 +1,6 @@
+export const STAGE_DEVELOPMENT = 'development'
+export const STAGE_PRODUCTION = 'production'
+
 // Pagination
 
 export const PAGE_SIZE = 10

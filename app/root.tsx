@@ -81,20 +81,21 @@ export const links: Route.LinksFunction = () => [
 	},
 ]
 
-export function meta({ data, error }: Route.MetaArgs) {
+export function meta({ loaderData, error }: Route.MetaArgs) {
 	return [
 		{
 			title: !error
-				? (data?.meta.title ?? 'Finway')
-				: (data?.meta.errorTitle ?? 'Error | Finway'),
+				? (loaderData?.meta.title ?? 'Finway')
+				: (loaderData?.meta.errorTitle ?? 'Error | Finway'),
 		},
 		{
 			property: 'og:title',
-			content: data?.meta.title ?? 'Finway',
+			content: loaderData?.meta.title ?? 'Finway',
 		},
 		{
 			name: 'description',
-			content: data?.meta.description ?? 'The hub for your finances',
+			content:
+				loaderData?.meta.description ?? 'The hub for your finances',
 		},
 	]
 }

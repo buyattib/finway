@@ -1,4 +1,5 @@
 import { render } from '@react-email/components'
+import { STAGE_PRODUCTION } from '~/lib/constants'
 import { env } from './env.server'
 
 const RESEND_BASE_URL = 'https://api.resend.com'
@@ -20,7 +21,7 @@ export async function sendEmail({
 )) {
 	const html = react ? await render(react) : _html
 
-	if (env.NODE_ENV !== 'production') {
+	if (env.NODE_ENV !== STAGE_PRODUCTION) {
 		console.log(text)
 		console.log(html)
 

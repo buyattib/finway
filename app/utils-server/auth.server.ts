@@ -1,4 +1,5 @@
 import { createCookieSessionStorage, redirect } from 'react-router'
+import { STAGE_PRODUCTION } from '~/lib/constants'
 import type { DB } from '~/lib/types'
 import { env } from './env.server'
 
@@ -7,7 +8,7 @@ export const authSessionStorage = createCookieSessionStorage({
 		name: 'finway_session',
 		sameSite: 'lax',
 		path: '/',
-		secure: env.NODE_ENV === 'production',
+		secure: env.NODE_ENV === STAGE_PRODUCTION,
 		httpOnly: true,
 		secrets: env.SESSION_SECRET.split(','),
 	},

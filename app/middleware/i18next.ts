@@ -1,6 +1,9 @@
 import { initReactI18next } from 'react-i18next'
 import { createCookie } from 'react-router'
 import { createI18nextMiddleware } from 'remix-i18next/middleware'
+
+import { env } from '~/utils-server/env.server'
+import { STAGE_PRODUCTION } from '~/lib/constants'
 import resources from '~/locales'
 import 'i18next'
 
@@ -8,7 +11,7 @@ import 'i18next'
 export const localeCookie = createCookie('lng', {
 	path: '/',
 	sameSite: 'lax',
-	secure: process.env.NODE_ENV === 'production',
+	secure: env.NODE_ENV === STAGE_PRODUCTION,
 	httpOnly: true,
 })
 

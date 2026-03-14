@@ -1,6 +1,7 @@
 import { createCookieSessionStorage, redirect } from 'react-router'
 
 import { type ToastSession, ToastSessionSchema } from '~/components/show-toast'
+import { STAGE_PRODUCTION } from '~/lib/constants'
 import { env } from './env.server'
 import { combineHeaders } from './headers.server'
 
@@ -11,7 +12,7 @@ export const toastSessionStorage = createCookieSessionStorage({
 		name: toastCookieKey,
 		sameSite: 'lax',
 		path: '/',
-		secure: env.NODE_ENV === 'production',
+		secure: env.NODE_ENV === STAGE_PRODUCTION,
 		httpOnly: true,
 		secrets: env.SESSION_SECRET.split(','),
 	},

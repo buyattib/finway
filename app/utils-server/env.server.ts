@@ -1,13 +1,18 @@
 import { z } from 'zod'
+import { STAGE_DEVELOPMENT, STAGE_PRODUCTION } from '~/lib/constants'
 
 const schema = z.object({
-	NODE_ENV: z.enum(['production', 'development', 'test'] as const),
-	DB_FILE_NAME: z.string(),
+	NODE_ENV: z.enum([STAGE_PRODUCTION, STAGE_DEVELOPMENT] as const),
+
 	SESSION_SECRET: z.string(),
 	HONEYPOT_SECRET: z.string(),
 	MAGIC_LINK_SECRET: z.string(),
-	RESEND_API_KEY: z.string(),
+
 	FINWAY_EMAIL: z.string(),
+	RESEND_API_KEY: z.string(),
+
+	DB_FILE_NAME: z.string(),
+	TURSO_AUTH_TOKEN: z.string().optional(),
 })
 
 declare global {
