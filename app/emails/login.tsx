@@ -1,4 +1,3 @@
-import type { TFunction } from 'i18next'
 import {
 	Body,
 	Button,
@@ -11,31 +10,45 @@ import {
 	Section,
 	Text,
 } from '@react-email/components'
+import type { TFunction } from 'i18next'
+
+import defaults from '../locales/en/emails'
 
 export default async function LoginEmail({
-	url,
+	url = 'https://example.com/login',
 	t,
 }: {
-	url: string
-	t: TFunction<'emails'>
+	url?: string
+	t?: TFunction<'emails'>
 }) {
+	const translations = {
+		preview: t?.('login.preview') ?? defaults.login.preview,
+		greeting: t?.('login.greeting') ?? defaults.login.greeting,
+		instruction: t?.('login.instruction') ?? defaults.login.instruction,
+		button: t?.('login.button') ?? defaults.login.button,
+		expiration: t?.('login.expiration') ?? defaults.login.expiration,
+		disclaimer: t?.('login.disclaimer') ?? defaults.login.disclaimer,
+	}
+
 	return (
 		<Html>
 			<Head />
-			<Preview>{t('login.preview')}</Preview>
+			<Preview>{translations.preview}</Preview>
 			<Body style={body}>
 				<Container style={container}>
 					<Heading style={heading}>Finway</Heading>
-					<Text style={text}>{t('login.greeting')}</Text>
-					<Text style={text}>{t('login.instruction')}</Text>
+					<Text style={text}>{translations.greeting}</Text>
+					<Text style={text}>{translations.instruction}</Text>
 					<Section style={buttonSection}>
-						<Button href={url} style={button}>
-							{t('login.button')}
+						<Button href={url} style={btnStyle}>
+							{translations.button}
 						</Button>
 					</Section>
-					<Text style={footnote}>{t('login.expiration')}</Text>
+					<Text style={footnote}>{translations.expiration}</Text>
 					<Hr style={hr} />
-					<Text style={disclaimer}>{t('login.disclaimer')}</Text>
+					<Text style={disclaimerStyle}>
+						{translations.disclaimer}
+					</Text>
 				</Container>
 			</Body>
 		</Html>
@@ -76,7 +89,7 @@ const buttonSection: React.CSSProperties = {
 	margin: '24px 0',
 }
 
-const button: React.CSSProperties = {
+const btnStyle: React.CSSProperties = {
 	backgroundColor: '#000',
 	color: '#fff',
 	padding: '14px 28px',
@@ -98,7 +111,7 @@ const hr: React.CSSProperties = {
 	margin: '16px 0',
 }
 
-const disclaimer: React.CSSProperties = {
+const disclaimerStyle: React.CSSProperties = {
 	fontSize: '12px',
 	color: '#999',
 	textAlign: 'center' as const,
