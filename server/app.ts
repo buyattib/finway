@@ -18,7 +18,7 @@ export const app = express()
 
 // connect to db and add to context for loaders/actions to use
 let client
-if (env.NODE_ENV === STAGE_PRODUCTION) {
+if (env.stage === STAGE_PRODUCTION) {
 	client = createClient({
 		url: env.DB_FILE_NAME,
 		authToken: env.TURSO_AUTH_TOKEN,

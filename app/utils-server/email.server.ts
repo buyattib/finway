@@ -21,7 +21,7 @@ export async function sendEmail({
 )) {
 	const html = react ? await render(react) : _html
 
-	if (env.NODE_ENV !== STAGE_PRODUCTION) {
+	if (env.stage !== STAGE_PRODUCTION) {
 		console.log(text)
 		console.log(html)
 

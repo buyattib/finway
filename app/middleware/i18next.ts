@@ -11,7 +11,7 @@ import 'i18next'
 export const localeCookie = createCookie('lng', {
 	path: '/',
 	sameSite: 'lax',
-	secure: env.NODE_ENV === STAGE_PRODUCTION,
+	secure: env.stage === STAGE_PRODUCTION,
 	httpOnly: true,
 })
 

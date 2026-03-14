@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { STAGE_DEVELOPMENT, STAGE_PRODUCTION } from '~/lib/constants'
 
 const schema = z.object({
-	NODE_ENV: z.enum([STAGE_PRODUCTION, STAGE_DEVELOPMENT] as const),
+	stage: z.enum([STAGE_PRODUCTION, STAGE_DEVELOPMENT] as const),
 
 	SESSION_SECRET: z.string(),
 	HONEYPOT_SECRET: z.string(),
@@ -23,4 +23,7 @@ declare global {
 	}
 }
 
-export const env = schema.parse(process.env)
+export const env = schema.parse({
+	stage: process.env.NODE_ENV,
+	...process.env,
+})

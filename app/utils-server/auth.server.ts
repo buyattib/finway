@@ -8,7 +8,7 @@ export const authSessionStorage = createCookieSessionStorage({
 		name: 'finway_session',
 		sameSite: 'lax',
 		path: '/',
-		secure: env.NODE_ENV === STAGE_PRODUCTION,
+		secure: env.stage === STAGE_PRODUCTION,
 		httpOnly: true,
 		secrets: env.SESSION_SECRET.split(','),
 	},

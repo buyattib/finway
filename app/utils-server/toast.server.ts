@@ -12,7 +12,7 @@ export const toastSessionStorage = createCookieSessionStorage({
 		name: toastCookieKey,
 		sameSite: 'lax',
 		path: '/',
-		secure: env.NODE_ENV === STAGE_PRODUCTION,
+		secure: env.stage === STAGE_PRODUCTION,
 		httpOnly: true,
 		secrets: env.SESSION_SECRET.split(','),
 	},

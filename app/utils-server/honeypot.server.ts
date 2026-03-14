@@ -3,7 +3,7 @@ import { env } from './env.server'
 
 export const honeypot = new Honeypot({
 	nameFieldName: 'name__confirm',
-	validFromFieldName: env.NODE_ENV === 'test' ? null : undefined,
+	validFromFieldName: undefined,
 	encryptionSeed: env.HONEYPOT_SECRET,
 })
 
