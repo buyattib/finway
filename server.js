@@ -180,6 +180,24 @@ if (!PRODUCTION) {
 	app.use(await import(BUILD_PATH).then(mod => mod.app))
 }
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
 	console.log(`Server is running on http://localhost:${PORT}`)
 })
+
+/** @param {string} signal */
+function gracefulShutdown(signal) {
+	console.log(`\n${signal} received. Shutting down gracefully...`)
+	server.close(() => {
+		console.log('Server closed')
+		process.exit(0)
+	})
+
+	// Force exit if connections aren't closed within 10 seconds
+	setTimeout(() => {
+		console.error('Forcing shutdown — connections did not close in time')
+		process.exit(1)
+	}, 10_000)
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
+process.on('SIGINT', () => gracefulShutdown('SIGINT'))
