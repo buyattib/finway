@@ -114,29 +114,29 @@ export default function CreditCards({
 										<Link
 											to={id}
 											prefetch='intent'
-											className='flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6'
+											className='flex items-center gap-4 sm:gap-6'
 										>
-											<div className='flex items-center gap-4'>
-												<CreditCardIcon className='size-5 text-muted-foreground' />
-												<div className='flex flex-col gap-1'>
-													<Text weight='medium'>
-														{brand} •••• {last4}
-													</Text>
-													<Text
-														size='sm'
-														theme='muted'
-													>
-														{t('index.expires', {
-															month: expiryMonth,
-															year: expiryYear,
-														})}
-													</Text>
-												</div>
+											<CreditCardIcon className='size-5 text-muted-foreground' />
+											<div className='flex flex-col gap-1'>
+												<Text weight='medium'>
+													{brand} •••• {last4}
+												</Text>
+												<Text
+													size='sm'
+													theme='muted'
+												>
+													{t('index.expires', {
+														month: expiryMonth,
+														year: expiryYear,
+													})}
+												</Text>
 											</div>
+										</Link>
+										<div className='flex items-start'>
 											<Text size='sm' theme='muted'>
 												{accountName}
 											</Text>
-										</Link>
+										</div>
 										<div className='flex flex-col gap-0.5'>
 											<Text size='sm' theme='muted'>
 												{t('index.closingDay', {

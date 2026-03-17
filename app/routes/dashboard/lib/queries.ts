@@ -141,7 +141,7 @@ export async function getMonthCreditCardTotals({
 
 	return db
 		.select({
-			currencyId: creditCardTable.currencyId,
+			currencyId: creditCardTransactionTable.currencyId,
 			currency: currencyTable.code,
 			amount: sql<string>`CAST(SUM(${creditCardTransactionInstallmentTable.amount}) / 100.0 AS TEXT)`.as(
 				'amount',
@@ -168,7 +168,7 @@ export async function getMonthCreditCardTotals({
 		)
 		.innerJoin(
 			currencyTable,
-			eq(currencyTable.id, creditCardTable.currencyId),
+			eq(currencyTable.id, creditCardTransactionTable.currencyId),
 		)
 		.where(
 			and(
@@ -182,7 +182,7 @@ export async function getMonthCreditCardTotals({
 				),
 			),
 		)
-		.groupBy(creditCardTable.currencyId)
+		.groupBy(creditCardTransactionTable.currencyId)
 		.orderBy(desc(sql`amount`))
 }
 
@@ -267,7 +267,7 @@ export async function getMonthInstallments({
 		)
 		.innerJoin(
 			currencyTable,
-			eq(currencyTable.id, creditCardTable.currencyId),
+			eq(currencyTable.id, creditCardTransactionTable.currencyId),
 		)
 		.where(
 			and(
