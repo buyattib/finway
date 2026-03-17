@@ -54,9 +54,6 @@ export async function loader({
 			account: {
 				columns: { name: true, ownerId: true },
 			},
-			currency: {
-				columns: { code: true },
-			},
 		},
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
@@ -78,6 +75,9 @@ export async function loader({
 		with: {
 			creditCard: {
 				columns: { id: true },
+			},
+			currency: {
+				columns: { code: true },
 			},
 			transactionCategory: {
 				columns: { name: true },
@@ -108,21 +108,20 @@ export async function loader({
 
 	const {
 		account: { ownerId: _ownerId, ...account },
-		currency,
 		...creditCardData
 	} = creditCard
 
-	const { transactionCategory, ...transactionData } = transaction
+	const { transactionCategory, currency, ...transactionData } = transaction
 
 	return {
 		creditCard: {
 			...creditCardData,
 			accountName: account.name,
-			currencyCode: currency.code,
 		},
 		transaction: {
 			...transactionData,
 			categoryName: transactionCategory.name,
+			currencyCode: currency.code,
 			amount: String(transactionData.amount / 100),
 		},
 		installments: installments.map(i => ({
@@ -150,9 +149,9 @@ export default function CreditCardTransaction({
 		closingDay,
 		dueDay,
 		accountName,
-		currencyCode,
 	} = creditCard
-	const { date, type, amount, description, categoryName } = transaction
+	const { date, type, amount, description, categoryName, currencyCode } =
+		transaction
 	const { t } = useTranslation('credit-cards')
 
 	return (
@@ -175,7 +174,6 @@ export default function CreditCardTransaction({
 						closingDay,
 						dueDay,
 						accountName,
-						currency: currencyCode,
 					}}
 				/>
 			</div>

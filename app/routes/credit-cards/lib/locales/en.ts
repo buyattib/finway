@@ -72,8 +72,6 @@ export default {
 		dueDayPlaceholder: '5',
 		accountLabel: 'Account',
 		accountPlaceholder: 'Select an account',
-		currencyLabel: 'Currency',
-		currencyPlaceholder: 'Select a currency',
 		resetButton: 'Reset',
 		noAccountMessage:
 			'You need to create an account first. Do it <0>here</0>',
@@ -94,7 +92,6 @@ export default {
 			dueDayInvalid: 'Must be a valid day',
 			dueDayRange: 'Must be between 1 and 31',
 			accountRequired: 'Account is required',
-			currencyRequired: 'Currency is required',
 		},
 		create: {
 			meta: {
@@ -107,7 +104,6 @@ export default {
 				invalidActionError: 'Invalid action',
 				successToast: 'Credit card created successfully',
 				accountNotFound: 'Account not found',
-				currencyNotFound: 'Currency not found',
 			},
 		},
 		edit: {
@@ -146,6 +142,8 @@ export default {
 			perInstallment: '{{amount}} per installment',
 			installmentsLabel: 'Installments',
 			installmentsPlaceholder: 'Select installments',
+			currencyLabel: 'Currency',
+			currencyPlaceholder: 'Select a currency',
 			categoryLabel: 'Transaction Category',
 			categoryPlaceholder: 'Select a transaction category',
 			dateLabel: 'Date',
@@ -156,6 +154,7 @@ export default {
 				invalidActionError: 'Invalid action',
 				successToast: 'Transaction created successfully',
 				creditCardNotFound: 'Credit card not found',
+				currencyNotFound: 'Currency not found',
 				categoryNotFound: 'Transaction category not found',
 			},
 			schema: {
@@ -165,6 +164,7 @@ export default {
 				amountInvalid: 'Amount must be a valid number',
 				amountPositive: 'Amount must be greater than zero',
 				installmentsMin: 'Must be at least 1',
+				currencyRequired: 'Currency is required',
 				categoryRequired: 'Category is required',
 				creditCardRequired: 'Credit card is required',
 			},

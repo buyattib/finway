@@ -26,14 +26,13 @@ import {
 	ComboboxField,
 } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
-import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createCreditCardFormSchema } from '../lib/schemas'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
 type Props = {
-	selectData: Pick<TSelectData, 'accounts' | 'currencies'>
+	selectData: Pick<TSelectData, 'accounts'>
 	lastResult?: SubmissionResult
 	initialData: Partial<TInitialData>
 	action: typeof ACTION_CREATION | typeof ACTION_EDITION
@@ -53,7 +52,7 @@ export function CreditCardForm({
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
-	const { accounts, currencies } = selectData
+	const { accounts } = selectData
 	const isEditing = action === ACTION_EDITION
 
 	const { title, buttonLabel } = {
@@ -84,12 +83,6 @@ export function CreditCardForm({
 		icon: <AccountTypeIcon accountType={accountType} size='xs' />,
 		value: id,
 		label: name,
-	}))
-
-	const currencyOptions = currencies.map(({ id, code }) => ({
-		icon: <CurrencyIcon currency={code} size='sm' />,
-		value: id,
-		label: code,
 	}))
 
 	return (
@@ -171,25 +164,13 @@ export function CreditCardForm({
 					</div>
 
 					{accounts.length !== 0 ? (
-						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-							<ComboboxField
-								label={t('form.accountLabel')}
-								field={fields.accountId}
-								buttonPlaceholder={t('form.accountPlaceholder')}
-								options={accountOptions}
-								disabled={isEditing}
-							/>
-
-							<ComboboxField
-								label={t('form.currencyLabel')}
-								field={fields.currencyId}
-								buttonPlaceholder={t(
-									'form.currencyPlaceholder',
-								)}
-								options={currencyOptions}
-								disabled={isEditing}
-							/>
-						</div>
+						<ComboboxField
+							label={t('form.accountLabel')}
+							field={fields.accountId}
+							buttonPlaceholder={t('form.accountPlaceholder')}
+							options={accountOptions}
+							disabled={isEditing}
+						/>
 					) : (
 						<Text size='sm' theme='muted' alignment='center'>
 							<Trans

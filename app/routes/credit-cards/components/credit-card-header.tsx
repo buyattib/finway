@@ -1,12 +1,10 @@
 import { CreditCardIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import type { TCurrency } from '~/lib/types'
 import { formatDate, getNextDateForDay } from '~/lib/utils'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
-import { CurrencyIcon } from '~/components/currency-icon'
 
 type Props = {
 	brand: string
@@ -16,7 +14,6 @@ type Props = {
 	closingDay: number
 	dueDay: number
 	accountName: string
-	currency: TCurrency
 }
 
 export function CreditCardHeader({
@@ -27,9 +24,8 @@ export function CreditCardHeader({
 	closingDay,
 	dueDay,
 	accountName,
-	currency,
 }: Props) {
-	const { t } = useTranslation(['credit-cards', 'constants'])
+	const { t } = useTranslation('credit-cards')
 
 	return (
 		<div className='flex flex-col sm:gap-2 gap-4'>
@@ -51,17 +47,6 @@ export function CreditCardHeader({
 				</Text>
 				<Text size='md' theme='muted'>
 					{accountName}
-				</Text>
-				<Text size='sm' theme='muted' className='hidden sm:block'>
-					·
-				</Text>
-				<Text
-					size='md'
-					theme='muted'
-					className='flex items-center gap-1'
-				>
-					<CurrencyIcon currency={currency} size='sm' />
-					{t(`constants:currency.${currency}`)}
 				</Text>
 			</div>
 			<div className='flex flex-col sm:flex-row sm:items-center gap-4'>

@@ -38,8 +38,6 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		accountId = accountIdParam
 	}
 
-	const currencyId = selectData.currencies[0].id
-
 	return {
 		selectData,
 		initialData: {
@@ -50,7 +48,6 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			closingDay: '',
 			dueDay: '',
 			accountId,
-			currencyId,
 		},
 		meta: {
 			title: t('form.create.meta.title'),
@@ -77,18 +74,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 					code: 'custom',
 					message: t('form.create.action.accountNotFound'),
 					path: ['accountId'],
-				})
-			}
-
-			const currency = await db.query.currency.findFirst({
-				where: (currency, { eq }) => eq(currency.id, data.currencyId),
-				columns: { id: true },
-			})
-			if (!currency) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: t('form.create.action.currencyNotFound'),
-					path: ['currencyId'],
 				})
 			}
 		}),

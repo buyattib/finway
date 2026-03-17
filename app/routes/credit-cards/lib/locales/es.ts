@@ -76,8 +76,6 @@ export default {
 		dueDayPlaceholder: '5',
 		accountLabel: 'Cuenta',
 		accountPlaceholder: 'Selecciona una cuenta',
-		currencyLabel: 'Moneda',
-		currencyPlaceholder: 'Selecciona una moneda',
 		resetButton: 'Restablecer',
 		noAccountMessage:
 			'Necesitas crear una cuenta primero. Hazlo <0>aquí</0>',
@@ -98,7 +96,6 @@ export default {
 			dueDayInvalid: 'Debe ser un día válido',
 			dueDayRange: 'Debe ser entre 1 y 31',
 			accountRequired: 'La cuenta es requerida',
-			currencyRequired: 'La moneda es requerida',
 		},
 		create: {
 			meta: {
@@ -112,7 +109,6 @@ export default {
 				invalidActionError: 'Acción inválida',
 				successToast: 'Tarjeta de crédito creada exitosamente',
 				accountNotFound: 'Cuenta no encontrada',
-				currencyNotFound: 'Moneda no encontrada',
 			},
 		},
 		edit: {
@@ -151,6 +147,8 @@ export default {
 			perInstallment: '{{amount}} por cuota',
 			installmentsLabel: 'Cuotas',
 			installmentsPlaceholder: 'Selecciona cuotas',
+			currencyLabel: 'Moneda',
+			currencyPlaceholder: 'Selecciona una moneda',
 			categoryLabel: 'Categoría de Transacción',
 			categoryPlaceholder: 'Selecciona una categoría de transacción',
 			dateLabel: 'Fecha',
@@ -161,6 +159,7 @@ export default {
 				invalidActionError: 'Acción inválida',
 				successToast: 'Transacción creada exitosamente',
 				creditCardNotFound: 'Tarjeta de crédito no encontrada',
+				currencyNotFound: 'Moneda no encontrada',
 				categoryNotFound: 'Categoría de transacción no encontrada',
 			},
 			schema: {
@@ -170,6 +169,7 @@ export default {
 				amountInvalid: 'El monto debe ser un número válido',
 				amountPositive: 'El monto debe ser mayor a cero',
 				installmentsMin: 'Debe ser al menos 1',
+				currencyRequired: 'La moneda es requerida',
 				categoryRequired: 'La categoría es requerida',
 				creditCardRequired: 'La tarjeta de crédito es requerida',
 			},

@@ -51,7 +51,6 @@ export async function loader({
 			closingDay: true,
 			dueDay: true,
 			accountId: true,
-			currencyId: true,
 		},
 		with: {
 			account: {
@@ -106,10 +105,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 					})
 				}
 			})
-			.transform(
-				({ accountId: _accountId, currencyId: _currencyId, ...rest }) =>
-					rest,
-			),
+			.transform(({ accountId: _accountId, ...rest }) => rest),
 	})
 
 	if (submission.status !== 'success') {

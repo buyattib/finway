@@ -18,6 +18,7 @@ import {
 	creditCardTransaction as creditCardTransactionTable,
 	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
 	transactionCategory as transactionCategoryTable,
+	currency as currencyTable,
 } from '~/database/schema'
 import {
 	createToastHeaders,
@@ -93,20 +94,13 @@ export async function loader({
 			account: {
 				columns: { name: true, ownerId: true },
 			},
-			currency: {
-				columns: { code: true },
-			},
 		},
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
 		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
 
-	const {
-		account: { ownerId: _ownerId, ...account },
-		currency,
-		...creditCardData
-	} = creditCard
+	const { account, ...creditCardData } = creditCard
 
 	const url = new URL(request.url)
 	const searchParams = url.searchParams
@@ -135,6 +129,7 @@ export async function loader({
 			amount: creditCardTransactionTable.amount,
 			description: creditCardTransactionTable.description,
 			categoryName: transactionCategoryTable.name,
+			currencyCode: currencyTable.code,
 			installments: db.$count(
 				creditCardTransactionInstallmentTable,
 				eq(
@@ -150,6 +145,10 @@ export async function loader({
 				creditCardTransactionTable.transactionCategoryId,
 				transactionCategoryTable.id,
 			),
+		)
+		.innerJoin(
+			currencyTable,
+			eq(creditCardTransactionTable.currencyId, currencyTable.id),
 		)
 		.innerJoin(
 			creditCardTransactionInstallmentTable,
@@ -174,7 +173,6 @@ export async function loader({
 		creditCard: {
 			...creditCardData,
 			accountName: account.name,
-			currencyCode: currency.code,
 		},
 		transactions: transactions.map(t => ({
 			...t,
@@ -313,7 +311,6 @@ export default function CreditCardDetails({
 		closingDay,
 		dueDay,
 		accountName,
-		currencyCode,
 	} = creditCard
 	const location = useLocation()
 	const navigation = useNavigation()
@@ -353,7 +350,6 @@ export default function CreditCardDetails({
 						closingDay,
 						dueDay,
 						accountName,
-						currency: currencyCode,
 					}}
 				/>
 
@@ -454,6 +450,7 @@ export default function CreditCardDetails({
 								date,
 								type,
 								amount,
+								currencyCode,
 								categoryName,
 								installments,
 							}) => {

@@ -8,7 +8,6 @@ import type { Route } from './+types'
 import {
 	creditCard as creditCardTable,
 	account as accountTable,
-	currency as currencyTable,
 } from '~/database/schema'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
@@ -18,8 +17,6 @@ import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
-import { CurrencyIcon } from '~/components/currency-icon'
-
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
 		{ title: loaderData?.meta.title },
@@ -43,14 +40,9 @@ export async function loader({ context }: Route.LoaderArgs) {
 			closingDay: creditCardTable.closingDay,
 			dueDay: creditCardTable.dueDay,
 			accountName: accountTable.name,
-			currencyCode: currencyTable.code,
 		})
 		.from(creditCardTable)
 		.innerJoin(accountTable, eq(creditCardTable.accountId, accountTable.id))
-		.innerJoin(
-			currencyTable,
-			eq(creditCardTable.currencyId, currencyTable.id),
-		)
 		.where(eq(accountTable.ownerId, user.id))
 		.orderBy(desc(creditCardTable.createdAt))
 
@@ -112,12 +104,8 @@ export default function CreditCards({
 								expiryYear,
 								closingDay,
 								dueDay,
-								currencyCode,
 								accountName,
 							}) => {
-								const label = t(
-									`constants:currency.${currencyCode}`,
-								)
 								return (
 									<li
 										key={id}
@@ -145,18 +133,9 @@ export default function CreditCards({
 													</Text>
 												</div>
 											</div>
-											<div className='flex flex-col gap-0.5'>
-												<Text className='flex items-center gap-2'>
-													<CurrencyIcon
-														currency={currencyCode}
-														size='sm'
-													/>
-													{label}
-												</Text>
-												<Text size='sm' theme='muted'>
-													{accountName}
-												</Text>
-											</div>
+											<Text size='sm' theme='muted'>
+												{accountName}
+											</Text>
 										</Link>
 										<div className='flex flex-col gap-0.5'>
 											<Text size='sm' theme='muted'>

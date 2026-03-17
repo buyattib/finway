@@ -68,9 +68,7 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 					{ message: t('form.schema.dueDayRange') },
 				)
 				.transform(Number),
-
 			accountId: z.string(t('form.schema.accountRequired')),
-			currencyId: z.string(t('form.schema.currencyRequired')),
 		})
 		.and(ActionSchema)
 }
@@ -123,6 +121,9 @@ export function createCreditCardTransactionFormSchema(
 				.string()
 				.default('')
 				.transform(value => value?.trim()),
+			currencyId: z.string(
+				t('transaction.create.schema.currencyRequired'),
+			),
 			transactionCategoryId: z.string(
 				t('transaction.create.schema.categoryRequired'),
 			),

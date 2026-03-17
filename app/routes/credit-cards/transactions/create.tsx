@@ -39,6 +39,7 @@ import {
 	DateField,
 } from '~/components/forms'
 import { TransactionType } from '~/components/transaction-type'
+import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createCreditCardTransactionFormSchema } from '../lib/schemas'
 import { getFirstInstallmentDate } from '../lib/utils'
@@ -81,6 +82,7 @@ export async function loader({
 			amount: '0',
 			totalInstallments: '1',
 			description: '',
+			currencyId: selectData.currencies?.[0]?.id || '',
 			transactionCategoryId:
 				selectData.transactionCategories?.[0]?.id || '',
 		} as const,
@@ -118,6 +120,21 @@ export async function action({ request, context }: Route.ActionArgs) {
 							'transaction.create.action.creditCardNotFound',
 						),
 						path: ['creditCardId'],
+					})
+				}
+
+				const currency = await db.query.currency.findFirst({
+					where: (currency, { eq }) =>
+						eq(currency.id, data.currencyId),
+					columns: { id: true },
+				})
+				if (!currency) {
+					return ctx.addIssue({
+						code: 'custom',
+						message: t(
+							'transaction.create.action.currencyNotFound',
+						),
+						path: ['currencyId'],
 					})
 				}
 
@@ -220,7 +237,7 @@ export default function CreateCreditCardTransaction({
 	loaderData: {
 		creditCard,
 		initialData,
-		selectData: { transactionCategories },
+		selectData: { transactionCategories, currencies },
 	},
 	actionData,
 }: Route.ComponentProps) {
@@ -257,6 +274,12 @@ export default function CreateCreditCardTransaction({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
 		label: t(`constants:ccTransactionType.${i}`),
+	}))
+
+	const currencyOptions = currencies.map(({ id, code }) => ({
+		icon: <CurrencyIcon currency={code} size='sm' />,
+		value: id,
+		label: code,
 	}))
 
 	const transactionCategoryOptions = transactionCategories.map(
@@ -358,6 +381,15 @@ export default function CreateCreditCardTransaction({
 							]}
 						/>
 					</div>
+
+					<ComboboxField
+						label={t('transaction.create.currencyLabel')}
+						field={fields.currencyId}
+						buttonPlaceholder={t(
+							'transaction.create.currencyPlaceholder',
+						)}
+						options={currencyOptions}
+					/>
 
 					<ComboboxField
 						label={t('transaction.create.categoryLabel')}

@@ -210,7 +210,6 @@ export const creditCard = sqliteTable(
 		dueDay: integer().notNull(),
 
 		accountId: text().notNull(),
-		currencyId: text().notNull(),
 	},
 	table => [
 		foreignKey({
@@ -218,15 +217,7 @@ export const creditCard = sqliteTable(
 			columns: [table.accountId],
 			foreignColumns: [account.id],
 		}).onDelete('cascade'),
-		foreignKey({
-			name: 'credit_cards_currencies_fk',
-			columns: [table.currencyId],
-			foreignColumns: [currency.id],
-		}).onDelete('cascade'),
-		index('credit_cards_accountId_currencyId_idx').on(
-			table.accountId,
-			table.currencyId,
-		),
+		index('credit_cards_accountId_idx').on(table.accountId),
 	],
 )
 
@@ -241,6 +232,7 @@ export const creditCardTransaction = sqliteTable(
 		type: text({ enum: CC_TRANSACTION_TYPES }).notNull(),
 
 		creditCardId: text().notNull(),
+		currencyId: text().notNull(),
 		transactionCategoryId: text().notNull(),
 	},
 	table => [
@@ -248,6 +240,11 @@ export const creditCardTransaction = sqliteTable(
 			name: 'credit_card_transactions_credit_cards_fk',
 			columns: [table.creditCardId],
 			foreignColumns: [creditCard.id],
+		}).onDelete('cascade'),
+		foreignKey({
+			name: 'credit_card_transactions_currencies_fk',
+			columns: [table.currencyId],
+			foreignColumns: [currency.id],
 		}).onDelete('cascade'),
 		foreignKey({
 			name: 'credit_card_transactions_transaction_categories_fk',
@@ -335,10 +332,6 @@ export const creditCardRelations = relations(creditCard, ({ one }) => ({
 		fields: [creditCard.accountId],
 		references: [account.id],
 	}),
-	currency: one(currency, {
-		fields: [creditCard.currencyId],
-		references: [currency.id],
-	}),
 }))
 
 export const creditCardTransactionRelations = relations(
@@ -347,6 +340,10 @@ export const creditCardTransactionRelations = relations(
 		creditCard: one(creditCard, {
 			fields: [creditCardTransaction.creditCardId],
 			references: [creditCard.id],
+		}),
+		currency: one(currency, {
+			fields: [creditCardTransaction.currencyId],
+			references: [currency.id],
 		}),
 		transactionCategory: one(transactionCategory, {
 			fields: [creditCardTransaction.transactionCategoryId],
