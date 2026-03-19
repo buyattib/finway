@@ -184,6 +184,7 @@ export default {
 			amount: 'Amount',
 			category: 'Category',
 			description: 'Description',
+			currency: 'Currency',
 			installmentsTitle: 'Installments ({{count}})',
 			dueDate: 'Due Date',
 			installmentAmount: 'Installment Amount',

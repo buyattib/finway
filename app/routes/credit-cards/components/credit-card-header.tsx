@@ -34,19 +34,16 @@ export function CreditCardHeader({
 				<Title level='h1'>
 					{brand} •••• {last4}
 				</Title>
+				<Text size='lg' theme='muted' className='sm:self-end'>
+					{accountName}
+				</Text>
 			</div>
 			<div className='flex flex-col sm:flex-row sm:items-center gap-4'>
-				<Text size='md' theme='primary'>
+				<Text size='md' theme='muted'>
 					{t('header.expires', {
 						month: expiryMonth,
 						year: expiryYear,
 					})}
-				</Text>
-				<Text size='sm' theme='muted' className='hidden sm:block'>
-					·
-				</Text>
-				<Text size='md' theme='muted'>
-					{accountName}
 				</Text>
 			</div>
 			<div className='flex flex-col sm:flex-row sm:items-center gap-4'>

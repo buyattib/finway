@@ -14,6 +14,7 @@ import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
 import { TransactionType } from '~/components/transaction-type'
+import { CurrencyIcon } from '~/components/currency-icon'
 
 import { CreditCardHeader } from '../components/credit-card-header'
 
@@ -182,8 +183,8 @@ export default function CreditCardTransaction({
 				className={cn(
 					'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6',
 					{
-						'md:grid-cols-4': !description,
-						'md:grid-cols-5': !!description,
+						'md:grid-cols-5': !description,
+						'md:grid-cols-6': !!description,
 					},
 				)}
 			>
@@ -211,6 +212,15 @@ export default function CreditCardTransaction({
 					</Text>
 					<Text size='md' theme='foreground'>
 						{getCurrencySymbol(currencyCode)} {formatNumber(amount)}
+					</Text>
+				</div>
+				<div className='flex flex-col gap-1'>
+					<Text size='sm' theme='muted'>
+						{t('transaction.details.currency')}
+					</Text>
+					<Text size='md' theme='foreground' className='flex items-center gap-2'>
+						<CurrencyIcon currency={currencyCode} size='sm' />
+						{currencyCode}
 					</Text>
 				</div>
 				<div className='flex flex-col gap-1'>

@@ -189,6 +189,7 @@ export default {
 			amount: 'Monto',
 			category: 'Categoría',
 			description: 'Descripción',
+			currency: 'Moneda',
 			installmentsTitle: 'Cuotas ({{count}})',
 			dueDate: 'Fecha de Vencimiento',
 			installmentAmount: 'Monto de Cuota',

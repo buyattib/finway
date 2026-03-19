@@ -109,7 +109,7 @@ export default function CreditCards({
 								return (
 									<li
 										key={id}
-										className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border rounded-xl'
+										className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 p-6 border rounded-xl'
 									>
 										<Link
 											to={id}
@@ -118,25 +118,25 @@ export default function CreditCards({
 										>
 											<CreditCardIcon className='size-5 text-muted-foreground' />
 											<div className='flex flex-col gap-1'>
-												<Text weight='medium'>
-													{brand} •••• {last4}
-												</Text>
-												<Text
-													size='sm'
-													theme='muted'
-												>
-													{t('index.expires', {
-														month: expiryMonth,
-														year: expiryYear,
-													})}
+												<div className='flex items-center gap-2'>
+													<Text weight='semi'>
+														{brand} •••• {last4}
+													</Text>
+													<Text theme='muted'>
+														·
+													</Text>
+													<Text theme='muted'>
+														{t('index.expires', {
+															month: expiryMonth,
+															year: expiryYear,
+														})}
+													</Text>
+												</div>
+												<Text theme='muted'>
+													{accountName}
 												</Text>
 											</div>
 										</Link>
-										<div className='flex items-start'>
-											<Text size='sm' theme='muted'>
-												{accountName}
-											</Text>
-										</div>
 										<div className='flex flex-col gap-0.5'>
 											<Text size='sm' theme='muted'>
 												{t('index.closingDay', {

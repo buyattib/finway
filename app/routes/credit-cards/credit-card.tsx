@@ -27,7 +27,7 @@ import {
 import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
-import type { TCCTransactionType } from '~/lib/types'
+import type { TCCTransactionType, TCurrency } from '~/lib/types'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { getSelectData } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
@@ -38,6 +38,7 @@ import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
 import { PageSection, PageHeader } from '~/components/ui/page'
 import { TransactionType } from '~/components/transaction-type'
+import { CurrencyIcon } from '~/components/currency-icon'
 import {
 	Tooltip,
 	TooltipContent,
@@ -510,10 +511,14 @@ export default function CreditCardDetails({
 											/>
 											<Text
 												size='sm'
-												theme='foreground'
 												weight='medium'
+												className='flex items-center gap-2'
 											>
-												{symbol} {formatNumber(amount)}
+												<CurrencyIcon
+													currency={currencyCode as TCurrency}
+													size='sm'
+												/>
+												<b>{currencyCode}</b> {formatNumber(amount)}
 											</Text>
 											<Text size='sm' theme='muted'>
 												{categoryName}
