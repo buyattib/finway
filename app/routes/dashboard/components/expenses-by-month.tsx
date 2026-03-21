@@ -131,12 +131,15 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 						tickLine={false}
 						axisLine={false}
 						tickMargin={10}
+						interval={0}
+						angle={-35}
+						textAnchor='end'
+						height={60}
 					/>
 					<Bar
 						dataKey='amount'
-						fill='var(--color-blue)'
+						fill='var(--color-danger)'
 						radius={6}
-						maxBarSize={100}
 					>
 						<LabelList
 							position='top'

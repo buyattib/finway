@@ -3,7 +3,7 @@ import { PlusIcon, TrashIcon } from 'lucide-react'
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
@@ -20,13 +20,11 @@ import { getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
-import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import {
 	Table,
 	TableBody,
-	TableCaption,
 	TableCell,
 	TableHead,
 	TableHeader,
@@ -35,6 +33,8 @@ import {
 import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { TablePagination } from '~/components/table-pagination'
+import { EmptyState } from '~/components/empty-state'
+import { ArrowRightLeftIcon } from 'lucide-react'
 
 import { DeleteTransferFormSchema } from './lib/schemas'
 
@@ -216,24 +216,23 @@ export default function Transfers({
 			</PageHeader>
 
 			<PageContent>
+				{transfers.length === 0 ? (
+					<EmptyState
+						icon={ArrowRightLeftIcon}
+						title={t('index.emptyTitle', {
+							defaultValue: 'No transfers yet',
+						})}
+						action={
+							<Button asChild>
+								<Link to='create'>
+									<PlusIcon />
+									{t('index.addTransferLabel')}
+								</Link>
+							</Button>
+						}
+					/>
+				) : (
 				<Table>
-					{transfers.length === 0 && (
-						<TableCaption>
-							<Text size='md' weight='medium' alignment='center'>
-								<Trans
-									i18nKey='index.emptyMessage'
-									ns='transfers'
-									components={[
-										<Link
-											key='0'
-											to='create'
-											className='text-primary'
-										/>,
-									]}
-								/>
-							</Text>
-						</TableCaption>
-					)}
 					{transfers.length !== 0 && (
 						<TableHeader>
 							<TableRow>
@@ -332,6 +331,7 @@ export default function Transfers({
 						)}
 					</TableBody>
 				</Table>
+				)}
 
 				<TablePagination
 					page={pagination.page}

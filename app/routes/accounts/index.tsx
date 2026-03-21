@@ -11,6 +11,7 @@ import {
 	EllipsisIcon,
 	PlusIcon,
 	SquarePenIcon,
+	WalletIcon,
 } from 'lucide-react'
 import { desc, eq, and, like, sql } from 'drizzle-orm'
 import { Trans, useTranslation } from 'react-i18next'
@@ -38,6 +39,7 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import { Spinner } from '~/components/ui/spinner'
+import { EmptyState } from '~/components/empty-state'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -164,9 +166,17 @@ export default function Accounts({
 				</div>
 
 				{accounts.length === 0 && (
-					<div className='my-2'>
-						{!search ? (
-							<Text size='md' weight='medium' alignment='center'>
+					<EmptyState
+						icon={WalletIcon}
+						title={
+							search
+								? t('index.emptySearchMessage', { search })
+								: t('index.emptyTitle', {
+										defaultValue: 'No accounts yet',
+									})
+						}
+						description={
+							!search ? (
 								<Trans
 									ns='accounts'
 									i18nKey='index.emptyMessage'
@@ -178,111 +188,123 @@ export default function Accounts({
 										/>,
 									]}
 								/>
-							</Text>
-						) : (
-							<Text size='md' weight='medium' alignment='center'>
-								{t('index.emptySearchMessage', { search })}
-							</Text>
-						)}
-					</div>
+							) : undefined
+						}
+						action={
+							!search ? (
+								<Button asChild>
+									<Link to='create'>
+										<PlusIcon />
+										{t('index.addAccountLabel')}
+									</Link>
+								</Button>
+							) : undefined
+						}
+					/>
 				)}
 
-				<ul className='flex flex-col gap-2'>
+				<ul className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'>
 					{accounts.map(
 						({ id, name, description, accountType, balances }) => (
 							<li
 								key={id}
-								className='relative flex flex-col gap-6 lg:flex-row lg:justify-between lg:items-center border rounded-xl p-4 lg:px-6 min-h-32'
+								className='relative flex flex-col gap-4 border rounded-xl p-5'
 							>
-								<div className='flex flex-col lg:flex-row lg:items-center gap-4 pr-10 lg:pr-0'>
-									<Link
-										to={id}
-										prefetch='intent'
-										className='flex items-center gap-4 lg:w-3xs'
-									>
-										<AccountTypeIcon
-											accountType={accountType}
-										/>
-										<div className='flex flex-col lg:gap-2 gap-4'>
-											<div className='flex flex-col gap-1'>
-												<Title id={id} level='h5'>
-													{name}
-												</Title>
-												<Text size='sm' theme='primary'>
-													{t(
-														`constants:accountType.${accountType}`,
-													)}
-												</Text>
-											</div>
-											{description && (
-												<Text size='sm' theme='muted'>
-													{description}
-												</Text>
-											)}
-										</div>
-									</Link>
-									<div className='lg:h-32 lg:border-l border-b' />
-									{balances.length !== 0 && (
-										<ul
-											className='flex flex-col justify-center gap-2'
-											aria-labelledby={id}
+								<div className='flex items-start gap-3 pr-10'>
+									<AccountTypeIcon
+										accountType={accountType}
+									/>
+									<div className='flex flex-col gap-0.5'>
+										<Link
+											to={id}
+											prefetch='intent'
 										>
-											{balances.map(
-												({
-													id: bId,
-													balance,
-													currency,
-												}) => {
-													const symbol =
-														getCurrencySymbol(
-															currency,
-														)
-													const [, currencyId] =
-														bId.split('-')
-													return (
-														<li
-															key={bId}
-															className='flex items-center gap-4'
-														>
-															<Link
-																to={{
-																	pathname:
-																		'../transactions/create',
-																	search: createSearchParams(
-																		{
-																			accountId:
-																				id,
-																			currencyId,
-																		},
-																	).toString(),
-																}}
-															>
-																<Text className='flex items-center gap-2'>
-																	<CurrencyIcon
-																		currency={
-																			currency
-																		}
-																		size='sm'
-																	/>
-																	{currency}
-																</Text>
-															</Link>
-															<Text>
-																{`${symbol} ${formatNumber(balance)}`}
-															</Text>
-														</li>
-													)
-												},
+											<Title id={id} level='h5'>
+												{name}
+											</Title>
+										</Link>
+										<Text size='sm' theme='primary'>
+											{t(
+												`constants:accountType.${accountType}`,
 											)}
-										</ul>
-									)}
+										</Text>
+										{description && (
+											<Text
+												size='xs'
+												theme='muted'
+												className='mt-1'
+											>
+												{description}
+											</Text>
+										)}
+									</div>
 								</div>
+
+								{balances.length !== 0 && (
+									<ul
+										className='flex flex-col gap-2 border-t pt-3'
+										aria-labelledby={id}
+									>
+										{balances.map(
+											({
+												id: bId,
+												balance,
+												currency,
+											}) => {
+												const symbol =
+													getCurrencySymbol(currency)
+												const [, currencyId] =
+													bId.split('-')
+												return (
+													<li
+														key={bId}
+														className='flex items-center justify-between gap-2'
+													>
+														<Link
+															to={{
+																pathname:
+																	'../transactions/create',
+																search: createSearchParams(
+																	{
+																		accountId:
+																			id,
+																		currencyId,
+																	},
+																).toString(),
+															}}
+														>
+															<Text className='flex items-center gap-2'>
+																<CurrencyIcon
+																	currency={
+																		currency
+																	}
+																	size='sm'
+																/>
+																{currency}
+															</Text>
+														</Link>
+														<Text
+															weight='bold'
+															size='lg'
+														>
+															{symbol}{' '}
+															{formatNumber(
+																balance,
+															)}
+														</Text>
+													</li>
+												)
+											},
+										)}
+									</ul>
+								)}
+
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
 										<Button
-											size='icon'
+											size='icon-sm'
 											variant='ghost'
-											className='absolute top-4 right-4 lg:relative lg:top-auto lg:right-auto'
+											className='absolute top-4 right-4'
 										>
 											<EllipsisIcon />
 										</Button>

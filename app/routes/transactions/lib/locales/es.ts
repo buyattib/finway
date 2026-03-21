@@ -18,6 +18,7 @@ export default {
 			category: 'Categoría',
 			type: 'Tipo',
 			amount: 'Monto',
+			actions: 'Acciones',
 		},
 		editAriaLabel: 'Editar transacción',
 		deleteAriaLabel: 'Eliminar transacción',

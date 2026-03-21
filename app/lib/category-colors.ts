@@ -1,0 +1,22 @@
+export const CATEGORY_COLORS = [
+	'oklch(0.65 0.20 25)',
+	'oklch(0.60 0.18 145)',
+	'oklch(0.60 0.17 240)',
+	'oklch(0.65 0.18 300)',
+	'oklch(0.70 0.17 65)',
+	'oklch(0.55 0.15 200)',
+	'oklch(0.70 0.20 340)',
+	'oklch(0.65 0.16 180)',
+	'oklch(0.75 0.15 85)',
+	'oklch(0.55 0.20 270)',
+	'oklch(0.60 0.15 110)',
+	'oklch(0.70 0.14 45)',
+	'oklch(0.55 0.18 330)',
+	'oklch(0.65 0.12 220)',
+	'oklch(0.60 0.20 15)',
+	'oklch(0.70 0.16 160)',
+]
+
+export function getCategoryColor(index: number): string {
+	return CATEGORY_COLORS[index % CATEGORY_COLORS.length]
+}

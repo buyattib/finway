@@ -15,6 +15,7 @@ export default {
 			category: 'Category',
 			type: 'Type',
 			amount: 'Amount',
+			actions: 'Actions',
 		},
 		editAriaLabel: 'Edit transaction',
 		deleteAriaLabel: 'Delete transaction',
