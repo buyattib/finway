@@ -10,6 +10,7 @@ import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
+import { CC_TRANSACTION_TYPE_CHARGE } from '~/lib/constants'
 
 type LoaderData = Route.ComponentProps['loaderData']
 
@@ -104,7 +105,12 @@ export function MonthInstallments({ monthInstallments }: Props) {
 												<Text
 													size='sm'
 													theme='foreground'
-													weight='medium'
+													weight='bold'
+													className={
+														ccTransactionType === CC_TRANSACTION_TYPE_CHARGE
+															? 'text-danger'
+															: 'text-success'
+													}
 												>
 													{symbol}{' '}
 													{formatNumber(
