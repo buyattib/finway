@@ -21,13 +21,14 @@ import {
 import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
-	TextField,
 	NumberField,
+	SelectField,
 	ComboboxField,
 } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
 import { createCreditCardFormSchema } from '../lib/schemas'
+import { CC_BRANDS } from '../lib/constants'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
@@ -119,11 +120,15 @@ export function CreditCardForm({
 						id={form.errorId}
 					/>
 
-					<TextField
+					<SelectField
 						autoFocus
 						label={t('form.brandLabel')}
 						field={fields.brand}
 						placeholder={t('form.brandPlaceholder')}
+						items={CC_BRANDS.map(brand => ({
+							value: brand,
+							label: brand,
+						}))}
 					/>
 
 					<NumberField

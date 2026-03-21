@@ -18,6 +18,8 @@ import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { EmptyState } from '~/components/empty-state'
 
+import { CC_BRAND_GRADIENTS, CC_BRAND_DEFAULT_GRADIENT } from './lib/constants'
+
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
 		{ title: loaderData?.meta.title },
@@ -55,13 +57,6 @@ export async function loader({ context }: Route.LoaderArgs) {
 		},
 	}
 }
-
-const brandGradients: Record<string, string> = {
-	VISA: 'from-blue to-info',
-	MASTERCARD: 'from-orange to-danger',
-	AMEX: 'from-success to-green',
-}
-const defaultGradient = 'from-purple to-cc'
 
 export default function CreditCards({
 	loaderData: { creditCards },
@@ -114,8 +109,8 @@ export default function CreditCards({
 								accountName,
 							}) => {
 								const gradient =
-									brandGradients[brand.toUpperCase()] ??
-									defaultGradient
+									CC_BRAND_GRADIENTS[brand] ??
+									CC_BRAND_DEFAULT_GRADIENT
 								return (
 									<li
 										key={id}
