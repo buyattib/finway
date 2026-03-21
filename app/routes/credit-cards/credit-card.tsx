@@ -28,7 +28,7 @@ import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
 import type { TCCTransactionType, TCurrency } from '~/lib/types'
-import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
+import { formatDate, formatNumber } from '~/lib/utils'
 import { getSelectData } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 
@@ -455,7 +455,6 @@ export default function CreditCardDetails({
 								categoryName,
 								installments,
 							}) => {
-								const symbol = getCurrencySymbol(currencyCode)
 								return (
 									<li
 										key={txId}
