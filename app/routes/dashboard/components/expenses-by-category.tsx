@@ -138,8 +138,8 @@ export function ExpensesByCategory({
 				</Select>
 			}
 		>
-			<ChartContainer config={config} className='w-full sm:max-h-80'>
-				<PieChart>
+			<ChartContainer config={config} className='w-full sm:max-h-80 [&_svg]:overflow-visible'>
+				<PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
 					<Pie
 						data={data}
 						dataKey='amount'
