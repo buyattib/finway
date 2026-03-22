@@ -13,7 +13,9 @@ export default {
 			amount: 'Amount',
 			fromAccount: 'From Account',
 			toAccount: 'To Account',
+			actions: 'Actions',
 		},
+		emptyTitle: 'No transfers yet',
 		deleteAriaLabel: 'Delete transfer',
 		action: {
 			deleteErrorToast: 'Could not delete transfer',

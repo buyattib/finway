@@ -1,5 +1,5 @@
-import { Link, Form, useNavigation, data } from 'react-router'
-import { PlusIcon, TrashIcon } from 'lucide-react'
+import { Link, Form, useNavigation, data, useLocation } from 'react-router'
+import { ArrowRightLeftIcon, PlusIcon, TrashIcon } from 'lucide-react'
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { parseWithZod } from '@conform-to/zod/v4'
@@ -15,11 +15,12 @@ import {
 import { createToastHeaders } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { formatDate, formatNumber } from '~/lib/utils'
+import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
+import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import {
@@ -32,9 +33,9 @@ import {
 } from '~/components/ui/table'
 import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
+import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 import { EmptyState } from '~/components/empty-state'
-import { ArrowRightLeftIcon } from 'lucide-react'
 
 import { DeleteTransferFormSchema } from './lib/schemas'
 
@@ -183,6 +184,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 export default function Transfers({
 	loaderData: { transfers, pagination },
 }: Route.ComponentProps) {
+	const location = useLocation()
 	const navigation = useNavigation()
 	const { t } = useTranslation('transfers')
 
@@ -216,12 +218,10 @@ export default function Transfers({
 			</PageHeader>
 
 			<PageContent>
-				{transfers.length === 0 ? (
+				{transfers.length === 0 && (
 					<EmptyState
 						icon={ArrowRightLeftIcon}
-						title={t('index.emptyTitle', {
-							defaultValue: 'No transfers yet',
-						})}
+						title={t('index.emptyTitle')}
 						action={
 							<Button asChild>
 								<Link to='create'>
@@ -231,106 +231,186 @@ export default function Transfers({
 							</Button>
 						}
 					/>
-				) : (
-				<Table>
-					{transfers.length !== 0 && (
-						<TableHeader>
-							<TableRow>
-								<TableHead>{t('index.table.date')}</TableHead>
-								<TableHead className='text-right'>
-									{t('index.table.amount')}
-								</TableHead>
-								<TableHead className='text-right'>
-									{t('index.table.fromAccount')}
-								</TableHead>
-								<TableHead className='text-right'>
-									{t('index.table.toAccount')}
-								</TableHead>
-								<TableHead></TableHead>
-							</TableRow>
-						</TableHeader>
-					)}
-					<TableBody>
-						{transfers.map(
-							({
-								id,
-								date,
-								amount,
-								currency,
-								fromAccount,
-								fromAccountType,
-								toAccount,
-								toAccountType,
-							}) => {
-								return (
-									<TableRow key={id}>
-										<TableCell className='w-30'>
-											{formatDate(new Date(date))}
-										</TableCell>
-										<TableCell className='text-right'>
-											<b>{currency}</b>{' '}
-											{formatNumber(amount)}
-										</TableCell>
-										<TableCell>
-											<div className='flex justify-end items-center gap-2'>
+				)}
+
+				{transfers.length > 0 && (
+					<>
+						{/* Desktop table view */}
+						<div className='hidden xl:block'>
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>{t('index.table.date')}</TableHead>
+										<TableHead>{t('index.table.fromAccount')}</TableHead>
+										<TableHead>{t('index.table.toAccount')}</TableHead>
+										<TableHead>{t('index.table.amount')}</TableHead>
+										<TableHead className='text-right'>{t('index.table.actions')}</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{transfers.map(
+										({
+											id,
+											date,
+											amount,
+											currency,
+											fromAccount,
+											fromAccountType,
+											toAccount,
+											toAccountType,
+										}) => {
+											const symbol = getCurrencySymbol(currency)
+											return (
+												<TableRow key={id}>
+													<TableCell className='text-muted-foreground'>
+														{formatDate(new Date(date))}
+													</TableCell>
+													<TableCell>
+														<div className='flex items-center gap-2'>
+															<AccountTypeIcon
+																size='xs'
+																accountType={fromAccountType}
+															/>
+															{fromAccount}
+														</div>
+													</TableCell>
+													<TableCell>
+														<div className='flex items-center gap-2'>
+															<AccountTypeIcon
+																size='xs'
+																accountType={toAccountType}
+															/>
+															{toAccount}
+														</div>
+													</TableCell>
+													<TableCell>
+														<span className='flex items-center gap-2 font-semibold'>
+															<CurrencyIcon
+																currency={currency}
+																size='sm'
+															/>
+															{symbol} {formatNumber(amount)}
+														</span>
+													</TableCell>
+													<TableCell className='text-right'>
+														<Form method='post'>
+															<input
+																type='hidden'
+																name='transferId'
+																value={id}
+															/>
+															<Button
+																size='icon-xs'
+																variant='destructive-ghost'
+																type='submit'
+																name='intent'
+																value='delete'
+																disabled={isDeleting}
+															>
+																{isDeleting &&
+																deletingId === id ? (
+																	<Spinner
+																		aria-hidden
+																		size='sm'
+																	/>
+																) : (
+																	<TrashIcon aria-hidden />
+																)}
+																<span className='sr-only'>
+																	{t('index.deleteAriaLabel')}
+																</span>
+															</Button>
+														</Form>
+													</TableCell>
+												</TableRow>
+											)
+										},
+									)}
+								</TableBody>
+							</Table>
+						</div>
+
+						{/* Mobile card view */}
+						<ul className='flex flex-col gap-2 min-w-0 xl:hidden'>
+							{transfers.map(
+								({
+									id,
+									date,
+									amount,
+									currency,
+									fromAccount,
+									fromAccountType,
+									toAccount,
+									toAccountType,
+								}) => {
+									return (
+										<li
+											key={id}
+											className='flex flex-col gap-3 border rounded-xl p-4'
+										>
+											<div className='flex items-center justify-between'>
+												<Text size='sm' theme='muted'>
+													{formatDate(new Date(date))}
+												</Text>
+												<Form method='post'>
+													<input
+														type='hidden'
+														name='transferId'
+														value={id}
+													/>
+													<Button
+														size='icon-xs'
+														variant='destructive-ghost'
+														type='submit'
+														name='intent'
+														value='delete'
+														disabled={isDeleting}
+													>
+														{isDeleting &&
+														deletingId === id ? (
+															<Spinner
+																aria-hidden
+																size='sm'
+															/>
+														) : (
+															<TrashIcon aria-hidden />
+														)}
+														<span className='sr-only'>
+															{t('index.deleteAriaLabel')}
+														</span>
+													</Button>
+												</Form>
+											</div>
+											<div className='flex items-center gap-2'>
 												<AccountTypeIcon
 													size='xs'
-													accountType={
-														fromAccountType
-													}
+													accountType={fromAccountType}
 												/>
-												{fromAccount}
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className='flex justify-end items-center gap-2'>
+												<Text size='sm'>{fromAccount}</Text>
+												<ArrowRightLeftIcon className='size-3 text-muted-foreground' />
 												<AccountTypeIcon
 													size='xs'
 													accountType={toAccountType}
 												/>
-												{toAccount}
+												<Text size='sm'>{toAccount}</Text>
 											</div>
-										</TableCell>
-										<TableCell className='flex justify-end items-center gap-2'>
-											<Form method='post'>
-												<input
-													type='hidden'
-													name='transferId'
-													value={id}
+											<Text
+												weight='semi'
+												className='flex items-center gap-2'
+												size='sm'
+											>
+												<CurrencyIcon
+													currency={currency}
+													size='sm'
 												/>
-												<Button
-													size='icon-xs'
-													variant='destructive-ghost'
-													type='submit'
-													name='intent'
-													value='delete'
-													disabled={isDeleting}
-												>
-													{isDeleting &&
-													deletingId === id ? (
-														<Spinner
-															aria-hidden
-															size='sm'
-														/>
-													) : (
-														<TrashIcon
-															aria-hidden
-														/>
-													)}
-													<span className='sr-only'>
-														{t(
-															'index.deleteAriaLabel',
-														)}
-													</span>
-												</Button>
-											</Form>
-										</TableCell>
-									</TableRow>
-								)
-							},
-						)}
-					</TableBody>
-				</Table>
+												<b>{currency}</b> {formatNumber(amount)}
+											</Text>
+										</li>
+									)
+								},
+							)}
+						</ul>
+					</>
 				)}
 
 				<TablePagination

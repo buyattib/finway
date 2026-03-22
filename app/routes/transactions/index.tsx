@@ -16,7 +16,7 @@ import { createToastHeaders } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
-import { PAGE_SIZE, TRANSACTION_TYPE_EXPENSE } from '~/lib/constants'
+import { PAGE_SIZE } from '~/lib/constants'
 import { getBalances, getSelectData } from '~/lib/queries'
 import type { TTransactionType } from '~/lib/types'
 
@@ -267,8 +267,7 @@ export default function Transactions({
 							hasFilters
 								? t('index.emptyFilteredMessage')
 								: t('index.emptyMessage', {
-										defaultValue:
-											'No transactions yet',
+										defaultValue: 'No transactions yet',
 									})
 						}
 						description={
@@ -296,12 +295,24 @@ export default function Transactions({
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>{t('index.table.date')}</TableHead>
-										<TableHead>{t('index.table.account')}</TableHead>
-										<TableHead>{t('index.table.amount')}</TableHead>
-										<TableHead>{t('index.table.type')}</TableHead>
-										<TableHead>{t('index.table.category')}</TableHead>
-										<TableHead className='text-right'>{t('index.table.actions')}</TableHead>
+										<TableHead>
+											{t('index.table.date')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.account')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.amount')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.type')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.category')}
+										</TableHead>
+										<TableHead className='text-right'>
+											{t('index.table.actions')}
+										</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -316,42 +327,52 @@ export default function Transactions({
 											accountType,
 											transactionCategory,
 										}) => {
-											const symbol = getCurrencySymbol(currency)
-											const isExpense = type === TRANSACTION_TYPE_EXPENSE
+											const symbol =
+												getCurrencySymbol(currency)
 											return (
 												<TableRow key={id}>
 													<TableCell className='text-muted-foreground'>
-														{formatDate(new Date(date))}
+														{formatDate(
+															new Date(date),
+														)}
 													</TableCell>
 													<TableCell>
 														<div className='flex items-center gap-2'>
 															<AccountTypeIcon
 																size='xs'
-																accountType={accountType}
+																accountType={
+																	accountType
+																}
 															/>
 															{account}
 														</div>
 													</TableCell>
 													<TableCell>
-														<span
-															className={`flex items-center gap-2 font-semibold ${isExpense ? 'text-danger' : 'text-success'}`}
-														>
+														<span className='flex items-center gap-2 font-semibold text-foreground'>
 															<CurrencyIcon
-																currency={currency}
+																currency={
+																	currency
+																}
 																size='sm'
 															/>
-															{symbol} {formatNumber(amount)}
+															{symbol}{' '}
+															{formatNumber(
+																amount,
+															)}
 														</span>
 													</TableCell>
 													<TableCell>
 														<TransactionType
 															variant='icon-text'
 															size='xs'
-															transactionType={type}
+															transactionType={
+																type
+															}
 														/>
 													</TableCell>
 													<TableCell className='text-muted-foreground'>
-														{transactionCategory ?? '-'}
+														{transactionCategory ??
+															'-'}
 													</TableCell>
 													<TableCell className='text-right'>
 														<div className='flex items-center justify-end gap-2'>
@@ -359,9 +380,13 @@ export default function Transactions({
 																asChild
 																size='icon-xs'
 																variant='ghost'
-																disabled={isDeleting}
+																disabled={
+																	isDeleting
+																}
 															>
-																<Link to={`${id}/edit`}>
+																<Link
+																	to={`${id}/edit`}
+																>
 																	<SquarePenIcon />
 																</Link>
 															</Button>
@@ -377,19 +402,26 @@ export default function Transactions({
 																	type='submit'
 																	name='intent'
 																	value='delete'
-																	disabled={isDeleting}
+																	disabled={
+																		isDeleting
+																	}
 																>
 																	{isDeleting &&
-																	deletingId === id ? (
+																	deletingId ===
+																		id ? (
 																		<Spinner
 																			aria-hidden
 																			size='sm'
 																		/>
 																	) : (
-																		<TrashIcon aria-hidden />
+																		<TrashIcon
+																			aria-hidden
+																		/>
 																	)}
 																	<span className='sr-only'>
-																		{t('index.deleteAriaLabel')}
+																		{t(
+																			'index.deleteAriaLabel',
+																		)}
 																	</span>
 																</Button>
 															</Form>
@@ -416,7 +448,6 @@ export default function Transactions({
 									accountType,
 									transactionCategory,
 								}) => {
-									const isExpense = type === TRANSACTION_TYPE_EXPENSE
 									return (
 										<li
 											key={id}
@@ -449,19 +480,26 @@ export default function Transactions({
 															type='submit'
 															name='intent'
 															value='delete'
-															disabled={isDeleting}
+															disabled={
+																isDeleting
+															}
 														>
 															{isDeleting &&
-															deletingId === id ? (
+															deletingId ===
+																id ? (
 																<Spinner
 																	aria-hidden
 																	size='sm'
 																/>
 															) : (
-																<TrashIcon aria-hidden />
+																<TrashIcon
+																	aria-hidden
+																/>
 															)}
 															<span className='sr-only'>
-																{t('index.deleteAriaLabel')}
+																{t(
+																	'index.deleteAriaLabel',
+																)}
 															</span>
 														</Button>
 													</Form>
@@ -477,14 +515,15 @@ export default function Transactions({
 											<div className='flex items-center justify-between'>
 												<Text
 													weight='semi'
-													className={`flex items-center gap-2 ${isExpense ? 'text-danger' : 'text-success'}`}
+													className='flex items-center gap-2'
 													size='sm'
 												>
 													<CurrencyIcon
 														currency={currency}
 														size='sm'
 													/>
-													<b>{currency}</b> {formatNumber(amount)}
+													<b>{currency}</b>{' '}
+													{formatNumber(amount)}
 												</Text>
 												<TransactionType
 													variant='icon-text'

@@ -252,7 +252,7 @@ export default function CreateCreditCardTransaction({
 	const [form, fields] = useForm({
 		lastResult: actionData?.submission,
 		id: 'cc-transaction-form',
-		shouldValidate: 'onInput',
+		shouldValidate: 'onBlur',
 		defaultValue: {
 			date: initializeDate().toISOString(),
 			...initialData,

@@ -216,6 +216,7 @@ export default function TransactionCategories({
 							className='flex items-center justify-between px-4 md:px-6 py-3 border rounded-md'
 						>
 							<div className='flex items-center gap-3'>
+								<TagIcon className='size-4 text-muted-foreground shrink-0' />
 								<Text>{name}</Text>
 								<Text size='sm' theme='muted'>
 									{description}

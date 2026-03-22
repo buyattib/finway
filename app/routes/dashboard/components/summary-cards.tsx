@@ -15,29 +15,27 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 type Variant = 'info' | 'danger' | 'success' | 'cc'
 
+const cardBase = 'border-l-4 border-l-primary/20'
+
 const variantStyles: Record<
 	Variant,
-	{ border: string; bg: string; icon: string }
+	{ card: string; icon: string }
 > = {
 	info: {
-		border: 'border-l-4 border-l-info',
-		bg: 'bg-info/5',
-		icon: 'text-info',
+		card: cardBase,
+		icon: 'text-muted-foreground',
 	},
 	danger: {
-		border: 'border-l-4 border-l-danger',
-		bg: 'bg-danger/5',
-		icon: 'text-danger',
+		card: cardBase,
+		icon: 'text-muted-foreground',
 	},
 	success: {
-		border: 'border-l-4 border-l-success',
-		bg: 'bg-success/5',
-		icon: 'text-success',
+		card: cardBase,
+		icon: 'text-muted-foreground',
 	},
 	cc: {
-		border: 'border-l-4 border-l-cc',
-		bg: 'bg-cc/5',
-		icon: 'text-cc',
+		card: cardBase,
+		icon: 'text-muted-foreground',
 	},
 }
 
@@ -84,7 +82,7 @@ export function SummaryCards({
 				return (
 					<Card
 						key={title}
-						className={cn(styles.border, styles.bg)}
+						className={cn(styles.card)}
 					>
 						<CardHeader className='flex items-center justify-between'>
 							<CardTitle>{title}</CardTitle>

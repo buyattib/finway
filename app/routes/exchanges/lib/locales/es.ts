@@ -16,7 +16,9 @@ export default {
 			from: 'Desde',
 			to: 'Hacia',
 			rate: 'Tasa',
+			actions: 'Acciones',
 		},
+		emptyTitle: 'Aún no hay intercambios',
 		deleteAriaLabel: 'Eliminar intercambio',
 		action: {
 			deleteErrorToast: 'No se pudo eliminar el intercambio',

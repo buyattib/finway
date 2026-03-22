@@ -15,7 +15,9 @@ export default {
 			amount: 'Monto',
 			fromAccount: 'Cuenta de origen',
 			toAccount: 'Cuenta de destino',
+			actions: 'Acciones',
 		},
+		emptyTitle: 'Aún no hay transferencias',
 		deleteAriaLabel: 'Eliminar transferencia',
 		action: {
 			deleteErrorToast: 'No se pudo eliminar la transferencia',

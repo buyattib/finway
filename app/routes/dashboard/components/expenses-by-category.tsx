@@ -152,7 +152,7 @@ export function ExpensesByCategory({
 								) / 10
 
 							const symbol = getCurrencySymbol(selectedCurrency)
-							const label = `${payload.transactionCategory}: ${symbol} ${formatNumber(payload.amount)} (%${perc})`
+							const label = `${payload.transactionCategory}: ${symbol} ${formatNumber(payload.amount)} (${perc}%)`
 							return (
 								<text
 									cx={props.cx}

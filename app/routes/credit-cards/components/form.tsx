@@ -70,7 +70,7 @@ export function CreditCardForm({
 	const [form, fields] = useForm({
 		lastResult,
 		id: 'credit-card-form',
-		shouldValidate: 'onInput',
+		shouldValidate: 'onBlur',
 		defaultValue: initialData,
 		constraint: getZodConstraint(createCreditCardFormSchema(t)),
 		onValidate({ formData }) {

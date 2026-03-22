@@ -92,7 +92,7 @@ export function TransactionForm({
 	const [form, fields] = useForm({
 		lastResult,
 		id: 'transaction-form',
-		shouldValidate: 'onInput',
+		shouldValidate: 'onBlur',
 		defaultValue,
 		constraint: getZodConstraint(TransactionFormSchema),
 		onValidate({ formData }) {

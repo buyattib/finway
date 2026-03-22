@@ -46,7 +46,7 @@ import {
 } from '~/components/ui/tooltip'
 import { TablePagination } from '~/components/table-pagination'
 
-import { CreditCardHeader } from './components/credit-card-header'
+import { CreditCardVisual } from './components/credit-card-visual'
 import { CreditCardTransactionFilters } from './components/filters'
 import {
 	DeleteCreditCardFormSchema,
@@ -341,20 +341,17 @@ export default function CreditCardDetails({
 
 	return (
 		<PageSection id={id}>
-			<PageHeader className='items-start'>
-				<CreditCardHeader
-					{...{
-						brand,
-						last4,
-						expiryMonth,
-						expiryYear,
-						closingDay,
-						dueDay,
-						accountName,
-					}}
+			<div className='flex flex-col sm:flex-row gap-6 items-start'>
+				<CreditCardVisual
+					brand={brand}
+					last4={last4}
+					expiryMonth={expiryMonth}
+					expiryYear={expiryYear}
+					closingDay={closingDay}
+					dueDay={dueDay}
+					accountName={accountName}
 				/>
-
-				<div className='flex sm:items-center gap-2'>
+				<div className='flex sm:items-center gap-2 sm:ml-auto'>
 					<Button size='icon' variant='outline' asChild>
 						<Link to='edit' prefetch='intent'>
 							<SquarePenIcon />
@@ -401,7 +398,7 @@ export default function CreditCardDetails({
 						</TooltipContent>
 					</Tooltip>
 				</div>
-			</PageHeader>
+			</div>
 
 			<PageSection id='cc-transactions-section'>
 				<PageHeader>
