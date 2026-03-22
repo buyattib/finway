@@ -47,12 +47,7 @@ export default {
 			unknownActionToast: 'Acción desconocida',
 		},
 	},
-	header: {
-		expires: 'Vence {{month}}/{{year}}',
-		closingDay: 'Cierra {{date}}',
-		dueDay: 'Vence {{date}}',
-	},
-	filters: {
+filters: {
 		type: 'Filtrar por tipo',
 		category: 'Filtrar por categoría',
 	},
@@ -180,8 +175,7 @@ export default {
 				creditCardNotFoundError: 'Tarjeta de crédito no encontrada',
 				notFoundError: 'Transacción no encontrada',
 			},
-			backAriaLabel: 'Volver a la tarjeta de crédito',
-			date: 'Fecha',
+		date: 'Fecha',
 			type: 'Tipo',
 			amount: 'Monto',
 			category: 'Categoría',

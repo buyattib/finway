@@ -1,5 +1,3 @@
-import { Link } from 'react-router'
-import { ArrowLeftIcon } from 'lucide-react'
 import { eq, asc } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
 
@@ -8,15 +6,13 @@ import type { Route } from './+types/transaction'
 import { creditCardTransactionInstallment as creditCardTransactionInstallmentTable } from '~/database/schema'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { cn, formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
+import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
-import { Button } from '~/components/ui/button'
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
-
-import { CreditCardHeader } from '../components/credit-card-header'
+import { CreditCard } from '~/components/credit-card'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
@@ -157,89 +153,51 @@ export default function CreditCardTransaction({
 
 	return (
 		<div className='flex flex-col gap-6'>
-			<div className='flex flex-col gap-2'>
-				<Button asChild variant='ghost' size='icon' className='mr-auto'>
-					<Link to='../..' relative='path'>
-						<ArrowLeftIcon />
-						<span className='sr-only'>
-							{t('transaction.details.backAriaLabel')}
-						</span>
-					</Link>
-				</Button>
-				<CreditCardHeader
-					{...{
-						brand,
-						last4,
-						expiryMonth,
-						expiryYear,
-						closingDay,
-						dueDay,
-						accountName,
-					}}
+			<div>
+				<CreditCard
+					brand={brand}
+					last4={last4}
+					expiryMonth={expiryMonth}
+					expiryYear={expiryYear}
+					closingDay={closingDay}
+					dueDay={dueDay}
+					accountName={accountName}
+					className='max-w-sm'
 				/>
 			</div>
 
-			<div
-				className={cn(
-					'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6',
-					{
-						'md:grid-cols-5': !description,
-						'md:grid-cols-6': !!description,
-					},
-				)}
-			>
-				<div className='flex flex-col gap-1'>
+			<div className='rounded-lg border p-4 flex flex-col gap-3'>
+				<div className='flex items-center justify-between'>
+					<div className='flex items-center gap-2'>
+						<TransactionType
+							variant='icon-text'
+							size='sm'
+							transactionType={type}
+						/>
+						<Text size='sm' theme='muted'>
+							·
+						</Text>
+						<Text size='sm' theme='muted'>
+							{categoryName}
+						</Text>
+					</div>
 					<Text size='sm' theme='muted'>
-						{t('transaction.details.date')}
-					</Text>
-					<Text size='md' theme='foreground'>
 						{formatDate(new Date(date))}
 					</Text>
 				</div>
-				<div className='flex flex-col gap-1'>
-					<Text size='sm' theme='muted'>
-						{t('transaction.details.type')}
-					</Text>
-					<TransactionType
-						variant='icon-text'
-						size='sm'
-						transactionType={type}
-					/>
-				</div>
-				<div className='flex flex-col gap-1'>
-					<Text size='sm' theme='muted'>
-						{t('transaction.details.amount')}
-					</Text>
-					<Text size='md' theme='foreground'>
+				<div className='flex items-center gap-2'>
+					<CurrencyIcon currency={currencyCode} size='sm' />
+					<Text size='lg' weight='bold'>
 						{getCurrencySymbol(currencyCode)} {formatNumber(amount)}
 					</Text>
-				</div>
-				<div className='flex flex-col gap-1'>
 					<Text size='sm' theme='muted'>
-						{t('transaction.details.currency')}
-					</Text>
-					<Text size='md' theme='foreground' className='flex items-center gap-2'>
-						<CurrencyIcon currency={currencyCode} size='sm' />
 						{currencyCode}
 					</Text>
 				</div>
-				<div className='flex flex-col gap-1'>
-					<Text size='sm' theme='muted'>
-						{t('transaction.details.category')}
-					</Text>
-					<Text size='md' theme='foreground'>
-						{categoryName}
-					</Text>
-				</div>
 				{description && (
-					<div className='flex flex-col gap-1'>
-						<Text size='sm' theme='muted'>
-							{t('transaction.details.description')}
-						</Text>
-						<Text size='md' theme='foreground'>
-							{description}
-						</Text>
-					</div>
+					<Text size='sm' theme='muted'>
+						{description}
+					</Text>
 				)}
 			</div>
 
