@@ -13,6 +13,7 @@ export default {
 			'Aún no has creado ninguna cuenta. Empieza a crearlas <0>aquí</0>.',
 		emptySearchMessage:
 			'No se encontraron cuentas para la búsqueda {{search}}',
+		noBalances: 'Sin balances aún',
 		editAction: 'Editar',
 		transactionAction: 'Transacción',
 	},

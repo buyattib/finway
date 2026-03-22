@@ -240,7 +240,15 @@ export default function Accounts({
 									</div>
 								</div>
 
-								{balances.length !== 0 && (
+								{balances.length === 0 ? (
+									<Text
+										size='sm'
+										theme='muted'
+										className='border-t pt-3'
+									>
+										{t('index.noBalances')}
+									</Text>
+								) : (
 									<ul
 										className='flex flex-col gap-2 border-t pt-3'
 										aria-labelledby={id}
