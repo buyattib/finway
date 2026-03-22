@@ -1,18 +1,37 @@
+import { Form, data, useNavigation, useLocation } from 'react-router'
+import { TrashIcon } from 'lucide-react'
+import { parseWithZod } from '@conform-to/zod/v4'
 import { eq, asc } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/transaction'
 
-import { creditCardTransactionInstallment as creditCardTransactionInstallmentTable } from '~/database/schema'
+import {
+	creditCardTransaction as creditCardTransactionTable,
+	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
+} from '~/database/schema'
+import {
+	createToastHeaders,
+	redirectWithToast,
+} from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
+import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
+import { Button } from '~/components/ui/button'
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { CreditCard } from '~/components/credit-card'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '~/components/ui/tooltip'
+
+import { DeleteCreditCardTransactionFormSchema } from '../lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
@@ -135,69 +154,159 @@ export async function loader({
 	}
 }
 
+export async function action({
+	request,
+	context,
+	params: { creditCardId },
+}: Route.ActionArgs) {
+	const user = context.get(userContext)
+	const db = context.get(dbContext)
+	const t = getServerT(context, 'credit-cards')
+
+	const formData = await request.formData()
+
+	const submission = parseWithZod(formData, {
+		schema: DeleteCreditCardTransactionFormSchema,
+	})
+
+	if (submission.status !== 'success') {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: t('details.action.deleteTransactionErrorToast'),
+			description: t('details.action.deleteTransactionErrorDescription'),
+		})
+		return data({}, { headers: toastHeaders })
+	}
+
+	const { creditCardTransactionId } = submission.value
+
+	const transaction = await db.query.creditCardTransaction.findFirst({
+		where: (t, { eq }) => eq(t.id, creditCardTransactionId),
+		columns: { id: true },
+		with: {
+			creditCard: {
+				columns: {},
+				with: { account: { columns: { ownerId: true } } },
+			},
+		},
+	})
+	if (!transaction || transaction.creditCard.account.ownerId !== user.id) {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: t('details.action.transactionNotFoundToast'),
+		})
+		return data({}, { headers: toastHeaders })
+	}
+
+	await db
+		.delete(creditCardTransactionTable)
+		.where(eq(creditCardTransactionTable.id, creditCardTransactionId))
+
+	return await redirectWithToast(
+		`/app/credit-cards/${creditCardId}`,
+		request,
+		{
+			type: 'success',
+			title: t('details.action.deleteTransactionSuccessToast'),
+		},
+	)
+}
+
 export default function CreditCardTransaction({
 	loaderData: { creditCard, transaction, installments },
 }: Route.ComponentProps) {
 	const {
-		brand,
-		last4,
-		expiryMonth,
-		expiryYear,
-		closingDay,
-		dueDay,
-		accountName,
-	} = creditCard
-	const { date, type, amount, description, categoryName, currencyCode } =
-		transaction
+		id: transactionId,
+		date,
+		type,
+		amount,
+		description,
+		categoryName,
+		currencyCode,
+	} = transaction
 	const { t } = useTranslation('credit-cards')
+	const navigation = useNavigation()
+	const location = useLocation()
+
+	const isDeleting =
+		navigation.formMethod === 'POST' &&
+		navigation.formAction === location.pathname &&
+		navigation.state === 'submitting'
 
 	return (
 		<div className='flex flex-col gap-6'>
-			<CreditCard
-				brand={brand}
-				last4={last4}
-				expiryMonth={expiryMonth}
-				expiryYear={expiryYear}
-				closingDay={closingDay}
-				dueDay={dueDay}
-				accountName={accountName}
-				className='max-w-sm'
-			/>
+			<div className='flex flex-col sm:flex-row gap-6 items-start'>
+				<CreditCard {...creditCard} className='max-w-sm' />
+				<div className='flex sm:items-center sm:ml-auto'>
+					<Tooltip>
+						<Form method='post'>
+							<input
+								type='hidden'
+								name='creditCardTransactionId'
+								value={transactionId}
+							/>
+							<TooltipTrigger asChild>
+								<Button
+									size='icon'
+									variant='destructive-outline'
+									type='submit'
+									name='intent'
+									value='delete-transaction'
+									disabled={isDeleting}
+								>
+									{isDeleting ? (
+										<Spinner size='sm' />
+									) : (
+										<TrashIcon aria-hidden />
+									)}
+									<span className='sr-only'>
+										{t(
+											'details.deleteTransactionAriaLabel',
+										)}
+									</span>
+								</Button>
+							</TooltipTrigger>
+						</Form>
+						<TooltipContent>
+							{t('details.deleteTransactionAriaLabel')}
+						</TooltipContent>
+					</Tooltip>
+				</div>
+			</div>
 
 			<div className='rounded-lg border p-4 flex flex-col gap-3'>
-					<div className='flex items-center justify-between'>
-						<div className='flex items-center gap-2'>
-							<TransactionType
-								variant='icon-text'
-								size='sm'
-								transactionType={type}
-							/>
-							<Text size='sm' theme='muted'>
-								·
-							</Text>
-							<Text size='sm' theme='muted'>
-								{categoryName}
-							</Text>
-						</div>
-						<Text size='sm' theme='muted'>
-							{formatDate(new Date(date))}
-						</Text>
-					</div>
+				<div className='flex items-center justify-between'>
 					<div className='flex items-center gap-2'>
-						<CurrencyIcon currency={currencyCode} size='sm' />
-						<Text size='lg' weight='bold'>
-							{getCurrencySymbol(currencyCode)}{' '}
-							{formatNumber(amount)}
+						<TransactionType
+							variant='icon-text'
+							size='sm'
+							transactionType={type}
+						/>
+						<Text size='sm' theme='muted'>
+							·
 						</Text>
 						<Text size='sm' theme='muted'>
-							{currencyCode}
+							{categoryName}
 						</Text>
 					</div>
-					{description && (
-						<Text size='sm' theme='muted'>
-							{description}
-						</Text>
-					)}
+					<Text size='sm' theme='muted'>
+						{formatDate(new Date(date))}
+					</Text>
+				</div>
+				<div className='flex items-center gap-2'>
+					<CurrencyIcon currency={currencyCode} size='sm' />
+					<Text size='lg' weight='bold'>
+						{getCurrencySymbol(currencyCode)} {formatNumber(amount)}
+					</Text>
+					<Text size='sm' theme='muted'>
+						{currencyCode}
+					</Text>
+				</div>
+				{description && (
+					<Text size='sm' theme='muted'>
+						{description}
+					</Text>
+				)}
 			</div>
 
 			<section

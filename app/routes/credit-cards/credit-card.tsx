@@ -48,10 +48,7 @@ import { TablePagination } from '~/components/table-pagination'
 import { CreditCard } from '~/components/credit-card'
 
 import { CreditCardTransactionFilters } from './components/filters'
-import {
-	DeleteCreditCardFormSchema,
-	DeleteCreditCardTransactionFormSchema,
-} from './lib/schemas'
+import { DeleteCreditCardFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
@@ -243,56 +240,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 		})
 	}
 
-	if (intent === 'delete-transaction') {
-		const submission = parseWithZod(formData, {
-			schema: DeleteCreditCardTransactionFormSchema,
-		})
-
-		if (submission.status !== 'success') {
-			const toastHeaders = await createToastHeaders(request, {
-				type: 'error',
-				title: t('details.action.deleteTransactionErrorToast'),
-				description: t(
-					'details.action.deleteTransactionErrorDescription',
-				),
-			})
-			return data({}, { headers: toastHeaders })
-		}
-
-		const { creditCardTransactionId } = submission.value
-
-		const transaction = await db.query.creditCardTransaction.findFirst({
-			where: (t, { eq }) => eq(t.id, creditCardTransactionId),
-			columns: { id: true },
-			with: {
-				creditCard: {
-					columns: {},
-					with: { account: { columns: { ownerId: true } } },
-				},
-			},
-		})
-		if (
-			!transaction ||
-			transaction.creditCard.account.ownerId !== user.id
-		) {
-			const toastHeaders = await createToastHeaders(request, {
-				type: 'error',
-				title: t('details.action.transactionNotFoundToast'),
-			})
-			return data({}, { headers: toastHeaders })
-		}
-
-		await db
-			.delete(creditCardTransactionTable)
-			.where(eq(creditCardTransactionTable.id, creditCardTransactionId))
-
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'success',
-			title: t('details.action.deleteTransactionSuccessToast'),
-		})
-		return data({}, { headers: toastHeaders })
-	}
-
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'error',
 		title: t('details.action.unknownActionToast'),
@@ -328,16 +275,6 @@ export default function CreditCardDetails({
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete-card'
-
-	const isDeletingTransaction =
-		navigation.formMethod === 'POST' &&
-		navigation.formAction === location.pathname &&
-		navigation.state === 'submitting' &&
-		navigation.formData?.get('intent') === 'delete-transaction'
-
-	const deletingTransactionId = navigation.formData?.get(
-		'creditCardTransactionId',
-	)
 
 	return (
 		<PageSection id={id}>
@@ -456,48 +393,12 @@ export default function CreditCardDetails({
 								return (
 									<li
 										key={txId}
-										className='relative rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
+										className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
 										onClick={() =>
 											navigate(`transactions/${txId}`)
 										}
 									>
-										<Form
-											method='post'
-											onClick={e => e.stopPropagation()}
-											className='absolute top-3 right-3'
-										>
-											<input
-												type='hidden'
-												name='creditCardTransactionId'
-												value={txId}
-											/>
-											<Button
-												size='icon-xs'
-												variant='destructive-ghost'
-												type='submit'
-												name='intent'
-												value='delete-transaction'
-												disabled={isDeletingTransaction}
-											>
-												{isDeletingTransaction &&
-												deletingTransactionId ===
-													txId ? (
-													<Spinner
-														aria-hidden
-														size='sm'
-													/>
-												) : (
-													<TrashIcon aria-hidden />
-												)}
-												<span className='sr-only'>
-													{t(
-														'details.deleteTransactionAriaLabel',
-													)}
-												</span>
-											</Button>
-										</Form>
-
-										<div className='grid grid-cols-3 sm:grid-cols-5 items-center gap-4 pr-8'>
+										<div className='grid grid-cols-3 sm:grid-cols-5 items-center gap-4'>
 											<Text size='sm' theme='muted'>
 												{formatDate(new Date(date))}
 											</Text>
