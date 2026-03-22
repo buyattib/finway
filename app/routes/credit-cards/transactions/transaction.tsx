@@ -153,52 +153,51 @@ export default function CreditCardTransaction({
 
 	return (
 		<div className='flex flex-col gap-6'>
-			<div>
-				<CreditCard
-					brand={brand}
-					last4={last4}
-					expiryMonth={expiryMonth}
-					expiryYear={expiryYear}
-					closingDay={closingDay}
-					dueDay={dueDay}
-					accountName={accountName}
-					className='max-w-sm'
-				/>
-			</div>
+			<CreditCard
+				brand={brand}
+				last4={last4}
+				expiryMonth={expiryMonth}
+				expiryYear={expiryYear}
+				closingDay={closingDay}
+				dueDay={dueDay}
+				accountName={accountName}
+				className='max-w-sm'
+			/>
 
 			<div className='rounded-lg border p-4 flex flex-col gap-3'>
-				<div className='flex items-center justify-between'>
-					<div className='flex items-center gap-2'>
-						<TransactionType
-							variant='icon-text'
-							size='sm'
-							transactionType={type}
-						/>
+					<div className='flex items-center justify-between'>
+						<div className='flex items-center gap-2'>
+							<TransactionType
+								variant='icon-text'
+								size='sm'
+								transactionType={type}
+							/>
+							<Text size='sm' theme='muted'>
+								·
+							</Text>
+							<Text size='sm' theme='muted'>
+								{categoryName}
+							</Text>
+						</div>
 						<Text size='sm' theme='muted'>
-							·
-						</Text>
-						<Text size='sm' theme='muted'>
-							{categoryName}
+							{formatDate(new Date(date))}
 						</Text>
 					</div>
-					<Text size='sm' theme='muted'>
-						{formatDate(new Date(date))}
-					</Text>
-				</div>
-				<div className='flex items-center gap-2'>
-					<CurrencyIcon currency={currencyCode} size='sm' />
-					<Text size='lg' weight='bold'>
-						{getCurrencySymbol(currencyCode)} {formatNumber(amount)}
-					</Text>
-					<Text size='sm' theme='muted'>
-						{currencyCode}
-					</Text>
-				</div>
-				{description && (
-					<Text size='sm' theme='muted'>
-						{description}
-					</Text>
-				)}
+					<div className='flex items-center gap-2'>
+						<CurrencyIcon currency={currencyCode} size='sm' />
+						<Text size='lg' weight='bold'>
+							{getCurrencySymbol(currencyCode)}{' '}
+							{formatNumber(amount)}
+						</Text>
+						<Text size='sm' theme='muted'>
+							{currencyCode}
+						</Text>
+					</div>
+					{description && (
+						<Text size='sm' theme='muted'>
+							{description}
+						</Text>
+					)}
 			</div>
 
 			<section

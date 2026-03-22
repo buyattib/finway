@@ -350,7 +350,7 @@ export default function CreditCardDetails({
 					closingDay={closingDay}
 					dueDay={dueDay}
 					accountName={accountName}
-					className='max-w-sm'
+					className='w-full max-w-sm shrink-0'
 				/>
 				<div className='flex sm:items-center gap-2 sm:ml-auto'>
 					<Button size='icon' variant='outline' asChild>
