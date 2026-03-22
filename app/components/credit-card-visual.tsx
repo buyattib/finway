@@ -1,8 +1,12 @@
 import { CreditCardIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
-import { formatDate, getNextDateForDay } from '~/lib/utils'
+import { cn, formatDate, getNextDateForDay } from '~/lib/utils'
 
-import { CC_BRAND_GRADIENTS, CC_BRAND_DEFAULT_GRADIENT } from '../lib/constants'
+import {
+	CC_BRAND_GRADIENTS,
+	CC_BRAND_DEFAULT_GRADIENT,
+} from '~/routes/credit-cards/lib/constants'
 
 type Props = {
 	brand: string
@@ -12,6 +16,7 @@ type Props = {
 	closingDay: number
 	dueDay: number
 	accountName: string
+	className?: string
 }
 
 export function CreditCardVisual({
@@ -22,12 +27,17 @@ export function CreditCardVisual({
 	closingDay,
 	dueDay,
 	accountName,
+	className,
 }: Props) {
+	const { t } = useTranslation('components')
 	const gradient = CC_BRAND_GRADIENTS[brand] ?? CC_BRAND_DEFAULT_GRADIENT
 
 	return (
 		<div
-			className={`bg-linear-to-br ${gradient} rounded-xl p-6 shadow-lg aspect-[1.586/1] w-full max-w-xs flex flex-col justify-between text-white shrink-0`}
+			className={cn(
+				`bg-linear-to-br ${gradient} rounded-xl p-6 shadow-lg aspect-[1.586/1] flex flex-col justify-between text-white`,
+				className,
+			)}
 		>
 			<div className='flex items-center justify-between'>
 				<div className='flex items-center gap-2'>
@@ -47,7 +57,7 @@ export function CreditCardVisual({
 			<div className='flex items-end justify-between'>
 				<div>
 					<p className='text-[10px] uppercase tracking-wider text-white/60'>
-						Valid thru
+						{t('creditCardVisual.validThru')}
 					</p>
 					<p className='text-sm font-medium'>
 						{String(expiryMonth).padStart(2, '0')}/{expiryYear}
@@ -55,10 +65,14 @@ export function CreditCardVisual({
 				</div>
 				<div className='flex flex-col items-end gap-1'>
 					<p className='text-xs text-white/70'>
-						Closes {formatDate(getNextDateForDay(closingDay))}
+						{t('creditCardVisual.closingDay', {
+							date: formatDate(getNextDateForDay(closingDay)),
+						})}
 					</p>
 					<p className='text-xs text-white/70'>
-						Due {formatDate(getNextDateForDay(dueDay))}
+						{t('creditCardVisual.dueDay', {
+							date: formatDate(getNextDateForDay(dueDay)),
+						})}
 					</p>
 				</div>
 			</div>

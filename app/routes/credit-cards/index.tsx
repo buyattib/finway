@@ -11,14 +11,12 @@ import {
 } from '~/database/schema'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { formatDate, getNextDateForDay } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { EmptyState } from '~/components/empty-state'
-
-import { CC_BRAND_GRADIENTS, CC_BRAND_DEFAULT_GRADIENT } from './lib/constants'
+import { CreditCardVisual } from '~/components/credit-card-visual'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -105,74 +103,25 @@ export default function CreditCards({
 								closingDay,
 								dueDay,
 								accountName,
-							}) => {
-								const gradient =
-									CC_BRAND_GRADIENTS[brand] ??
-									CC_BRAND_DEFAULT_GRADIENT
-								return (
-									<li
-										key={id}
-										className='flex flex-col gap-3'
+							}) => (
+								<li key={id}>
+									<Link
+										to={id}
+										prefetch='intent'
+										className='block transition-transform hover:scale-[1.02]'
 									>
-										<Link
-											to={id}
-											prefetch='intent'
-											className={`bg-linear-to-br ${gradient} rounded-xl p-6 shadow-lg aspect-[1.586/1] flex flex-col justify-between text-white transition-transform hover:scale-[1.02]`}
-										>
-											<div className='flex items-center justify-between'>
-												<div className='flex items-center gap-2'>
-													<CreditCardIcon className='size-6 text-white/70' />
-													<span className='text-lg font-bold tracking-wide'>
-														{brand}
-													</span>
-												</div>
-												<p className='text-sm text-white/70'>
-													{accountName}
-												</p>
-											</div>
-											<div>
-												<p className='text-lg tracking-[0.25em] font-mono'>
-													{'•••• •••• •••• '}
-													{last4}
-												</p>
-											</div>
-											<div className='flex items-end justify-between'>
-												<div>
-													<p className='text-[10px] uppercase tracking-wider text-white/60'>
-														Valid thru
-													</p>
-													<p className='text-sm font-medium'>
-														{String(
-															expiryMonth,
-														).padStart(2, '0')}
-														/{expiryYear}
-													</p>
-												</div>
-												<div className='flex flex-col items-end gap-1'>
-													<p className='text-xs text-white/70'>
-														{t('index.closingDay', {
-															date: formatDate(
-																getNextDateForDay(
-																	closingDay,
-																),
-															),
-														})}
-													</p>
-													<p className='text-xs text-white/70'>
-														{t('index.dueDay', {
-															date: formatDate(
-																getNextDateForDay(
-																	dueDay,
-																),
-															),
-														})}
-													</p>
-												</div>
-											</div>
-										</Link>
-									</li>
-								)
-							},
+										<CreditCardVisual
+											brand={brand}
+											last4={last4}
+											expiryMonth={expiryMonth}
+											expiryYear={expiryYear}
+											closingDay={closingDay}
+											dueDay={dueDay}
+											accountName={accountName}
+										/>
+									</Link>
+								</li>
+							),
 						)}
 					</ul>
 				)}

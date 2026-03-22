@@ -45,8 +45,8 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 import { TablePagination } from '~/components/table-pagination'
+import { CreditCardVisual } from '~/components/credit-card-visual'
 
-import { CreditCardVisual } from './components/credit-card-visual'
 import { CreditCardTransactionFilters } from './components/filters'
 import {
 	DeleteCreditCardFormSchema,
@@ -511,10 +511,13 @@ export default function CreditCardDetails({
 												className='flex items-center gap-2'
 											>
 												<CurrencyIcon
-													currency={currencyCode as TCurrency}
+													currency={
+														currencyCode as TCurrency
+													}
 													size='sm'
 												/>
-												<b>{currencyCode}</b> {formatNumber(amount)}
+												<b>{currencyCode}</b>{' '}
+												{formatNumber(amount)}
 											</Text>
 											<Text size='sm' theme='muted'>
 												{categoryName}
