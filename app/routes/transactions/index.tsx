@@ -266,9 +266,7 @@ export default function Transactions({
 						title={
 							hasFilters
 								? t('index.emptyFilteredMessage')
-								: t('index.emptyMessage', {
-										defaultValue: 'No transactions yet',
-									})
+								: t('index.emptyMessage')
 						}
 						description={
 							!hasFilters ? (
