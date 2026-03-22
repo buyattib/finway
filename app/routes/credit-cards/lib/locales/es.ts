@@ -10,9 +10,6 @@ export default {
 		addCreditCardLabel: 'Tarjeta de Crédito',
 		emptyMessage:
 			'Aún no has creado ninguna tarjeta de crédito. Empieza a crearlas <0>aquí</0>',
-		expires: 'Vence {{month}}/{{year}}',
-		closingDay: 'Cierra {{date}}',
-		dueDay: 'Vence {{date}}',
 	},
 	details: {
 		meta: {
