@@ -2,7 +2,7 @@ import { Link, Form, useNavigation, data } from 'react-router'
 import { PlusIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq } from 'drizzle-orm'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import type { Route } from './+types'
 
 import { transactionCategory as transactionCategoryTable } from '~/database/schema'
@@ -20,6 +20,8 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
+import { EmptyState } from '~/components/empty-state'
+import { TagIcon } from 'lucide-react'
 
 import {
 	AddSuggestionsSchema,
@@ -191,30 +193,30 @@ export default function TransactionCategories({
 
 			<PageContent>
 				{transactionCategories.length === 0 && (
-					<div className='my-2'>
-						<Text size='md' weight='medium' alignment='center'>
-							<Trans
-								i18nKey='index.emptyMessage'
-								ns='transaction-categories'
-								components={[
-									<Link
-										key='0'
-										to='create'
-										className='text-primary'
-									/>,
-								]}
-							/>
-						</Text>
-					</div>
+					<EmptyState
+						icon={TagIcon}
+						title={t('index.emptyTitle', {
+							defaultValue: 'No categories yet',
+						})}
+						action={
+							<Button asChild>
+								<Link to='create'>
+									<PlusIcon />
+									{t('index.addCategoryLabel')}
+								</Link>
+							</Button>
+						}
+					/>
 				)}
 
 				<ul className='flex flex-col gap-2'>
 					{transactionCategories.map(({ id, name, description }) => (
 						<li
 							key={id}
-							className='flex items-center justify-between px-4 md:px-6 py-1 border rounded-md'
+							className='flex items-center justify-between px-4 md:px-6 py-3 border rounded-md'
 						>
-							<div className='flex items-center gap-2'>
+							<div className='flex items-center gap-3'>
+								<TagIcon className='size-4 text-muted-foreground shrink-0' />
 								<Text>{name}</Text>
 								<Text size='sm' theme='muted'>
 									{description}

@@ -15,7 +15,7 @@ import {
 import { createToastHeaders } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { formatDate, formatNumber } from '~/lib/utils'
+import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { PAGE_SIZE } from '~/lib/constants'
 import { getBalances, getSelectData } from '~/lib/queries'
 import type { TTransactionType } from '~/lib/types'
@@ -24,11 +24,21 @@ import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '~/components/ui/table'
 import { TablePagination } from '~/components/table-pagination'
 import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { TransactionType } from '~/components/transaction-type'
+import { EmptyState } from '~/components/empty-state'
+import { ReceiptTextIcon } from 'lucide-react'
 
 import { TransactionsFilters } from './components/filters'
 import { DeleteTransactionFormSchema } from './lib/schemas'
@@ -251,9 +261,15 @@ export default function Transactions({
 				</div>
 
 				{transactions.length === 0 && (
-					<div className='my-2'>
-						<Text size='md' weight='medium' alignment='center'>
-							{!hasFilters ? (
+					<EmptyState
+						icon={ReceiptTextIcon}
+						title={
+							hasFilters
+								? t('index.emptyFilteredMessage')
+								: t('index.emptyMessage')
+						}
+						description={
+							!hasFilters ? (
 								<Trans
 									ns='transactions'
 									i18nKey='index.emptyMessage'
@@ -265,104 +281,264 @@ export default function Transactions({
 										/>,
 									]}
 								/>
-							) : (
-								t('index.emptyFilteredMessage')
-							)}
-						</Text>
-					</div>
+							) : undefined
+						}
+					/>
 				)}
 
-				<ul className='flex flex-col gap-2 min-w-0'>
-					{transactions.map(
-						({
-							id,
-							date,
-							type,
-							amount,
-							currency,
-							account,
-							accountType,
-							transactionCategory,
-						}) => (
-							<li
-								key={id}
-								className='grid grid-cols-1 xl:grid-cols-[1fr_2fr_2fr_1fr_2fr_auto] items-center gap-4 border rounded-xl p-4 xl:px-6'
-							>
-								<div className='flex items-center justify-between xl:contents'>
-									<Text size='sm' theme='muted'>
-										{formatDate(new Date(date))}
-									</Text>
-									<div className='flex items-center gap-2 xl:order-last'>
-										<Button
-											asChild
-											size='icon-xs'
-											variant='ghost'
-											disabled={isDeleting}
+				{transactions.length > 0 && (
+					<>
+						{/* Desktop table view */}
+						<div className='hidden xl:block'>
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>
+											{t('index.table.date')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.account')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.amount')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.type')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.category')}
+										</TableHead>
+										<TableHead className='text-right'>
+											{t('index.table.actions')}
+										</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{transactions.map(
+										({
+											id,
+											date,
+											type,
+											amount,
+											currency,
+											account,
+											accountType,
+											transactionCategory,
+										}) => {
+											const symbol =
+												getCurrencySymbol(currency)
+											return (
+												<TableRow key={id}>
+													<TableCell className='text-muted-foreground'>
+														{formatDate(
+															new Date(date),
+														)}
+													</TableCell>
+													<TableCell>
+														<div className='flex items-center gap-2'>
+															<AccountTypeIcon
+																size='xs'
+																accountType={
+																	accountType
+																}
+															/>
+															{account}
+														</div>
+													</TableCell>
+													<TableCell>
+														<span className='flex items-center gap-2 font-semibold text-foreground'>
+															<CurrencyIcon
+																currency={
+																	currency
+																}
+																size='sm'
+															/>
+															{symbol}{' '}
+															{formatNumber(
+																amount,
+															)}
+														</span>
+													</TableCell>
+													<TableCell>
+														<TransactionType
+															variant='icon-text'
+															size='xs'
+															transactionType={
+																type
+															}
+														/>
+													</TableCell>
+													<TableCell className='text-muted-foreground'>
+														{transactionCategory ??
+															'-'}
+													</TableCell>
+													<TableCell className='text-right'>
+														<div className='flex items-center justify-end gap-2'>
+															<Button
+																asChild
+																size='icon-xs'
+																variant='ghost'
+																disabled={
+																	isDeleting
+																}
+															>
+																<Link
+																	to={`${id}/edit`}
+																>
+																	<SquarePenIcon />
+																</Link>
+															</Button>
+															<Form method='post'>
+																<input
+																	type='hidden'
+																	name='transactionId'
+																	value={id}
+																/>
+																<Button
+																	size='icon-xs'
+																	variant='destructive-ghost'
+																	type='submit'
+																	name='intent'
+																	value='delete'
+																	disabled={
+																		isDeleting
+																	}
+																>
+																	{isDeleting &&
+																	deletingId ===
+																		id ? (
+																		<Spinner
+																			aria-hidden
+																			size='sm'
+																		/>
+																	) : (
+																		<TrashIcon
+																			aria-hidden
+																		/>
+																	)}
+																	<span className='sr-only'>
+																		{t(
+																			'index.deleteAriaLabel',
+																		)}
+																	</span>
+																</Button>
+															</Form>
+														</div>
+													</TableCell>
+												</TableRow>
+											)
+										},
+									)}
+								</TableBody>
+							</Table>
+						</div>
+
+						{/* Mobile card view */}
+						<ul className='flex flex-col gap-2 min-w-0 xl:hidden'>
+							{transactions.map(
+								({
+									id,
+									date,
+									type,
+									amount,
+									currency,
+									account,
+									accountType,
+									transactionCategory,
+								}) => {
+									return (
+										<li
+											key={id}
+											className='flex flex-col gap-3 border rounded-xl p-4'
 										>
-											<Link to={`${id}/edit`}>
-												<SquarePenIcon />
-											</Link>
-										</Button>
-										<Form method='post'>
-											<input
-												type='hidden'
-												name='transactionId'
-												value={id}
-											/>
-											<Button
-												size='icon-xs'
-												variant='destructive-ghost'
-												type='submit'
-												name='intent'
-												value='delete'
-												disabled={isDeleting}
-											>
-												{isDeleting &&
-												deletingId === id ? (
-													<Spinner
-														aria-hidden
+											<div className='flex items-center justify-between'>
+												<Text size='sm' theme='muted'>
+													{formatDate(new Date(date))}
+												</Text>
+												<div className='flex items-center gap-2'>
+													<Button
+														asChild
+														size='icon-xs'
+														variant='ghost'
+														disabled={isDeleting}
+													>
+														<Link to={`${id}/edit`}>
+															<SquarePenIcon />
+														</Link>
+													</Button>
+													<Form method='post'>
+														<input
+															type='hidden'
+															name='transactionId'
+															value={id}
+														/>
+														<Button
+															size='icon-xs'
+															variant='destructive-ghost'
+															type='submit'
+															name='intent'
+															value='delete'
+															disabled={
+																isDeleting
+															}
+														>
+															{isDeleting &&
+															deletingId ===
+																id ? (
+																<Spinner
+																	aria-hidden
+																	size='sm'
+																/>
+															) : (
+																<TrashIcon
+																	aria-hidden
+																/>
+															)}
+															<span className='sr-only'>
+																{t(
+																	'index.deleteAriaLabel',
+																)}
+															</span>
+														</Button>
+													</Form>
+												</div>
+											</div>
+											<div className='flex items-center gap-2'>
+												<AccountTypeIcon
+													size='xs'
+													accountType={accountType}
+												/>
+												<Text size='sm'>{account}</Text>
+											</div>
+											<div className='flex items-center justify-between'>
+												<TransactionType
+													variant='icon-text'
+													size='xs'
+													transactionType={type}
+												/>
+												<Text
+													weight='semi'
+													className='flex items-center gap-2'
+													size='sm'
+												>
+													<CurrencyIcon
+														currency={currency}
 														size='sm'
 													/>
-												) : (
-													<TrashIcon aria-hidden />
-												)}
-												<span className='sr-only'>
-													{t('index.deleteAriaLabel')}
-												</span>
-											</Button>
-										</Form>
-									</div>
-								</div>
-								<div className='flex items-center gap-2'>
-									<AccountTypeIcon
-										size='xs'
-										accountType={accountType}
-									/>
-									<Text size='sm'>{account}</Text>
-								</div>
-								<Text
-									weight='medium'
-									className='flex items-center gap-2'
-									size='sm'
-								>
-									<CurrencyIcon
-										currency={currency}
-										size='sm'
-									/>
-									<b>{currency}</b> {formatNumber(amount)}
-								</Text>
-								<TransactionType
-									variant='icon-text'
-									size='xs'
-									transactionType={type}
-								/>
-								<Text size='sm' theme='muted'>
-									{transactionCategory ?? '-'}
-								</Text>
-							</li>
-						),
-					)}
-				</ul>
+													{getCurrencySymbol(currency)}{' '}
+													{formatNumber(amount)}
+												</Text>
+											</div>
+											<Text size='sm' theme='muted'>
+												{transactionCategory ?? '-'}
+											</Text>
+										</li>
+									)
+								},
+							)}
+						</ul>
+					</>
+				)}
 
 				<TablePagination
 					page={pagination.page}

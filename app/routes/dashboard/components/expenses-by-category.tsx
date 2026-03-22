@@ -9,6 +9,7 @@ import type { Route } from '../+types'
 import { formatNumber } from '~/lib/utils'
 import type { TCurrency } from '~/lib/types'
 import { getCurrencySymbol } from '~/lib/utils'
+import { getCategoryColor } from '~/lib/category-colors'
 
 import { type ChartConfig, ChartContainer } from '~/components/ui/chart'
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
@@ -23,28 +24,6 @@ import {
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
 
-const colorPalette = [
-	'#8884d8',
-	'#82ca9d',
-	'#ffc658',
-	'#ff7c7c',
-	'#8dd1e1',
-	'#d084d0',
-	'#ffb347',
-	'#87ceeb',
-	'#dda0dd',
-	'#98fb98',
-	'#f0e68c',
-	'#ff6347',
-	'#40e0d0',
-	'#ee82ee',
-	'#90ee90',
-	'#ffd700',
-	'#ff69b4',
-	'#00ced1',
-	'#ffa500',
-	'#9370db',
-]
 
 type LoaderData = Route.ComponentProps['loaderData']
 type Props = Pick<LoaderData, 'expensesByCategory'> &
@@ -90,24 +69,14 @@ export function ExpensesByCategory({
 						<Text size='sm' theme='muted'>
 							{t('index.expensesByCategory.noExpenses')}
 						</Text>
-						<div className='flex items-center gap-4 flex-wrap justify-center'>
-							<Button asChild variant='outline'>
-								<Link to='/app/accounts'>
-									<PlusIcon />
-									{t(
-										'index.expensesByCategory.createAccount',
-									)}
-								</Link>
-							</Button>
-							<Button asChild variant='default'>
-								<Link to='/app/transactions'>
-									<PlusIcon />
-									{t(
-										'index.expensesByCategory.createTransaction',
-									)}
-								</Link>
-							</Button>
-						</div>
+						<Button asChild variant='default'>
+							<Link to='/app/transactions'>
+								<PlusIcon />
+								{t(
+									'index.expensesByCategory.createTransaction',
+								)}
+							</Link>
+						</Button>
 					</div>
 				</div>
 			</Layout>
@@ -128,7 +97,7 @@ export function ExpensesByCategory({
 		return {
 			transactionCategory: expense.transactionCategory,
 			amount: Number(expense.amount),
-			fill: colorPalette[i % colorPalette.length],
+			fill: getCategoryColor(i),
 		}
 	})
 
@@ -159,8 +128,8 @@ export function ExpensesByCategory({
 				</Select>
 			}
 		>
-			<ChartContainer config={config} className='w-full sm:max-h-80'>
-				<PieChart>
+			<ChartContainer config={config} className='w-full sm:max-h-80 [&_svg]:overflow-visible'>
+				<PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
 					<Pie
 						data={data}
 						dataKey='amount'
@@ -173,7 +142,7 @@ export function ExpensesByCategory({
 								) / 10
 
 							const symbol = getCurrencySymbol(selectedCurrency)
-							const label = `${payload.transactionCategory}: ${symbol} ${formatNumber(payload.amount)} (%${perc})`
+							const label = `${payload.transactionCategory}: ${symbol} ${formatNumber(payload.amount)} (${perc}%)`
 							return (
 								<text
 									cx={props.cx}

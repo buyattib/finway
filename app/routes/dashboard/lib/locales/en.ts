@@ -16,8 +16,7 @@ export default {
 		},
 		expensesByCategory: {
 			title: 'Expenses by category',
-			noExpenses: 'No expenses',
-			createAccount: 'Create Account',
+			noExpenses: 'No expenses this month',
 			createTransaction: 'Create Transaction',
 		},
 		expensesByMonth: {

@@ -10,6 +10,7 @@ export default {
 		emptyMessage:
 			'You have not created any accounts yet. Start creating them <0>here</0>.',
 		emptySearchMessage: 'No accounts found for the search {{search}}',
+		noBalances: 'No balances yet',
 		editAction: 'Edit',
 		transactionAction: 'Transaction',
 	},

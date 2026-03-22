@@ -28,7 +28,7 @@ import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
 import type { TCCTransactionType, TCurrency } from '~/lib/types'
-import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
+import { formatDate, formatNumber } from '~/lib/utils'
 import { getSelectData } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 
@@ -45,13 +45,10 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 import { TablePagination } from '~/components/table-pagination'
+import { CreditCard } from '~/components/credit-card'
 
-import { CreditCardHeader } from './components/credit-card-header'
 import { CreditCardTransactionFilters } from './components/filters'
-import {
-	DeleteCreditCardFormSchema,
-	DeleteCreditCardTransactionFormSchema,
-} from './lib/schemas'
+import { DeleteCreditCardFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
@@ -243,56 +240,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 		})
 	}
 
-	if (intent === 'delete-transaction') {
-		const submission = parseWithZod(formData, {
-			schema: DeleteCreditCardTransactionFormSchema,
-		})
-
-		if (submission.status !== 'success') {
-			const toastHeaders = await createToastHeaders(request, {
-				type: 'error',
-				title: t('details.action.deleteTransactionErrorToast'),
-				description: t(
-					'details.action.deleteTransactionErrorDescription',
-				),
-			})
-			return data({}, { headers: toastHeaders })
-		}
-
-		const { creditCardTransactionId } = submission.value
-
-		const transaction = await db.query.creditCardTransaction.findFirst({
-			where: (t, { eq }) => eq(t.id, creditCardTransactionId),
-			columns: { id: true },
-			with: {
-				creditCard: {
-					columns: {},
-					with: { account: { columns: { ownerId: true } } },
-				},
-			},
-		})
-		if (
-			!transaction ||
-			transaction.creditCard.account.ownerId !== user.id
-		) {
-			const toastHeaders = await createToastHeaders(request, {
-				type: 'error',
-				title: t('details.action.transactionNotFoundToast'),
-			})
-			return data({}, { headers: toastHeaders })
-		}
-
-		await db
-			.delete(creditCardTransactionTable)
-			.where(eq(creditCardTransactionTable.id, creditCardTransactionId))
-
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'success',
-			title: t('details.action.deleteTransactionSuccessToast'),
-		})
-		return data({}, { headers: toastHeaders })
-	}
-
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'error',
 		title: t('details.action.unknownActionToast'),
@@ -329,32 +276,20 @@ export default function CreditCardDetails({
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete-card'
 
-	const isDeletingTransaction =
-		navigation.formMethod === 'POST' &&
-		navigation.formAction === location.pathname &&
-		navigation.state === 'submitting' &&
-		navigation.formData?.get('intent') === 'delete-transaction'
-
-	const deletingTransactionId = navigation.formData?.get(
-		'creditCardTransactionId',
-	)
-
 	return (
 		<PageSection id={id}>
-			<PageHeader className='items-start'>
-				<CreditCardHeader
-					{...{
-						brand,
-						last4,
-						expiryMonth,
-						expiryYear,
-						closingDay,
-						dueDay,
-						accountName,
-					}}
+			<div className='flex flex-col sm:flex-row gap-6 items-start'>
+				<CreditCard
+					brand={brand}
+					last4={last4}
+					expiryMonth={expiryMonth}
+					expiryYear={expiryYear}
+					closingDay={closingDay}
+					dueDay={dueDay}
+					accountName={accountName}
+					className='w-full max-w-sm shrink-0'
 				/>
-
-				<div className='flex sm:items-center gap-2'>
+				<div className='flex sm:items-center gap-2 sm:ml-auto'>
 					<Button size='icon' variant='outline' asChild>
 						<Link to='edit' prefetch='intent'>
 							<SquarePenIcon />
@@ -401,7 +336,7 @@ export default function CreditCardDetails({
 						</TooltipContent>
 					</Tooltip>
 				</div>
-			</PageHeader>
+			</div>
 
 			<PageSection id='cc-transactions-section'>
 				<PageHeader>
@@ -455,52 +390,15 @@ export default function CreditCardDetails({
 								categoryName,
 								installments,
 							}) => {
-								const symbol = getCurrencySymbol(currencyCode)
 								return (
 									<li
 										key={txId}
-										className='relative rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
+										className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
 										onClick={() =>
 											navigate(`transactions/${txId}`)
 										}
 									>
-										<Form
-											method='post'
-											onClick={e => e.stopPropagation()}
-											className='absolute top-3 right-3'
-										>
-											<input
-												type='hidden'
-												name='creditCardTransactionId'
-												value={txId}
-											/>
-											<Button
-												size='icon-xs'
-												variant='destructive-ghost'
-												type='submit'
-												name='intent'
-												value='delete-transaction'
-												disabled={isDeletingTransaction}
-											>
-												{isDeletingTransaction &&
-												deletingTransactionId ===
-													txId ? (
-													<Spinner
-														aria-hidden
-														size='sm'
-													/>
-												) : (
-													<TrashIcon aria-hidden />
-												)}
-												<span className='sr-only'>
-													{t(
-														'details.deleteTransactionAriaLabel',
-													)}
-												</span>
-											</Button>
-										</Form>
-
-										<div className='grid grid-cols-3 sm:grid-cols-5 items-center gap-4 pr-8'>
+										<div className='grid grid-cols-3 sm:grid-cols-5 items-center gap-4'>
 											<Text size='sm' theme='muted'>
 												{formatDate(new Date(date))}
 											</Text>
@@ -515,10 +413,13 @@ export default function CreditCardDetails({
 												className='flex items-center gap-2'
 											>
 												<CurrencyIcon
-													currency={currencyCode as TCurrency}
+													currency={
+														currencyCode as TCurrency
+													}
 													size='sm'
 												/>
-												<b>{currencyCode}</b> {formatNumber(amount)}
+												<b>{currencyCode}</b>{' '}
+												{formatNumber(amount)}
 											</Text>
 											<Text size='sm' theme='muted'>
 												{categoryName}

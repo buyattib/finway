@@ -87,12 +87,20 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 	}
 
 	const config = {} satisfies ChartConfig
-	const data = expensesByMonth[selectedCurrency].map(exp => {
-		const date = new Date(exp.year, exp.month - 1)
-		const dateString = formatDate(date, { day: undefined, month: 'long' })
+
+	const expenseData = expensesByMonth[selectedCurrency]
+	const expenseMap = new Map(
+		expenseData.map(exp => [`${exp.year}-${exp.month}`, exp.amount]),
+	)
+
+	const now = new Date()
+	const data = Array.from({ length: 12 }, (_, i) => {
+		const date = new Date(now.getFullYear(), now.getMonth() - 11 + i)
+		const key = `${date.getFullYear()}-${date.getMonth() + 1}`
+		const dateString = formatDate(date, { day: undefined, month: 'short' })
 		return {
 			date: dateString,
-			amount: exp.amount,
+			amount: expenseMap.get(key) ?? '0',
 		}
 	})
 
@@ -117,12 +125,13 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 				</Select>
 			}
 		>
-			<ChartContainer config={config} className='aspect-auto h-80 w-full'>
+			<ChartContainer config={config} className='aspect-auto h-80 w-full [&_svg]:overflow-visible'>
 				<BarChart
 					accessibilityLayer
 					data={data}
 					margin={{
-						top: 20,
+						top: 30,
+						right: 50,
 					}}
 				>
 					<CartesianGrid vertical={false} />
@@ -131,20 +140,27 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 						tickLine={false}
 						axisLine={false}
 						tickMargin={10}
+						interval={0}
+						angle={-45}
+						textAnchor='end'
+						height={70}
+						dy={5}
+						padding={{ right: 20 }}
 					/>
 					<Bar
 						dataKey='amount'
-						fill='var(--color-blue)'
+						fill='var(--color-danger)'
 						radius={6}
-						maxBarSize={100}
 					>
 						<LabelList
 							position='top'
 							offset={6}
-							fontSize={14}
-							className='font-semibold'
+							fontSize={12}
+							className='font-semibold whitespace-nowrap'
 							formatter={amount =>
-								`${currencySymbol} ${formatNumber(String(amount))}`
+								Number(amount) === 0
+									? ''
+									: `${currencySymbol}${formatNumber(String(amount))}`
 							}
 						/>
 					</Bar>

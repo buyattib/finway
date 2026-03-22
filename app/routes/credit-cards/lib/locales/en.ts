@@ -8,9 +8,6 @@ export default {
 		addCreditCardLabel: 'Credit Card',
 		emptyMessage:
 			'You have not created any credit cards yet. Start creating them <0>here</0>',
-		expires: 'Expires {{month}}/{{year}}',
-		closingDay: 'Closes {{date}}',
-		dueDay: 'Due {{date}}',
 	},
 	details: {
 		meta: {
@@ -47,12 +44,7 @@ export default {
 			unknownActionToast: 'Unknown action',
 		},
 	},
-	header: {
-		expires: 'Expires {{month}}/{{year}}',
-		closingDay: 'Closes {{date}}',
-		dueDay: 'Due {{date}}',
-	},
-	filters: {
+filters: {
 		type: 'Filter by type',
 		category: 'Filter by category',
 	},
@@ -178,8 +170,7 @@ export default {
 				creditCardNotFoundError: 'Credit card not found',
 				notFoundError: 'Transaction not found',
 			},
-			backAriaLabel: 'Back to credit card',
-			date: 'Date',
+		date: 'Date',
 			type: 'Type',
 			amount: 'Amount',
 			category: 'Category',

@@ -14,7 +14,9 @@ export default {
 			from: 'From',
 			to: 'To',
 			rate: 'Rate',
+			actions: 'Actions',
 		},
+		emptyTitle: 'No exchanges yet',
 		deleteAriaLabel: 'Delete exchange',
 		action: {
 			deleteErrorToast: 'Could not delete exchange',

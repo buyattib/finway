@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import { CreditCardIcon, PlusIcon } from 'lucide-react'
 import { desc, eq } from 'drizzle-orm'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
@@ -11,12 +11,13 @@ import {
 } from '~/database/schema'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { formatDate, getNextDateForDay } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
-import { Text } from '~/components/ui/text'
 import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
+import { EmptyState } from '~/components/empty-state'
+import { CreditCard } from '~/components/credit-card'
+
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
 		{ title: loaderData?.meta.title },
@@ -58,7 +59,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 export default function CreditCards({
 	loaderData: { creditCards },
 }: Route.ComponentProps) {
-	const { t } = useTranslation(['credit-cards', 'constants'])
+	const { t } = useTranslation('credit-cards')
 
 	return (
 		<PageSection id='credit-cards-section'>
@@ -78,23 +79,20 @@ export default function CreditCards({
 
 			<PageContent>
 				{creditCards.length === 0 ? (
-					<div className='my-2'>
-						<Text size='md' weight='medium' alignment='center'>
-							<Trans
-								i18nKey='index.emptyMessage'
-								ns='credit-cards'
-								components={[
-									<Link
-										key='0'
-										to='create'
-										className='text-primary'
-									/>,
-								]}
-							/>
-						</Text>
-					</div>
+					<EmptyState
+						icon={CreditCardIcon}
+						title={t('index.emptyMessage')}
+						action={
+							<Button asChild>
+								<Link to='create'>
+									<PlusIcon />
+									{t('index.addCreditCardLabel')}
+								</Link>
+							</Button>
+						}
+					/>
 				) : (
-					<ul className='flex flex-col gap-2'>
+					<ul className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'>
 						{creditCards.map(
 							({
 								id,
@@ -105,61 +103,25 @@ export default function CreditCards({
 								closingDay,
 								dueDay,
 								accountName,
-							}) => {
-								return (
-									<li
-										key={id}
-										className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 p-6 border rounded-xl'
+							}) => (
+								<li key={id}>
+									<Link
+										to={id}
+										prefetch='intent'
+										className='block transition-transform hover:scale-[1.02]'
 									>
-										<Link
-											to={id}
-											prefetch='intent'
-											className='flex items-center gap-4 sm:gap-6'
-										>
-											<CreditCardIcon className='size-5 text-muted-foreground' />
-											<div className='flex flex-col gap-1'>
-												<div className='flex items-center gap-2'>
-													<Text weight='semi'>
-														{brand} •••• {last4}
-													</Text>
-													<Text theme='muted'>
-														·
-													</Text>
-													<Text theme='muted'>
-														{t('index.expires', {
-															month: expiryMonth,
-															year: expiryYear,
-														})}
-													</Text>
-												</div>
-												<Text theme='muted'>
-													{accountName}
-												</Text>
-											</div>
-										</Link>
-										<div className='flex flex-col gap-0.5'>
-											<Text size='sm' theme='muted'>
-												{t('index.closingDay', {
-													date: formatDate(
-														getNextDateForDay(
-															closingDay,
-														),
-													),
-												})}
-											</Text>
-											<Text size='sm' theme='muted'>
-												{t('index.dueDay', {
-													date: formatDate(
-														getNextDateForDay(
-															dueDay,
-														),
-													),
-												})}
-											</Text>
-										</div>
-									</li>
-								)
-							},
+										<CreditCard
+											brand={brand}
+											last4={last4}
+											expiryMonth={expiryMonth}
+											expiryYear={expiryYear}
+											closingDay={closingDay}
+											dueDay={dueDay}
+											accountName={accountName}
+										/>
+									</Link>
+								</li>
+							),
 						)}
 					</ul>
 				)}

@@ -10,9 +10,6 @@ export default {
 		addCreditCardLabel: 'Tarjeta de Crédito',
 		emptyMessage:
 			'Aún no has creado ninguna tarjeta de crédito. Empieza a crearlas <0>aquí</0>',
-		expires: 'Vence {{month}}/{{year}}',
-		closingDay: 'Cierra {{date}}',
-		dueDay: 'Vence {{date}}',
 	},
 	details: {
 		meta: {
@@ -50,12 +47,7 @@ export default {
 			unknownActionToast: 'Acción desconocida',
 		},
 	},
-	header: {
-		expires: 'Vence {{month}}/{{year}}',
-		closingDay: 'Cierra {{date}}',
-		dueDay: 'Vence {{date}}',
-	},
-	filters: {
+filters: {
 		type: 'Filtrar por tipo',
 		category: 'Filtrar por categoría',
 	},
@@ -183,8 +175,7 @@ export default {
 				creditCardNotFoundError: 'Tarjeta de crédito no encontrada',
 				notFoundError: 'Transacción no encontrada',
 			},
-			backAriaLabel: 'Volver a la tarjeta de crédito',
-			date: 'Fecha',
+		date: 'Fecha',
 			type: 'Tipo',
 			amount: 'Monto',
 			category: 'Categoría',

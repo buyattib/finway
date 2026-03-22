@@ -5,6 +5,7 @@ import {
 	ACTION_CREATION,
 	ACTION_EDITION,
 	CC_TRANSACTION_TYPES,
+	CC_BRANDS,
 } from '~/lib/constants'
 import { removeCommas } from '~/lib/utils'
 
@@ -21,7 +22,7 @@ const ActionSchema = z.discriminatedUnion('action', [
 export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 	return z
 		.object({
-			brand: z.string(t('form.schema.brandRequired')),
+			brand: z.enum(CC_BRANDS, t('form.schema.brandRequired')),
 			last4: z
 				.string(t('form.schema.last4Required'))
 				.regex(/^\d{4}$/, t('form.schema.last4Invalid')),

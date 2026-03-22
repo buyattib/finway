@@ -7,7 +7,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import type { Route as EditRoute } from '../+types/edit'
 
 import type { TSelectData } from '~/lib/types'
-import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
+import { ACTION_CREATION, ACTION_EDITION, CC_BRANDS } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -21,8 +21,8 @@ import {
 import { Text } from '~/components/ui/text'
 import {
 	ErrorList,
-	TextField,
 	NumberField,
+	SelectField,
 	ComboboxField,
 } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
@@ -69,7 +69,7 @@ export function CreditCardForm({
 	const [form, fields] = useForm({
 		lastResult,
 		id: 'credit-card-form',
-		shouldValidate: 'onInput',
+		shouldValidate: 'onBlur',
 		defaultValue: initialData,
 		constraint: getZodConstraint(createCreditCardFormSchema(t)),
 		onValidate({ formData }) {
@@ -119,11 +119,15 @@ export function CreditCardForm({
 						id={form.errorId}
 					/>
 
-					<TextField
+					<SelectField
 						autoFocus
 						label={t('form.brandLabel')}
 						field={fields.brand}
 						placeholder={t('form.brandPlaceholder')}
+						items={CC_BRANDS.map(brand => ({
+							value: brand,
+							label: brand,
+						}))}
 					/>
 
 					<NumberField
