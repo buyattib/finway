@@ -16,7 +16,7 @@ import { Button } from '~/components/ui/button'
 import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { EmptyState } from '~/components/empty-state'
-import { CreditCardVisual } from '~/components/credit-card-visual'
+import { CreditCard } from '~/components/credit-card'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -59,7 +59,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 export default function CreditCards({
 	loaderData: { creditCards },
 }: Route.ComponentProps) {
-	const { t } = useTranslation(['credit-cards', 'constants'])
+	const { t } = useTranslation('credit-cards')
 
 	return (
 		<PageSection id='credit-cards-section'>
@@ -110,7 +110,7 @@ export default function CreditCards({
 										prefetch='intent'
 										className='block transition-transform hover:scale-[1.02]'
 									>
-										<CreditCardVisual
+										<CreditCard
 											brand={brand}
 											last4={last4}
 											expiryMonth={expiryMonth}

@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next'
 
 import { cn, formatDate, getNextDateForDay } from '~/lib/utils'
 
-import {
-	CC_BRAND_GRADIENTS,
-	CC_BRAND_DEFAULT_GRADIENT,
-} from '~/routes/credit-cards/lib/constants'
+const BRAND_GRADIENTS: Record<string, string> = {
+	VISA: 'from-[oklch(0.35_0.05_250)] to-[oklch(0.25_0.04_260)]',
+	MASTERCARD: 'from-[oklch(0.35_0.04_270)] to-[oklch(0.22_0.03_280)]',
+	AMEX: 'from-[oklch(0.38_0.04_230)] to-[oklch(0.25_0.05_240)]',
+}
+
+const DEFAULT_GRADIENT = 'from-[oklch(0.32_0.03_270)] to-[oklch(0.22_0.02_270)]'
 
 type Props = {
 	brand: string
@@ -19,7 +22,7 @@ type Props = {
 	className?: string
 }
 
-export function CreditCardVisual({
+export function CreditCard({
 	brand,
 	last4,
 	expiryMonth,
@@ -30,7 +33,7 @@ export function CreditCardVisual({
 	className,
 }: Props) {
 	const { t } = useTranslation('components')
-	const gradient = CC_BRAND_GRADIENTS[brand] ?? CC_BRAND_DEFAULT_GRADIENT
+	const gradient = BRAND_GRADIENTS[brand] ?? DEFAULT_GRADIENT
 
 	return (
 		<div
@@ -57,7 +60,7 @@ export function CreditCardVisual({
 			<div className='flex items-end justify-between'>
 				<div>
 					<p className='text-[10px] uppercase tracking-wider text-white/60'>
-						{t('creditCardVisual.validThru')}
+						{t('creditCard.validThru')}
 					</p>
 					<p className='text-sm font-medium'>
 						{String(expiryMonth).padStart(2, '0')}/{expiryYear}
@@ -65,12 +68,12 @@ export function CreditCardVisual({
 				</div>
 				<div className='flex flex-col items-end gap-1'>
 					<p className='text-xs text-white/70'>
-						{t('creditCardVisual.closingDay', {
+						{t('creditCard.closingDay', {
 							date: formatDate(getNextDateForDay(closingDay)),
 						})}
 					</p>
 					<p className='text-xs text-white/70'>
-						{t('creditCardVisual.dueDay', {
+						{t('creditCard.dueDay', {
 							date: formatDate(getNextDateForDay(dueDay)),
 						})}
 					</p>

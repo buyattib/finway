@@ -63,3 +63,13 @@ export const CC_TRANSACTION_TYPES = [
 	CC_TRANSACTION_TYPE_CHARGE,
 	CC_TRANSACTION_TYPE_REFUND,
 ] as const
+
+export const CC_BRAND_VISA = 'VISA'
+export const CC_BRAND_MASTERCARD = 'MASTERCARD'
+export const CC_BRAND_AMEX = 'AMEX'
+
+export const CC_BRANDS = [
+	CC_BRAND_VISA,
+	CC_BRAND_MASTERCARD,
+	CC_BRAND_AMEX,
+] as const

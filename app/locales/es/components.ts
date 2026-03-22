@@ -22,7 +22,7 @@ export default {
 		transactionCategories: 'Categorías de Transacción',
 		logoutButton: 'Cerrar sesión',
 	},
-	creditCardVisual: {
+	creditCard: {
 		validThru: 'Válido hasta',
 		closingDay: 'Cierra {{date}}',
 		dueDay: 'Vence {{date}}',

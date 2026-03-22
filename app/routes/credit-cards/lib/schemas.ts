@@ -5,8 +5,8 @@ import {
 	ACTION_CREATION,
 	ACTION_EDITION,
 	CC_TRANSACTION_TYPES,
+	CC_BRANDS,
 } from '~/lib/constants'
-import { CC_BRANDS } from './constants'
 import { removeCommas } from '~/lib/utils'
 
 const ActionSchema = z.discriminatedUnion('action', [

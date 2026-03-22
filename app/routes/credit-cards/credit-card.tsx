@@ -45,7 +45,7 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 import { TablePagination } from '~/components/table-pagination'
-import { CreditCardVisual } from '~/components/credit-card-visual'
+import { CreditCard } from '~/components/credit-card'
 
 import { CreditCardTransactionFilters } from './components/filters'
 import {
@@ -342,7 +342,7 @@ export default function CreditCardDetails({
 	return (
 		<PageSection id={id}>
 			<div className='flex flex-col sm:flex-row gap-6 items-start'>
-				<CreditCardVisual
+				<CreditCard
 					brand={brand}
 					last4={last4}
 					expiryMonth={expiryMonth}
