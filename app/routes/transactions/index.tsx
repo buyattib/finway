@@ -511,6 +511,11 @@ export default function Transactions({
 												<Text size='sm'>{account}</Text>
 											</div>
 											<div className='flex items-center justify-between'>
+												<TransactionType
+													variant='icon-text'
+													size='xs'
+													transactionType={type}
+												/>
 												<Text
 													weight='semi'
 													className='flex items-center gap-2'
@@ -520,14 +525,9 @@ export default function Transactions({
 														currency={currency}
 														size='sm'
 													/>
-													<b>{currency}</b>{' '}
+													{getCurrencySymbol(currency)}{' '}
 													{formatNumber(amount)}
 												</Text>
-												<TransactionType
-													variant='icon-text'
-													size='xs'
-													transactionType={type}
-												/>
 											</div>
 											<Text size='sm' theme='muted'>
 												{transactionCategory ?? '-'}

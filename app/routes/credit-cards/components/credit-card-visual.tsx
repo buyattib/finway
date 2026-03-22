@@ -36,7 +36,7 @@ export function CreditCardVisual({
 						{brand}
 					</span>
 				</div>
-				<p className='text-xs text-white/70'>{accountName}</p>
+				<p className='text-sm text-white/70'>{accountName}</p>
 			</div>
 			<div>
 				<p className='text-lg tracking-[0.25em] font-mono'>

@@ -1,5 +1,5 @@
 import { Link, Form, useNavigation, data, useLocation } from 'react-router'
-import { ArrowRightLeftIcon, PlusIcon, TrashIcon } from 'lucide-react'
+import { ArrowRightIcon, ArrowRightLeftIcon, PlusIcon, TrashIcon } from 'lucide-react'
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { parseWithZod } from '@conform-to/zod/v4'
@@ -381,30 +381,36 @@ export default function Transfers({
 													</Button>
 												</Form>
 											</div>
-											<div className='flex items-center gap-2'>
-												<AccountTypeIcon
-													size='xs'
-													accountType={fromAccountType}
-												/>
-												<Text size='sm'>{fromAccount}</Text>
-												<ArrowRightLeftIcon className='size-3 text-muted-foreground' />
-												<AccountTypeIcon
-													size='xs'
-													accountType={toAccountType}
-												/>
-												<Text size='sm'>{toAccount}</Text>
+											<div className='flex items-center justify-between'>
+												<div className='flex items-center gap-2'>
+													<AccountTypeIcon
+														size='xs'
+														accountType={fromAccountType}
+													/>
+													<Text size='sm'>{fromAccount}</Text>
+												</div>
+												<div className='flex flex-col items-center gap-1'>
+													<Text
+														weight='semi'
+														className='flex items-center gap-1'
+														size='xs'
+													>
+														<CurrencyIcon
+															currency={currency}
+															size='sm'
+														/>
+														{getCurrencySymbol(currency)} {formatNumber(amount)}
+													</Text>
+													<ArrowRightIcon className='size-4 text-muted-foreground' />
+												</div>
+												<div className='flex items-center gap-2'>
+													<AccountTypeIcon
+														size='xs'
+														accountType={toAccountType}
+													/>
+													<Text size='sm'>{toAccount}</Text>
+												</div>
 											</div>
-											<Text
-												weight='semi'
-												className='flex items-center gap-2'
-												size='sm'
-											>
-												<CurrencyIcon
-													currency={currency}
-													size='sm'
-												/>
-												<b>{currency}</b> {formatNumber(amount)}
-											</Text>
 										</li>
 									)
 								},

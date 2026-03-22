@@ -60,22 +60,22 @@ export function TransactionType({
 		[TRANSACTION_TYPE_EXPENSE]: {
 			icon: BanknoteArrowUpIcon,
 			label: t(`transactionType.${TRANSACTION_TYPE_EXPENSE}`),
-			textCn: 'text-muted-foreground',
+			textCn: 'text-danger',
 		},
 		[TRANSACTION_TYPE_INCOME]: {
 			icon: BanknoteArrowDownIcon,
 			label: t(`transactionType.${TRANSACTION_TYPE_INCOME}`),
-			textCn: 'text-muted-foreground',
+			textCn: 'text-success',
 		},
 		[CC_TRANSACTION_TYPE_CHARGE]: {
 			icon: BanknoteArrowUpIcon,
 			label: t(`ccTransactionType.${CC_TRANSACTION_TYPE_CHARGE}`),
-			textCn: 'text-muted-foreground',
+			textCn: 'text-danger',
 		},
 		[CC_TRANSACTION_TYPE_REFUND]: {
 			icon: BanknoteArrowDownIcon,
 			label: t(`ccTransactionType.${CC_TRANSACTION_TYPE_REFUND}`),
-			textCn: 'text-muted-foreground',
+			textCn: 'text-success',
 		},
 	}[transactionType]
 

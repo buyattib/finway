@@ -1,5 +1,5 @@
 import { Link, Form, useNavigation, data, useLocation } from 'react-router'
-import { ArrowUpDownIcon, PlusIcon, TrashIcon } from 'lucide-react'
+import { RefreshCwIcon, PlusIcon, TrashIcon } from 'lucide-react'
 import { eq, desc, sql } from 'drizzle-orm'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { alias } from 'drizzle-orm/sqlite-core'
@@ -205,7 +205,7 @@ export default function Exchanges({
 			<PageContent>
 				{exchanges.length === 0 && (
 					<EmptyState
-						icon={ArrowUpDownIcon}
+						icon={RefreshCwIcon}
 						title={t('index.emptyTitle')}
 						action={
 							<Button asChild>
@@ -392,9 +392,9 @@ export default function Exchanges({
 														currency={fromCurrency}
 														size='sm'
 													/>
-													<b>{fromCurrency}</b> {formatNumber(fromAmount)}
+													{getCurrencySymbol(fromCurrency)} {formatNumber(fromAmount)}
 												</Text>
-												<ArrowUpDownIcon className='size-3 text-muted-foreground shrink-0' />
+												<RefreshCwIcon className='size-4 text-muted-foreground shrink-0' />
 												<Text
 													weight='semi'
 													className='flex items-center gap-2'
@@ -404,7 +404,7 @@ export default function Exchanges({
 														currency={toCurrency}
 														size='sm'
 													/>
-													<b>{toCurrency}</b> {formatNumber(toAmount)}
+													{getCurrencySymbol(toCurrency)} {formatNumber(toAmount)}
 												</Text>
 											</div>
 											<Text size='xs' theme='muted'>

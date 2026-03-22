@@ -18,7 +18,7 @@ export default {
 		},
 		expensesByCategory: {
 			title: 'Gastos por categoría',
-			noExpenses: 'Sin gastos',
+			noExpenses: 'Sin gastos este mes',
 			createAccount: 'Crear Cuenta',
 			createTransaction: 'Crear Transacción',
 		},

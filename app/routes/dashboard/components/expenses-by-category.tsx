@@ -69,24 +69,14 @@ export function ExpensesByCategory({
 						<Text size='sm' theme='muted'>
 							{t('index.expensesByCategory.noExpenses')}
 						</Text>
-						<div className='flex items-center gap-4 flex-wrap justify-center'>
-							<Button asChild variant='outline'>
-								<Link to='/app/accounts'>
-									<PlusIcon />
-									{t(
-										'index.expensesByCategory.createAccount',
-									)}
-								</Link>
-							</Button>
-							<Button asChild variant='default'>
-								<Link to='/app/transactions'>
-									<PlusIcon />
-									{t(
-										'index.expensesByCategory.createTransaction',
-									)}
-								</Link>
-							</Button>
-						</div>
+						<Button asChild variant='default'>
+							<Link to='/app/transactions'>
+								<PlusIcon />
+								{t(
+									'index.expensesByCategory.createTransaction',
+								)}
+							</Link>
+						</Button>
 					</div>
 				</div>
 			</Layout>

@@ -7,7 +7,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import {
 	ArrowRightLeftIcon,
-	ArrowUpDownIcon,
+	RefreshCwIcon,
 	BanknoteArrowDownIcon,
 	CreditCardIcon,
 	LayoutDashboard,
@@ -75,7 +75,7 @@ const links = [
 	{
 		to: '/app/exchanges',
 		labelKey: 'layout.exchanges' as const,
-		icon: <ArrowUpDownIcon />,
+		icon: <RefreshCwIcon />,
 	},
 	{
 		to: '/app/transaction-categories',

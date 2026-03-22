@@ -94,7 +94,7 @@ export default function CreditCards({
 						}
 					/>
 				) : (
-					<ul className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+					<ul className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'>
 						{creditCards.map(
 							({
 								id,
@@ -117,7 +117,7 @@ export default function CreditCards({
 										<Link
 											to={id}
 											prefetch='intent'
-											className={`bg-linear-to-br ${gradient} rounded-xl p-6 shadow-lg aspect-[1.586/1] max-w-sm flex flex-col justify-between text-white transition-transform hover:scale-[1.02]`}
+											className={`bg-linear-to-br ${gradient} rounded-xl p-6 shadow-lg aspect-[1.586/1] flex flex-col justify-between text-white transition-transform hover:scale-[1.02]`}
 										>
 											<div className='flex items-center justify-between'>
 												<div className='flex items-center gap-2'>
@@ -126,7 +126,7 @@ export default function CreditCards({
 														{brand}
 													</span>
 												</div>
-												<p className='text-xs text-white/70'>
+												<p className='text-sm text-white/70'>
 													{accountName}
 												</p>
 											</div>
