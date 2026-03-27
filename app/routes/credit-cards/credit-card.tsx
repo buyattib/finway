@@ -6,7 +6,7 @@ import {
 	useLocation,
 	useNavigate,
 } from 'react-router'
-import { SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
+import { ArrowLeftIcon, SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq, desc, and } from 'drizzle-orm'
 import { Trans, useTranslation } from 'react-i18next'
@@ -278,6 +278,11 @@ export default function CreditCardDetails({
 
 	return (
 		<PageSection id={id}>
+			<Button asChild variant='link' width='fit' size='icon'>
+				<Link to='/app/credit-cards'>
+					<ArrowLeftIcon />
+				</Link>
+			</Button>
 			<div className='flex flex-col sm:flex-row gap-6 items-start'>
 				<CreditCard
 					brand={brand}

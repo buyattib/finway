@@ -1,5 +1,5 @@
-import { Form, data, useNavigation, useLocation } from 'react-router'
-import { TrashIcon } from 'lucide-react'
+import { Form, Link, data, useNavigation, useLocation } from 'react-router'
+import { ArrowLeftIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq, asc } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
@@ -235,6 +235,11 @@ export default function CreditCardTransaction({
 
 	return (
 		<div className='flex flex-col gap-6'>
+			<Button asChild variant='link' width='fit' size='icon'>
+				<Link to={`/app/credit-cards/${creditCard.id}`}>
+					<ArrowLeftIcon />
+				</Link>
+			</Button>
 			<div className='flex flex-col sm:flex-row gap-6 items-start'>
 				<CreditCard {...creditCard} className='max-w-sm' />
 				<div className='flex sm:items-center sm:ml-auto'>
