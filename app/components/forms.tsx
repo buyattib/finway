@@ -106,7 +106,7 @@ export function NumberField({
 	className,
 	...inputProps
 }: {
-	field: FieldMetadata<string | null>
+	field: FieldMetadata<string | number | null>
 	label?: string
 	className?: string
 } & React.InputHTMLAttributes<HTMLInputElement>) {

@@ -24,6 +24,6 @@ declare global {
 }
 
 export const env = schema.parse({
-	stage: process.env.NODE_ENV,
 	...process.env,
+	stage: process.env.NODE_ENV,
 })
