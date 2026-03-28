@@ -17,32 +17,34 @@ export async function ensureStatementsExist(
 	creditCardId: string,
 	targetDate: Date,
 ) {
-	const latestStatement = await db.query.creditCardStatement.findFirst({
-		where: (s, { eq }) => eq(s.creditCardId, creditCardId),
-		orderBy: (s, { desc }) => [desc(s.closingDate)],
-	})
-
-	if (!latestStatement) {
-		throw new Error('No initial statement found for credit card')
-	}
-
-	const newStatements = []
-
-	let lastClosing = latestStatement.closingDate
-	let lastDue = latestStatement.dueDate
-	while (new Date(lastClosing) < targetDate) {
-		lastClosing = addMonth(lastClosing)
-		lastDue = addMonth(lastDue)
-		newStatements.push({
-			closingDate: lastClosing,
-			dueDate: lastDue,
-			creditCardId,
+	await db.transaction(async tx => {
+		const latestStatement = await tx.query.creditCardStatement.findFirst({
+			where: (s, { eq }) => eq(s.creditCardId, creditCardId),
+			orderBy: (s, { desc }) => [desc(s.closingDate)],
 		})
-	}
 
-	if (newStatements.length > 0) {
-		await db.insert(creditCardStatementTable).values(newStatements)
-	}
+		if (!latestStatement) {
+			throw new Error('No initial statement found for credit card')
+		}
+
+		const newStatements = []
+
+		let lastClosing = latestStatement.closingDate
+		let lastDue = latestStatement.dueDate
+		while (new Date(lastClosing) < targetDate) {
+			lastClosing = addMonth(lastClosing)
+			lastDue = addMonth(lastDue)
+			newStatements.push({
+				closingDate: lastClosing,
+				dueDate: lastDue,
+				creditCardId,
+			})
+		}
+
+		if (newStatements.length > 0) {
+			await tx.insert(creditCardStatementTable).values(newStatements)
+		}
+	})
 }
 
 export async function getStatementForDate(

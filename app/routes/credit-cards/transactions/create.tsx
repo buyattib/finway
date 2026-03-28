@@ -206,6 +206,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 		limit: installmentCount,
 	})
 
+	if (statements.length < installmentCount) {
+		throw new Error(
+			`Expected ${installmentCount} statements but found ${statements.length}`,
+		)
+	}
+
 	await db.transaction(async tx => {
 		const [{ id: creditCardTransactionId }] = await tx
 			.insert(creditCardTransactionTable)
