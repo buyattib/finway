@@ -8,8 +8,7 @@ export default {
 		},
 		title: 'Tarjetas de Crédito',
 		addCreditCardLabel: 'Tarjeta de Crédito',
-		emptyMessage:
-			'Aún no has creado ninguna tarjeta de crédito. Empieza a crearlas <0>aquí</0>',
+		emptyTitle: 'Aún no hay tarjetas de crédito',
 	},
 	details: {
 		meta: {

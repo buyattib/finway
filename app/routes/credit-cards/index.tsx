@@ -79,7 +79,7 @@ export default function CreditCards({
 				{creditCards.length === 0 ? (
 					<EmptyState
 						icon={CreditCardIcon}
-						title={t('index.emptyMessage')}
+						title={t('index.emptyTitle')}
 						action={
 							<Button asChild>
 								<Link to='create'>
