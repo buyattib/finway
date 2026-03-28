@@ -58,6 +58,73 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 			accountId: z.string(t('form.schema.accountRequired')),
 		})
 		.and(ActionSchema)
+		.refine(
+			data => {
+				if (data.action !== ACTION_CREATION) return true
+				return !!data.currentClosingDate
+			},
+			{
+				message: t('form.schema.currentClosingDateRequired'),
+				path: ['currentClosingDate'],
+			},
+		)
+		.refine(
+			data => {
+				if (data.action !== ACTION_CREATION) return true
+				return !!data.currentDueDate
+			},
+			{
+				message: t('form.schema.currentDueDateRequired'),
+				path: ['currentDueDate'],
+			},
+		)
+		.refine(
+			data => {
+				if (data.action !== ACTION_CREATION) return true
+				if (!data.currentClosingDate) return true
+				return new Date(data.currentClosingDate) > new Date()
+			},
+			{
+				message: t('form.schema.currentClosingDateFuture'),
+				path: ['currentClosingDate'],
+			},
+		)
+		.refine(
+			data => {
+				if (data.action !== ACTION_CREATION) return true
+				if (!data.currentDueDate) return true
+				return new Date(data.currentDueDate) > new Date()
+			},
+			{
+				message: t('form.schema.currentDueDateFuture'),
+				path: ['currentDueDate'],
+			},
+		)
+		.refine(
+			data => {
+				if (data.action !== ACTION_CREATION) return true
+				if (!data.currentClosingDate || !data.currentDueDate) return true
+				return new Date(data.currentDueDate) > new Date(data.currentClosingDate)
+			},
+			{
+				message: t('form.schema.dueDateAfterClosingDate'),
+				path: ['currentDueDate'],
+			},
+		)
+		.refine(
+			data => {
+				if (data.action !== ACTION_CREATION) return true
+				if (!data.currentClosingDate || !data.currentDueDate) return true
+				const closing = new Date(data.currentClosingDate)
+				const due = new Date(data.currentDueDate)
+				const diffDays = (due.getTime() - closing.getTime()) / (1000 * 60 * 60 * 24)
+				return diffDays <= 20
+			},
+			{
+				message: t('form.schema.dueDateMaxDifference'),
+				path: ['currentDueDate'],
+			},
+		)
 }
 
 export type CreditCardFormSchema = ReturnType<typeof createCreditCardFormSchema>
