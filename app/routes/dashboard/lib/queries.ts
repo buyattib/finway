@@ -9,6 +9,7 @@ import {
 	creditCard as creditCardTable,
 	creditCardTransaction as creditCardTransactionTable,
 	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
+	creditCardStatement as creditCardStatementTable,
 } from '~/database/schema'
 
 import type { TTransactionType } from '~/lib/types'
@@ -128,7 +129,7 @@ export async function getMonthTransactions({
 		.orderBy(...orderBy())
 }
 
-export async function getMonthCreditCardTotals({
+export async function getCurrentStatementCreditCardTotals({
 	db,
 	ownerId,
 }: {
@@ -148,6 +149,13 @@ export async function getMonthCreditCardTotals({
 			),
 		})
 		.from(creditCardTransactionInstallmentTable)
+		.innerJoin(
+			creditCardStatementTable,
+			eq(
+				creditCardStatementTable.id,
+				creditCardTransactionInstallmentTable.statementId,
+			),
+		)
 		.innerJoin(
 			creditCardTransactionTable,
 			eq(
@@ -173,11 +181,11 @@ export async function getMonthCreditCardTotals({
 		.where(
 			and(
 				gte(
-					creditCardTransactionInstallmentTable.date,
+					creditCardStatementTable.dueDate,
 					monthStart.toISOString(),
 				),
 				lte(
-					creditCardTransactionInstallmentTable.date,
+					creditCardStatementTable.dueDate,
 					monthEnd.toISOString(),
 				),
 			),
@@ -186,7 +194,7 @@ export async function getMonthCreditCardTotals({
 		.orderBy(desc(sql`amount`))
 }
 
-export async function getMonthInstallments({
+export async function getCurrentStatementInstallments({
 	db,
 	ownerId,
 }: {
@@ -216,7 +224,7 @@ export async function getMonthInstallments({
 				sql<string>`CAST(${creditCardTransactionInstallmentTable.amount} / 100.0 AS TEXT)`.as(
 					'installmentAmount',
 				),
-			installmentDate: creditCardTransactionInstallmentTable.date,
+			installmentDate: creditCardStatementTable.dueDate,
 
 			ccTransactionId: creditCardTransactionTable.id,
 			ccTransactionDate: creditCardTransactionTable.date,
@@ -233,6 +241,13 @@ export async function getMonthInstallments({
 			currency: currencyTable.code,
 		})
 		.from(creditCardTransactionInstallmentTable)
+		.innerJoin(
+			creditCardStatementTable,
+			eq(
+				creditCardStatementTable.id,
+				creditCardTransactionInstallmentTable.statementId,
+			),
+		)
 		.innerJoin(
 			creditCardTransactionTable,
 			eq(
@@ -272,14 +287,14 @@ export async function getMonthInstallments({
 		.where(
 			and(
 				gte(
-					creditCardTransactionInstallmentTable.date,
+					creditCardStatementTable.dueDate,
 					monthStart.toISOString(),
 				),
 				lte(
-					creditCardTransactionInstallmentTable.date,
+					creditCardStatementTable.dueDate,
 					monthEnd.toISOString(),
 				),
 			),
 		)
-		.orderBy(desc(creditCardTransactionInstallmentTable.date))
+		.orderBy(desc(creditCardStatementTable.dueDate))
 }

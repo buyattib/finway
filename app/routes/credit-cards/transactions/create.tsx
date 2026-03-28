@@ -42,7 +42,7 @@ import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createCreditCardTransactionFormSchema } from '../lib/schemas'
-import { getFirstInstallmentDate } from '../lib/utils'
+import { getStatementForDate, ensureStatementsExist } from '../lib/statements'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -110,7 +110,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 				const creditCard = await db.query.creditCard.findFirst({
 					where: (creditCard, { eq }) =>
 						eq(creditCard.id, data.creditCardId),
-					columns: { id: true, closingDay: true, dueDay: true },
+					columns: { id: true },
 					with: { account: { columns: { ownerId: true } } },
 				})
 				if (!creditCard || creditCard.account.ownerId !== user.id) {
@@ -179,16 +179,32 @@ export async function action({ request, context }: Route.ActionArgs) {
 		...transactionData
 	} = submission.value
 
-	const creditCard = (await db.query.creditCard.findFirst({
-		where: (creditCard, { eq }) => eq(creditCard.id, creditCardId),
-		columns: { closingDay: true, dueDay: true },
-	}))!
+	const transactionDate = new Date(transactionData.date)
+	const installmentCount = Number(totalInstallments)
 
-	const firstInstallmentDate = getFirstInstallmentDate(
-		new Date(transactionData.date),
-		creditCard.closingDay,
-		creditCard.dueDay,
+	const transactionStatement = await getStatementForDate(
+		db,
+		creditCardId,
+		transactionDate,
 	)
+
+	if (installmentCount > 1) {
+		const lastInstallmentDate = new Date(transactionStatement.closingDate)
+		lastInstallmentDate.setMonth(
+			lastInstallmentDate.getMonth() + installmentCount - 1,
+		)
+		await ensureStatementsExist(db, creditCardId, lastInstallmentDate)
+	}
+
+	const statements = await db.query.creditCardStatement.findMany({
+		where: (s, { eq, gte, and }) =>
+			and(
+				eq(s.creditCardId, creditCardId),
+				gte(s.closingDate, transactionStatement.closingDate),
+			),
+		orderBy: (s, { asc }) => [asc(s.closingDate)],
+		limit: installmentCount,
+	})
 
 	await db.transaction(async tx => {
 		const [{ id: creditCardTransactionId }] = await tx
@@ -199,24 +215,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 			})
 			.returning({ id: creditCardTransactionTable.id })
 
-		const installmentCount = Number(totalInstallments)
 		const baseAmount = Math.floor(transactionData.amount / installmentCount)
 		const remainder = transactionData.amount - baseAmount * installmentCount
 
-		const installments = Array.from(
-			{ length: installmentCount },
-			(_, i) => {
-				const date = new Date(firstInstallmentDate)
-				date.setMonth(date.getMonth() + i)
-
-				return {
-					installmentNumber: i + 1,
-					amount: baseAmount + (i < remainder ? 1 : 0),
-					date: date.toISOString(),
-					creditCardTransactionId,
-				}
-			},
-		)
+		const installments = statements.map((statement, i) => ({
+			installmentNumber: i + 1,
+			amount: baseAmount + (i < remainder ? 1 : 0),
+			statementId: statement.id,
+			creditCardTransactionId,
+		}))
 
 		await tx
 			.insert(creditCardTransactionInstallmentTable)

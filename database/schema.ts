@@ -206,9 +206,6 @@ export const creditCard = sqliteTable(
 		expiryMonth: text().notNull(),
 		expiryYear: text().notNull(),
 
-		closingDay: integer().notNull(),
-		dueDay: integer().notNull(),
-
 		accountId: text().notNull(),
 	},
 	table => [
@@ -218,6 +215,26 @@ export const creditCard = sqliteTable(
 			foreignColumns: [account.id],
 		}).onDelete('cascade'),
 		index('credit_cards_accountId_idx').on(table.accountId),
+	],
+)
+
+export const creditCardStatement = sqliteTable(
+	'credit_card_statements',
+	{
+		...base,
+		id: cuid2().defaultRandom().primaryKey(),
+		closingDate: text().notNull(),
+		dueDate: text().notNull(),
+
+		creditCardId: text().notNull(),
+	},
+	table => [
+		foreignKey({
+			name: 'credit_card_statements_credit_cards_fk',
+			columns: [table.creditCardId],
+			foreignColumns: [creditCard.id],
+		}).onDelete('cascade'),
+		index('credit_card_statements_creditCardId_idx').on(table.creditCardId),
 	],
 )
 
@@ -264,8 +281,8 @@ export const creditCardTransactionInstallment = sqliteTable(
 		id: cuid2().defaultRandom().primaryKey(),
 		installmentNumber: integer().notNull(),
 		amount: integer().notNull(),
-		date: text().notNull(),
 
+		statementId: text().notNull(),
 		creditCardTransactionId: text().notNull(),
 	},
 	table => [
@@ -274,9 +291,17 @@ export const creditCardTransactionInstallment = sqliteTable(
 			columns: [table.creditCardTransactionId],
 			foreignColumns: [creditCardTransaction.id],
 		}).onDelete('cascade'),
+		foreignKey({
+			name: 'credit_card_transaction_installments_credit_card_statements_fk',
+			columns: [table.statementId],
+			foreignColumns: [creditCardStatement.id],
+		}).onDelete('cascade'),
 		index(
 			'credit_card_transaction_installments_creditCardTransactionId_idx',
 		).on(table.creditCardTransactionId),
+		index(
+			'credit_card_transaction_installments_statementId_idx',
+		).on(table.statementId),
 	],
 )
 
@@ -327,12 +352,27 @@ export const exchangeRelations = relations(exchange, ({ one }) => ({
 	}),
 }))
 
-export const creditCardRelations = relations(creditCard, ({ one }) => ({
-	account: one(account, {
-		fields: [creditCard.accountId],
-		references: [account.id],
+export const creditCardRelations = relations(
+	creditCard,
+	({ one, many }) => ({
+		account: one(account, {
+			fields: [creditCard.accountId],
+			references: [account.id],
+		}),
+		statements: many(creditCardStatement),
 	}),
-}))
+)
+
+export const creditCardStatementRelations = relations(
+	creditCardStatement,
+	({ one, many }) => ({
+		creditCard: one(creditCard, {
+			fields: [creditCardStatement.creditCardId],
+			references: [creditCard.id],
+		}),
+		installments: many(creditCardTransactionInstallment),
+	}),
+)
 
 export const creditCardTransactionRelations = relations(
 	creditCardTransaction,
@@ -358,6 +398,10 @@ export const creditCardTransactionInstallmentRelations = relations(
 		creditCardTransaction: one(creditCardTransaction, {
 			fields: [creditCardTransactionInstallment.creditCardTransactionId],
 			references: [creditCardTransaction.id],
+		}),
+		statement: one(creditCardStatement, {
+			fields: [creditCardTransactionInstallment.statementId],
+			references: [creditCardStatement.id],
 		}),
 	}),
 )

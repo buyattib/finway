@@ -9,6 +9,7 @@ import type { Route } from './+types/transaction'
 import {
 	creditCardTransaction as creditCardTransactionTable,
 	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
+	creditCardStatement as creditCardStatementTable,
 } from '~/database/schema'
 import {
 	createToastHeaders,
@@ -63,8 +64,6 @@ export async function loader({
 			last4: true,
 			expiryMonth: true,
 			expiryYear: true,
-			closingDay: true,
-			dueDay: true,
 		},
 		with: {
 			account: {
@@ -111,9 +110,16 @@ export async function loader({
 			installmentNumber:
 				creditCardTransactionInstallmentTable.installmentNumber,
 			amount: creditCardTransactionInstallmentTable.amount,
-			date: creditCardTransactionInstallmentTable.date,
+			date: creditCardStatementTable.dueDate,
 		})
 		.from(creditCardTransactionInstallmentTable)
+		.innerJoin(
+			creditCardStatementTable,
+			eq(
+				creditCardTransactionInstallmentTable.statementId,
+				creditCardStatementTable.id,
+			),
+		)
 		.where(
 			eq(
 				creditCardTransactionInstallmentTable.creditCardTransactionId,
@@ -121,6 +127,15 @@ export async function loader({
 			),
 		)
 		.orderBy(asc(creditCardTransactionInstallmentTable.installmentNumber))
+
+	const currentStatement = await db.query.creditCardStatement.findFirst({
+		where: (s, { eq, gte, and }) =>
+			and(
+				eq(s.creditCardId, creditCardId),
+				gte(s.closingDate, new Date().toISOString()),
+			),
+		orderBy: (s, { asc }) => [asc(s.closingDate)],
+	})
 
 	const {
 		account: { ownerId: _ownerId, ...account },
@@ -132,6 +147,8 @@ export async function loader({
 	return {
 		creditCard: {
 			...creditCardData,
+			closingDate: currentStatement?.closingDate ?? '',
+			dueDate: currentStatement?.dueDate ?? '',
 			accountName: account.name,
 		},
 		transaction: {

@@ -11,8 +11,8 @@ import {
 
 import {
 	getMonthTransactions,
-	getMonthCreditCardTotals,
-	getMonthInstallments,
+	getCurrentStatementCreditCardTotals,
+	getCurrentStatementInstallments,
 } from './lib/queries'
 import type {
 	CategoryResponse,
@@ -66,13 +66,13 @@ export async function loader({ context }: Route.LoaderArgs) {
 			transactionType: TRANSACTION_TYPE_INCOME,
 			group: 'currency',
 		}),
-		monthCreditCardTotals: await getMonthCreditCardTotals({
+		monthCreditCardTotals: await getCurrentStatementCreditCardTotals({
 			db,
 			ownerId: user.id,
 		}),
 	}
 
-	const monthInstallments = await getMonthInstallments({
+	const monthInstallments = await getCurrentStatementInstallments({
 		db,
 		ownerId: user.id,
 	})

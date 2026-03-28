@@ -113,6 +113,13 @@
       "when": 1773747220956,
       "tag": "0015_move_currency_cc_transaction",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1774709184001,
+      "tag": "0016_update_cc_models",
+      "breakpoints": true
     }
   ]
 }

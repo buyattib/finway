@@ -38,8 +38,6 @@ export async function loader({ context }: Route.LoaderArgs) {
 			brand: creditCardTable.brand,
 			expiryMonth: creditCardTable.expiryMonth,
 			expiryYear: creditCardTable.expiryYear,
-			closingDay: creditCardTable.closingDay,
-			dueDay: creditCardTable.dueDay,
 			accountName: accountTable.name,
 		})
 		.from(creditCardTable)
@@ -100,8 +98,6 @@ export default function CreditCards({
 								brand,
 								expiryMonth,
 								expiryYear,
-								closingDay,
-								dueDay,
 								accountName,
 							}) => (
 								<li key={id}>
@@ -115,8 +111,6 @@ export default function CreditCards({
 											last4={last4}
 											expiryMonth={expiryMonth}
 											expiryYear={expiryYear}
-											closingDay={closingDay}
-											dueDay={dueDay}
 											accountName={accountName}
 										/>
 									</Link>

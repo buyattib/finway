@@ -20,6 +20,7 @@ import {
 } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
 import {
+	DateField,
 	ErrorList,
 	NumberField,
 	SelectField,
@@ -152,20 +153,18 @@ export function CreditCardForm({
 						/>
 					</div>
 
-					<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-						<NumberField
-							label={t('form.closingDayLabel')}
-							field={fields.closingDay}
-							placeholder={t('form.closingDayPlaceholder')}
-							maxLength={2}
-						/>
-						<NumberField
-							label={t('form.dueDayLabel')}
-							field={fields.dueDay}
-							placeholder={t('form.dueDayPlaceholder')}
-							maxLength={2}
-						/>
-					</div>
+					{!isEditing && (
+						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
+							<DateField
+								label={t('form.currentClosingDateLabel')}
+								field={fields.currentClosingDate}
+							/>
+							<DateField
+								label={t('form.currentDueDateLabel')}
+								field={fields.currentDueDate}
+							/>
+						</div>
+					)}
 
 					{accounts.length !== 0 ? (
 						<ComboboxField

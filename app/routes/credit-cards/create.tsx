@@ -2,7 +2,10 @@ import { data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
 import type { Route } from './+types/create'
 
-import { creditCard as creditCardTable } from '~/database/schema'
+import {
+	creditCard as creditCardTable,
+	creditCardStatement as creditCardStatementTable,
+} from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
@@ -45,8 +48,8 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			brand: '',
 			expiryMonth: '',
 			expiryYear: '',
-			closingDay: 0,
-			dueDay: 0,
+			currentClosingDate: '',
+			currentDueDate: '',
 			accountId,
 		},
 		meta: {
@@ -89,9 +92,23 @@ export async function action({ request, context }: Route.ActionArgs) {
 		})
 	}
 
-	const { action: _action, ...creditCardData } = submission.value
+	const {
+		action: _action,
+		currentClosingDate,
+		currentDueDate,
+		...creditCardData
+	} = submission.value
 
-	await db.insert(creditCardTable).values(creditCardData)
+	const [{ id: creditCardId }] = await db
+		.insert(creditCardTable)
+		.values(creditCardData)
+		.returning({ id: creditCardTable.id })
+
+	await db.insert(creditCardStatementTable).values({
+		closingDate: currentClosingDate!,
+		dueDate: currentDueDate!,
+		creditCardId,
+	})
 
 	return await redirectWithToast('/app/credit-cards', request, {
 		type: 'success',

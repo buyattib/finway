@@ -49,6 +49,7 @@ import { CreditCard } from '~/components/credit-card'
 
 import { CreditCardTransactionFilters } from './components/filters'
 import { DeleteCreditCardFormSchema } from './lib/schemas'
+import { ensureStatementsExist } from './lib/statements'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {
@@ -85,8 +86,6 @@ export async function loader({
 			last4: true,
 			expiryMonth: true,
 			expiryYear: true,
-			closingDay: true,
-			dueDay: true,
 		},
 		with: {
 			account: {
@@ -96,6 +95,21 @@ export async function loader({
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
 		throw new Response(t('details.loader.notFoundError'), { status: 404 })
+	}
+
+	await ensureStatementsExist(db, creditCardId, new Date())
+
+	const currentStatement = await db.query.creditCardStatement.findFirst({
+		where: (s, { eq, gte, and }) =>
+			and(
+				eq(s.creditCardId, creditCardId),
+				gte(s.closingDate, new Date().toISOString()),
+			),
+		orderBy: (s, { asc }) => [asc(s.closingDate)],
+	})
+
+	if (!currentStatement) {
+		throw new Error('There is a problem with your credit card statements')
 	}
 
 	const { account, ...creditCardData } = creditCard
@@ -170,6 +184,8 @@ export async function loader({
 	return {
 		creditCard: {
 			...creditCardData,
+			closingDate: currentStatement.closingDate,
+			dueDate: currentStatement.dueDate,
 			accountName: account.name,
 		},
 		transactions: transactions.map(t => ({
@@ -256,8 +272,8 @@ export default function CreditCardDetails({
 		last4,
 		expiryMonth,
 		expiryYear,
-		closingDay,
-		dueDay,
+		closingDate,
+		dueDate,
 		accountName,
 	} = creditCard
 	const location = useLocation()
@@ -289,8 +305,8 @@ export default function CreditCardDetails({
 					last4={last4}
 					expiryMonth={expiryMonth}
 					expiryYear={expiryYear}
-					closingDay={closingDay}
-					dueDay={dueDay}
+					closingDate={closingDate}
+					dueDate={dueDate}
 					accountName={accountName}
 					className='w-full max-w-sm shrink-0'
 				/>
