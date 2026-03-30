@@ -498,7 +498,12 @@ export function DateField({
 		initialValue: fieldProps.defaultValue,
 	})
 
-	const dateValue = control.value ? new Date(control.value) : undefined
+	const dateValue = control.value
+		? (() => {
+				const d = new Date(control.value)
+				return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+			})()
+		: undefined
 
 	return (
 		<div className={cn('flex flex-col gap-1 w-full', className)}>
@@ -538,7 +543,8 @@ export function DateField({
 						selected={dateValue}
 						onSelect={date => {
 							if (!date) return
-							control.change(date.toISOString())
+							const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+							control.change(utcDate.toISOString())
 							setOpen(false)
 						}}
 					/>

@@ -3,11 +3,11 @@ import { creditCardStatement as creditCardStatementTable } from '~/database/sche
 
 function addMonth(dateStr: string): string {
 	const date = new Date(dateStr)
-	const targetDay = date.getDate()
-	date.setMonth(date.getMonth() + 1)
+	const targetDay = date.getUTCDate()
+	date.setUTCMonth(date.getUTCMonth() + 1)
 	// Handle overflow (e.g., Jan 31 -> Feb 28)
-	if (date.getDate() !== targetDay) {
-		date.setDate(0)
+	if (date.getUTCDate() !== targetDay) {
+		date.setUTCDate(0)
 	}
 	return date.toISOString()
 }

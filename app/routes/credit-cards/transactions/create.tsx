@@ -188,13 +188,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 		transactionDate,
 	)
 
-	if (installmentCount > 1) {
-		const lastInstallmentDate = new Date(transactionStatement.closingDate)
-		lastInstallmentDate.setMonth(
-			lastInstallmentDate.getMonth() + installmentCount - 1,
-		)
-		await ensureStatementsExist(db, creditCardId, lastInstallmentDate)
-	}
+	const lastInstallmentDate = new Date(transactionStatement.closingDate)
+	lastInstallmentDate.setMonth(
+		lastInstallmentDate.getMonth() + installmentCount - 1,
+	)
+	await ensureStatementsExist(db, creditCardId, lastInstallmentDate)
 
 	const statements = await db.query.creditCardStatement.findMany({
 		where: (s, { eq, gte, and }) =>
