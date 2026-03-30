@@ -6,8 +6,6 @@ export default {
 		},
 		title: 'Transfers',
 		addTransferLabel: 'Transfer',
-		emptyMessage:
-			'You have not created any transfer yet. Start creating them <0>here</0>.',
 		table: {
 			date: 'Date',
 			amount: 'Amount',
@@ -15,7 +13,7 @@ export default {
 			toAccount: 'To Account',
 			actions: 'Actions',
 		},
-		emptyTitle: 'No transfers yet',
+		emptyTitle: 'You have not created any transfers yet',
 		deleteAriaLabel: 'Delete transfer',
 		action: {
 			deleteErrorToast: 'Could not delete transfer',

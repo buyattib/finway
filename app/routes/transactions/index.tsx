@@ -2,7 +2,7 @@ import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { PlusIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { eq, desc, sql, and } from 'drizzle-orm'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
@@ -266,22 +266,7 @@ export default function Transactions({
 						title={
 							hasFilters
 								? t('index.emptyFilteredMessage')
-								: t('index.emptyMessage')
-						}
-						description={
-							!hasFilters ? (
-								<Trans
-									ns='transactions'
-									i18nKey='index.emptyMessage'
-									components={[
-										<Link
-											key='0'
-											to='create'
-											className='text-primary'
-										/>,
-									]}
-								/>
-							) : undefined
+								: t('index.emptyTitle')
 						}
 					/>
 				)}

@@ -8,8 +8,6 @@ export default {
 		},
 		title: 'Transferencias',
 		addTransferLabel: 'Transferencia',
-		emptyMessage:
-			'Aún no has creado ninguna transferencia. Empieza a crearlas <0>aquí</0>.',
 		table: {
 			date: 'Fecha',
 			amount: 'Monto',
@@ -17,7 +15,7 @@ export default {
 			toAccount: 'Cuenta de destino',
 			actions: 'Acciones',
 		},
-		emptyTitle: 'Aún no hay transferencias',
+		emptyTitle: 'Aún no has creado ninguna transferencia',
 		deleteAriaLabel: 'Eliminar transferencia',
 		action: {
 			deleteErrorToast: 'No se pudo eliminar la transferencia',

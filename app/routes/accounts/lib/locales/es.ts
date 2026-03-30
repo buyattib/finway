@@ -9,8 +9,7 @@ export default {
 		title: 'Cuentas',
 		addAccountLabel: 'Cuenta',
 		searchPlaceholder: 'Buscar cuentas por nombre',
-		emptyMessage:
-			'Aún no has creado ninguna cuenta. Empieza a crearlas <0>aquí</0>.',
+		emptyTitle: 'Aún no has creado ninguna cuenta',
 		emptySearchMessage:
 			'No se encontraron cuentas para la búsqueda {{search}}',
 		noBalances: 'Sin balances aún',

@@ -6,8 +6,7 @@ export default {
 		},
 		title: 'Transactions ({{total}})',
 		addTransactionLabel: 'Transaction',
-		emptyMessage:
-			'You have not created any transactions yet. Start creating them <0>here</0>.',
+		emptyTitle: 'You have not created any transactions yet',
 		emptyFilteredMessage: 'No transactions found with applied filters',
 		table: {
 			date: 'Date',

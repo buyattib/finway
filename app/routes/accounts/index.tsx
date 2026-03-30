@@ -14,7 +14,7 @@ import {
 	WalletIcon,
 } from 'lucide-react'
 import { desc, eq, and, like, sql } from 'drizzle-orm'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
@@ -171,24 +171,7 @@ export default function Accounts({
 						title={
 							search
 								? t('index.emptySearchMessage', { search })
-								: t('index.emptyTitle', {
-										defaultValue: 'No accounts yet',
-									})
-						}
-						description={
-							!search ? (
-								<Trans
-									ns='accounts'
-									i18nKey='index.emptyMessage'
-									components={[
-										<Link
-											key='0'
-											to='create'
-											className='text-primary'
-										/>,
-									]}
-								/>
-							) : undefined
+								: t('index.emptyTitle')
 						}
 						action={
 							!search ? (

@@ -8,8 +8,7 @@ export default {
 		},
 		title: 'Categorías de Transacción',
 		addCategoryLabel: 'Categoría',
-		emptyMessage:
-			'Aún no has creado ninguna categoría de transacción. Empieza a crearlas <0>aquí</0>.',
+		emptyTitle: 'Aún no has creado ninguna categoría',
 		deleteAriaLabel: 'Eliminar categoría {{name}}',
 		deleteTooltip:
 			'Eliminar una categoría no se puede deshacer y las transacciones asociadas serán eliminadas.',

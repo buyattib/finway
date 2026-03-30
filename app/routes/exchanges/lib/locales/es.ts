@@ -8,8 +8,6 @@ export default {
 		},
 		title: 'Intercambios',
 		addExchangeLabel: 'Intercambio',
-		emptyMessage:
-			'Aún no has creado ningún intercambio. Empieza a crearlos <0>aquí</0>.',
 		table: {
 			date: 'Fecha',
 			account: 'Cuenta',
@@ -18,7 +16,7 @@ export default {
 			rate: 'Tasa',
 			actions: 'Acciones',
 		},
-		emptyTitle: 'Aún no hay intercambios',
+		emptyTitle: 'Aún no has creado ningún intercambio',
 		deleteAriaLabel: 'Eliminar intercambio',
 		action: {
 			deleteErrorToast: 'No se pudo eliminar el intercambio',

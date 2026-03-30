@@ -6,7 +6,7 @@ export default {
 		},
 		title: 'Credit Cards',
 		addCreditCardLabel: 'Credit Card',
-		emptyTitle: 'No credit cards yet',
+		emptyTitle: 'You have not created any credit cards yet',
 	},
 	details: {
 		meta: {

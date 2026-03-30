@@ -8,8 +8,7 @@ export default {
 		},
 		title: 'Transacciones ({{total}})',
 		addTransactionLabel: 'Transacción',
-		emptyMessage:
-			'Aún no has creado ninguna transacción. Empieza a crearlas <0>aquí</0>.',
+		emptyTitle: 'Aún no has creado ninguna transacción',
 		emptyFilteredMessage:
 			'No se encontraron transacciones con los filtros aplicados',
 		table: {

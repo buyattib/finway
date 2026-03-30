@@ -6,8 +6,6 @@ export default {
 		},
 		title: 'Exchanges',
 		addExchangeLabel: 'Exchange',
-		emptyMessage:
-			'You have not created any exchange yet. Start creating them <0>here</0>.',
 		table: {
 			date: 'Date',
 			account: 'Account',
@@ -16,7 +14,7 @@ export default {
 			rate: 'Rate',
 			actions: 'Actions',
 		},
-		emptyTitle: 'No exchanges yet',
+		emptyTitle: 'You have not created any exchanges yet',
 		deleteAriaLabel: 'Delete exchange',
 		action: {
 			deleteErrorToast: 'Could not delete exchange',

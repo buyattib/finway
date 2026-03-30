@@ -22,7 +22,6 @@ export default {
 		expensesByMonth: {
 			title: 'Expenses a year back',
 			noExpenses: 'No expenses',
-			createAccount: 'Create Account',
 			createTransaction: 'Create Transaction',
 		},
 		monthInstallments: {

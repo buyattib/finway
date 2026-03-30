@@ -64,22 +64,14 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 						<Text size='sm' theme='muted'>
 							{t('index.expensesByMonth.noExpenses')}
 						</Text>
-						<div className='flex items-center gap-4'>
-							<Button asChild variant='outline'>
-								<Link to='/accounts'>
-									<PlusIcon />
-									{t('index.expensesByMonth.createAccount')}
-								</Link>
-							</Button>
-							<Button asChild variant='default'>
-								<Link to='/transactions'>
-									<PlusIcon />
-									{t(
-										'index.expensesByMonth.createTransaction',
-									)}
-								</Link>
-							</Button>
-						</div>
+						<Button asChild variant='default'>
+							<Link to='/transactions'>
+								<PlusIcon />
+								{t(
+									'index.expensesByMonth.createTransaction',
+								)}
+							</Link>
+						</Button>
 					</div>
 				</div>
 			</Layout>

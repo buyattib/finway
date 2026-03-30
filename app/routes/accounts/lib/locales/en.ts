@@ -7,8 +7,7 @@ export default {
 		title: 'Accounts',
 		addAccountLabel: 'Account',
 		searchPlaceholder: 'Search accounts by name',
-		emptyMessage:
-			'You have not created any accounts yet. Start creating them <0>here</0>.',
+		emptyTitle: 'You have not created any accounts yet',
 		emptySearchMessage: 'No accounts found for the search {{search}}',
 		noBalances: 'No balances yet',
 		editAction: 'Edit',

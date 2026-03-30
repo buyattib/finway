@@ -195,9 +195,7 @@ export default function TransactionCategories({
 				{transactionCategories.length === 0 && (
 					<EmptyState
 						icon={TagIcon}
-						title={t('index.emptyTitle', {
-							defaultValue: 'No categories yet',
-						})}
+						title={t('index.emptyTitle')}
 						action={
 							<Button asChild>
 								<Link to='create'>

@@ -6,8 +6,7 @@ export default {
 		},
 		title: 'Transaction Categories',
 		addCategoryLabel: 'Category',
-		emptyMessage:
-			'You have not created any transaction category yet. Start creating them <0>here</0>.',
+		emptyTitle: 'You have not created any categories yet',
 		deleteAriaLabel: 'Delete category {{name}}',
 		deleteTooltip:
 			'Deleting a category cannot be undone and transactions associated with it will be deleted.',
