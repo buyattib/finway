@@ -81,28 +81,6 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 		.refine(
 			data => {
 				if (data.action !== ACTION_CREATION) return true
-				if (!data.currentClosingDate) return true
-				return new Date(data.currentClosingDate) > new Date()
-			},
-			{
-				message: t('form.schema.currentClosingDateFuture'),
-				path: ['currentClosingDate'],
-			},
-		)
-		.refine(
-			data => {
-				if (data.action !== ACTION_CREATION) return true
-				if (!data.currentDueDate) return true
-				return new Date(data.currentDueDate) > new Date()
-			},
-			{
-				message: t('form.schema.currentDueDateFuture'),
-				path: ['currentDueDate'],
-			},
-		)
-		.refine(
-			data => {
-				if (data.action !== ACTION_CREATION) return true
 				if (!data.currentClosingDate || !data.currentDueDate) return true
 				return new Date(data.currentDueDate) > new Date(data.currentClosingDate)
 			},

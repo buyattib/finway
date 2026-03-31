@@ -76,8 +76,6 @@ filters: {
 			expiryYearFuture: 'Must be a valid year in the future',
 			currentClosingDateRequired: 'Closing date is required',
 			currentDueDateRequired: 'Due date is required',
-			currentClosingDateFuture: 'Closing date must be in the future',
-			currentDueDateFuture: 'Due date must be in the future',
 			dueDateAfterClosingDate: 'Due date must be after closing date',
 			dueDateMaxDifference: 'Due date must be within 20 days of closing date',
 			accountRequired: 'Account is required',

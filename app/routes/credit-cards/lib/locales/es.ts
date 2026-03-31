@@ -80,8 +80,6 @@ filters: {
 			expiryYearFuture: 'Debe ser un año válido en el futuro',
 			currentClosingDateRequired: 'La fecha de cierre es requerida',
 			currentDueDateRequired: 'La fecha de vencimiento es requerida',
-			currentClosingDateFuture: 'La fecha de cierre debe ser en el futuro',
-			currentDueDateFuture: 'La fecha de vencimiento debe ser en el futuro',
 			dueDateAfterClosingDate: 'La fecha de vencimiento debe ser posterior a la fecha de cierre',
 			dueDateMaxDifference: 'La fecha de vencimiento debe estar dentro de los 20 días de la fecha de cierre',
 			accountRequired: 'La cuenta es requerida',

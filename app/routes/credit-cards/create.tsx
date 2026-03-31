@@ -110,7 +110,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		creditCardId,
 	})
 
-	return await redirectWithToast('/app/credit-cards', request, {
+	return await redirectWithToast(`/app/credit-cards/${creditCardId}`, request, {
 		type: 'success',
 		title: t('form.create.action.successToast'),
 	})
