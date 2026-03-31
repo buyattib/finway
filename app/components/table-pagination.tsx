@@ -20,14 +20,12 @@ export function TablePagination({ page, pages }: TablePaginationProps) {
 			<PaginationContent>
 				<PaginationItem>
 					<PaginationPrevious
-						prefetch='intent'
 						to={{ search: `?page=${page === 1 ? 1 : page - 1}` }}
 					/>
 				</PaginationItem>
 				{Array.from(Array(pages).keys()).map(v => (
 					<PaginationItem key={v}>
 						<PaginationLink
-							prefetch='intent'
 							to={{ search: `?page=${v + 1}` }}
 							isActive={page === v + 1}
 						>
@@ -37,7 +35,6 @@ export function TablePagination({ page, pages }: TablePaginationProps) {
 				))}
 				<PaginationItem>
 					<PaginationNext
-						prefetch='intent'
 						to={{
 							search: `?page=${page === pages ? pages : page + 1}`,
 						}}

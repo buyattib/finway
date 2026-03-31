@@ -193,7 +193,7 @@ export default function Exchanges({
 					autoFocus
 					disabled={isDeleting}
 				>
-					<Link to='create' prefetch='intent'>
+					<Link to='create'>
 						<PlusIcon aria-hidden />
 						<span className='sm:inline hidden'>
 							{t('index.addExchangeLabel')}

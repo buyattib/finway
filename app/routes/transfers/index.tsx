@@ -208,7 +208,7 @@ export default function Transfers({
 					autoFocus
 					disabled={isDeleting}
 				>
-					<Link to='create' prefetch='intent'>
+					<Link to='create'>
 						<PlusIcon aria-hidden />
 						<span className='sm:inline hidden'>
 							{t('index.addTransferLabel')}

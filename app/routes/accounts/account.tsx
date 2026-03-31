@@ -144,7 +144,7 @@ export default function AccountDetails({
 				</div>
 				<div className='flex items-center gap-2 shrink-0'>
 					<Button size='icon' variant='outline' asChild>
-						<Link to='edit' prefetch='intent'>
+						<Link to='edit'>
 							<SquarePenIcon />
 						</Link>
 					</Button>

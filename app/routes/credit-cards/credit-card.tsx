@@ -312,7 +312,7 @@ export default function CreditCardDetails({
 				/>
 				<div className='flex sm:items-center gap-2 sm:ml-auto'>
 					<Button size='icon' variant='outline' asChild>
-						<Link to='edit' prefetch='intent'>
+						<Link to='edit'>
 							<SquarePenIcon />
 							<span className='sr-only'>
 								{t('details.editAriaLabel', {
@@ -367,7 +367,7 @@ export default function CreditCardDetails({
 						})}
 					</Title>
 					<Button asChild variant='default'>
-						<Link to='transactions/create' prefetch='intent'>
+						<Link to='transactions/create'>
 							<PlusIcon aria-hidden />
 							<span className='sm:inline hidden'>
 								{t('details.addTransactionLabel')}

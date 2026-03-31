@@ -132,7 +132,7 @@ export default function Accounts({
 					{t('index.title')}
 				</Title>
 				<Button asChild variant='default' autoFocus>
-					<Link to='create' prefetch='intent'>
+					<Link to='create'>
 						<PlusIcon aria-hidden />
 						<span className='sm:inline hidden'>
 							{t('index.addAccountLabel')}
@@ -200,8 +200,7 @@ export default function Accounts({
 									<div className='flex flex-col gap-0.5'>
 										<Link
 											to={id}
-											prefetch='intent'
-										>
+											>
 											<Title id={id} level='h5'>
 												{name}
 											</Title>
