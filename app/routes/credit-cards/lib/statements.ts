@@ -12,6 +12,16 @@ function addMonth(dateStr: string): string {
 	return date.toISOString()
 }
 
+function subtractMonth(dateStr: string): string {
+	const date = new Date(dateStr)
+	const targetDay = date.getUTCDate()
+	date.setUTCMonth(date.getUTCMonth() - 1)
+	if (date.getUTCDate() !== targetDay) {
+		date.setUTCDate(0)
+	}
+	return date.toISOString()
+}
+
 export async function ensureStatementsExist(
 	db: DB,
 	creditCardId: string,
@@ -22,13 +32,13 @@ export async function ensureStatementsExist(
 			where: (s, { eq }) => eq(s.creditCardId, creditCardId),
 			orderBy: (s, { desc }) => [desc(s.closingDate)],
 		})
-
 		if (!latestStatement) {
-			throw new Error('No initial statement found for credit card')
+			throw new Error('No latest statement found for credit card')
 		}
 
 		const newStatements = []
 
+		// Generate future statements
 		let lastClosing = latestStatement.closingDate
 		let lastDue = latestStatement.dueDate
 		while (new Date(lastClosing) < targetDate) {
@@ -37,6 +47,27 @@ export async function ensureStatementsExist(
 			newStatements.push({
 				closingDate: lastClosing,
 				dueDate: lastDue,
+				creditCardId,
+			})
+		}
+
+		const earliestStatement = await tx.query.creditCardStatement.findFirst({
+			where: (s, { eq }) => eq(s.creditCardId, creditCardId),
+			orderBy: (s, { asc }) => [asc(s.closingDate)],
+		})
+		if (!earliestStatement) {
+			throw new Error('No earliest statement found for credit card')
+		}
+
+		// Generate past statements
+		let firstClosing = earliestStatement.closingDate
+		let firstDue = earliestStatement.dueDate
+		while (new Date(firstClosing) > targetDate) {
+			firstClosing = subtractMonth(firstClosing)
+			firstDue = subtractMonth(firstDue)
+			newStatements.push({
+				closingDate: firstClosing,
+				dueDate: firstDue,
 				creditCardId,
 			})
 		}
