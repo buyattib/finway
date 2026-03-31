@@ -47,41 +47,17 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 					{ message: t('form.schema.expiryYearFuture') },
 				),
 
-			currentClosingDate: z
-				.iso
-				.datetime(t('form.schema.currentClosingDateRequired'))
-				.optional(),
-			currentDueDate: z
-				.iso
-				.datetime(t('form.schema.currentDueDateRequired'))
-				.optional(),
+			currentClosingDate: z.iso.datetime(
+				t('form.schema.currentClosingDateRequired'),
+			),
+			currentDueDate: z.iso.datetime(
+				t('form.schema.currentDueDateRequired'),
+			),
 			accountId: z.string(t('form.schema.accountRequired')),
 		})
 		.and(ActionSchema)
 		.refine(
 			data => {
-				if (data.action !== ACTION_CREATION) return true
-				return !!data.currentClosingDate
-			},
-			{
-				message: t('form.schema.currentClosingDateRequired'),
-				path: ['currentClosingDate'],
-			},
-		)
-		.refine(
-			data => {
-				if (data.action !== ACTION_CREATION) return true
-				return !!data.currentDueDate
-			},
-			{
-				message: t('form.schema.currentDueDateRequired'),
-				path: ['currentDueDate'],
-			},
-		)
-		.refine(
-			data => {
-				if (data.action !== ACTION_CREATION) return true
-				if (!data.currentClosingDate || !data.currentDueDate) return true
 				return new Date(data.currentDueDate) > new Date(data.currentClosingDate)
 			},
 			{
@@ -91,8 +67,6 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 		)
 		.refine(
 			data => {
-				if (data.action !== ACTION_CREATION) return true
-				if (!data.currentClosingDate || !data.currentDueDate) return true
 				const closing = new Date(data.currentClosingDate)
 				const due = new Date(data.currentDueDate)
 				const diffDays = (due.getTime() - closing.getTime()) / (1000 * 60 * 60 * 24)

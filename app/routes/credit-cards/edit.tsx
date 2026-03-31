@@ -54,13 +54,23 @@ export async function loader({
 			account: {
 				columns: { ownerId: true },
 			},
+			statements: {
+				orderBy: (s, { desc }) => [desc(s.closingDate)],
+				limit: 1,
+				columns: { closingDate: true, dueDate: true },
+			},
 		},
 	})
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
 		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
 
-	const { account: _account, ...initialData } = creditCard
+	const { account: _account, statements, ...rest } = creditCard
+	const initialData = {
+		...rest,
+		currentClosingDate: statements[0]?.closingDate ?? '',
+		currentDueDate: statements[0]?.dueDate ?? '',
+	}
 	const selectData = await getSelectData(db, user.id)
 
 	return {

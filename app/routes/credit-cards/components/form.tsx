@@ -153,7 +153,20 @@ export function CreditCardForm({
 						/>
 					</div>
 
-					{!isEditing && (
+					{isEditing ? (
+						<>
+							<input
+								type='hidden'
+								name={fields.currentClosingDate.name}
+								value={fields.currentClosingDate.value}
+							/>
+							<input
+								type='hidden'
+								name={fields.currentDueDate.name}
+								value={fields.currentDueDate.value}
+							/>
+						</>
+					) : (
 						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 							<DateField
 								label={t('form.currentClosingDateLabel')}
