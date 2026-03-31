@@ -49,9 +49,10 @@ export function formatNumber(
 }
 
 export function initializeDate() {
-	const date = new Date()
-	date.setHours(0, 0, 0, 0)
-	return date
+	const now = new Date()
+	return new Date(
+		Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
+	)
 }
 
 export function formatDate(
