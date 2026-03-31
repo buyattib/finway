@@ -1,5 +1,10 @@
 import { Link, Form, useNavigation, data, useLocation } from 'react-router'
-import { ArrowRightIcon, ArrowRightLeftIcon, PlusIcon, TrashIcon } from 'lucide-react'
+import {
+	ArrowRightIcon,
+	ArrowRightLeftIcon,
+	PlusIcon,
+	TrashIcon,
+} from 'lucide-react'
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { parseWithZod } from '@conform-to/zod/v4'
@@ -240,11 +245,21 @@ export default function Transfers({
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>{t('index.table.date')}</TableHead>
-										<TableHead>{t('index.table.fromAccount')}</TableHead>
-										<TableHead>{t('index.table.toAccount')}</TableHead>
-										<TableHead>{t('index.table.amount')}</TableHead>
-										<TableHead className='text-right'>{t('index.table.actions')}</TableHead>
+										<TableHead>
+											{t('index.table.date')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.fromAccount')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.toAccount')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.amount')}
+										</TableHead>
+										<TableHead className='text-right'>
+											{t('index.table.actions')}
+										</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -259,17 +274,22 @@ export default function Transfers({
 											toAccount,
 											toAccountType,
 										}) => {
-											const symbol = getCurrencySymbol(currency)
+											const symbol =
+												getCurrencySymbol(currency)
 											return (
 												<TableRow key={id}>
 													<TableCell className='text-muted-foreground'>
-														{formatDate(new Date(date))}
+														{formatDate(
+															new Date(date),
+														)}
 													</TableCell>
 													<TableCell>
 														<div className='flex items-center gap-2'>
 															<AccountTypeIcon
 																size='xs'
-																accountType={fromAccountType}
+																accountType={
+																	fromAccountType
+																}
 															/>
 															{fromAccount}
 														</div>
@@ -278,7 +298,9 @@ export default function Transfers({
 														<div className='flex items-center gap-2'>
 															<AccountTypeIcon
 																size='xs'
-																accountType={toAccountType}
+																accountType={
+																	toAccountType
+																}
 															/>
 															{toAccount}
 														</div>
@@ -286,10 +308,15 @@ export default function Transfers({
 													<TableCell>
 														<span className='flex items-center gap-2 font-semibold'>
 															<CurrencyIcon
-																currency={currency}
+																currency={
+																	currency
+																}
 																size='sm'
 															/>
-															{symbol} {formatNumber(amount)}
+															{symbol}{' '}
+															{formatNumber(
+																amount,
+															)}
 														</span>
 													</TableCell>
 													<TableCell className='text-right'>
@@ -305,19 +332,26 @@ export default function Transfers({
 																type='submit'
 																name='intent'
 																value='delete'
-																disabled={isDeleting}
+																disabled={
+																	isDeleting
+																}
 															>
 																{isDeleting &&
-																deletingId === id ? (
+																deletingId ===
+																	id ? (
 																	<Spinner
 																		aria-hidden
 																		size='sm'
 																	/>
 																) : (
-																	<TrashIcon aria-hidden />
+																	<TrashIcon
+																		aria-hidden
+																	/>
 																)}
 																<span className='sr-only'>
-																	{t('index.deleteAriaLabel')}
+																	{t(
+																		'index.deleteAriaLabel',
+																	)}
 																</span>
 															</Button>
 														</Form>
@@ -373,10 +407,14 @@ export default function Transfers({
 																size='sm'
 															/>
 														) : (
-															<TrashIcon aria-hidden />
+															<TrashIcon
+																aria-hidden
+															/>
 														)}
 														<span className='sr-only'>
-															{t('index.deleteAriaLabel')}
+															{t(
+																'index.deleteAriaLabel',
+															)}
 														</span>
 													</Button>
 												</Form>
@@ -385,9 +423,13 @@ export default function Transfers({
 												<div className='flex items-center gap-2'>
 													<AccountTypeIcon
 														size='xs'
-														accountType={fromAccountType}
+														accountType={
+															fromAccountType
+														}
 													/>
-													<Text size='sm'>{fromAccount}</Text>
+													<Text size='sm'>
+														{fromAccount}
+													</Text>
 												</div>
 												<div className='flex flex-col items-center gap-1'>
 													<Text
@@ -399,16 +441,23 @@ export default function Transfers({
 															currency={currency}
 															size='sm'
 														/>
-														{getCurrencySymbol(currency)} {formatNumber(amount)}
+														{getCurrencySymbol(
+															currency,
+														)}{' '}
+														{formatNumber(amount)}
 													</Text>
 													<ArrowRightIcon className='size-4 text-muted-foreground' />
 												</div>
 												<div className='flex items-center gap-2'>
 													<AccountTypeIcon
 														size='xs'
-														accountType={toAccountType}
+														accountType={
+															toAccountType
+														}
 													/>
-													<Text size='sm'>{toAccount}</Text>
+													<Text size='sm'>
+														{toAccount}
+													</Text>
 												</div>
 											</div>
 										</li>

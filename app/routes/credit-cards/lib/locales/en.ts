@@ -43,7 +43,7 @@ export default {
 			unknownActionToast: 'Unknown action',
 		},
 	},
-filters: {
+	filters: {
 		type: 'Filter by type',
 		category: 'Filter by category',
 	},
@@ -77,7 +77,8 @@ filters: {
 			currentClosingDateRequired: 'Closing date is required',
 			currentDueDateRequired: 'Due date is required',
 			dueDateAfterClosingDate: 'Due date must be after closing date',
-			dueDateMaxDifference: 'Due date must be within 20 days of closing date',
+			dueDateMaxDifference:
+				'Due date must be within 20 days of closing date',
 			accountRequired: 'Account is required',
 		},
 		create: {
@@ -165,7 +166,7 @@ filters: {
 				creditCardNotFoundError: 'Credit card not found',
 				notFoundError: 'Transaction not found',
 			},
-		date: 'Date',
+			date: 'Date',
 			type: 'Type',
 			amount: 'Amount',
 			category: 'Category',

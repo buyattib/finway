@@ -17,10 +17,7 @@ type Variant = 'info' | 'danger' | 'success' | 'cc'
 
 const cardBase = 'border-l-4 border-l-primary/20'
 
-const variantStyles: Record<
-	Variant,
-	{ card: string; icon: string }
-> = {
+const variantStyles: Record<Variant, { card: string; icon: string }> = {
 	info: {
 		card: cardBase,
 		icon: 'text-muted-foreground',
@@ -80,10 +77,7 @@ export function SummaryCards({
 			{cards.map(({ title, icon, data, empty, variant }) => {
 				const styles = variantStyles[variant]
 				return (
-					<Card
-						key={title}
-						className={cn(styles.card)}
-					>
+					<Card key={title} className={cn(styles.card)}>
 						<CardHeader className='flex items-center justify-between'>
 							<CardTitle>{title}</CardTitle>
 							<span className={styles.icon}>{icon}</span>
@@ -95,29 +89,30 @@ export function SummaryCards({
 								</Text>
 							)}
 							<ul className='flex flex-col gap-2'>
-								{data.map(({ currencyId, currency, amount }) => {
-									const symbol = getCurrencySymbol(currency)
-									return (
-										<li
-											key={currencyId}
-											className='flex items-center justify-between gap-2'
-										>
-											<Text className='flex items-center gap-2'>
-												<CurrencyIcon
-													currency={currency}
-													size='sm'
-												/>
-												{currency}
-											</Text>
-											<Text
-												weight='bold'
-												size='xl'
+								{data.map(
+									({ currencyId, currency, amount }) => {
+										const symbol =
+											getCurrencySymbol(currency)
+										return (
+											<li
+												key={currencyId}
+												className='flex items-center justify-between gap-2'
 											>
-												{symbol} {formatNumber(amount)}
-											</Text>
-										</li>
-									)
-								})}
+												<Text className='flex items-center gap-2'>
+													<CurrencyIcon
+														currency={currency}
+														size='sm'
+													/>
+													{currency}
+												</Text>
+												<Text weight='bold' size='xl'>
+													{symbol}{' '}
+													{formatNumber(amount)}
+												</Text>
+											</li>
+										)
+									},
+								)}
 							</ul>
 						</CardContent>
 					</Card>

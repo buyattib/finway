@@ -1,27 +1,27 @@
 services:
-  - type: web
-    name: finway
-    runtime: node
-    plan: free
-    region: virginia
-    buildCommand: pnpm install --frozen-lockfile && pnpm run build && drizzle-kit migrate
-    startCommand: pnpm start:production
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: NODE_VERSION
-        value: 22
-      - key: SESSION_SECRET
-        generateValue: true
-      - key: HONEYPOT_SECRET
-        generateValue: true
-      - key: MAGIC_LINK_SECRET
-        generateValue: true
-      - key: FINWAY_EMAIL
-        sync: false
-      - key: RESEND_API_KEY
-        sync: false
-      - key: DB_FILE_NAME
-        sync: false
-      - key: TURSO_AUTH_TOKEN
-        sync: false
+    - type: web
+      name: finway
+      runtime: node
+      plan: free
+      region: virginia
+      buildCommand: pnpm install --frozen-lockfile && pnpm run build && drizzle-kit migrate
+      startCommand: pnpm start:production
+      envVars:
+          - key: NODE_ENV
+            value: production
+          - key: NODE_VERSION
+            value: 22
+          - key: SESSION_SECRET
+            generateValue: true
+          - key: HONEYPOT_SECRET
+            generateValue: true
+          - key: MAGIC_LINK_SECRET
+            generateValue: true
+          - key: FINWAY_EMAIL
+            sync: false
+          - key: RESEND_API_KEY
+            sync: false
+          - key: DB_FILE_NAME
+            sync: false
+          - key: TURSO_AUTH_TOKEN
+            sync: false

@@ -510,7 +510,9 @@ export default function Transactions({
 														currency={currency}
 														size='sm'
 													/>
-													{getCurrencySymbol(currency)}{' '}
+													{getCurrencySymbol(
+														currency,
+													)}{' '}
 													{formatNumber(amount)}
 												</Text>
 											</div>

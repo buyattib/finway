@@ -50,9 +50,7 @@ export function formatNumber(
 
 export function initializeDate() {
 	const now = new Date()
-	return new Date(
-		Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
-	)
+	return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
 }
 
 export function formatDate(

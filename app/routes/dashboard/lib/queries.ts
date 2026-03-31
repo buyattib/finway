@@ -180,14 +180,8 @@ export async function getCurrentStatementCreditCardTotals({
 		)
 		.where(
 			and(
-				gte(
-					creditCardStatementTable.dueDate,
-					monthStart.toISOString(),
-				),
-				lte(
-					creditCardStatementTable.dueDate,
-					monthEnd.toISOString(),
-				),
+				gte(creditCardStatementTable.dueDate, monthStart.toISOString()),
+				lte(creditCardStatementTable.dueDate, monthEnd.toISOString()),
 			),
 		)
 		.groupBy(creditCardTransactionTable.currencyId)
@@ -286,14 +280,8 @@ export async function getCurrentStatementInstallments({
 		)
 		.where(
 			and(
-				gte(
-					creditCardStatementTable.dueDate,
-					monthStart.toISOString(),
-				),
-				lte(
-					creditCardStatementTable.dueDate,
-					monthEnd.toISOString(),
-				),
+				gte(creditCardStatementTable.dueDate, monthStart.toISOString()),
+				lte(creditCardStatementTable.dueDate, monthEnd.toISOString()),
 			),
 		)
 		.orderBy(desc(creditCardStatementTable.dueDate))

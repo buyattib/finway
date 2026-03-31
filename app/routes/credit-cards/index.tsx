@@ -103,7 +103,7 @@ export default function CreditCards({
 								<li key={id}>
 									<Link
 										to={id}
-											className='block transition-transform hover:scale-[1.02]'
+										className='block transition-transform hover:scale-[1.02]'
 									>
 										<CreditCard
 											brand={brand}

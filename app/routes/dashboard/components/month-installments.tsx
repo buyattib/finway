@@ -105,9 +105,7 @@ export function MonthInstallments({ monthInstallments }: Props) {
 										<div className='flex items-center justify-between text-muted-foreground'>
 											<Text size='xs' theme='muted'>
 												{formatDate(
-													new Date(
-														ccTransactionDate,
-													),
+													new Date(ccTransactionDate),
 												)}
 											</Text>
 											<Text size='xs' theme='muted'>

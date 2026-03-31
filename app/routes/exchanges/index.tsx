@@ -225,12 +225,24 @@ export default function Exchanges({
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>{t('index.table.date')}</TableHead>
-										<TableHead>{t('index.table.account')}</TableHead>
-										<TableHead>{t('index.table.from')}</TableHead>
-										<TableHead>{t('index.table.to')}</TableHead>
-										<TableHead>{t('index.table.rate')}</TableHead>
-										<TableHead className='text-right'>{t('index.table.actions')}</TableHead>
+										<TableHead>
+											{t('index.table.date')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.account')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.from')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.to')}
+										</TableHead>
+										<TableHead>
+											{t('index.table.rate')}
+										</TableHead>
+										<TableHead className='text-right'>
+											{t('index.table.actions')}
+										</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -245,18 +257,24 @@ export default function Exchanges({
 											account,
 											accountType,
 										}) => {
-											const fromSymbol = getCurrencySymbol(fromCurrency)
-											const toSymbol = getCurrencySymbol(toCurrency)
+											const fromSymbol =
+												getCurrencySymbol(fromCurrency)
+											const toSymbol =
+												getCurrencySymbol(toCurrency)
 											return (
 												<TableRow key={id}>
 													<TableCell className='text-muted-foreground'>
-														{formatDate(new Date(date))}
+														{formatDate(
+															new Date(date),
+														)}
 													</TableCell>
 													<TableCell>
 														<div className='flex items-center gap-2'>
 															<AccountTypeIcon
 																size='xs'
-																accountType={accountType}
+																accountType={
+																	accountType
+																}
 															/>
 															{account}
 														</div>
@@ -264,27 +282,40 @@ export default function Exchanges({
 													<TableCell>
 														<span className='flex items-center gap-2 font-semibold'>
 															<CurrencyIcon
-																currency={fromCurrency}
+																currency={
+																	fromCurrency
+																}
 																size='sm'
 															/>
-															{fromSymbol} {formatNumber(fromAmount)}
+															{fromSymbol}{' '}
+															{formatNumber(
+																fromAmount,
+															)}
 														</span>
 													</TableCell>
 													<TableCell>
 														<span className='flex items-center gap-2 font-semibold'>
 															<CurrencyIcon
-																currency={toCurrency}
+																currency={
+																	toCurrency
+																}
 																size='sm'
 															/>
-															{toSymbol} {formatNumber(toAmount)}
+															{toSymbol}{' '}
+															{formatNumber(
+																toAmount,
+															)}
 														</span>
 													</TableCell>
 													<TableCell className='text-muted-foreground'>
 														{formatNumber(
 															Number(fromAmount) /
-																Number(toAmount),
+																Number(
+																	toAmount,
+																),
 														)}{' '}
-														{fromCurrency}/{toCurrency}
+														{fromCurrency}/
+														{toCurrency}
 													</TableCell>
 													<TableCell className='text-right'>
 														<Form method='post'>
@@ -299,19 +330,26 @@ export default function Exchanges({
 																type='submit'
 																name='intent'
 																value='delete'
-																disabled={isDeleting}
+																disabled={
+																	isDeleting
+																}
 															>
 																{isDeleting &&
-																deletingId === id ? (
+																deletingId ===
+																	id ? (
 																	<Spinner
 																		aria-hidden
 																		size='sm'
 																	/>
 																) : (
-																	<TrashIcon aria-hidden />
+																	<TrashIcon
+																		aria-hidden
+																	/>
 																)}
 																<span className='sr-only'>
-																	{t('index.deleteAriaLabel')}
+																	{t(
+																		'index.deleteAriaLabel',
+																	)}
 																</span>
 															</Button>
 														</Form>
@@ -367,10 +405,14 @@ export default function Exchanges({
 																size='sm'
 															/>
 														) : (
-															<TrashIcon aria-hidden />
+															<TrashIcon
+																aria-hidden
+															/>
 														)}
 														<span className='sr-only'>
-															{t('index.deleteAriaLabel')}
+															{t(
+																'index.deleteAriaLabel',
+															)}
 														</span>
 													</Button>
 												</Form>
@@ -392,7 +434,10 @@ export default function Exchanges({
 														currency={fromCurrency}
 														size='sm'
 													/>
-													{getCurrencySymbol(fromCurrency)} {formatNumber(fromAmount)}
+													{getCurrencySymbol(
+														fromCurrency,
+													)}{' '}
+													{formatNumber(fromAmount)}
 												</Text>
 												<RefreshCwIcon className='size-4 text-muted-foreground shrink-0' />
 												<Text
@@ -404,11 +449,15 @@ export default function Exchanges({
 														currency={toCurrency}
 														size='sm'
 													/>
-													{getCurrencySymbol(toCurrency)} {formatNumber(toAmount)}
+													{getCurrencySymbol(
+														toCurrency,
+													)}{' '}
+													{formatNumber(toAmount)}
 												</Text>
 											</div>
 											<Text size='xs' theme='muted'>
-												{t('index.table.rate')}: {formatNumber(
+												{t('index.table.rate')}:{' '}
+												{formatNumber(
 													Number(fromAmount) /
 														Number(toAmount),
 												)}{' '}

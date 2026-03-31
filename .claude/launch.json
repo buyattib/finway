@@ -1,12 +1,12 @@
 {
-  "version": "0.0.1",
-  "configurations": [
-    {
-      "name": "dev",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["--env-file=.env.development", "server.js"],
-      "port": 3000,
-      "autoPort": true
-    }
-  ]
+	"version": "0.0.1",
+	"configurations": [
+		{
+			"name": "dev",
+			"runtimeExecutable": "node",
+			"runtimeArgs": ["--env-file=.env.development", "server.js"],
+			"port": 3000,
+			"autoPort": true
+		}
+	]
 }

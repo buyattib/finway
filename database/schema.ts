@@ -299,9 +299,9 @@ export const creditCardTransactionInstallment = sqliteTable(
 		index(
 			'credit_card_transaction_installments_creditCardTransactionId_idx',
 		).on(table.creditCardTransactionId),
-		index(
-			'credit_card_transaction_installments_statementId_idx',
-		).on(table.statementId),
+		index('credit_card_transaction_installments_statementId_idx').on(
+			table.statementId,
+		),
 	],
 )
 
@@ -352,16 +352,13 @@ export const exchangeRelations = relations(exchange, ({ one }) => ({
 	}),
 }))
 
-export const creditCardRelations = relations(
-	creditCard,
-	({ one, many }) => ({
-		account: one(account, {
-			fields: [creditCard.accountId],
-			references: [account.id],
-		}),
-		statements: many(creditCardStatement),
+export const creditCardRelations = relations(creditCard, ({ one, many }) => ({
+	account: one(account, {
+		fields: [creditCard.accountId],
+		references: [account.id],
 	}),
-)
+	statements: many(creditCardStatement),
+}))
 
 export const creditCardStatementRelations = relations(
 	creditCardStatement,

@@ -501,7 +501,11 @@ export function DateField({
 	const dateValue = control.value
 		? (() => {
 				const d = new Date(control.value)
-				return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+				return new Date(
+					d.getUTCFullYear(),
+					d.getUTCMonth(),
+					d.getUTCDate(),
+				)
 			})()
 		: undefined
 
@@ -543,7 +547,13 @@ export function DateField({
 						selected={dateValue}
 						onSelect={date => {
 							if (!date) return
-							const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+							const utcDate = new Date(
+								Date.UTC(
+									date.getFullYear(),
+									date.getMonth(),
+									date.getDate(),
+								),
+							)
 							control.change(utcDate.toISOString())
 							setOpen(false)
 						}}

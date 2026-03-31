@@ -67,9 +67,7 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 						<Button asChild variant='default'>
 							<Link to='/transactions'>
 								<PlusIcon />
-								{t(
-									'index.expensesByMonth.createTransaction',
-								)}
+								{t('index.expensesByMonth.createTransaction')}
 							</Link>
 						</Button>
 					</div>
@@ -117,7 +115,10 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 				</Select>
 			}
 		>
-			<ChartContainer config={config} className='aspect-auto h-80 w-full [&_svg]:overflow-visible'>
+			<ChartContainer
+				config={config}
+				className='aspect-auto h-80 w-full [&_svg]:overflow-visible'
+			>
 				<BarChart
 					accessibilityLayer
 					data={data}
@@ -139,11 +140,7 @@ export function ExpensesByMonth({ expensesByMonth }: Props) {
 						dy={5}
 						padding={{ right: 20 }}
 					/>
-					<Bar
-						dataKey='amount'
-						fill='var(--color-danger)'
-						radius={6}
-					>
+					<Bar dataKey='amount' fill='var(--color-danger)' radius={6}>
 						<LabelList
 							position='top'
 							offset={6}

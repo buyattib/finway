@@ -58,7 +58,10 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 		.and(ActionSchema)
 		.refine(
 			data => {
-				return new Date(data.currentDueDate) > new Date(data.currentClosingDate)
+				return (
+					new Date(data.currentDueDate) >
+					new Date(data.currentClosingDate)
+				)
 			},
 			{
 				message: t('form.schema.dueDateAfterClosingDate'),
@@ -69,7 +72,8 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 			data => {
 				const closing = new Date(data.currentClosingDate)
 				const due = new Date(data.currentDueDate)
-				const diffDays = (due.getTime() - closing.getTime()) / (1000 * 60 * 60 * 24)
+				const diffDays =
+					(due.getTime() - closing.getTime()) / (1000 * 60 * 60 * 24)
 				return diffDays <= 20
 			},
 			{

@@ -198,9 +198,7 @@ export default function Accounts({
 										accountType={accountType}
 									/>
 									<div className='flex flex-col gap-0.5'>
-										<Link
-											to={id}
-											>
+										<Link to={id}>
 											<Title id={id} level='h5'>
 												{name}
 											</Title>

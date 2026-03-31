@@ -24,7 +24,6 @@ import {
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
 
-
 type LoaderData = Route.ComponentProps['loaderData']
 type Props = Pick<LoaderData, 'expensesByCategory'> &
 	Pick<LoaderData['summary'], 'monthExpenses'>
@@ -128,7 +127,10 @@ export function ExpensesByCategory({
 				</Select>
 			}
 		>
-			<ChartContainer config={config} className='w-full sm:max-h-80 [&_svg]:overflow-visible'>
+			<ChartContainer
+				config={config}
+				className='w-full sm:max-h-80 [&_svg]:overflow-visible'
+			>
 				<PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
 					<Pie
 						data={data}

@@ -46,7 +46,7 @@ export default {
 			unknownActionToast: 'Acción desconocida',
 		},
 	},
-filters: {
+	filters: {
 		type: 'Filtrar por tipo',
 		category: 'Filtrar por categoría',
 	},
@@ -80,8 +80,10 @@ filters: {
 			expiryYearFuture: 'Debe ser un año válido en el futuro',
 			currentClosingDateRequired: 'La fecha de cierre es requerida',
 			currentDueDateRequired: 'La fecha de vencimiento es requerida',
-			dueDateAfterClosingDate: 'La fecha de vencimiento debe ser posterior a la fecha de cierre',
-			dueDateMaxDifference: 'La fecha de vencimiento debe estar dentro de los 20 días de la fecha de cierre',
+			dueDateAfterClosingDate:
+				'La fecha de vencimiento debe ser posterior a la fecha de cierre',
+			dueDateMaxDifference:
+				'La fecha de vencimiento debe estar dentro de los 20 días de la fecha de cierre',
 			accountRequired: 'La cuenta es requerida',
 		},
 		create: {
@@ -170,7 +172,7 @@ filters: {
 				creditCardNotFoundError: 'Tarjeta de crédito no encontrada',
 				notFoundError: 'Transacción no encontrada',
 			},
-		date: 'Fecha',
+			date: 'Fecha',
 			type: 'Tipo',
 			amount: 'Monto',
 			category: 'Categoría',
