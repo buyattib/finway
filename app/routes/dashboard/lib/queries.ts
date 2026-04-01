@@ -1,5 +1,4 @@
-import type { DB } from '~/lib/types'
-import { and, eq, gte, lte, sql, desc, asc, count } from 'drizzle-orm'
+import { and, eq, gte, lte, min, sql, desc, asc, count } from 'drizzle-orm'
 
 import {
 	transaction as transactionTable,
@@ -12,7 +11,8 @@ import {
 	creditCardStatement as creditCardStatementTable,
 } from '~/database/schema'
 
-import type { TTransactionType } from '~/lib/types'
+import type { TTransactionType, DB } from '~/lib/types'
+import { initializeDate } from '~/lib/utils'
 
 import type { CurrencyResponse, CategoryResponse, MonthResponse } from './types'
 
@@ -195,9 +195,35 @@ export async function getCurrentStatementInstallments({
 	db: DB
 	ownerId: string
 }) {
-	const now = new Date()
-	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-	const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+	const now = initializeDate().toISOString()
+
+	const nextDueDateSq = db
+		.select({
+			creditCardId: creditCardStatementTable.creditCardId,
+			minDueDate: min(creditCardStatementTable.dueDate).as('minDueDate'),
+		})
+		.from(creditCardStatementTable)
+		.where(gte(creditCardStatementTable.dueDate, now))
+		.groupBy(creditCardStatementTable.creditCardId)
+		.as('nextDueDate')
+
+	const activeStatementSq = db
+		.select({
+			statementId: creditCardStatementTable.id,
+			dueDate: creditCardStatementTable.dueDate,
+		})
+		.from(creditCardStatementTable)
+		.innerJoin(
+			nextDueDateSq,
+			and(
+				eq(
+					nextDueDateSq.creditCardId,
+					creditCardStatementTable.creditCardId,
+				),
+				eq(nextDueDateSq.minDueDate, creditCardStatementTable.dueDate),
+			),
+		)
+		.as('activeStatement')
 
 	const installmentCountSq = db
 		.select({
@@ -218,7 +244,7 @@ export async function getCurrentStatementInstallments({
 				sql<string>`CAST(${creditCardTransactionInstallmentTable.amount} / 100.0 AS TEXT)`.as(
 					'installmentAmount',
 				),
-			installmentDate: creditCardStatementTable.dueDate,
+			installmentDate: activeStatementSq.dueDate,
 
 			ccTransactionId: creditCardTransactionTable.id,
 			ccTransactionDate: creditCardTransactionTable.date,
@@ -236,9 +262,9 @@ export async function getCurrentStatementInstallments({
 		})
 		.from(creditCardTransactionInstallmentTable)
 		.innerJoin(
-			creditCardStatementTable,
+			activeStatementSq,
 			eq(
-				creditCardStatementTable.id,
+				activeStatementSq.statementId,
 				creditCardTransactionInstallmentTable.statementId,
 			),
 		)
@@ -278,11 +304,5 @@ export async function getCurrentStatementInstallments({
 			currencyTable,
 			eq(currencyTable.id, creditCardTransactionTable.currencyId),
 		)
-		.where(
-			and(
-				gte(creditCardStatementTable.dueDate, monthStart.toISOString()),
-				lte(creditCardStatementTable.dueDate, monthEnd.toISOString()),
-			),
-		)
-		.orderBy(desc(creditCardStatementTable.dueDate))
+		.orderBy(asc(activeStatementSq.dueDate))
 }
