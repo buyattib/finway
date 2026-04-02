@@ -11,8 +11,10 @@ import {
 	creditCardStatement as creditCardStatementTable,
 } from '~/database/schema'
 
-import type { TTransactionType, DB } from '~/lib/types'
+import type { DB } from '~/lib/types'
 import { initializeDate } from '~/lib/utils'
+
+import type { TTransactionType } from '~/routes/transactions/lib/types'
 
 import type { CurrencyResponse, CategoryResponse, MonthResponse } from './types'
 

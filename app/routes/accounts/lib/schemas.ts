@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { TFunction } from 'i18next'
-import { ACCOUNT_TYPES, ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
+import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
+import { ACCOUNT_TYPES } from './constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({

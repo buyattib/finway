@@ -14,12 +14,8 @@ import type { Route as CreateRoute } from '../+types/create'
 import type { Route as EditRoute } from '../+types/edit'
 
 import { initializeDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
-import {
-	ACTION_CREATION,
-	ACTION_EDITION,
-	TRANSACTION_TYPES,
-	TRANSACTION_TYPE_EXPENSE,
-} from '~/lib/constants'
+import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
+import { TRANSACTION_TYPES, TRANSACTION_TYPE_EXPENSE } from '../lib/constants'
 import type { TSelectData } from '~/lib/types'
 
 import { Button } from '~/components/ui/button'

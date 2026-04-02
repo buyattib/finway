@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { Route } from '../+types'
 
-import { TRANSACTION_TYPES } from '~/lib/constants'
+import { TRANSACTION_TYPES } from '../lib/constants'
 
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'

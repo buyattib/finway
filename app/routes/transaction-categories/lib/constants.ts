@@ -16,7 +16,3 @@ export const CATEGORY_COLORS = [
 	'oklch(0.60 0.20 15)',
 	'oklch(0.70 0.16 160)',
 ]
-
-export function getCategoryColor(index: number): string {
-	return CATEGORY_COLORS[index % CATEGORY_COLORS.length]
-}

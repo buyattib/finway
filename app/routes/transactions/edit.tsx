@@ -11,11 +11,11 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { removeCommas } from '~/lib/utils'
 import { getBalances, getSelectData } from '~/lib/queries'
+import { ACTION_EDITION } from '~/lib/constants'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-	ACTION_EDITION,
-} from '~/lib/constants'
+} from './lib/constants'
 
 import { createTransactionFormSchema } from './lib/schemas'
 import { TransactionForm } from './components/form'

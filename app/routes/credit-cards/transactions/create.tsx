@@ -14,11 +14,8 @@ import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
 import { removeCommas, initializeDate, formatNumber } from '~/lib/utils'
-import {
-	ACTION_CREATION,
-	CC_TRANSACTION_TYPE_CHARGE,
-	CC_TRANSACTION_TYPES,
-} from '~/lib/constants'
+import { ACTION_CREATION } from '~/lib/constants'
+import { CC_TRANSACTION_TYPE_CHARGE, CC_TRANSACTION_TYPES } from '../lib/constants'
 import { getSelectData } from '~/lib/queries'
 
 import { Button } from '~/components/ui/button'

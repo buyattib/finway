@@ -9,7 +9,7 @@ import type { Route } from '../+types'
 import { formatNumber } from '~/lib/utils'
 import type { TCurrency } from '~/lib/types'
 import { getCurrencySymbol } from '~/lib/utils'
-import { getCategoryColor } from '~/lib/category-colors'
+import { getCategoryColor } from '~/routes/transaction-categories/lib/utils'
 
 import { type ChartConfig, ChartContainer } from '~/components/ui/chart'
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'

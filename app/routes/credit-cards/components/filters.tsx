@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { Route } from '../+types/credit-card'
 
-import { CC_TRANSACTION_TYPES } from '~/lib/constants'
+import { CC_TRANSACTION_TYPES } from '../lib/constants'
 
 import { TransactionType } from '~/components/transaction-type'
 import { Combobox } from '~/components/ui/combobox'

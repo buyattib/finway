@@ -8,12 +8,10 @@ import {
 	index,
 } from 'drizzle-orm/sqlite-core'
 
-import {
-	CURRENCIES,
-	ACCOUNT_TYPES,
-	TRANSACTION_TYPES,
-	CC_TRANSACTION_TYPES,
-} from '~/lib/constants'
+import { CURRENCIES } from '~/lib/constants'
+import { ACCOUNT_TYPES } from '~/routes/accounts/lib/constants'
+import { TRANSACTION_TYPES } from '~/routes/transactions/lib/constants'
+import { CC_TRANSACTION_TYPES } from '~/routes/credit-cards/lib/constants'
 
 const base = {
 	createdAt: text()

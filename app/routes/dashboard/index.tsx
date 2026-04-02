@@ -7,7 +7,7 @@ import type { TCurrency } from '~/lib/types'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-} from '~/lib/constants'
+} from '~/routes/transactions/lib/constants'
 
 import {
 	getMonthTransactions,
