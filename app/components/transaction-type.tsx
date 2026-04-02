@@ -14,7 +14,7 @@ import {
 import {
 	CC_TRANSACTION_TYPE_CHARGE,
 	CC_TRANSACTION_TYPE_REFUND,
-} from '~/lib/constants'
+} from '~/routes/credit-cards/lib/constants'
 import type { TCCTransactionType, TTransactionType } from '~/lib/types'
 
 const iconVariants = cva('', {
