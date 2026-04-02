@@ -5,7 +5,8 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Route as EditRoute } from '../+types/edit'
 
-import { ACCOUNT_TYPES, ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
+import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
+import { ACCOUNT_TYPES } from '../lib/constants'
 
 import { Button } from '~/components/ui/button'
 import {
