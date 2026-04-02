@@ -17,7 +17,7 @@ import {
 	ACCOUNT_TYPE_CRYPTO_WALLET,
 	ACCOUNT_TYPE_BROKER,
 } from '~/routes/accounts/lib/constants'
-import type { TAccountType } from '~/lib/types'
+import type { TAccountType } from '~/routes/accounts/lib/types'
 
 const accountTypeIconVariants = cva('text-white', {
 	variants: {

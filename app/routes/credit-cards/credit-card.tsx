@@ -27,7 +27,7 @@ import {
 import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
-import type { TCCTransactionType, TCurrency } from '~/lib/types'
+import type { TCurrency } from '~/lib/types'
 import { formatDate, formatNumber } from '~/lib/utils'
 import { getSelectData } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
@@ -50,6 +50,7 @@ import { CreditCard } from '~/components/credit-card'
 import { CreditCardTransactionFilters } from './components/filters'
 import { DeleteCreditCardFormSchema } from './lib/schemas'
 import { ensureStatementsExist } from './lib/statements'
+import type { TCCTransactionType } from './lib/types'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.creditCard) {

@@ -7,15 +7,17 @@ import {
 } from 'lucide-react'
 
 import { cn } from '~/lib/utils'
+
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
 } from '~/routes/transactions/lib/constants'
+import type { TTransactionType } from '~/routes/transactions/lib/types'
 import {
 	CC_TRANSACTION_TYPE_CHARGE,
 	CC_TRANSACTION_TYPE_REFUND,
 } from '~/routes/credit-cards/lib/constants'
-import type { TCCTransactionType, TTransactionType } from '~/lib/types'
+import type { TCCTransactionType } from '~/routes/credit-cards/lib/types'
 
 const iconVariants = cva('', {
 	variants: {

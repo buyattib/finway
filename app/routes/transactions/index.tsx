@@ -18,7 +18,6 @@ import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { PAGE_SIZE } from '~/lib/constants'
 import { getBalances, getSelectData } from '~/lib/queries'
-import type { TTransactionType } from '~/lib/types'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -42,6 +41,7 @@ import { ReceiptTextIcon } from 'lucide-react'
 
 import { TransactionsFilters } from './components/filters'
 import { DeleteTransactionFormSchema } from './lib/schemas'
+import type { TTransactionType } from './lib/types'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [

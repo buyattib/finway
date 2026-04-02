@@ -18,12 +18,11 @@ import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
-import { dbContext, userContext } from '~/lib/context'
 import { getServerT } from '~/utils-server/i18n.server'
 import { account as accountTable } from '~/database/schema'
+import { dbContext, userContext } from '~/lib/context'
 import { formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { getBalances } from '~/lib/queries'
-import type { TAccountBalance } from '~/lib/types'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -40,6 +39,8 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { Spinner } from '~/components/ui/spinner'
 import { EmptyState } from '~/components/empty-state'
+
+import type { TAccountBalance } from './lib/types'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
