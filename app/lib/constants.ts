@@ -28,16 +28,6 @@ export const CURRENCIES = [
 	CURRENCY_DAI,
 ] as const
 
-// Transactions
-
-export const TRANSACTION_TYPE_EXPENSE = 'EXPENSE'
-export const TRANSACTION_TYPE_INCOME = 'INCOME'
-
-export const TRANSACTION_TYPES = [
-	TRANSACTION_TYPE_EXPENSE,
-	TRANSACTION_TYPE_INCOME,
-] as const
-
 // Credit Cards
 
 export const CC_TRANSACTION_TYPE_CHARGE = 'CHARGE'

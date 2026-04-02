@@ -10,6 +10,8 @@ import { cn } from '~/lib/utils'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
+} from '~/routes/transactions/lib/constants'
+import {
 	CC_TRANSACTION_TYPE_CHARGE,
 	CC_TRANSACTION_TYPE_REFUND,
 } from '~/lib/constants'

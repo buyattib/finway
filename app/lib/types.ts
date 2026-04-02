@@ -4,7 +4,8 @@ import * as schema from '~/database/schema'
 import type { requireAuthenticated } from '~/utils-server/auth.server'
 
 import { ACCOUNT_TYPES } from '~/routes/accounts/lib/constants'
-import { CC_TRANSACTION_TYPES, CURRENCIES, TRANSACTION_TYPES } from './constants'
+import { TRANSACTION_TYPES } from '~/routes/transactions/lib/constants'
+import { CC_TRANSACTION_TYPES, CURRENCIES } from './constants'
 import { type getSelectData } from './queries'
 
 export type UserAuth = Awaited<ReturnType<typeof requireAuthenticated>>

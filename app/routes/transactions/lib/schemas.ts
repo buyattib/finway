@@ -3,11 +3,8 @@ import type { TFunction } from 'i18next'
 
 import { removeCommas } from '~/lib/utils'
 
-import {
-	TRANSACTION_TYPES,
-	ACTION_CREATION,
-	ACTION_EDITION,
-} from '~/lib/constants'
+import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
+import { TRANSACTION_TYPES } from './constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({
