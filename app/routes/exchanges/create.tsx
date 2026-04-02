@@ -37,6 +37,8 @@ import {
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
+import { formatNumber, getCurrencySymbol } from '~/lib/utils'
+
 import { getBalances, getSelectData } from '~/lib/queries'
 import { createExchangeFormSchema } from './lib/schemas'
 
@@ -53,11 +55,15 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const t = getServerT(context, 'exchanges')
 
-	const { accounts, currencies } = await getSelectData(db, user.id)
+	const [{ accounts, currencies }, balances] = await Promise.all([
+		getSelectData(db, user.id),
+		getBalances({ db, ownerId: user.id, parseBalance: true }),
+	])
 
 	return {
 		accounts,
 		currencies,
+		balances,
 		meta: {
 			title: t('form.create.meta.title'),
 			description: t('form.create.meta.description'),
@@ -150,7 +156,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateExchange({
-	loaderData: { accounts, currencies },
+	loaderData: { accounts, currencies, balances },
 	actionData,
 }: Route.ComponentProps) {
 	const location = useLocation()
@@ -182,6 +188,20 @@ export default function CreateExchange({
 			})
 		},
 	})
+
+	const selectedBalance = balances.find(
+		b =>
+			b.accountId === fields.accountId.value &&
+			b.currencyId === fields.fromCurrencyId.value,
+	)
+
+	const balanceDescription = selectedBalance
+		? t('form.availableBalance', {
+				symbol: getCurrencySymbol(selectedBalance.currency),
+				amount: formatNumber(selectedBalance.balance),
+				currency: selectedBalance.currency,
+			})
+		: undefined
 
 	const accountOptions = accounts.map(({ id, name, accountType }) => ({
 		icon: <AccountTypeIcon accountType={accountType} size='sm' />,
@@ -255,16 +275,16 @@ export default function CreateExchange({
 								/>
 							</div>
 
-							<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-								<AmountField
-									label={t('form.fromAmountLabel')}
-									field={fields.fromAmount}
-								/>
-								<AmountField
-									label={t('form.toAmountLabel')}
-									field={fields.toAmount}
-								/>
-							</div>
+							<AmountField
+								label={t('form.fromAmountLabel')}
+								field={fields.fromAmount}
+								description={balanceDescription}
+							/>
+
+							<AmountField
+								label={t('form.toAmountLabel')}
+								field={fields.toAmount}
+							/>
 						</>
 					) : (
 						<Text size='sm' theme='muted' alignment='center'>

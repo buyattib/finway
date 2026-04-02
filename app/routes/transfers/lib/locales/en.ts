@@ -34,6 +34,7 @@ export default {
 		currencyLabel: 'Currency',
 		currencyPlaceholder: 'Select a currency',
 		amountLabel: 'Amount',
+		availableBalance: 'Available: {{symbol}}{{amount}} {{currency}}',
 		resetButton: 'Reset',
 		noAccountMessage:
 			'You need to create an account first. Do it <0>here</0>',

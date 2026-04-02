@@ -35,6 +35,7 @@ export default {
 		toCurrencyLabel: 'To Currency',
 		currencyPlaceholder: 'Select a currency',
 		fromAmountLabel: 'From Amount',
+		availableBalance: 'Available: {{symbol}}{{amount}} {{currency}}',
 		toAmountLabel: 'To Amount',
 		resetButton: 'Reset',
 		noAccountMessage:

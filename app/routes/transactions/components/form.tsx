@@ -10,13 +10,15 @@ import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { ArrowLeftIcon } from 'lucide-react'
 import { Trans, useTranslation } from 'react-i18next'
 
+import type { Route as CreateRoute } from '../+types/create'
 import type { Route as EditRoute } from '../+types/edit'
 
-import { initializeDate } from '~/lib/utils'
+import { initializeDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import {
 	ACTION_CREATION,
 	ACTION_EDITION,
 	TRANSACTION_TYPES,
+	TRANSACTION_TYPE_EXPENSE,
 } from '~/lib/constants'
 import type { TSelectData } from '~/lib/types'
 
@@ -45,9 +47,11 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import { createTransactionFormSchema } from '../lib/schemas'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
+type TBalances = CreateRoute.ComponentProps['loaderData']['balances']
 
 type Props = {
 	selectData: TSelectData
+	balances: TBalances
 	lastResult?: SubmissionResult
 	initialData: Partial<TInitialData>
 	action: typeof ACTION_CREATION | typeof ACTION_EDITION
@@ -55,6 +59,7 @@ type Props = {
 
 export function TransactionForm({
 	selectData,
+	balances,
 	lastResult,
 	initialData,
 	action,
@@ -119,6 +124,21 @@ export function TransactionForm({
 		value: id,
 		label: code,
 	}))
+
+	const selectedBalance = balances.find(
+		b =>
+			b.accountId === fields.accountId.value &&
+			b.currencyId === fields.currencyId.value,
+	)
+
+	const balanceDescription =
+		fields.type.value === TRANSACTION_TYPE_EXPENSE && selectedBalance
+			? t('form.availableBalance', {
+					symbol: getCurrencySymbol(selectedBalance.currency),
+					amount: formatNumber(selectedBalance.balance),
+					currency: selectedBalance.currency,
+				})
+			: undefined
 
 	const transactionCategoryOptions = transactionCategories.map(
 		({ id, name }) => ({
@@ -210,6 +230,7 @@ export function TransactionForm({
 					<AmountField
 						label={t('form.amountLabel')}
 						field={fields.amount}
+						description={balanceDescription}
 					/>
 
 					{transactionCategories.length !== 0 ? (

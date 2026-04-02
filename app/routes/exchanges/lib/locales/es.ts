@@ -37,6 +37,7 @@ export default {
 		toCurrencyLabel: 'Moneda de destino',
 		currencyPlaceholder: 'Selecciona una moneda',
 		fromAmountLabel: 'Monto de origen',
+		availableBalance: 'Disponible: {{symbol}}{{amount}} {{currency}}',
 		toAmountLabel: 'Monto de destino',
 		resetButton: 'Restablecer',
 		noAccountMessage:

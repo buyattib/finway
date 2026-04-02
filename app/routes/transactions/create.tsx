@@ -32,7 +32,10 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const accountIdParam = url.searchParams.get('accountId')
 	const currencyIdParam = url.searchParams.get('currencyId')
 
-	const selectData = await getSelectData(db, user.id)
+	const [selectData, balances] = await Promise.all([
+		getSelectData(db, user.id),
+		getBalances({ db, ownerId: user.id, parseBalance: true }),
+	])
 
 	let accountId = selectData.accounts?.[0]?.id || ''
 	if (
@@ -52,6 +55,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 	return {
 		selectData,
+		balances,
 		initialData: {
 			type: TRANSACTION_TYPE_EXPENSE,
 			amount: '0',
@@ -169,7 +173,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateTransaction({
-	loaderData: { selectData, initialData },
+	loaderData: { selectData, balances, initialData },
 	actionData,
 }: Route.ComponentProps) {
 	return (
@@ -177,6 +181,7 @@ export default function CreateTransaction({
 			action={ACTION_CREATION}
 			lastResult={actionData?.submission}
 			selectData={selectData}
+			balances={balances}
 			initialData={initialData}
 		/>
 	)

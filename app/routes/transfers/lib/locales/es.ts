@@ -36,6 +36,7 @@ export default {
 		currencyLabel: 'Moneda',
 		currencyPlaceholder: 'Selecciona una moneda',
 		amountLabel: 'Monto',
+		availableBalance: 'Disponible: {{symbol}}{{amount}} {{currency}}',
 		resetButton: 'Restablecer',
 		noAccountMessage:
 			'Necesitas crear una cuenta primero. Hazlo <0>aquí</0>',

@@ -43,6 +43,7 @@ export default {
 		currencyLabel: 'Currency',
 		currencyPlaceholder: 'Select a currency',
 		amountLabel: 'Amount',
+		availableBalance: 'Available: {{symbol}}{{amount}} {{currency}}',
 		categoryLabel: 'Transaction Category',
 		categoryPlaceholder: 'Select a transaction category',
 		dateLabel: 'Date',

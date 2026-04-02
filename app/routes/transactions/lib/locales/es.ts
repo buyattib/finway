@@ -46,6 +46,7 @@ export default {
 		currencyLabel: 'Moneda',
 		currencyPlaceholder: 'Selecciona una moneda',
 		amountLabel: 'Monto',
+		availableBalance: 'Disponible: {{symbol}}{{amount}} {{currency}}',
 		categoryLabel: 'Categoría de Transacción',
 		categoryPlaceholder: 'Selecciona una categoría de transacción',
 		dateLabel: 'Fecha',

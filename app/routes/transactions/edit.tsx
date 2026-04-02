@@ -62,9 +62,14 @@ export async function loader({
 
 	const { account: _account, ...transactionData } = transaction
 
-	const selectData = await getSelectData(db, user.id)
+	const [selectData, balances] = await Promise.all([
+		getSelectData(db, user.id),
+		getBalances({ db, ownerId: user.id, parseBalance: true }),
+	])
+
 	return {
 		selectData,
+		balances,
 		initialData: {
 			...transactionData,
 			transactionCategoryId: transactionData.transactionCategoryId ?? '',
@@ -221,7 +226,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateTransaction({
-	loaderData: { selectData, initialData },
+	loaderData: { selectData, balances, initialData },
 	actionData,
 }: Route.ComponentProps) {
 	return (
@@ -229,6 +234,7 @@ export default function CreateTransaction({
 			action={ACTION_EDITION}
 			lastResult={actionData?.submission}
 			selectData={selectData}
+			balances={balances}
 			initialData={initialData}
 		/>
 	)
