@@ -31,6 +31,27 @@ export async function getBalancesByAccount({
 	return balancesByAccount
 }
 
+export async function getAccountById({
+	db,
+	accountId,
+}: {
+	db: DB
+	accountId: string
+}) {
+	const account = await db.query.account.findFirst({
+		where: (account, { eq }) => eq(account.id, accountId),
+		columns: {
+			id: true,
+			name: true,
+			description: true,
+			accountType: true,
+			ownerId: true,
+		},
+	})
+
+	return account
+}
+
 export async function getUserAccounts({
 	db,
 	userId,

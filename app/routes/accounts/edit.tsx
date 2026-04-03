@@ -12,6 +12,7 @@ import { dbContext, userContext } from '~/lib/context'
 import { ACTION_EDITION } from '~/lib/constants'
 
 import { AccountForm } from './components/form'
+import { getAccountById } from './lib/queries'
 import { createAccountFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -33,16 +34,7 @@ export async function loader({
 	const user = context.get(userContext)
 	const t = getServerT(context, 'accounts')
 
-	const account = await db.query.account.findFirst({
-		where: (account, { eq }) => eq(account.id, accountId),
-		columns: {
-			id: true,
-			name: true,
-			description: true,
-			accountType: true,
-			ownerId: true,
-		},
-	})
+	const account = await getAccountById({ db, accountId })
 	if (!account || account.ownerId !== user.id) {
 		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
@@ -71,16 +63,7 @@ export async function action({ context, request }: Route.ActionArgs) {
 		schema: createAccountFormSchema(t).superRefine(async (data, ctx) => {
 			if (data.action !== ACTION_EDITION) return
 
-			const account = await db.query.account.findFirst({
-				where: (account, { eq }) => eq(account.id, data.id),
-				columns: {
-					id: true,
-					name: true,
-					description: true,
-					accountType: true,
-					ownerId: true,
-				},
-			})
+			const account = await getAccountById({ db, accountId: data.id })
 			if (!account || account.ownerId !== user.id) {
 				return ctx.addIssue({
 					code: 'custom',
