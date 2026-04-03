@@ -1,10 +1,10 @@
-import { and, desc, eq, like, sql } from 'drizzle-orm'
+import { and, desc, eq, like, ne, sql } from 'drizzle-orm'
 
 import { account as accountTable } from '~/database/schema'
 import { getBalances } from '~/lib/queries'
 import type { DB } from '~/lib/types'
 
-import type { TBalanceByAccount } from './types'
+import type { TAccountType, TBalanceByAccount } from './types'
 
 export async function getBalancesByAccount({
 	db,
@@ -52,16 +52,91 @@ export async function getAccountById({
 	return account
 }
 
-export async function getUserAccounts({
+export async function getDuplicateAccountCount({
 	db,
-	userId,
+	ownerId,
+	name,
+	accountType,
+	excludeId,
+}: {
+	db: DB
+	ownerId: string
+	name: string
+	accountType: TAccountType
+	excludeId?: string
+}) {
+	const filters = [
+		eq(accountTable.ownerId, ownerId),
+		eq(accountTable.name, name),
+		eq(accountTable.accountType, accountType),
+	]
+	if (excludeId) {
+		filters.push(ne(accountTable.id, excludeId))
+	}
+
+	return db.$count(accountTable, and(...filters))
+}
+
+export async function deleteAccount({
+	db,
+	accountId,
+}: {
+	db: DB
+	accountId: string
+}) {
+	await db.delete(accountTable).where(eq(accountTable.id, accountId))
+}
+
+export async function createAccount({
+	db,
+	ownerId,
+	name,
+	accountType,
+	description,
+}: {
+	db: DB
+	ownerId: string
+	name: string
+	accountType: TAccountType
+	description: string
+}) {
+	const [{ id }] = await db
+		.insert(accountTable)
+		.values({ name, accountType, description, ownerId })
+		.returning({ id: accountTable.id })
+
+	return id
+}
+
+export async function updateAccount({
+	db,
+	id,
+	name,
+	accountType,
+	description,
+}: {
+	db: DB
+	id: string
+	name: string
+	accountType: TAccountType
+	description: string
+}) {
+	await db
+		.update(accountTable)
+		.set({ name, accountType, description })
+		.where(eq(accountTable.id, id))
+}
+
+export async function getAccounts({
+	db,
+	ownerId,
 	search,
 }: {
 	db: DB
-	userId: string
+	ownerId: string
 	search: string | null
 }) {
-	const filters = [eq(accountTable.ownerId, userId)]
+	const filters = [eq(accountTable.ownerId, ownerId)]
 	if (search) {
 		filters.push(
 			like(sql`lower(${accountTable.name})`, `%${search.toLowerCase()}%`),

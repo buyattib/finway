@@ -37,7 +37,7 @@ import {
 import { Spinner } from '~/components/ui/spinner'
 import { EmptyState } from '~/components/empty-state'
 
-import { getBalancesByAccount, getUserAccounts } from './lib/queries'
+import { getBalancesByAccount, getAccounts } from './lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -60,9 +60,9 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		ownerId: user.id,
 	})
 
-	const _accounts = await getUserAccounts({
+	const _accounts = await getAccounts({
 		db,
-		userId: user.id,
+		ownerId: user.id,
 		search,
 	})
 
