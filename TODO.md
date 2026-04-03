@@ -10,4 +10,4 @@
 
 - Sessions for auth?
 - Investment porfolio tracking
-- MCP server to comunicate through llms
+- Add MCP

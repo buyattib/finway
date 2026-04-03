@@ -10,11 +10,13 @@ export default [
 	route('/authenticate', 'routes/auth/authenticate.tsx'),
 	route('/logout', 'routes/auth/logout.tsx'),
 
-	layout('layouts/public.tsx', [route('login', 'routes/auth/login.tsx')]),
+	layout('components/layouts/public.tsx', [
+		route('login', 'routes/auth/login.tsx'),
+	]),
 
 	route('/', 'routes/app.tsx'),
 
-	route('app', 'layouts/private.tsx', [
+	route('app', 'components/layouts/private.tsx', [
 		index('routes/index.tsx'),
 		route('dashboard', 'routes/dashboard/index.tsx'),
 
