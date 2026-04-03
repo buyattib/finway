@@ -14,11 +14,16 @@ import {
 	ListIcon,
 	WalletIcon,
 } from 'lucide-react'
+import { eq, desc } from 'drizzle-orm'
 
 import type { Route } from './+types/private'
 
+import {
+	creditCard as creditCardTable,
+	account as accountTable,
+} from '~/database/schema'
 import { authMiddleware } from '~/middleware/auth'
-import { userContext } from '~/lib/context'
+import { userContext, dbContext } from '~/lib/context'
 import { cn } from '~/lib/utils'
 
 import { FinwayLink } from '~/components/finway-link'
@@ -39,10 +44,27 @@ import {
 	useSidebar,
 } from '~/components/ui/sidebar'
 
+import { ensureStatementsExist } from '~/routes/credit-cards/lib/statements'
+
 export const middleware: MiddlewareFunction[] = [authMiddleware]
 
 export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
+	const db = context.get(dbContext)
+
+	// Credit card statements check on every load of the app running on the background
+	db.select({ id: creditCardTable.id })
+		.from(creditCardTable)
+		.innerJoin(accountTable, eq(creditCardTable.accountId, accountTable.id))
+		.where(eq(accountTable.ownerId, user.id))
+		.orderBy(desc(creditCardTable.createdAt))
+		.then(cards => {
+			void Promise.all(
+				cards.map(({ id }) =>
+					ensureStatementsExist(db, id, new Date()),
+				),
+			)
+		})
 	return { user }
 }
 

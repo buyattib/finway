@@ -7,6 +7,8 @@ import {
 } from '@react-router/dev/routes'
 
 export default [
+	route('/', 'routes/index.tsx'),
+
 	route('/authenticate', 'routes/auth/authenticate.tsx'),
 	route('/logout', 'routes/auth/logout.tsx'),
 
@@ -14,10 +16,8 @@ export default [
 		route('login', 'routes/auth/login.tsx'),
 	]),
 
-	route('/', 'routes/app.tsx'),
-
 	route('app', 'components/layouts/private.tsx', [
-		index('routes/index.tsx'),
+		index('routes/app.tsx'),
 		route('dashboard', 'routes/dashboard/index.tsx'),
 
 		// accounts

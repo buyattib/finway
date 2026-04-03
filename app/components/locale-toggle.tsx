@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { useRootLoader } from '~/hooks/use-root-loader'
 
-import type { action } from '~/routes/app'
+import type { action } from '~/routes/index'
 
 export const LocaleFormSchema = z.object({
 	locale: z.enum(['en', 'es']),

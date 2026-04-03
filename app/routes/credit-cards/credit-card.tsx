@@ -49,7 +49,6 @@ import { CreditCard } from '~/components/credit-card'
 
 import { CreditCardTransactionFilters } from './components/filters'
 import { DeleteCreditCardFormSchema } from './lib/schemas'
-import { ensureStatementsExist } from './lib/statements'
 import type { TCCTransactionType } from './lib/types'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -97,8 +96,6 @@ export async function loader({
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
 		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
-
-	await ensureStatementsExist(db, creditCardId, new Date())
 
 	const currentStatement = await db.query.creditCardStatement.findFirst({
 		where: (s, { eq, gte, and }) =>
