@@ -1,22 +1,14 @@
 import { Link, Form, useNavigation, data, useLocation } from 'react-router'
 import { RefreshCwIcon, PlusIcon, TrashIcon } from 'lucide-react'
-import { eq, desc, sql } from 'drizzle-orm'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { alias } from 'drizzle-orm/sqlite-core'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
-import {
-	currency as currencyTable,
-	account as accountTable,
-	exchange as exchangeTable,
-} from '~/database/schema'
 import { createToastHeaders } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
-import { getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
@@ -37,6 +29,12 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 import { EmptyState } from '~/components/empty-state'
 
+import {
+	getExchanges,
+	getExchangeById,
+	getExchangeBalance,
+	deleteExchange,
+} from './lib/queries'
 import { DeleteExchangeFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -55,40 +53,11 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const page = Number(url.searchParams.get('page') ?? '1')
 
-	const fromCurrencyAlias = alias(currencyTable, 'fromCurrency')
-	const toCurrencyAlias = alias(currencyTable, 'toCurrency')
-
-	const query = db
-		.select({
-			id: exchangeTable.id,
-			date: exchangeTable.date,
-
-			account: accountTable.name,
-			accountType: accountTable.accountType,
-
-			fromCurrency: fromCurrencyAlias.code,
-			toCurrency: toCurrencyAlias.code,
-
-			fromAmount: sql<string>`CAST(${exchangeTable.fromAmount} / 100.0 as TEXT)`,
-			toAmount: sql<string>`CAST(${exchangeTable.toAmount} / 100.0 as TEXT)`,
-		})
-		.from(exchangeTable)
-		.innerJoin(accountTable, eq(exchangeTable.accountId, accountTable.id))
-		.innerJoin(
-			fromCurrencyAlias,
-			eq(exchangeTable.fromCurrencyId, fromCurrencyAlias.id),
-		)
-		.innerJoin(
-			toCurrencyAlias,
-			eq(exchangeTable.toCurrencyId, toCurrencyAlias.id),
-		)
-		.where(eq(accountTable.ownerId, user.id))
-		.orderBy(desc(exchangeTable.date), desc(exchangeTable.createdAt))
-
-	const total = await db.$count(query)
-	const exchanges = await query
-		.limit(PAGE_SIZE)
-		.offset((page - 1) * PAGE_SIZE)
+	const { exchanges, total } = await getExchanges({
+		db,
+		ownerId: user.id,
+		page,
+	})
 
 	return {
 		exchanges,
@@ -123,16 +92,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const { exchangeId } = submission.value
 
-	const exchange = await db.query.exchange.findFirst({
-		where: (exchange, { eq }) => eq(exchange.id, exchangeId),
-		columns: {
-			id: true,
-			accountId: true,
-			toCurrencyId: true,
-			toAmount: true,
-		},
-		with: { account: { columns: { ownerId: true } } },
-	})
+	const exchange = await getExchangeById({ db, exchangeId })
 	if (!exchange || exchange.account.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
@@ -141,15 +101,13 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	const { accountId, toCurrencyId: currencyId } = exchange
-	const [{ balance }] = await getBalances({
+	const balance = await getExchangeBalance({
 		db,
 		ownerId: user.id,
-		accountId,
-		currencyId,
-		parseBalance: false,
+		accountId: exchange.accountId,
+		currencyId: exchange.toCurrencyId,
 	})
-	if (balance < exchange.toAmount) {
+	if (!balance || balance.balance < exchange.toAmount) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: t('index.action.negativeBalanceError'),
@@ -157,7 +115,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	await db.delete(exchangeTable).where(eq(exchangeTable.id, exchangeId))
+	await deleteExchange({ db, exchangeId })
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',
