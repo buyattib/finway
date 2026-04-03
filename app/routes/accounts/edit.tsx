@@ -1,10 +1,8 @@
-import { and, eq, ne } from 'drizzle-orm'
 import { data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
 
 import type { Route } from './+types/edit'
 
-import { account as accountTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
@@ -12,6 +10,11 @@ import { dbContext, userContext } from '~/lib/context'
 import { ACTION_EDITION } from '~/lib/constants'
 
 import { AccountForm } from './components/form'
+import {
+	getAccountById,
+	getDuplicateAccountCount,
+	updateAccount,
+} from './lib/queries'
 import { createAccountFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -33,16 +36,7 @@ export async function loader({
 	const user = context.get(userContext)
 	const t = getServerT(context, 'accounts')
 
-	const account = await db.query.account.findFirst({
-		where: (account, { eq }) => eq(account.id, accountId),
-		columns: {
-			id: true,
-			name: true,
-			description: true,
-			accountType: true,
-			ownerId: true,
-		},
-	})
+	const account = await getAccountById({ db, accountId })
 	if (!account || account.ownerId !== user.id) {
 		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
@@ -66,46 +60,8 @@ export async function action({ context, request }: Route.ActionArgs) {
 	const t = getServerT(context, 'accounts')
 
 	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: createAccountFormSchema(t).superRefine(async (data, ctx) => {
-			if (data.action !== ACTION_EDITION) return
-
-			const account = await db.query.account.findFirst({
-				where: (account, { eq }) => eq(account.id, data.id),
-				columns: {
-					id: true,
-					name: true,
-					description: true,
-					accountType: true,
-					ownerId: true,
-				},
-			})
-			if (!account || account.ownerId !== user.id) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: t('form.edit.action.accountWithIdNotFoundError', {
-						id: data.id,
-					}),
-				})
-			}
-
-			const existingAccountsCount = await db.$count(
-				accountTable,
-				and(
-					eq(accountTable.ownerId, user.id),
-					eq(accountTable.name, data.name),
-					eq(accountTable.accountType, data.accountType),
-					ne(accountTable.id, data.id),
-				),
-			)
-			if (existingAccountsCount > 0) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: t('form.edit.action.duplicateError'),
-				})
-			}
-		}),
+	const submission = parseWithZod(formData, {
+		schema: createAccountFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
@@ -118,9 +74,43 @@ export async function action({ context, request }: Route.ActionArgs) {
 		})
 	}
 
+	const account = await getAccountById({ db, accountId: submission.value.id })
+	if (!account || account.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					formErrors: [
+						t('form.edit.action.accountWithIdNotFoundError', {
+							id: submission.value.id,
+						}),
+					],
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const existingAccountsCount = await getDuplicateAccountCount({
+		db,
+		ownerId: user.id,
+		name: submission.value.name,
+		accountType: submission.value.accountType,
+		excludeId: submission.value.id,
+	})
+	if (existingAccountsCount > 0) {
+		return data(
+			{
+				submission: submission.reply({
+					formErrors: [t('form.edit.action.duplicateError')],
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
 	const { action: _action, id, ...body } = submission.value
 
-	await db.update(accountTable).set(body).where(eq(accountTable.id, id))
+	await updateAccount({ db, id, ...body })
 
 	return await redirectWithToast(`/app/accounts/${id}`, request, {
 		type: 'success',

@@ -1,11 +1,9 @@
 import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
 import type { Route } from './+types/account'
 
-import { account as accountTable } from '~/database/schema'
 import {
 	createToastHeaders,
 	redirectWithToast,
@@ -15,6 +13,8 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { getBalances } from '~/lib/queries'
+
+import { deleteAccount, getAccountById } from './lib/queries'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -50,16 +50,7 @@ export async function loader({
 	const user = context.get(userContext)
 	const t = getServerT(context, 'accounts')
 
-	const account = await db.query.account.findFirst({
-		where: eq(accountTable.id, accountId),
-		columns: {
-			id: true,
-			name: true,
-			description: true,
-			accountType: true,
-			ownerId: true,
-		},
-	})
+	const account = await getAccountById({ db, accountId })
 	if (!account || account.ownerId !== user.id) {
 		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
@@ -99,15 +90,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const { accountId } = submission.value
-	const account = await db.query.account.findFirst({
-		where: eq(accountTable.id, accountId),
-		columns: { name: true, ownerId: true },
-	})
+	const account = await getAccountById({ db, accountId })
 	if (!account || account.ownerId !== user.id) {
 		throw new Response(t('details.action.notFoundError'), { status: 404 })
 	}
 
-	await db.delete(accountTable).where(eq(accountTable.id, accountId))
+	await deleteAccount({ db, accountId })
 
 	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',

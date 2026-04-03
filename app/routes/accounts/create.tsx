@@ -1,10 +1,8 @@
-import { and, eq } from 'drizzle-orm'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { data } from 'react-router'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import type { Route } from './+types/create'
 
-import { account as accountTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
@@ -12,8 +10,9 @@ import { dbContext, userContext } from '~/lib/context'
 import { ACTION_CREATION } from '~/lib/constants'
 
 import type { TAccountType } from './lib/types'
-import { createAccountFormSchema } from './lib/schemas'
 import { AccountForm } from './components/form'
+import { createAccount, getDuplicateAccountCount } from './lib/queries'
+import { createAccountFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -47,24 +46,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const t = getServerT(context, 'accounts')
 
 	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: createAccountFormSchema(t).superRefine(async (data, ctx) => {
-			const existingAccountsCount = await db.$count(
-				accountTable,
-				and(
-					eq(accountTable.ownerId, user.id),
-					eq(accountTable.name, data.name),
-					eq(accountTable.accountType, data.accountType),
-				),
-			)
-			if (existingAccountsCount > 0) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: t('form.create.action.duplicateError'),
-				})
-			}
-		}),
+	const submission = parseWithZod(formData, {
+		schema: createAccountFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
@@ -77,12 +60,30 @@ export async function action({ request, context }: Route.ActionArgs) {
 		})
 	}
 
+	const existingAccountsCount = await getDuplicateAccountCount({
+		db,
+		ownerId: user.id,
+		name: submission.value.name,
+		accountType: submission.value.accountType,
+	})
+	if (existingAccountsCount > 0) {
+		return data(
+			{
+				submission: submission.reply({
+					formErrors: [t('form.create.action.duplicateError')],
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
 	const { action: _action, redirectTo, ...accountData } = submission.value
 
-	const [{ id: accountId }] = await db
-		.insert(accountTable)
-		.values({ ...accountData, ownerId: user.id })
-		.returning({ id: accountTable.id })
+	const accountId = await createAccount({
+		db,
+		ownerId: user.id,
+		...accountData,
+	})
 
 	return await redirectWithToast(
 		safeRedirect(redirectTo || `/app/accounts/${accountId}`),

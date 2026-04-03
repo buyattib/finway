@@ -13,16 +13,13 @@ import {
 	SquarePenIcon,
 	WalletIcon,
 } from 'lucide-react'
-import { desc, eq, and, like, sql } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
 import { getServerT } from '~/utils-server/i18n.server'
-import { account as accountTable } from '~/database/schema'
 import { dbContext, userContext } from '~/lib/context'
 import { formatNumber, getCurrencySymbol } from '~/lib/utils'
-import { getBalances } from '~/lib/queries'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -40,7 +37,7 @@ import {
 import { Spinner } from '~/components/ui/spinner'
 import { EmptyState } from '~/components/empty-state'
 
-import type { TAccountBalance } from './lib/types'
+import { getBalancesByAccount, getAccounts } from './lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -58,39 +55,18 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const search = url.searchParams.get('search')
 
-	const balances = await getBalances({ db, ownerId: user.id })
-	const balancesByAccount = balances.reduce(
-		(acc, { accountId, currencyId, currency, balance }) => {
-			acc[accountId] = acc[accountId] || []
-			acc[accountId].push({
-				id: `${accountId}-${currencyId}`,
-				currency,
-				balance,
-			})
-			return acc
-		},
-		{} as Record<string, TAccountBalance[]>,
-	)
+	const balancesByAccount = await getBalancesByAccount({
+		db,
+		ownerId: user.id,
+	})
 
-	const filters = [eq(accountTable.ownerId, user.id)]
-	if (search) {
-		filters.push(
-			like(sql`lower(${accountTable.name})`, `%${search.toLowerCase()}%`),
-		)
-	}
+	const _accounts = await getAccounts({
+		db,
+		ownerId: user.id,
+		search,
+	})
 
-	const accountsQuery = await db
-		.select({
-			id: accountTable.id,
-			name: accountTable.name,
-			description: accountTable.description,
-			accountType: accountTable.accountType,
-		})
-		.from(accountTable)
-		.where(and(...filters))
-		.orderBy(desc(accountTable.createdAt))
-
-	const accounts = accountsQuery.map(acc => ({
+	const accounts = _accounts.map(acc => ({
 		...acc,
 		balances: balancesByAccount[acc.id]
 			.filter(({ balance }) => Number(balance) > 0)
@@ -115,6 +91,7 @@ export default function Accounts({
 	const { t } = useTranslation(['accounts', 'constants'])
 
 	useEffect(() => {
+		// sync search field with query params value
 		const searchField = document.getElementById('search')
 		if (searchField instanceof HTMLInputElement) {
 			searchField.value = search ?? ''
