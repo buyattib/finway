@@ -2,12 +2,10 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm } from '@conform-to/react'
 import { data, Link, Form, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
-import { eq, and } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import type { Route } from './+types/create'
 
-import { transactionCategory as transactionCategoryTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
@@ -24,6 +22,10 @@ import {
 import { ErrorList, TextField } from '~/components/forms'
 
 import { createTransactionCategoryFormSchema } from './lib/schemas'
+import {
+	createTransactionCategory,
+	getDuplicateTransactionCategoryCount,
+} from './lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -53,26 +55,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const t = getServerT(context, 'transaction-categories')
 
 	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: createTransactionCategoryFormSchema(t).superRefine(
-			async (data, ctx) => {
-				const existingTransactionCategoriesCount = await db.$count(
-					transactionCategoryTable,
-					and(
-						eq(transactionCategoryTable.ownerId, user.id),
-						eq(transactionCategoryTable.name, data.name),
-					),
-				)
-
-				if (existingTransactionCategoriesCount > 0) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.duplicateError'),
-					})
-				}
-			},
-		),
+	const submission = parseWithZod(formData, {
+		schema: createTransactionCategoryFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
@@ -80,11 +64,24 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const { redirectTo, name, description } = submission.value
-	await db.insert(transactionCategoryTable).values({
-		name,
-		description,
+
+	const existingCount = await getDuplicateTransactionCategoryCount({
+		db,
 		ownerId: user.id,
+		name,
 	})
+	if (existingCount > 0) {
+		return data(
+			{
+				submission: submission.reply({
+					formErrors: [t('form.create.action.duplicateError')],
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	await createTransactionCategory({ db, ownerId: user.id, name, description })
 
 	return await redirectWithToast(
 		safeRedirect(redirectTo || '/app/transaction-categories'),

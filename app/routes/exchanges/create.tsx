@@ -12,7 +12,6 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { Trans, useTranslation } from 'react-i18next'
 import type { Route } from './+types/create'
 
-import { exchange as exchangeTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
@@ -38,8 +37,11 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 import { formatNumber, getCurrencySymbol } from '~/lib/utils'
+import { getSelectData, getBalances, getCurrencyById } from '~/lib/queries'
 
-import { getBalances, getSelectData } from '~/lib/queries'
+import { getAccountById } from '~/routes/accounts/lib/queries'
+
+import { getExchangeBalance, createExchange } from './lib/queries'
 import { createExchangeFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -78,76 +80,99 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const formData = await request.formData()
 
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: createExchangeFormSchema(t)
-			.transform(data => ({
-				...data,
-				fromAmount: Number(removeCommas(data.fromAmount)) * 100,
-				toAmount: Number(removeCommas(data.toAmount)) * 100,
-			}))
-			.superRefine(async (data, ctx) => {
-				const account = await db.query.account.findFirst({
-					where: (account, { eq }) => eq(account.id, data.accountId),
-					columns: { ownerId: true },
-				})
-				if (!account || account.ownerId !== user.id) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.accountNotFound'),
-						path: ['accountId'],
-					})
-				}
-
-				const fromCurrency = await db.query.currency.findFirst({
-					where: (currency, { eq }) =>
-						eq(currency.id, data.fromCurrencyId),
-					columns: { id: true },
-				})
-				if (!fromCurrency) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.fromCurrencyNotFound'),
-						path: ['fromCurrencyId'],
-					})
-				}
-
-				const toCurrency = await db.query.currency.findFirst({
-					where: (currency, { eq }) =>
-						eq(currency.id, data.toCurrencyId),
-					columns: { id: true },
-				})
-				if (!toCurrency) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.toCurrencyNotFound'),
-						path: ['toCurrencyId'],
-					})
-				}
-
-				const { accountId, fromCurrencyId: currencyId } = data
-				const [result] = await getBalances({
-					db,
-					ownerId: user.id,
-					accountId,
-					currencyId,
-					parseBalance: false,
-				})
-				if (!result || result.balance < data.fromAmount) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.insufficientBalance'),
-						path: ['fromAmount'],
-					})
-				}
-			}),
+	const submission = parseWithZod(formData, {
+		schema: createExchangeFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
 		return data({ submission: submission.reply() }, { status: 422 })
 	}
 
-	await db.insert(exchangeTable).values(submission.value)
+	const { accountId, fromCurrencyId, toCurrencyId } = submission.value
+	const fromAmount = Number(removeCommas(submission.value.fromAmount)) * 100
+	const toAmount = Number(removeCommas(submission.value.toAmount)) * 100
+
+	const account = await getAccountById({ db, accountId })
+	if (!account || account.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						accountId: [t('form.create.action.accountNotFound')],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const fromCurrency = await getCurrencyById({
+		db,
+		currencyId: fromCurrencyId,
+	})
+	if (!fromCurrency) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						fromCurrencyId: [
+							t('form.create.action.fromCurrencyNotFound'),
+						],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const toCurrency = await getCurrencyById({ db, currencyId: toCurrencyId })
+	if (!toCurrency) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						toCurrencyId: [
+							t('form.create.action.toCurrencyNotFound'),
+						],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const balance = await getExchangeBalance({
+		db,
+		ownerId: user.id,
+		accountId,
+		currencyId: fromCurrencyId,
+	})
+	if (!balance || balance.balance < fromAmount) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						fromAmount: [
+							t('form.create.action.insufficientBalance'),
+						],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	await createExchange({
+		db,
+		values: {
+			date: submission.value.date,
+			fromAmount,
+			toAmount,
+			fromCurrencyId,
+			toCurrencyId,
+			accountId,
+		},
+	})
 
 	return await redirectWithToast(`/app/exchanges`, request, {
 		type: 'success',

@@ -1,11 +1,9 @@
 import { Link, Form, useNavigation, data } from 'react-router'
-import { PlusIcon, TrashIcon } from 'lucide-react'
+import { PlusIcon, TagIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
 import type { Route } from './+types'
 
-import { transactionCategory as transactionCategoryTable } from '~/database/schema'
 import { createToastHeaders } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
@@ -21,12 +19,18 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 import { EmptyState } from '~/components/empty-state'
-import { TagIcon } from 'lucide-react'
 
 import {
 	AddSuggestionsSchema,
 	DeleteTransactionCategoryFormSchema,
 } from './lib/schemas'
+import {
+	getTransactionCategories,
+	getTransactionCategoryById,
+	deleteTransactionCategory,
+	getExistingCategoriesByName,
+	bulkCreateTransactionCategories,
+} from './lib/queries'
 import { SuggestedCategoriesDialog } from './components/suggested-categories-dialog'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -42,13 +46,9 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const t = getServerT(context, 'transaction-categories')
 
-	const transactionCategories = await db.query.transactionCategory.findMany({
-		orderBy: (transactionCategory, { desc }) => [
-			desc(transactionCategory.createdAt),
-		],
-		where: (transactionCategory, { eq }) =>
-			eq(transactionCategory.ownerId, user.id),
-		columns: { id: true, name: true, description: true },
+	const transactionCategories = await getTransactionCategories({
+		db,
+		ownerId: user.id,
 	})
 
 	return {
@@ -84,10 +84,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const { categoryNames } = parsed.data
 
-		const existingCategories = await db.query.transactionCategory.findMany({
-			where: (tc, { eq, and, inArray }) =>
-				and(eq(tc.ownerId, user.id), inArray(tc.name, categoryNames)),
-			columns: { name: true },
+		const existingCategories = await getExistingCategoriesByName({
+			db,
+			ownerId: user.id,
+			categoryNames,
 		})
 
 		const existingNames = new Set(
@@ -98,12 +98,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 		)
 
 		if (newCategories.length > 0) {
-			await db.insert(transactionCategoryTable).values(
-				newCategories.map(name => ({
-					name,
-					ownerId: user.id,
-				})),
-			)
+			await bulkCreateTransactionCategories({
+				db,
+				ownerId: user.id,
+				names: newCategories,
+			})
 		}
 
 		const toastHeaders = await createToastHeaders(request, {
@@ -130,10 +129,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const { transactionCategoryId } = submission.value
 
-	const transactionCategory = await db.query.transactionCategory.findFirst({
-		where: (transactionCategory, { eq }) =>
-			eq(transactionCategory.id, transactionCategoryId),
-		columns: { id: true, ownerId: true },
+	const transactionCategory = await getTransactionCategoryById({
+		db,
+		transactionCategoryId,
 	})
 	if (!transactionCategory || transactionCategory.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
@@ -143,9 +141,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	await db
-		.delete(transactionCategoryTable)
-		.where(eq(transactionCategoryTable.id, transactionCategoryId))
+	await deleteTransactionCategory({ db, transactionCategoryId })
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',

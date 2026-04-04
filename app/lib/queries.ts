@@ -244,3 +244,20 @@ export async function getSelectData(db: DB, ownerId: string) {
 		transactionCategories,
 	}
 }
+
+export async function getCurrencyById({
+	db,
+	currencyId,
+}: {
+	db: DB
+	currencyId: string
+}) {
+	return db.query.currency.findFirst({
+		where: (currency, { eq }) => eq(currency.id, currencyId),
+		columns: { id: true, code: true },
+	})
+}
+
+export async function getCurrencies({ db }: { db: DB }) {
+	return db.query.currency.findMany({ columns: { id: true, code: true } })
+}

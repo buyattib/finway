@@ -1,22 +1,14 @@
 import { Link, Form, data, useNavigation, useLocation } from 'react-router'
-import { PlusIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
+import { PlusIcon, ReceiptTextIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq, desc, sql, and } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
-import {
-	currency as currencyTable,
-	account as accountTable,
-	transaction as transactionTable,
-	transactionCategory as transactionCategoryTable,
-} from '~/database/schema'
 import { createToastHeaders } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
-import { PAGE_SIZE } from '~/lib/constants'
 import { getBalances, getSelectData } from '~/lib/queries'
 
 import { Button } from '~/components/ui/button'
@@ -37,10 +29,14 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { TransactionType } from '~/components/transaction-type'
 import { EmptyState } from '~/components/empty-state'
-import { ReceiptTextIcon } from 'lucide-react'
 
 import { TransactionsFilters } from './components/filters'
 import { DeleteTransactionFormSchema } from './lib/schemas'
+import {
+	getTransactions,
+	getTransactionById,
+	deleteTransaction,
+} from './lib/queries'
 import type { TTransactionType } from './lib/types'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -68,73 +64,22 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const transactionType =
 		(searchParams.get('transactionType') as TTransactionType) ?? ''
 
-	const filters = [eq(accountTable.ownerId, user.id)]
-	if (accountId) {
-		filters.push(eq(transactionTable.accountId, accountId))
+	const filters = {
+		accountId,
+		currencyId,
+		transactionCategoryId,
+		transactionType,
 	}
 
-	if (currencyId) {
-		filters.push(eq(transactionTable.currencyId, currencyId))
-	}
-
-	if (transactionCategoryId) {
-		filters.push(
-			eq(transactionTable.transactionCategoryId, transactionCategoryId),
-		)
-	}
-
-	if (transactionType) {
-		filters.push(eq(transactionTable.type, transactionType))
-	}
-
-	const query = db
-		.select({
-			id: transactionTable.id,
-			date: transactionTable.date,
-			amount: sql<string>`CAST(${transactionTable.amount} / 100.0 as TEXT)`,
-			type: transactionTable.type,
-			currency: currencyTable.code,
-			account: accountTable.name,
-			accountType: accountTable.accountType,
-			transactionCategory: transactionCategoryTable.name,
-		})
-		.from(transactionTable)
-		.innerJoin(
-			currencyTable,
-			eq(transactionTable.currencyId, currencyTable.id),
-		)
-		.innerJoin(
-			accountTable,
-			eq(transactionTable.accountId, accountTable.id),
-		)
-		.leftJoin(
-			transactionCategoryTable,
-			eq(
-				transactionCategoryTable.id,
-				transactionTable.transactionCategoryId,
-			),
-		)
-		.where(and(...filters))
-		.orderBy(desc(transactionTable.date), desc(transactionTable.createdAt))
-
-	const total = await db.$count(query)
-	const transactions = await query
-		.limit(PAGE_SIZE)
-		.offset((page - 1) * PAGE_SIZE)
-
-	const pages = Math.ceil(total / PAGE_SIZE)
-
-	const selectData = await getSelectData(db, user.id)
+	const [{ transactions, pagination }, selectData] = await Promise.all([
+		getTransactions({ db, ownerId: user.id, page, ...filters }),
+		getSelectData(db, user.id),
+	])
 
 	return {
 		transactions,
-		pagination: { page, pages, total },
-		filters: {
-			accountId,
-			currencyId,
-			transactionCategoryId,
-			transactionType,
-		},
+		pagination,
+		filters,
 		selectData,
 		meta: {
 			title: t('index.meta.title'),
@@ -166,11 +111,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const { transactionId } = submission.value
 
-	const transaction = await db.query.transaction.findFirst({
-		where: (transaction, { eq }) => eq(transaction.id, transactionId),
-		columns: { id: true, accountId: true, currencyId: true, amount: true },
-		with: { account: { columns: { ownerId: true } } },
-	})
+	const transaction = await getTransactionById({ db, transactionId })
 	if (!transaction || transaction.account.ownerId !== user.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
@@ -196,9 +137,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	await db
-		.delete(transactionTable)
-		.where(eq(transactionTable.id, transactionId))
+	await deleteTransaction({ db, transactionId })
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',

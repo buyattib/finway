@@ -5,23 +5,15 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from 'lucide-react'
-import { eq, and, desc, sql } from 'drizzle-orm'
-import { alias } from 'drizzle-orm/sqlite-core'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
-import {
-	currency as currencyTable,
-	account as accountTable,
-	transfer as transferTable,
-} from '~/database/schema'
 import { createToastHeaders } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
-import { getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
@@ -42,6 +34,12 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 import { EmptyState } from '~/components/empty-state'
 
+import {
+	getTransfers,
+	getTransferById,
+	getTransferBalance,
+	deleteTransfer,
+} from './lib/queries'
 import { DeleteTransferFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -60,48 +58,11 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const page = Number(url.searchParams.get('page') ?? '1')
 
-	const fromAccountAlias = alias(accountTable, 'fromAccount')
-	const toAccountAlias = alias(accountTable, 'toAccount')
-
-	const query = db
-		.select({
-			id: transferTable.id,
-
-			date: transferTable.date,
-			amount: sql<string>`CAST(${transferTable.amount} / 100.0 as TEXT)`,
-			currency: currencyTable.code,
-
-			fromAccount: fromAccountAlias.name,
-			fromAccountType: fromAccountAlias.accountType,
-
-			toAccount: toAccountAlias.name,
-			toAccountType: toAccountAlias.accountType,
-		})
-		.from(transferTable)
-		.innerJoin(
-			currencyTable,
-			eq(transferTable.currencyId, currencyTable.id),
-		)
-		.innerJoin(
-			fromAccountAlias,
-			eq(transferTable.fromAccountId, fromAccountAlias.id),
-		)
-		.innerJoin(
-			toAccountAlias,
-			eq(transferTable.toAccountId, toAccountAlias.id),
-		)
-		.where(
-			and(
-				eq(fromAccountAlias.ownerId, user.id),
-				eq(toAccountAlias.ownerId, user.id),
-			),
-		)
-		.orderBy(desc(transferTable.date), desc(transferTable.createdAt))
-
-	const total = await db.$count(query)
-	const transfers = await query
-		.limit(PAGE_SIZE)
-		.offset((page - 1) * PAGE_SIZE)
+	const { transfers, total } = await getTransfers({
+		db,
+		ownerId: user.id,
+		page,
+	})
 
 	return {
 		transfers,
@@ -136,19 +97,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const { transferId } = submission.value
 
-	const transfer = await db.query.transfer.findFirst({
-		where: (transfer, { eq }) => eq(transfer.id, transferId),
-		columns: {
-			id: true,
-			toAccountId: true,
-			currencyId: true,
-			amount: true,
-		},
-		with: {
-			fromAccount: { columns: { ownerId: true } },
-			toAccount: { columns: { ownerId: true } },
-		},
-	})
+	const transfer = await getTransferById({ db, transferId })
 	if (
 		!transfer ||
 		(transfer.fromAccount && transfer.fromAccount.ownerId !== user.id) ||
@@ -161,15 +110,13 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	const { toAccountId: accountId, currencyId } = transfer
-	const [{ balance }] = await getBalances({
+	const balance = await getTransferBalance({
 		db,
 		ownerId: user.id,
-		accountId,
-		currencyId,
-		parseBalance: false,
+		accountId: transfer.toAccountId,
+		currencyId: transfer.currencyId,
 	})
-	if (balance < transfer.amount) {
+	if (!balance || balance.balance < transfer.amount) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: t('index.action.negativeBalanceError'),
@@ -177,7 +124,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		return data({}, { headers: toastHeaders })
 	}
 
-	await db.delete(transferTable).where(eq(transferTable.id, transferId))
+	await deleteTransfer({ db, transferId })
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',

@@ -6,6 +6,59 @@ import type { DB } from '~/lib/types'
 
 import type { TAccountType, TBalanceByAccount } from './types'
 
+// fetch --------
+
+export async function getAccountById({
+	db,
+	accountId,
+}: {
+	db: DB
+	accountId: string
+}) {
+	const account = await db.query.account.findFirst({
+		where: (account, { eq }) => eq(account.id, accountId),
+		columns: {
+			id: true,
+			name: true,
+			description: true,
+			accountType: true,
+			ownerId: true,
+		},
+	})
+
+	return account
+}
+
+export async function getAccounts({
+	db,
+	ownerId,
+	search,
+}: {
+	db: DB
+	ownerId: string
+	search: string | null
+}) {
+	const filters = [eq(accountTable.ownerId, ownerId)]
+	if (search) {
+		filters.push(
+			like(sql`lower(${accountTable.name})`, `%${search.toLowerCase()}%`),
+		)
+	}
+
+	const accounts = await db
+		.select({
+			id: accountTable.id,
+			name: accountTable.name,
+			description: accountTable.description,
+			accountType: accountTable.accountType,
+		})
+		.from(accountTable)
+		.where(and(...filters))
+		.orderBy(desc(accountTable.createdAt))
+
+	return accounts
+}
+
 export async function getBalancesByAccount({
 	db,
 	ownerId,
@@ -29,27 +82,6 @@ export async function getBalancesByAccount({
 	)
 
 	return balancesByAccount
-}
-
-export async function getAccountById({
-	db,
-	accountId,
-}: {
-	db: DB
-	accountId: string
-}) {
-	const account = await db.query.account.findFirst({
-		where: (account, { eq }) => eq(account.id, accountId),
-		columns: {
-			id: true,
-			name: true,
-			description: true,
-			accountType: true,
-			ownerId: true,
-		},
-	})
-
-	return account
 }
 
 export async function getDuplicateAccountCount({
@@ -76,6 +108,8 @@ export async function getDuplicateAccountCount({
 
 	return db.$count(accountTable, and(...filters))
 }
+
+// mutations --------
 
 export async function deleteAccount({
 	db,
@@ -125,34 +159,4 @@ export async function updateAccount({
 		.update(accountTable)
 		.set({ name, accountType, description })
 		.where(eq(accountTable.id, id))
-}
-
-export async function getAccounts({
-	db,
-	ownerId,
-	search,
-}: {
-	db: DB
-	ownerId: string
-	search: string | null
-}) {
-	const filters = [eq(accountTable.ownerId, ownerId)]
-	if (search) {
-		filters.push(
-			like(sql`lower(${accountTable.name})`, `%${search.toLowerCase()}%`),
-		)
-	}
-
-	const accounts = await db
-		.select({
-			id: accountTable.id,
-			name: accountTable.name,
-			description: accountTable.description,
-			accountType: accountTable.accountType,
-		})
-		.from(accountTable)
-		.where(and(...filters))
-		.orderBy(desc(accountTable.createdAt))
-
-	return accounts
 }

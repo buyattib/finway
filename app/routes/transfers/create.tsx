@@ -12,12 +12,11 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { Trans, useTranslation } from 'react-i18next'
 import type { Route } from './+types/create'
 
-import { transfer as transferTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { initializeDate, removeCommas } from '~/lib/utils'
-import { getBalances, getSelectData } from '~/lib/queries'
+import { getSelectData, getCurrencyById } from '~/lib/queries'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -39,7 +38,11 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 import { formatNumber, getCurrencySymbol } from '~/lib/utils'
+import { getBalances } from '~/lib/queries'
 
+import { getAccountById } from '~/routes/accounts/lib/queries'
+
+import { getTransferBalance, createTransfer } from './lib/queries'
 import { createTransferFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -78,77 +81,92 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const formData = await request.formData()
 
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: createTransferFormSchema(t)
-			.transform(data => ({
-				...data,
-				amount: Number(removeCommas(data.amount)) * 100,
-			}))
-			.superRefine(async (data, ctx) => {
-				const fromAccount = await db.query.account.findFirst({
-					where: (account, { eq }) =>
-						eq(account.id, data.fromAccountId),
-					columns: { ownerId: true },
-				})
-				const toAccount = await db.query.account.findFirst({
-					where: (account, { eq }) =>
-						eq(account.id, data.toAccountId),
-					columns: { ownerId: true },
-				})
-
-				if (!fromAccount || fromAccount.ownerId !== user.id) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.fromAccountNotFound'),
-						path: ['fromAccountId'],
-					})
-				}
-
-				if (!toAccount || toAccount.ownerId !== user.id) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.toAccountNotFound'),
-						path: ['toAccountId'],
-					})
-				}
-
-				const currency = await db.query.currency.findFirst({
-					where: (currency, { eq }) =>
-						eq(currency.id, data.currencyId),
-					columns: { id: true },
-				})
-				if (!currency) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.currencyNotFound'),
-						path: ['currencyId'],
-					})
-				}
-
-				const { fromAccountId: accountId, currencyId } = data
-				const [result] = await getBalances({
-					db,
-					ownerId: user.id,
-					accountId,
-					currencyId,
-					parseBalance: false,
-				})
-				if (!result || result.balance < data.amount) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.insufficientBalance'),
-						path: ['amount'],
-					})
-				}
-			}),
+	const submission = parseWithZod(formData, {
+		schema: createTransferFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
 		return data({ submission: submission.reply() }, { status: 422 })
 	}
 
-	await db.insert(transferTable).values(submission.value)
+	const { fromAccountId, toAccountId, currencyId } = submission.value
+	const amount = Number(removeCommas(submission.value.amount)) * 100
+
+	const fromAccount = await getAccountById({ db, accountId: fromAccountId })
+	if (!fromAccount || fromAccount.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						fromAccountId: [
+							t('form.create.action.fromAccountNotFound'),
+						],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const toAccount = await getAccountById({ db, accountId: toAccountId })
+	if (!toAccount || toAccount.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						toAccountId: [
+							t('form.create.action.toAccountNotFound'),
+						],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const currency = await getCurrencyById({ db, currencyId })
+	if (!currency) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						currencyId: [t('form.create.action.currencyNotFound')],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const balance = await getTransferBalance({
+		db,
+		ownerId: user.id,
+		accountId: fromAccountId,
+		currencyId,
+	})
+	if (!balance || balance.balance < amount) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						amount: [t('form.create.action.insufficientBalance')],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	await createTransfer({
+		db,
+		values: {
+			date: submission.value.date,
+			amount,
+			currencyId,
+			fromAccountId,
+			toAccountId,
+		},
+	})
 
 	return await redirectWithToast(`/app/transfers`, request, {
 		type: 'success',
