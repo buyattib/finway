@@ -3,17 +3,20 @@ import { parseWithZod } from '@conform-to/zod/v4'
 
 import type { Route } from './+types/create'
 
-import { transaction as transactionTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
 import { removeCommas } from '~/lib/utils'
-import { getBalances, getSelectData } from '~/lib/queries'
+import { getBalances, getCurrencyById, getSelectData } from '~/lib/queries'
 import { ACTION_CREATION } from '~/lib/constants'
-import { TRANSACTION_TYPE_EXPENSE } from './lib/constants'
 
+import { getAccountById } from '~/routes/accounts/lib/queries'
+import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/queries'
+
+import { TRANSACTION_TYPE_EXPENSE } from './lib/constants'
 import { createTransactionFormSchema } from './lib/schemas'
+import { createTransaction } from './lib/queries'
 import { TransactionForm } from './components/form'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -79,78 +82,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const t = getServerT(context, 'transactions')
 
 	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: createTransactionFormSchema(t)
-			.transform(data => ({
-				...data,
-				amount: Number(removeCommas(data.amount)) * 100,
-			}))
-			.superRefine(async (data, ctx) => {
-				const account = await db.query.account.findFirst({
-					where: (account, { eq }) => eq(account.id, data.accountId),
-					columns: { ownerId: true },
-				})
-				if (!account || account.ownerId !== user.id) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.accountNotFound'),
-						path: ['accountId'],
-					})
-				}
-
-				const currency = await db.query.currency.findFirst({
-					where: (currency, { eq }) =>
-						eq(currency.id, data.currencyId),
-					columns: { id: true },
-				})
-				if (!currency) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.currencyNotFound'),
-						path: ['currencyId'],
-					})
-				}
-
-				const transactionCategory =
-					await db.query.transactionCategory.findFirst({
-						where: (transactionCategory, { eq }) =>
-							eq(
-								transactionCategory.id,
-								data.transactionCategoryId,
-							),
-						columns: { ownerId: true },
-					})
-				if (
-					!transactionCategory ||
-					transactionCategory.ownerId !== user.id
-				) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.categoryNotFound'),
-						path: ['transactionCategoryId'],
-					})
-				}
-
-				const { accountId, currencyId } = data
-				const [result] = await getBalances({
-					db,
-					ownerId: user.id,
-					accountId,
-					currencyId,
-					parseBalance: false,
-				})
-				if (
-					data.type === TRANSACTION_TYPE_EXPENSE &&
-					(!result || result.balance < data.amount)
-				) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.create.action.insufficientBalance'),
-						path: ['amount'],
-					})
-				}
-			}),
+	const submission = parseWithZod(formData, {
+		schema: createTransactionFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
@@ -163,9 +96,86 @@ export async function action({ request, context }: Route.ActionArgs) {
 		})
 	}
 
-	const { action: _action, ...transactionData } = submission.value
+	const { action: _action, ...values } = submission.value
+	const amount = Number(removeCommas(values.amount)) * 100
 
-	await db.insert(transactionTable).values(transactionData)
+	const account = await getAccountById({ db, accountId: values.accountId })
+	if (!account || account.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						accountId: [t('form.create.action.accountNotFound')],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const currency = await getCurrencyById({
+		db,
+		currencyId: values.currencyId,
+	})
+	if (!currency) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						currencyId: [t('form.create.action.currencyNotFound')],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const transactionCategory = await getTransactionCategoryById({
+		db,
+		transactionCategoryId: values.transactionCategoryId,
+	})
+	if (!transactionCategory || transactionCategory.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						transactionCategoryId: [
+							t('form.create.action.categoryNotFound'),
+						],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const [result] = await getBalances({
+		db,
+		ownerId: user.id,
+		accountId: values.accountId,
+		currencyId: values.currencyId,
+		parseBalance: false,
+	})
+	if (
+		values.type === TRANSACTION_TYPE_EXPENSE &&
+		(!result || result.balance < amount)
+	) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						amount: [t('form.create.action.insufficientBalance')],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	await createTransaction({
+		db,
+		data: { ...values, amount },
+	})
 
 	return await redirectWithToast(`/app/transactions`, request, {
 		type: 'success',
