@@ -6,12 +6,36 @@ import {
 	transaction as transactionTable,
 	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
+import { getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 import type { DB } from '~/lib/types'
 
 import type { TTransactionType } from './types'
 
 // fetch --------
+
+export async function getTransactionById({
+	db,
+	transactionId,
+}: {
+	db: DB
+	transactionId: string
+}) {
+	return db.query.transaction.findFirst({
+		where: (transaction, { eq }) => eq(transaction.id, transactionId),
+		columns: {
+			id: true,
+			date: true,
+			type: true,
+			amount: true,
+			description: true,
+			accountId: true,
+			currencyId: true,
+			transactionCategoryId: true,
+		},
+		with: { account: { columns: { ownerId: true } } },
+	})
+}
 
 export async function getTransactions({
 	db,
@@ -86,27 +110,25 @@ export async function getTransactions({
 	return { transactions, pagination: { page, pages, total } }
 }
 
-export async function getTransactionById({
+export async function getTransactionBalance({
 	db,
-	transactionId,
+	ownerId,
+	accountId,
+	currencyId,
 }: {
 	db: DB
-	transactionId: string
+	ownerId: string
+	accountId: string
+	currencyId: string
 }) {
-	return db.query.transaction.findFirst({
-		where: (transaction, { eq }) => eq(transaction.id, transactionId),
-		columns: {
-			id: true,
-			date: true,
-			type: true,
-			amount: true,
-			description: true,
-			accountId: true,
-			currencyId: true,
-			transactionCategoryId: true,
-		},
-		with: { account: { columns: { ownerId: true } } },
+	const [result] = await getBalances({
+		db,
+		ownerId,
+		accountId,
+		currencyId,
+		parseBalance: false,
 	})
+	return result
 }
 
 // mutations --------

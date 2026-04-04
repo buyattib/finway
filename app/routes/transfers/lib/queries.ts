@@ -10,6 +10,30 @@ import { getBalances } from '~/lib/queries'
 import type { DB } from '~/lib/types'
 import { PAGE_SIZE } from '~/lib/constants'
 
+// fetch --------
+
+export async function getTransferById({
+	db,
+	transferId,
+}: {
+	db: DB
+	transferId: string
+}) {
+	return db.query.transfer.findFirst({
+		where: (transfer, { eq }) => eq(transfer.id, transferId),
+		columns: {
+			id: true,
+			toAccountId: true,
+			currencyId: true,
+			amount: true,
+		},
+		with: {
+			fromAccount: { columns: { ownerId: true } },
+			toAccount: { columns: { ownerId: true } },
+		},
+	})
+}
+
 export async function getTransfers({
 	db,
 	ownerId,
@@ -65,67 +89,6 @@ export async function getTransfers({
 	return { transfers, total }
 }
 
-export async function getTransferById({
-	db,
-	transferId,
-}: {
-	db: DB
-	transferId: string
-}) {
-	return db.query.transfer.findFirst({
-		where: (transfer, { eq }) => eq(transfer.id, transferId),
-		columns: {
-			id: true,
-			toAccountId: true,
-			currencyId: true,
-			amount: true,
-		},
-		with: {
-			fromAccount: { columns: { ownerId: true } },
-			toAccount: { columns: { ownerId: true } },
-		},
-	})
-}
-
-export async function getCurrencyById({
-	db,
-	currencyId,
-}: {
-	db: DB
-	currencyId: string
-}) {
-	return db.query.currency.findFirst({
-		where: (currency, { eq }) => eq(currency.id, currencyId),
-		columns: { id: true },
-	})
-}
-
-export async function createTransfer({
-	db,
-	values,
-}: {
-	db: DB
-	values: {
-		date: string
-		amount: number
-		currencyId: string
-		fromAccountId: string
-		toAccountId: string
-	}
-}) {
-	await db.insert(transferTable).values(values)
-}
-
-export async function deleteTransfer({
-	db,
-	transferId,
-}: {
-	db: DB
-	transferId: string
-}) {
-	await db.delete(transferTable).where(eq(transferTable.id, transferId))
-}
-
 export async function getTransferBalance({
 	db,
 	ownerId,
@@ -145,4 +108,32 @@ export async function getTransferBalance({
 		parseBalance: false,
 	})
 	return result
+}
+
+// mutations --------
+
+export async function deleteTransfer({
+	db,
+	transferId,
+}: {
+	db: DB
+	transferId: string
+}) {
+	await db.delete(transferTable).where(eq(transferTable.id, transferId))
+}
+
+export async function createTransfer({
+	db,
+	values,
+}: {
+	db: DB
+	values: {
+		date: string
+		amount: number
+		currencyId: string
+		fromAccountId: string
+		toAccountId: string
+	}
+}) {
+	await db.insert(transferTable).values(values)
 }

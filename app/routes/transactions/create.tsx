@@ -16,7 +16,7 @@ import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/
 
 import { TRANSACTION_TYPE_EXPENSE } from './lib/constants'
 import { createTransactionFormSchema } from './lib/schemas'
-import { createTransaction } from './lib/queries'
+import { createTransaction, getTransactionBalance } from './lib/queries'
 import { TransactionForm } from './components/form'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -149,12 +149,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 		)
 	}
 
-	const [result] = await getBalances({
+	const result = await getTransactionBalance({
 		db,
 		ownerId: user.id,
 		accountId: values.accountId,
 		currencyId: values.currencyId,
-		parseBalance: false,
 	})
 	if (
 		values.type === TRANSACTION_TYPE_EXPENSE &&

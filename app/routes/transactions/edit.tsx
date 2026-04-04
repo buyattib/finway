@@ -19,7 +19,11 @@ import {
 	TRANSACTION_TYPE_INCOME,
 } from './lib/constants'
 import { createTransactionFormSchema } from './lib/schemas'
-import { getTransactionById, updateTransaction } from './lib/queries'
+import {
+	getTransactionById,
+	getTransactionBalance,
+	updateTransaction,
+} from './lib/queries'
 import { TransactionForm } from './components/form'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -158,12 +162,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 		)
 	}
 
-	const [result] = await getBalances({
+	const result = await getTransactionBalance({
 		db,
 		ownerId: user.id,
 		accountId: values.accountId,
 		currencyId: values.currencyId,
-		parseBalance: false,
 	})
 	let balance = !result ? 0 : result.balance
 

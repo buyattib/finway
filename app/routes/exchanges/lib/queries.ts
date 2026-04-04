@@ -10,6 +10,27 @@ import { getBalances } from '~/lib/queries'
 import type { DB } from '~/lib/types'
 import { PAGE_SIZE } from '~/lib/constants'
 
+// fetch --------
+
+export async function getExchangeById({
+	db,
+	exchangeId,
+}: {
+	db: DB
+	exchangeId: string
+}) {
+	return db.query.exchange.findFirst({
+		where: (exchange, { eq }) => eq(exchange.id, exchangeId),
+		columns: {
+			id: true,
+			accountId: true,
+			toCurrencyId: true,
+			toAmount: true,
+		},
+		with: { account: { columns: { ownerId: true } } },
+	})
+}
+
 export async function getExchanges({
 	db,
 	ownerId,
@@ -57,65 +78,6 @@ export async function getExchanges({
 	return { exchanges, total }
 }
 
-export async function getExchangeById({
-	db,
-	exchangeId,
-}: {
-	db: DB
-	exchangeId: string
-}) {
-	return db.query.exchange.findFirst({
-		where: (exchange, { eq }) => eq(exchange.id, exchangeId),
-		columns: {
-			id: true,
-			accountId: true,
-			toCurrencyId: true,
-			toAmount: true,
-		},
-		with: { account: { columns: { ownerId: true } } },
-	})
-}
-
-export async function getCurrencyById({
-	db,
-	currencyId,
-}: {
-	db: DB
-	currencyId: string
-}) {
-	return db.query.currency.findFirst({
-		where: (currency, { eq }) => eq(currency.id, currencyId),
-		columns: { id: true },
-	})
-}
-
-export async function createExchange({
-	db,
-	values,
-}: {
-	db: DB
-	values: {
-		date: string
-		fromAmount: number
-		toAmount: number
-		fromCurrencyId: string
-		toCurrencyId: string
-		accountId: string
-	}
-}) {
-	await db.insert(exchangeTable).values(values)
-}
-
-export async function deleteExchange({
-	db,
-	exchangeId,
-}: {
-	db: DB
-	exchangeId: string
-}) {
-	await db.delete(exchangeTable).where(eq(exchangeTable.id, exchangeId))
-}
-
 export async function getExchangeBalance({
 	db,
 	ownerId,
@@ -135,4 +97,33 @@ export async function getExchangeBalance({
 		parseBalance: false,
 	})
 	return result
+}
+
+// mutations --------
+
+export async function deleteExchange({
+	db,
+	exchangeId,
+}: {
+	db: DB
+	exchangeId: string
+}) {
+	await db.delete(exchangeTable).where(eq(exchangeTable.id, exchangeId))
+}
+
+export async function createExchange({
+	db,
+	values,
+}: {
+	db: DB
+	values: {
+		date: string
+		fromAmount: number
+		toAmount: number
+		fromCurrencyId: string
+		toCurrencyId: string
+		accountId: string
+	}
+}) {
+	await db.insert(exchangeTable).values(values)
 }

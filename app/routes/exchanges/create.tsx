@@ -37,15 +37,11 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 import { formatNumber, getCurrencySymbol } from '~/lib/utils'
-import { getSelectData, getBalances } from '~/lib/queries'
+import { getSelectData, getBalances, getCurrencyById } from '~/lib/queries'
 
 import { getAccountById } from '~/routes/accounts/lib/queries'
 
-import {
-	getCurrencyById,
-	getExchangeBalance,
-	createExchange,
-} from './lib/queries'
+import { getExchangeBalance, createExchange } from './lib/queries'
 import { createExchangeFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {

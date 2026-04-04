@@ -16,7 +16,7 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { initializeDate, removeCommas } from '~/lib/utils'
-import { getSelectData } from '~/lib/queries'
+import { getSelectData, getCurrencyById } from '~/lib/queries'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -42,11 +42,7 @@ import { getBalances } from '~/lib/queries'
 
 import { getAccountById } from '~/routes/accounts/lib/queries'
 
-import {
-	getCurrencyById,
-	getTransferBalance,
-	createTransfer,
-} from './lib/queries'
+import { getTransferBalance, createTransfer } from './lib/queries'
 import { createTransferFormSchema } from './lib/schemas'
 
 export function meta({ loaderData }: Route.MetaArgs) {
