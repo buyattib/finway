@@ -7,6 +7,7 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import type { Route } from './+types/login'
 
 import { dbContext } from '~/lib/context'
+import { getUserByEmail } from '~/lib/queries'
 import { checkHoneypot } from '~/utils-server/honeypot.server'
 import { createToastHeaders } from '~/utils-server/toast.server'
 import { requireAnonymous } from '~/utils-server/auth.server'
@@ -67,9 +68,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const { email, remember, redirectTo } = submission.value
 
-	const user = await db.query.user.findFirst({
-		where: (user, { eq }) => eq(user.email, email),
-	})
+	const user = await getUserByEmail({ db, email })
 
 	const magicLink = createMagicLink({
 		emailAddress: email,

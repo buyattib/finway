@@ -2,8 +2,8 @@ import { safeRedirect } from 'remix-utils/safe-redirect'
 
 import type { Route } from './+types/authenticate'
 
-import { user as userTable } from '~/database/schema'
 import { dbContext } from '~/lib/context'
+import { getUserByEmail, createUser } from '~/lib/queries'
 import {
 	createAuthSessionHeaders,
 	removeAuthSession,
@@ -37,18 +37,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		)
 	}
 
-	let user = await db.query.user.findFirst({
-		columns: { id: true, email: true },
-		where: (user, { eq }) => eq(user.email, email),
-	})
+	let user = await getUserByEmail({ db, email })
 
 	if (!user) {
-		const result = await db
-			.insert(userTable)
-			.values({ email })
-			.returning({ id: userTable.id, email: userTable.email })
-
-		user = result[0]
+		user = await createUser({ db, email })
 	}
 
 	const searchParams = new URL(request.url).searchParams

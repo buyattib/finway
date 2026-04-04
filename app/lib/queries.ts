@@ -2,6 +2,7 @@ import { and, eq, sql, desc } from 'drizzle-orm'
 import { unionAll } from 'drizzle-orm/sqlite-core'
 
 import {
+	user as userTable,
 	currency as currencyTable,
 	account as accountTable,
 	transfer as transferTable,
@@ -260,4 +261,20 @@ export async function getCurrencyById({
 
 export async function getCurrencies({ db }: { db: DB }) {
 	return db.query.currency.findMany({ columns: { id: true, code: true } })
+}
+
+export async function getUserByEmail({ db, email }: { db: DB; email: string }) {
+	return db.query.user.findFirst({
+		where: (user, { eq }) => eq(user.email, email),
+		columns: { id: true, email: true },
+	})
+}
+
+export async function createUser({ db, email }: { db: DB; email: string }) {
+	const [user] = await db
+		.insert(userTable)
+		.values({ email })
+		.returning({ id: userTable.id, email: userTable.email })
+
+	return user
 }
