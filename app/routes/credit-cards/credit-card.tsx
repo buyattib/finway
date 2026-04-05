@@ -8,18 +8,10 @@ import {
 } from 'react-router'
 import { ArrowLeftIcon, SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq, desc, and } from 'drizzle-orm'
 import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/credit-card'
 
-import {
-	creditCard as creditCardTable,
-	creditCardTransaction as creditCardTransactionTable,
-	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
-	transactionCategory as transactionCategoryTable,
-	currency as currencyTable,
-} from '~/database/schema'
 import {
 	createToastHeaders,
 	redirectWithToast,
@@ -31,6 +23,13 @@ import type { TCurrency } from '~/lib/types'
 import { formatDate, formatNumber } from '~/lib/utils'
 import { getSelectData } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
+
+import {
+	getCreditCardById,
+	getCurrentStatement,
+	getCreditCardTransactions,
+	deleteCreditCard,
+} from './lib/queries'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -78,33 +77,12 @@ export async function loader({
 	const user = context.get(userContext)
 	const t = getServerT(context, 'credit-cards')
 
-	const creditCard = await db.query.creditCard.findFirst({
-		where: (creditCard, { eq }) => eq(creditCard.id, creditCardId),
-		columns: {
-			id: true,
-			brand: true,
-			last4: true,
-			expiryMonth: true,
-			expiryYear: true,
-		},
-		with: {
-			account: {
-				columns: { name: true, ownerId: true },
-			},
-		},
-	})
+	const creditCard = await getCreditCardById({ db, creditCardId })
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
 		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
 
-	const currentStatement = await db.query.creditCardStatement.findFirst({
-		where: (s, { eq, gte, and }) =>
-			and(
-				eq(s.creditCardId, creditCardId),
-				gte(s.closingDate, new Date().toISOString()),
-			),
-		orderBy: (s, { asc }) => [asc(s.closingDate)],
-	})
+	const currentStatement = await getCurrentStatement({ db, creditCardId })
 
 	if (!currentStatement) {
 		throw new Error('There is a problem with your credit card statements')
@@ -121,63 +99,14 @@ export async function loader({
 
 	const selectData = await getSelectData(db, user.id)
 
-	const filters = [eq(creditCardTransactionTable.creditCardId, creditCardId)]
-	if (type) {
-		filters.push(eq(creditCardTransactionTable.type, type))
-	}
-	if (categoryId) {
-		filters.push(
-			eq(creditCardTransactionTable.transactionCategoryId, categoryId),
-		)
-	}
-
-	const transactionsQuery = db
-		.select({
-			id: creditCardTransactionTable.id,
-			date: creditCardTransactionTable.date,
-			type: creditCardTransactionTable.type,
-			amount: creditCardTransactionTable.amount,
-			description: creditCardTransactionTable.description,
-			categoryName: transactionCategoryTable.name,
-			currencyCode: currencyTable.code,
-			installments: db.$count(
-				creditCardTransactionInstallmentTable,
-				eq(
-					creditCardTransactionTable.id,
-					creditCardTransactionInstallmentTable.creditCardTransactionId,
-				),
-			),
-		})
-		.from(creditCardTransactionTable)
-		.innerJoin(
-			transactionCategoryTable,
-			eq(
-				creditCardTransactionTable.transactionCategoryId,
-				transactionCategoryTable.id,
-			),
-		)
-		.innerJoin(
-			currencyTable,
-			eq(creditCardTransactionTable.currencyId, currencyTable.id),
-		)
-		.innerJoin(
-			creditCardTransactionInstallmentTable,
-			eq(
-				creditCardTransactionTable.id,
-				creditCardTransactionInstallmentTable.creditCardTransactionId,
-			),
-		)
-		.where(and(...filters))
-		.groupBy(creditCardTransactionTable.id)
-		.orderBy(
-			desc(creditCardTransactionTable.date),
-			desc(creditCardTransactionTable.createdAt),
-		)
-
-	const total = await db.$count(transactionsQuery)
-	const transactions = await transactionsQuery
-		.limit(PAGE_SIZE)
-		.offset((page - 1) * PAGE_SIZE)
+	const { transactions, total } = await getCreditCardTransactions({
+		db,
+		creditCardId,
+		type,
+		categoryId,
+		page,
+		pageSize: PAGE_SIZE,
+	})
 
 	return {
 		creditCard: {
@@ -228,22 +157,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 		}
 
 		const { creditCardId } = submission.value
-		const creditCard = await db.query.creditCard.findFirst({
-			where: eq(creditCardTable.id, creditCardId),
-			columns: { brand: true, last4: true },
-			with: {
-				account: { columns: { ownerId: true } },
-			},
-		})
+		const creditCard = await getCreditCardById({ db, creditCardId })
 		if (!creditCard || creditCard.account.ownerId !== user.id) {
 			throw new Response(t('details.action.notFoundError'), {
 				status: 404,
 			})
 		}
 
-		await db
-			.delete(creditCardTable)
-			.where(eq(creditCardTable.id, creditCardId))
+		await deleteCreditCard({ db, creditCardId })
 
 		return await redirectWithToast('/app/credit-cards', request, {
 			type: 'success',

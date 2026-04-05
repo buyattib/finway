@@ -5,10 +5,6 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { Route } from './+types/create'
 
-import {
-	creditCardTransaction as creditCardTransactionTable,
-	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
-} from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
@@ -16,7 +12,9 @@ import { dbContext, userContext } from '~/lib/context'
 import { removeCommas, initializeDate, formatNumber } from '~/lib/utils'
 import { ACTION_CREATION } from '~/lib/constants'
 import { CC_TRANSACTION_TYPE_CHARGE, CC_TRANSACTION_TYPES } from '../lib/constants'
-import { getSelectData } from '~/lib/queries'
+import { getSelectData, getCurrencyById } from '~/lib/queries'
+import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/queries'
+import { getCreditCardById, createCreditCardTransaction } from '../lib/queries'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -39,7 +37,7 @@ import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createCreditCardTransactionFormSchema } from '../lib/schemas'
-import { getStatementForDate, ensureStatementsExist } from '../lib/statements'
+import { getStatementForDate, ensureStatementsExist } from '../lib/utils'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -57,11 +55,7 @@ export async function loader({
 	const db = context.get(dbContext)
 	const t = getServerT(context, 'credit-cards')
 
-	const creditCard = await db.query.creditCard.findFirst({
-		where: (creditCard, { eq }) => eq(creditCard.id, creditCardId),
-		columns: { id: true, brand: true, last4: true },
-		with: { account: { columns: { ownerId: true } } },
-	})
+	const creditCard = await getCreditCardById({ db, creditCardId })
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
 		throw new Response(t('transaction.create.loader.notFoundError'), {
 			status: 404,
@@ -96,67 +90,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: createCreditCardTransactionFormSchema(t)
-			.transform(data => ({
-				...data,
-				amount: Number(removeCommas(data.amount)) * 100,
-			}))
-			.superRefine(async (data, ctx) => {
-				const creditCard = await db.query.creditCard.findFirst({
-					where: (creditCard, { eq }) =>
-						eq(creditCard.id, data.creditCardId),
-					columns: { id: true },
-					with: { account: { columns: { ownerId: true } } },
-				})
-				if (!creditCard || creditCard.account.ownerId !== user.id) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t(
-							'transaction.create.action.creditCardNotFound',
-						),
-						path: ['creditCardId'],
-					})
-				}
-
-				const currency = await db.query.currency.findFirst({
-					where: (currency, { eq }) =>
-						eq(currency.id, data.currencyId),
-					columns: { id: true },
-				})
-				if (!currency) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t(
-							'transaction.create.action.currencyNotFound',
-						),
-						path: ['currencyId'],
-					})
-				}
-
-				const transactionCategory =
-					await db.query.transactionCategory.findFirst({
-						where: (transactionCategory, { eq }) =>
-							eq(
-								transactionCategory.id,
-								data.transactionCategoryId,
-							),
-						columns: { ownerId: true },
-					})
-				if (
-					!transactionCategory ||
-					transactionCategory.ownerId !== user.id
-				) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t(
-							'transaction.create.action.categoryNotFound',
-						),
-						path: ['transactionCategoryId'],
-					})
-				}
-			}),
+	const submission = parseWithZod(formData, {
+		schema: createCreditCardTransactionFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
@@ -173,10 +108,63 @@ export async function action({ request, context }: Route.ActionArgs) {
 		action: _action,
 		creditCardId,
 		totalInstallments,
-		...transactionData
+		...values
 	} = submission.value
 
-	const transactionDate = new Date(transactionData.date)
+	const amount = Number(removeCommas(values.amount)) * 100
+
+	const creditCard = await getCreditCardById({ db, creditCardId })
+	if (!creditCard || creditCard.account.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						creditCardId: [
+							t('transaction.create.action.creditCardNotFound'),
+						],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const currency = await getCurrencyById({ db, currencyId: values.currencyId })
+	if (!currency) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						currencyId: [
+							t('transaction.create.action.currencyNotFound'),
+						],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const transactionCategory = await getTransactionCategoryById({
+		db,
+		transactionCategoryId: values.transactionCategoryId,
+	})
+	if (!transactionCategory || transactionCategory.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						transactionCategoryId: [
+							t('transaction.create.action.categoryNotFound'),
+						],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	const transactionDate = new Date(values.date)
 	const installmentCount = Number(totalInstallments)
 
 	const transactionStatement = await getStatementForDate(
@@ -207,28 +195,22 @@ export async function action({ request, context }: Route.ActionArgs) {
 		)
 	}
 
-	await db.transaction(async tx => {
-		const [{ id: creditCardTransactionId }] = await tx
-			.insert(creditCardTransactionTable)
-			.values({
-				...transactionData,
-				creditCardId,
-			})
-			.returning({ id: creditCardTransactionTable.id })
+	const baseAmount = Math.floor(amount / installmentCount)
+	const remainder = amount - baseAmount * installmentCount
 
-		const baseAmount = Math.floor(transactionData.amount / installmentCount)
-		const remainder = transactionData.amount - baseAmount * installmentCount
-
-		const installments = statements.map((statement, i) => ({
+	await createCreditCardTransaction({
+		db,
+		transactionData: {
+			...values,
+			amount,
+			description: values.description ?? '',
+		},
+		creditCardId,
+		installments: statements.map((statement, i) => ({
 			installmentNumber: i + 1,
 			amount: baseAmount + (i < remainder ? 1 : 0),
 			statementId: statement.id,
-			creditCardTransactionId,
-		}))
-
-		await tx
-			.insert(creditCardTransactionInstallmentTable)
-			.values(installments)
+		})),
 	})
 
 	return await redirectWithToast(

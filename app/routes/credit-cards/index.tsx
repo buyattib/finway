@@ -1,16 +1,13 @@
 import { Link } from 'react-router'
 import { CreditCardIcon, PlusIcon } from 'lucide-react'
-import { desc, eq } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
 
-import {
-	creditCard as creditCardTable,
-	account as accountTable,
-} from '~/database/schema'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
+
+import { getCreditCards } from './lib/queries'
 
 import { Button } from '~/components/ui/button'
 import { Title } from '~/components/ui/title'
@@ -31,19 +28,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const t = getServerT(context, 'credit-cards')
 
-	const creditCards = await db
-		.select({
-			id: creditCardTable.id,
-			last4: creditCardTable.last4,
-			brand: creditCardTable.brand,
-			expiryMonth: creditCardTable.expiryMonth,
-			expiryYear: creditCardTable.expiryYear,
-			accountName: accountTable.name,
-		})
-		.from(creditCardTable)
-		.innerJoin(accountTable, eq(creditCardTable.accountId, accountTable.id))
-		.where(eq(accountTable.ownerId, user.id))
-		.orderBy(desc(creditCardTable.createdAt))
+	const creditCards = await getCreditCards({ db, ownerId: user.id })
 
 	return {
 		creditCards,

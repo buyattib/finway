@@ -44,7 +44,7 @@ import {
 	useSidebar,
 } from '~/components/ui/sidebar'
 
-import { ensureStatementsExist } from '~/routes/credit-cards/lib/statements'
+import { ensureStatementsExist } from '~/routes/credit-cards/lib/utils'
 
 export const middleware: MiddlewareFunction[] = [authMiddleware]
 

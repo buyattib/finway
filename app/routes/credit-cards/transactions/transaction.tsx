@@ -1,16 +1,10 @@
 import { Form, Link, data, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq, asc } from 'drizzle-orm'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/transaction'
 
-import {
-	creditCardTransaction as creditCardTransactionTable,
-	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
-	creditCardStatement as creditCardStatementTable,
-} from '~/database/schema'
 import {
 	createToastHeaders,
 	redirectWithToast,
@@ -18,6 +12,14 @@ import {
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
+
+import {
+	getCreditCardById,
+	getCreditCardTransactionById,
+	getTransactionInstallments,
+	getCurrentStatement,
+	deleteCreditCardTransaction,
+} from '../lib/queries'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -56,21 +58,7 @@ export async function loader({
 	const user = context.get(userContext)
 	const t = getServerT(context, 'credit-cards')
 
-	const creditCard = await db.query.creditCard.findFirst({
-		where: (creditCard, { eq }) => eq(creditCard.id, creditCardId),
-		columns: {
-			id: true,
-			brand: true,
-			last4: true,
-			expiryMonth: true,
-			expiryYear: true,
-		},
-		with: {
-			account: {
-				columns: { name: true, ownerId: true },
-			},
-		},
-	})
+	const creditCard = await getCreditCardById({ db, creditCardId })
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
 		throw new Response(
 			t('transaction.details.loader.creditCardNotFoundError'),
@@ -78,26 +66,9 @@ export async function loader({
 		)
 	}
 
-	const transaction = await db.query.creditCardTransaction.findFirst({
-		where: (tx, { eq }) => eq(tx.id, transactionId),
-		columns: {
-			id: true,
-			date: true,
-			type: true,
-			amount: true,
-			description: true,
-		},
-		with: {
-			creditCard: {
-				columns: { id: true },
-			},
-			currency: {
-				columns: { code: true },
-			},
-			transactionCategory: {
-				columns: { name: true },
-			},
-		},
+	const transaction = await getCreditCardTransactionById({
+		db,
+		transactionId,
 	})
 	if (!transaction || transaction.creditCard.id !== creditCardId) {
 		throw new Response(t('transaction.details.loader.notFoundError'), {
@@ -105,37 +76,12 @@ export async function loader({
 		})
 	}
 
-	const installments = await db
-		.select({
-			installmentNumber:
-				creditCardTransactionInstallmentTable.installmentNumber,
-			amount: creditCardTransactionInstallmentTable.amount,
-			date: creditCardStatementTable.dueDate,
-		})
-		.from(creditCardTransactionInstallmentTable)
-		.innerJoin(
-			creditCardStatementTable,
-			eq(
-				creditCardTransactionInstallmentTable.statementId,
-				creditCardStatementTable.id,
-			),
-		)
-		.where(
-			eq(
-				creditCardTransactionInstallmentTable.creditCardTransactionId,
-				transactionId,
-			),
-		)
-		.orderBy(asc(creditCardTransactionInstallmentTable.installmentNumber))
-
-	const currentStatement = await db.query.creditCardStatement.findFirst({
-		where: (s, { eq, gte, and }) =>
-			and(
-				eq(s.creditCardId, creditCardId),
-				gte(s.closingDate, new Date().toISOString()),
-			),
-		orderBy: (s, { asc }) => [asc(s.closingDate)],
+	const installments = await getTransactionInstallments({
+		db,
+		transactionId,
 	})
+
+	const currentStatement = await getCurrentStatement({ db, creditCardId })
 
 	const {
 		account: { ownerId: _ownerId, ...account },
@@ -197,17 +143,11 @@ export async function action({
 
 	const { creditCardTransactionId } = submission.value
 
-	const transaction = await db.query.creditCardTransaction.findFirst({
-		where: (t, { eq }) => eq(t.id, creditCardTransactionId),
-		columns: { id: true },
-		with: {
-			creditCard: {
-				columns: {},
-				with: { account: { columns: { ownerId: true } } },
-			},
-		},
+	const transaction = await getCreditCardTransactionById({
+		db,
+		transactionId: creditCardTransactionId,
 	})
-	if (!transaction || transaction.creditCard.account.ownerId !== user.id) {
+	if (!transaction) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: t('details.action.transactionNotFoundToast'),
@@ -215,9 +155,19 @@ export async function action({
 		return data({}, { headers: toastHeaders })
 	}
 
-	await db
-		.delete(creditCardTransactionTable)
-		.where(eq(creditCardTransactionTable.id, creditCardTransactionId))
+	const creditCard = await getCreditCardById({
+		db,
+		creditCardId: transaction.creditCard.id,
+	})
+	if (!creditCard || creditCard.account.ownerId !== user.id) {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: t('details.action.transactionNotFoundToast'),
+		})
+		return data({}, { headers: toastHeaders })
+	}
+
+	await deleteCreditCardTransaction({ db, creditCardTransactionId })
 
 	return await redirectWithToast(
 		`/app/credit-cards/${creditCardId}`,

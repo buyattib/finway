@@ -1,10 +1,8 @@
 import { data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { eq } from 'drizzle-orm'
 
 import type { Route } from './+types/edit'
 
-import { creditCard as creditCardTable } from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
@@ -13,6 +11,7 @@ import { ACTION_EDITION } from '~/lib/constants'
 
 import { CreditCardForm } from './components/form'
 import { createCreditCardFormSchema } from './lib/schemas'
+import { getCreditCardById, updateCreditCard } from './lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	if (!loaderData?.initialData) {
@@ -40,27 +39,7 @@ export async function loader({
 	const user = context.get(userContext)
 	const t = getServerT(context, 'credit-cards')
 
-	const creditCard = await db.query.creditCard.findFirst({
-		where: (creditCard, { eq }) => eq(creditCard.id, creditCardId),
-		columns: {
-			id: true,
-			brand: true,
-			last4: true,
-			expiryMonth: true,
-			expiryYear: true,
-			accountId: true,
-		},
-		with: {
-			account: {
-				columns: { ownerId: true },
-			},
-			statements: {
-				orderBy: (s, { desc }) => [desc(s.closingDate)],
-				limit: 1,
-				columns: { closingDate: true, dueDate: true },
-			},
-		},
-	})
+	const creditCard = await getCreditCardById({ db, creditCardId })
 	if (!creditCard || creditCard.account.ownerId !== user.id) {
 		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
@@ -94,26 +73,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: createCreditCardFormSchema(t)
-			.superRefine(async (data, ctx) => {
-				if (data.action !== ACTION_EDITION) return
-
-				const creditCard = await db.query.creditCard.findFirst({
-					where: (creditCard, { eq }) => eq(creditCard.id, data.id),
-					with: {
-						account: { columns: { ownerId: true } },
-					},
-				})
-				if (!creditCard || creditCard.account.ownerId !== user.id) {
-					return ctx.addIssue({
-						code: 'custom',
-						message: t('form.edit.action.creditCardNotFound'),
-					})
-				}
-			})
-			.transform(({ accountId: _accountId, ...rest }) => rest),
+	const submission = parseWithZod(formData, {
+		schema: createCreditCardFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
@@ -126,9 +87,21 @@ export async function action({ request, context }: Route.ActionArgs) {
 		})
 	}
 
-	const { action: _action, id, ...body } = submission.value
+	const { action: _action, id, accountId: _accountId, ...body } = submission.value
 
-	await db.update(creditCardTable).set(body).where(eq(creditCardTable.id, id))
+	const creditCard = await getCreditCardById({ db, creditCardId: id! })
+	if (!creditCard || creditCard.account.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					formErrors: [t('form.edit.action.creditCardNotFound')],
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	await updateCreditCard({ db, id: id!, body })
 
 	return await redirectWithToast('/app/credit-cards', request, {
 		type: 'success',

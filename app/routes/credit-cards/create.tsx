@@ -2,10 +2,6 @@ import { data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
 import type { Route } from './+types/create'
 
-import {
-	creditCard as creditCardTable,
-	creditCardStatement as creditCardStatementTable,
-} from '~/database/schema'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
@@ -14,6 +10,8 @@ import { ACTION_CREATION } from '~/lib/constants'
 
 import { CreditCardForm } from './components/form'
 import { createCreditCardFormSchema } from './lib/schemas'
+import { createCreditCard } from './lib/queries'
+import { getAccountById } from '~/routes/accounts/lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -65,21 +63,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: createCreditCardFormSchema(t).superRefine(async (data, ctx) => {
-			const account = await db.query.account.findFirst({
-				where: (account, { eq }) => eq(account.id, data.accountId),
-				columns: { ownerId: true },
-			})
-			if (!account || account.ownerId !== user.id) {
-				return ctx.addIssue({
-					code: 'custom',
-					message: t('form.create.action.accountNotFound'),
-					path: ['accountId'],
-				})
-			}
-		}),
+	const submission = parseWithZod(formData, {
+		schema: createCreditCardFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
@@ -99,15 +84,25 @@ export async function action({ request, context }: Route.ActionArgs) {
 		...creditCardData
 	} = submission.value
 
-	const [{ id: creditCardId }] = await db
-		.insert(creditCardTable)
-		.values(creditCardData)
-		.returning({ id: creditCardTable.id })
+	const account = await getAccountById({ db, accountId: creditCardData.accountId })
+	if (!account || account.ownerId !== user.id) {
+		return data(
+			{
+				submission: submission.reply({
+					fieldErrors: {
+						accountId: [t('form.create.action.accountNotFound')],
+					},
+				}),
+			},
+			{ status: 422 },
+		)
+	}
 
-	await db.insert(creditCardStatementTable).values({
-		closingDate: currentClosingDate!,
-		dueDate: currentDueDate!,
-		creditCardId,
+	const creditCardId = await createCreditCard({
+		db,
+		creditCardData,
+		currentClosingDate: currentClosingDate!,
+		currentDueDate: currentDueDate!,
 	})
 
 	return await redirectWithToast(
