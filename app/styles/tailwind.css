@@ -249,7 +249,7 @@
 }
 
 @utility animate-progress {
-	animation: progress 1s ease-in-out infinite;
+	animation: progress 3s ease-in-out infinite;
 }
 
 /* Shadcn */

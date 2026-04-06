@@ -14,15 +14,5 @@ export default {
 			noExpenses: 'Sin gastos',
 			noIncomes: 'Sin ingresos',
 		},
-		expensesByCategory: {
-			title: 'Gastos por categoría',
-			noExpenses: 'Sin gastos este mes',
-			createTransaction: 'Crear Transacción',
-		},
-		expensesByMonth: {
-			title: 'Gastos del último año',
-			noExpenses: 'Sin gastos',
-			createTransaction: 'Crear Transacción',
-		},
 	},
 } satisfies typeof en

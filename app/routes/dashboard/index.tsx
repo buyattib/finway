@@ -3,24 +3,15 @@ import type { Route } from './+types'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { getBalances } from '~/lib/queries'
-import type { TCurrency } from '~/lib/types'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
 } from '~/routes/transactions/lib/constants'
 
-import { getMonthTransactions } from './lib/queries'
-import type {
-	CategoryResponse,
-	CurrencyResponse,
-	MonthResponse,
-} from './lib/types'
-
 import { PageSection } from '~/components/ui/page'
 
+import { getMonthTransactions } from './lib/queries'
 import { SummaryCards } from './components/summary-cards'
-import { ExpensesByCategory } from './components/expenses-by-category'
-import { ExpensesByMonth } from './components/expenses-by-month'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -63,78 +54,21 @@ export async function loader({ context }: Route.LoaderArgs) {
 		}),
 	}
 
-	const expensesByCategory = (
-		await getMonthTransactions({
-			db,
-			ownerId: user.id,
-			transactionType: TRANSACTION_TYPE_EXPENSE,
-			group: 'category',
-		})
-	).reduce(
-		(acc, curr) => {
-			acc[curr.currency] = acc[curr.currency] || []
-			acc[curr.currency].push({
-				transactionCategoryId: curr.transactionCategoryId,
-				transactionCategory: curr.transactionCategory,
-				amount: curr.amount,
-			})
-			return acc
-		},
-		{} as Record<
-			TCurrency,
-			Array<CategoryResponse & Pick<CurrencyResponse, 'amount'>>
-		>,
-	)
-
-	const expensesByMonth = (
-		await getMonthTransactions({
-			db,
-			ownerId: user.id,
-			transactionType: TRANSACTION_TYPE_EXPENSE,
-			group: 'month',
-		})
-	).reduce(
-		(acc, curr) => {
-			acc[curr.currency] = acc[curr.currency] || []
-			acc[curr.currency].push({
-				month: curr.month,
-				year: curr.year,
-				amount: curr.amount,
-			})
-			return acc
-		},
-		{} as Record<
-			TCurrency,
-			Array<MonthResponse & Pick<CurrencyResponse, 'amount'>>
-		>,
-	)
-
 	return {
 		meta: {
 			title: t('index.meta.title'),
 			description: t('index.meta.description'),
 		},
 		summary,
-		expensesByCategory,
-		expensesByMonth,
 	}
 }
 
 export default function Dashboard({
-	loaderData: {
-		summary,
-		expensesByCategory,
-		expensesByMonth,
-	},
+	loaderData: { summary },
 }: Route.ComponentProps) {
 	return (
 		<PageSection>
 			<SummaryCards summary={summary} />
-			<ExpensesByCategory
-				expensesByCategory={expensesByCategory}
-				monthExpenses={summary.monthExpenses}
-			/>
-			<ExpensesByMonth expensesByMonth={expensesByMonth} />
 		</PageSection>
 	)
 }

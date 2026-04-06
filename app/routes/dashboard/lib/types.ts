@@ -5,13 +5,3 @@ export type CurrencyResponse = {
 	currency: TCurrency
 	amount: string
 }
-
-export type CategoryResponse = {
-	transactionCategoryId: string
-	transactionCategory: string
-}
-
-export type MonthResponse = {
-	month: number
-	year: number
-}

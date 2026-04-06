@@ -12,15 +12,5 @@ export default {
 			noExpenses: 'No expenses',
 			noIncomes: 'No incomes',
 		},
-		expensesByCategory: {
-			title: 'Expenses by category',
-			noExpenses: 'No expenses this month',
-			createTransaction: 'Create Transaction',
-		},
-		expensesByMonth: {
-			title: 'Expenses a year back',
-			noExpenses: 'No expenses',
-			createTransaction: 'Create Transaction',
-		},
 	},
 }
