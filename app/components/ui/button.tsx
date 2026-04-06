@@ -35,6 +35,7 @@ const buttonVariants = cva(
 				icon: 'size-9',
 				'icon-sm': 'size-7',
 				'icon-xs': 'size-6',
+				inline: 'h-auto p-0 text-xs',
 			},
 			width: {
 				full: 'w-full',

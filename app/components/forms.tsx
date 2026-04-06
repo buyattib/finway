@@ -349,12 +349,14 @@ export function AmountField({
 	field,
 	className,
 	description,
+	maxValue,
 	...inputProps
 }: {
 	label?: string
 	field: FieldMetadata<string>
 	className?: string
 	description?: string
+	maxValue?: string
 } & React.InputHTMLAttributes<HTMLInputElement>) {
 	const fallbackId = useId()
 	const fieldProps = getInputProps(field, { type: 'text' })
@@ -415,9 +417,21 @@ export function AmountField({
 				}}
 			/>
 			{description && (
-				<Text size='xs' theme='muted' className='px-1'>
-					{description}
-				</Text>
+				<div className='flex items-center gap-1.5 px-1'>
+					<Text size='xs' theme='muted'>
+						{description}
+					</Text>
+					{maxValue && (
+						<Button
+							type='button'
+							variant='link'
+							onClick={() => control.change(maxValue)}
+							size='inline'
+						>
+							Max
+						</Button>
+					)}
+				</div>
 			)}
 			<div className='min-h-6 py-1 px-1'>
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}

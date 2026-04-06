@@ -227,6 +227,7 @@ export function TransactionForm({
 						label={t('form.amountLabel')}
 						field={fields.amount}
 						description={balanceDescription}
+						maxValue={selectedBalance?.balance}
 					/>
 
 					{transactionCategories.length !== 0 ? (

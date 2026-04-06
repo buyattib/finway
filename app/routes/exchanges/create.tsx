@@ -304,6 +304,7 @@ export default function CreateExchange({
 								label={t('form.fromAmountLabel')}
 								field={fields.fromAmount}
 								description={balanceDescription}
+								maxValue={selectedBalance?.balance}
 							/>
 
 							<AmountField

@@ -301,6 +301,7 @@ export default function CreateTransfer({
 								label={t('form.amountLabel')}
 								field={fields.amount}
 								description={balanceDescription}
+								maxValue={selectedBalance?.balance}
 							/>
 						</>
 					) : (
