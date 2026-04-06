@@ -44,7 +44,7 @@ export default function CreditCardLayout({
 				accountName={creditCard.accountName}
 				className='w-full max-w-sm shrink-0'
 			/>
-			<Outlet context={creditCard} />
+			<Outlet />
 		</PageSection>
 	)
 }
