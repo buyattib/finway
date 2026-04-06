@@ -4,7 +4,6 @@ import {
 	BanknoteArrowDownIcon,
 	BanknoteArrowUpIcon,
 	WalletIcon,
-	CreditCardIcon,
 } from 'lucide-react'
 
 import { cn, formatNumber, getCurrencySymbol } from '~/lib/utils'
@@ -13,7 +12,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-type Variant = 'info' | 'danger' | 'success' | 'cc'
+type Variant = 'info' | 'danger' | 'success'
 
 const cardBase = 'border-l-4 border-l-primary/20'
 
@@ -27,10 +26,6 @@ const variantStyles: Record<Variant, { card: string; icon: string }> = {
 		icon: 'text-muted-foreground',
 	},
 	success: {
-		card: cardBase,
-		icon: 'text-muted-foreground',
-	},
-	cc: {
 		card: cardBase,
 		icon: 'text-muted-foreground',
 	},
@@ -62,13 +57,6 @@ export function SummaryCards({
 			data: summary.monthIncomes,
 			empty: t('index.summaryCards.noIncomes'),
 			variant: 'success' as Variant,
-		},
-		{
-			title: t('index.summaryCards.monthCreditCardTotals'),
-			icon: <CreditCardIcon />,
-			data: summary.monthCreditCardTotals,
-			empty: t('index.summaryCards.noInstallments'),
-			variant: 'cc' as Variant,
 		},
 	]
 

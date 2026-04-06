@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, lt, lte, sum } from 'drizzle-orm'
 
 import {
 	creditCard as creditCardTable,
@@ -218,9 +218,11 @@ export async function getCreditCardTransactionById({
 export async function getTransactionInstallments({
 	db,
 	transactionId,
+	maxClosingDate,
 }: {
 	db: DB
 	transactionId: string
+	maxClosingDate: string
 }) {
 	return db
 		.select({
@@ -238,12 +240,175 @@ export async function getTransactionInstallments({
 			),
 		)
 		.where(
-			eq(
-				creditCardTransactionInstallmentTable.creditCardTransactionId,
-				transactionId,
+			and(
+				eq(
+					creditCardTransactionInstallmentTable.creditCardTransactionId,
+					transactionId,
+				),
+				lte(creditCardStatementTable.closingDate, maxClosingDate),
 			),
 		)
-		.orderBy(creditCardTransactionInstallmentTable.installmentNumber)
+		.orderBy(desc(creditCardTransactionInstallmentTable.installmentNumber))
+}
+
+export async function getCreditCardStatements({
+	db,
+	creditCardId,
+	maxClosingDate,
+	page,
+	pageSize,
+}: {
+	db: DB
+	creditCardId: string
+	maxClosingDate: string
+	page: number
+	pageSize: number
+}) {
+	const whereFilter = and(
+		eq(creditCardStatementTable.creditCardId, creditCardId),
+		lte(creditCardStatementTable.closingDate, maxClosingDate),
+	)
+
+	const statements = await db.query.creditCardStatement.findMany({
+		where: whereFilter,
+		orderBy: (s, { desc }) => [desc(s.closingDate)],
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		columns: {
+			id: true,
+			closingDate: true,
+			dueDate: true,
+		},
+		with: {
+			installments: {
+				columns: { amount: true },
+				with: {
+					creditCardTransaction: {
+						columns: {},
+						with: {
+							currency: { columns: { code: true } },
+						},
+					},
+				},
+			},
+		},
+	})
+
+	const total = await db.$count(
+		db
+			.select({ id: creditCardStatementTable.id })
+			.from(creditCardStatementTable)
+			.where(whereFilter),
+	)
+
+	return { statements, total }
+}
+
+export async function getStatementById({
+	db,
+	statementId,
+}: {
+	db: DB
+	statementId: string
+}) {
+	return db.query.creditCardStatement.findFirst({
+		where: (s, { eq }) => eq(s.id, statementId),
+	})
+}
+
+export async function getStatementTotalsByCurrency({
+	db,
+	statementId,
+}: {
+	db: DB
+	statementId: string
+}) {
+	return db
+		.select({
+			currencyCode: currencyTable.code,
+			total: sum(creditCardTransactionInstallmentTable.amount),
+		})
+		.from(creditCardTransactionInstallmentTable)
+		.innerJoin(
+			creditCardTransactionTable,
+			eq(
+				creditCardTransactionInstallmentTable.creditCardTransactionId,
+				creditCardTransactionTable.id,
+			),
+		)
+		.innerJoin(
+			currencyTable,
+			eq(creditCardTransactionTable.currencyId, currencyTable.id),
+		)
+		.where(
+			eq(creditCardTransactionInstallmentTable.statementId, statementId),
+		)
+		.groupBy(currencyTable.code)
+}
+
+export async function getStatementInstallments({
+	db,
+	statementId,
+	page,
+	pageSize,
+}: {
+	db: DB
+	statementId: string
+	page: number
+	pageSize: number
+}) {
+	const installmentsQuery = db
+		.select({
+			id: creditCardTransactionInstallmentTable.id,
+			installmentNumber:
+				creditCardTransactionInstallmentTable.installmentNumber,
+			amount: creditCardTransactionInstallmentTable.amount,
+			transactionId: creditCardTransactionTable.id,
+			transactionDate: creditCardTransactionTable.date,
+			transactionType: creditCardTransactionTable.type,
+			transactionDescription: creditCardTransactionTable.description,
+			categoryName: transactionCategoryTable.name,
+			currencyCode: currencyTable.code,
+			totalInstallments: db.$count(
+				creditCardTransactionInstallmentTable,
+				eq(
+					creditCardTransactionTable.id,
+					creditCardTransactionInstallmentTable.creditCardTransactionId,
+				),
+			),
+		})
+		.from(creditCardTransactionInstallmentTable)
+		.innerJoin(
+			creditCardTransactionTable,
+			eq(
+				creditCardTransactionInstallmentTable.creditCardTransactionId,
+				creditCardTransactionTable.id,
+			),
+		)
+		.innerJoin(
+			transactionCategoryTable,
+			eq(
+				creditCardTransactionTable.transactionCategoryId,
+				transactionCategoryTable.id,
+			),
+		)
+		.innerJoin(
+			currencyTable,
+			eq(creditCardTransactionTable.currencyId, currencyTable.id),
+		)
+		.where(
+			eq(creditCardTransactionInstallmentTable.statementId, statementId),
+		)
+		.orderBy(
+			desc(creditCardTransactionTable.date),
+		)
+
+	const total = await db.$count(installmentsQuery)
+	const installments = await installmentsQuery
+		.limit(pageSize)
+		.offset((page - 1) * pageSize)
+
+	return { installments, total }
 }
 
 export async function getLatestStatement({
@@ -270,6 +435,37 @@ export async function getEarliestStatement({
 		where: (s, { eq }) => eq(s.creditCardId, creditCardId),
 		orderBy: (s, { asc }) => [asc(s.closingDate)],
 	})
+}
+
+export async function getAdjacentStatements({
+	db,
+	creditCardId,
+	closingDate,
+}: {
+	db: DB
+	creditCardId: string
+	closingDate: string
+}) {
+	const [previous, next] = await Promise.all([
+		db.query.creditCardStatement.findFirst({
+			where: (s, { and: _and, eq: _eq }) =>
+				_and(
+					_eq(s.creditCardId, creditCardId),
+					lt(s.closingDate, closingDate),
+				),
+			orderBy: (s) => [desc(s.closingDate)],
+		}),
+		db.query.creditCardStatement.findFirst({
+			where: (s, { and: _and, eq: _eq }) =>
+				_and(
+					_eq(s.creditCardId, creditCardId),
+					gt(s.closingDate, closingDate),
+				),
+			orderBy: (s) => [asc(s.closingDate)],
+		}),
+	])
+
+	return { previous, next }
 }
 
 // mutations --------
@@ -385,6 +581,21 @@ export async function deleteCreditCard({
 	creditCardId: string
 }) {
 	await db.delete(creditCardTable).where(eq(creditCardTable.id, creditCardId))
+}
+
+export async function updateStatement({
+	db,
+	statementId,
+	body,
+}: {
+	db: DB
+	statementId: string
+	body: { closingDate: string; dueDate: string }
+}) {
+	await db
+		.update(creditCardStatementTable)
+		.set(body)
+		.where(eq(creditCardStatementTable.id, statementId))
 }
 
 export async function deleteCreditCardTransaction({

@@ -62,11 +62,19 @@ export default [
 				layout('routes/credit-cards/credit-card-layout.tsx', [
 					index('routes/credit-cards/credit-card.tsx'),
 					route(
+						'statements/:statementId',
+						'routes/credit-cards/statements/statement.tsx',
+					),
+					route(
 						'transactions/:transactionId',
 						'routes/credit-cards/transactions/transaction.tsx',
 					),
 				]),
 				route('edit', 'routes/credit-cards/edit.tsx'),
+				route(
+					'statements/:statementId/edit',
+					'routes/credit-cards/statements/edit.tsx',
+				),
 				route(
 					'transactions/create',
 					'routes/credit-cards/transactions/create.tsx',

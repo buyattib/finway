@@ -13,8 +13,6 @@ export default {
 	details: {
 		meta: {
 			title: 'Tarjeta de Crédito {{brand}} •••• {{last4}} | Finway',
-			notFoundTitle:
-				'Tarjeta de crédito {{creditCardId}} no encontrada | Finway',
 		},
 		loader: {
 			notFoundError: 'Tarjeta de crédito no encontrada',
@@ -22,16 +20,11 @@ export default {
 		editAriaLabel: 'Editar {{brand}} •••• {{last4}}',
 		deleteAriaLabel: 'Eliminar tarjeta de crédito {{brand}} •••• {{last4}}',
 		deleteTooltip: 'Eliminar una tarjeta de crédito no se puede deshacer.',
-		transactionsTitle: 'Transacciones ({{total}})',
+		statementsTitle: 'Resúmenes ({{total}})',
 		addTransactionLabel: 'Transacción',
-		emptyMessage: 'Aún no hay transacciones. <0>Crear una</0>',
-		table: {
-			date: 'Fecha',
-			category: 'Categoría',
-			type: 'Tipo',
-			amount: 'Monto',
-			installments: 'Cuotas',
-		},
+		emptyStatements: 'Aún no hay resúmenes.',
+		closingDate: 'Cierre',
+		dueDate: 'Vencimiento',
 		deleteTransactionAriaLabel: 'Eliminar transacción',
 		action: {
 			notFoundError: 'Tarjeta de crédito no encontrada',
@@ -44,6 +37,35 @@ export default {
 			deleteTransactionSuccessToast: 'Transacción eliminada',
 			transactionNotFoundToast: 'Transacción no encontrada',
 			unknownActionToast: 'Acción desconocida',
+		},
+	},
+	statement: {
+		details: {
+			meta: {
+				title: 'Resumen · {{brand}} •••• {{last4}} | Finway',
+			},
+			loader: {
+				notFoundError: 'Resumen no encontrado',
+			},
+			closingDate: 'Fecha de Cierre',
+			dueDate: 'Fecha de Vencimiento',
+			editButton: 'Editar',
+			editTitle: 'Editar Fechas del Resumen',
+			editDescription:
+				'Actualiza las fechas de cierre y vencimiento de este resumen.',
+			editCancelButton: 'Cancelar',
+			editSubmitButton: 'Guardar',
+			installmentsTitle: 'Cuotas ({{total}})',
+			emptyInstallments: 'No hay cuotas en este resumen.',
+			installmentOf: '{{number}} / {{total}}',
+			action: {
+				notFoundError: 'Resumen no encontrado',
+				editSuccessToast: 'Fechas del resumen actualizadas',
+				closingDateAfterPrevious:
+					'La fecha de cierre debe ser posterior a la del resumen anterior',
+				closingDateBeforeNext:
+					'La fecha de cierre debe ser anterior a la del resumen siguiente',
+			},
 		},
 	},
 	filters: {
@@ -80,8 +102,6 @@ export default {
 			expiryYearFuture: 'Debe ser un año válido en el futuro',
 			currentClosingDateRequired: 'La fecha de cierre es requerida',
 			currentDueDateRequired: 'La fecha de vencimiento es requerida',
-			dueDateAfterClosingDate:
-				'La fecha de vencimiento debe ser posterior a la fecha de cierre',
 			dueDateMaxDifference:
 				'La fecha de vencimiento debe estar dentro de los 20 días de la fecha de cierre',
 			accountRequired: 'La cuenta es requerida',
@@ -166,18 +186,10 @@ export default {
 		details: {
 			meta: {
 				title: 'Transacción · {{brand}} •••• {{last4}} | Finway',
-				notFoundTitle: 'Transacción no encontrada | Finway',
 			},
 			loader: {
-				creditCardNotFoundError: 'Tarjeta de crédito no encontrada',
 				notFoundError: 'Transacción no encontrada',
 			},
-			date: 'Fecha',
-			type: 'Tipo',
-			amount: 'Monto',
-			category: 'Categoría',
-			description: 'Descripción',
-			currency: 'Moneda',
 			installmentsTitle: 'Cuotas ({{count}})',
 			dueDate: 'Fecha de Vencimiento',
 			installmentAmount: 'Monto de Cuota',

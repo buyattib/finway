@@ -9,11 +9,7 @@ import {
 	TRANSACTION_TYPE_INCOME,
 } from '~/routes/transactions/lib/constants'
 
-import {
-	getMonthTransactions,
-	getCurrentStatementCreditCardTotals,
-	getCurrentStatementInstallments,
-} from './lib/queries'
+import { getMonthTransactions } from './lib/queries'
 import type {
 	CategoryResponse,
 	CurrencyResponse,
@@ -25,7 +21,6 @@ import { PageSection } from '~/components/ui/page'
 import { SummaryCards } from './components/summary-cards'
 import { ExpensesByCategory } from './components/expenses-by-category'
 import { ExpensesByMonth } from './components/expenses-by-month'
-import { MonthInstallments } from './components/month-installments'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -66,16 +61,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 			transactionType: TRANSACTION_TYPE_INCOME,
 			group: 'currency',
 		}),
-		monthCreditCardTotals: await getCurrentStatementCreditCardTotals({
-			db,
-			ownerId: user.id,
-		}),
 	}
-
-	const monthInstallments = await getCurrentStatementInstallments({
-		db,
-		ownerId: user.id,
-	})
 
 	const expensesByCategory = (
 		await getMonthTransactions({
@@ -131,7 +117,6 @@ export async function loader({ context }: Route.LoaderArgs) {
 		summary,
 		expensesByCategory,
 		expensesByMonth,
-		monthInstallments,
 	}
 }
 
@@ -140,7 +125,6 @@ export default function Dashboard({
 		summary,
 		expensesByCategory,
 		expensesByMonth,
-		monthInstallments,
 	},
 }: Route.ComponentProps) {
 	return (
@@ -151,7 +135,6 @@ export default function Dashboard({
 				monthExpenses={summary.monthExpenses}
 			/>
 			<ExpensesByMonth expensesByMonth={expensesByMonth} />
-			<MonthInstallments monthInstallments={monthInstallments} />
 		</PageSection>
 	)
 }

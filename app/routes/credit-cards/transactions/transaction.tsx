@@ -1,5 +1,5 @@
-import { Form, data, useNavigation, useLocation } from 'react-router'
-import { TrashIcon } from 'lucide-react'
+import { Form, Link, data, useNavigation, useLocation } from 'react-router'
+import { ArrowLeftIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
@@ -17,6 +17,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
+import { CreditCard } from '~/components/credit-card'
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 import {
@@ -64,11 +65,20 @@ export async function loader({
 	const installments = await getTransactionInstallments({
 		db,
 		transactionId,
+		maxClosingDate: creditCard.closingDate,
 	})
 
 	const { transactionCategory, currency, ...transactionData } = transaction
 
 	return {
+		creditCard: {
+			id: creditCardId,
+			brand: creditCard.brand,
+			last4: creditCard.last4,
+			expiryMonth: creditCard.expiryMonth,
+			expiryYear: creditCard.expiryYear,
+			accountName: creditCard.accountName,
+		},
 		transaction: {
 			...transactionData,
 			categoryName: transactionCategory.name,
@@ -151,7 +161,7 @@ export async function action({
 }
 
 export default function CreditCardTransaction({
-	loaderData: { transaction, installments },
+	loaderData: { creditCard, transaction, installments },
 }: Route.ComponentProps) {
 	const {
 		id: transactionId,
@@ -173,9 +183,14 @@ export default function CreditCardTransaction({
 
 	return (
 		<>
-			<div className='flex sm:items-center sm:ml-auto'>
+			<div className='flex items-center gap-2'>
+				<Button asChild variant='link' width='fit' size='icon'>
+					<Link to={`/app/credit-cards/${creditCard.id}`}>
+						<ArrowLeftIcon />
+					</Link>
+				</Button>
 				<Tooltip>
-					<Form method='post'>
+					<Form method='post' className='ml-auto'>
 						<input
 							type='hidden'
 							name='creditCardTransactionId'
@@ -207,7 +222,16 @@ export default function CreditCardTransaction({
 				</Tooltip>
 			</div>
 
-			<div className='rounded-lg border p-4 flex flex-col gap-3'>
+			<div className='flex flex-col lg:flex-row lg:items-start gap-6'>
+				<CreditCard
+					brand={creditCard.brand}
+					last4={creditCard.last4}
+					expiryMonth={creditCard.expiryMonth}
+					expiryYear={creditCard.expiryYear}
+					accountName={creditCard.accountName}
+					className='w-full shrink-0 md:max-w-sm'
+				/>
+				<div className='rounded-lg border p-4 flex flex-col gap-3 w-full'>
 				<div className='flex items-center justify-between'>
 					<div className='flex items-center gap-2'>
 						<TransactionType
@@ -240,6 +264,7 @@ export default function CreditCardTransaction({
 						{description}
 					</Text>
 				)}
+				</div>
 			</div>
 
 			<section

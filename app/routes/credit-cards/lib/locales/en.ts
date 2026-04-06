@@ -11,7 +11,6 @@ export default {
 	details: {
 		meta: {
 			title: 'Credit Card {{brand}} •••• {{last4}} | Finway',
-			notFoundTitle: 'Credit card {{creditCardId}} not found | Finway',
 		},
 		loader: {
 			notFoundError: 'Credit card not found',
@@ -19,16 +18,11 @@ export default {
 		editAriaLabel: 'Edit {{brand}} •••• {{last4}}',
 		deleteAriaLabel: 'Delete credit card {{brand}} •••• {{last4}}',
 		deleteTooltip: 'Deleting a credit card cannot be undone.',
-		transactionsTitle: 'Transactions ({{total}})',
+		statementsTitle: 'Statements ({{total}})',
 		addTransactionLabel: 'Transaction',
-		emptyMessage: 'No transactions yet. <0>Create one</0>',
-		table: {
-			date: 'Date',
-			category: 'Category',
-			type: 'Type',
-			amount: 'Amount',
-			installments: 'Installments',
-		},
+		emptyStatements: 'No statements yet.',
+		closingDate: 'Closes',
+		dueDate: 'Due',
 		deleteTransactionAriaLabel: 'Delete transaction',
 		action: {
 			notFoundError: 'Credit card not found',
@@ -41,6 +35,34 @@ export default {
 			deleteTransactionSuccessToast: 'Transaction deleted',
 			transactionNotFoundToast: 'Transaction not found',
 			unknownActionToast: 'Unknown action',
+		},
+	},
+	statement: {
+		details: {
+			meta: {
+				title: 'Statement · {{brand}} •••• {{last4}} | Finway',
+			},
+			loader: {
+				notFoundError: 'Statement not found',
+			},
+			closingDate: 'Closing Date',
+			dueDate: 'Due Date',
+			editButton: 'Edit',
+			editTitle: 'Edit Statement Dates',
+			editDescription: 'Update the closing and due dates for this statement.',
+			editCancelButton: 'Cancel',
+			editSubmitButton: 'Save',
+			installmentsTitle: 'Installments ({{total}})',
+			emptyInstallments: 'No installments in this statement.',
+			installmentOf: '{{number}} / {{total}}',
+			action: {
+				notFoundError: 'Statement not found',
+				editSuccessToast: 'Statement dates updated',
+				closingDateAfterPrevious:
+					'Closing date must be after the previous statement closing date',
+				closingDateBeforeNext:
+					'Closing date must be before the next statement closing date',
+			},
 		},
 	},
 	filters: {
@@ -76,7 +98,6 @@ export default {
 			expiryYearFuture: 'Must be a valid year in the future',
 			currentClosingDateRequired: 'Closing date is required',
 			currentDueDateRequired: 'Due date is required',
-			dueDateAfterClosingDate: 'Due date must be after closing date',
 			dueDateMaxDifference:
 				'Due date must be within 20 days of closing date',
 			accountRequired: 'Account is required',
@@ -160,18 +181,10 @@ export default {
 		details: {
 			meta: {
 				title: 'Transaction · {{brand}} •••• {{last4}} | Finway',
-				notFoundTitle: 'Transaction not found | Finway',
 			},
 			loader: {
-				creditCardNotFoundError: 'Credit card not found',
 				notFoundError: 'Transaction not found',
 			},
-			date: 'Date',
-			type: 'Type',
-			amount: 'Amount',
-			category: 'Category',
-			description: 'Description',
-			currency: 'Currency',
 			installmentsTitle: 'Installments ({{count}})',
 			dueDate: 'Due Date',
 			installmentAmount: 'Installment Amount',

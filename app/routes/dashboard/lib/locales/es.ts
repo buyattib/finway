@@ -10,11 +10,9 @@ export default {
 			totalBalances: 'Balances totales',
 			monthExpenses: 'Gastos del mes',
 			monthIncomes: 'Ingresos del mes',
-			monthCreditCardTotals: 'Totales de tarjeta de crédito del mes',
 			noBalances: 'Sin balances',
 			noExpenses: 'Sin gastos',
 			noIncomes: 'Sin ingresos',
-			noInstallments: 'Sin cuotas',
 		},
 		expensesByCategory: {
 			title: 'Gastos por categoría',
@@ -25,13 +23,6 @@ export default {
 			title: 'Gastos del último año',
 			noExpenses: 'Sin gastos',
 			createTransaction: 'Crear Transacción',
-		},
-		monthInstallments: {
-			title: 'Cuotas del mes ({{count}})',
-			noInstallments: 'No hay cuotas pendientes este mes',
-			dueDate: 'Fecha de pago',
-			category: 'Categoría',
-			installmentAmount: 'Monto',
 		},
 	},
 } satisfies typeof en
