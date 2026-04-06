@@ -42,7 +42,11 @@ export async function loader({
 	const t = getServerT(context, 'credit-cards')
 
 	const statement = await getStatementById({ db, statementId })
-	if (!statement || statement.creditCardId !== creditCardId) {
+	if (
+		!statement ||
+		statement.creditCardId !== creditCardId ||
+		statement.closingDate > creditCard.closingDate
+	) {
 		throw new Response(t('statement.details.loader.notFoundError'), {
 			status: 404,
 		})
