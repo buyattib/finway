@@ -16,7 +16,11 @@ import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
-import { getStatementById, getStatementInstallments } from '../lib/queries'
+import {
+	getStatementById,
+	getStatementInstallments,
+	getStatementTotalsByCurrency,
+} from '../lib/queries'
 import { creditCardContext } from '../lib/context'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -47,12 +51,15 @@ export async function loader({
 	const url = new URL(request.url)
 	const page = Number(url.searchParams.get('page') ?? '1')
 
-	const { installments, total } = await getStatementInstallments({
-		db,
-		statementId,
-		page,
-		pageSize: PAGE_SIZE,
-	})
+	const [{ installments, total }, currencyTotals] = await Promise.all([
+		getStatementInstallments({
+			db,
+			statementId,
+			page,
+			pageSize: PAGE_SIZE,
+		}),
+		getStatementTotalsByCurrency({ db, statementId }),
+	])
 
 	return {
 		creditCardId,
@@ -60,6 +67,10 @@ export async function loader({
 			closingDate: statement.closingDate,
 			dueDate: statement.dueDate,
 		},
+		totals: currencyTotals.map(t => ({
+			currencyCode: t.currencyCode,
+			total: String(Number(t.total) / 100),
+		})),
 		installments: installments.map(i => ({
 			...i,
 			amount: String(i.amount / 100),
@@ -75,7 +86,7 @@ export async function loader({
 }
 
 export default function StatementDetails({
-	loaderData: { creditCardId, statement, installments, pagination },
+	loaderData: { creditCardId, statement, totals, installments, pagination },
 }: Route.ComponentProps) {
 	const { t } = useTranslation('credit-cards')
 	const navigate = useNavigate()
@@ -101,6 +112,25 @@ export default function StatementDetails({
 						</Text>
 					</div>
 				</div>
+				{totals.length > 0 && (
+					<div className='flex items-center gap-4 border-t pt-3'>
+						{totals.map(({ currencyCode, total }) => (
+							<Text
+								key={currencyCode}
+								size='sm'
+								weight='medium'
+								className='flex items-center gap-1'
+							>
+								<CurrencyIcon
+									currency={currencyCode as TCurrency}
+									size='sm'
+								/>
+								{getCurrencySymbol(currencyCode)}{' '}
+								{formatNumber(total)}
+							</Text>
+						))}
+					</div>
+				)}
 			</div>
 
 			<PageSection id='statement-installments-section'>

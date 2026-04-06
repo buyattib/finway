@@ -1,4 +1,4 @@
-import { and, desc, eq, lte } from 'drizzle-orm'
+import { and, desc, eq, lte, sum } from 'drizzle-orm'
 
 import {
 	creditCard as creditCardTable,
@@ -218,9 +218,11 @@ export async function getCreditCardTransactionById({
 export async function getTransactionInstallments({
 	db,
 	transactionId,
+	maxClosingDate,
 }: {
 	db: DB
 	transactionId: string
+	maxClosingDate: string
 }) {
 	return db
 		.select({
@@ -238,12 +240,15 @@ export async function getTransactionInstallments({
 			),
 		)
 		.where(
-			eq(
-				creditCardTransactionInstallmentTable.creditCardTransactionId,
-				transactionId,
+			and(
+				eq(
+					creditCardTransactionInstallmentTable.creditCardTransactionId,
+					transactionId,
+				),
+				lte(creditCardStatementTable.closingDate, maxClosingDate),
 			),
 		)
-		.orderBy(creditCardTransactionInstallmentTable.installmentNumber)
+		.orderBy(desc(creditCardTransactionInstallmentTable.installmentNumber))
 }
 
 export async function getCreditCardStatements({
@@ -309,6 +314,36 @@ export async function getStatementById({
 	return db.query.creditCardStatement.findFirst({
 		where: (s, { eq }) => eq(s.id, statementId),
 	})
+}
+
+export async function getStatementTotalsByCurrency({
+	db,
+	statementId,
+}: {
+	db: DB
+	statementId: string
+}) {
+	return db
+		.select({
+			currencyCode: currencyTable.code,
+			total: sum(creditCardTransactionInstallmentTable.amount),
+		})
+		.from(creditCardTransactionInstallmentTable)
+		.innerJoin(
+			creditCardTransactionTable,
+			eq(
+				creditCardTransactionInstallmentTable.creditCardTransactionId,
+				creditCardTransactionTable.id,
+			),
+		)
+		.innerJoin(
+			currencyTable,
+			eq(creditCardTransactionTable.currencyId, currencyTable.id),
+		)
+		.where(
+			eq(creditCardTransactionInstallmentTable.statementId, statementId),
+		)
+		.groupBy(currencyTable.code)
 }
 
 export async function getStatementInstallments({

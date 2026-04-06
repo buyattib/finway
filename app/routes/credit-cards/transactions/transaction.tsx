@@ -64,6 +64,7 @@ export async function loader({
 	const installments = await getTransactionInstallments({
 		db,
 		transactionId,
+		maxClosingDate: creditCard.closingDate,
 	})
 
 	const { transactionCategory, currency, ...transactionData } = transaction
