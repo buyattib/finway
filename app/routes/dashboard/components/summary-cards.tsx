@@ -1,35 +1,19 @@
 import { useTranslation } from 'react-i18next'
-import type { Route } from '../+types'
-import {
-	BanknoteArrowDownIcon,
-	BanknoteArrowUpIcon,
-	WalletIcon,
-} from 'lucide-react'
+import { WalletIcon } from 'lucide-react'
 
-import { cn, formatNumber, getCurrencySymbol } from '~/lib/utils'
+import type { Route } from '../+types'
+
+import { formatNumber, getCurrencySymbol } from '~/lib/utils'
 
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
 import { CurrencyIcon } from '~/components/currency-icon'
+import { TransactionType } from '~/components/transaction-type'
 
-type Variant = 'info' | 'danger' | 'success'
-
-const cardBase = 'border-l-4 border-l-primary/20'
-
-const variantStyles: Record<Variant, { card: string; icon: string }> = {
-	info: {
-		card: cardBase,
-		icon: 'text-muted-foreground',
-	},
-	danger: {
-		card: cardBase,
-		icon: 'text-muted-foreground',
-	},
-	success: {
-		card: cardBase,
-		icon: 'text-muted-foreground',
-	},
-}
+import {
+	TRANSACTION_TYPE_EXPENSE,
+	TRANSACTION_TYPE_INCOME,
+} from '~/routes/transactions/lib/constants'
 
 export function SummaryCards({
 	summary,
@@ -42,33 +26,39 @@ export function SummaryCards({
 			icon: <WalletIcon />,
 			data: summary.balances,
 			empty: t('index.summaryCards.noBalances'),
-			variant: 'info' as Variant,
 		},
 		{
 			title: t('index.summaryCards.monthExpenses'),
-			icon: <BanknoteArrowDownIcon />,
+			icon: (
+				<TransactionType
+					transactionType={TRANSACTION_TYPE_EXPENSE}
+					variant='icon'
+				/>
+			),
 			data: summary.monthExpenses,
 			empty: t('index.summaryCards.noExpenses'),
-			variant: 'danger' as Variant,
 		},
 		{
 			title: t('index.summaryCards.monthIncomes'),
-			icon: <BanknoteArrowUpIcon />,
+			icon: (
+				<TransactionType
+					transactionType={TRANSACTION_TYPE_INCOME}
+					variant='icon'
+				/>
+			),
 			data: summary.monthIncomes,
 			empty: t('index.summaryCards.noIncomes'),
-			variant: 'success' as Variant,
 		},
 	]
 
 	return (
 		<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-			{cards.map(({ title, icon, data, empty, variant }) => {
-				const styles = variantStyles[variant]
+			{cards.map(({ title, icon, data, empty }) => {
 				return (
-					<Card key={title} className={cn(styles.card)}>
+					<Card key={title} className='border-l-4 border-l-primary/20'>
 						<CardHeader className='flex items-center justify-between'>
 							<CardTitle>{title}</CardTitle>
-							<span className={styles.icon}>{icon}</span>
+							{icon}
 						</CardHeader>
 						<CardContent>
 							{data.length === 0 && (

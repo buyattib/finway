@@ -1,6 +1,3 @@
-- Remove all charts
-- Use transaction icon on the dashboard cards
-
 - Edit cc transactions
 
 - Consolidated balance in one currency (external api to fetch fx)
