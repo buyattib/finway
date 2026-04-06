@@ -19,16 +19,13 @@ export default {
 		editAriaLabel: 'Edit {{brand}} •••• {{last4}}',
 		deleteAriaLabel: 'Delete credit card {{brand}} •••• {{last4}}',
 		deleteTooltip: 'Deleting a credit card cannot be undone.',
-		transactionsTitle: 'Transactions ({{total}})',
+		statementsTitle: 'Statements ({{total}})',
 		addTransactionLabel: 'Transaction',
-		emptyMessage: 'No transactions yet. <0>Create one</0>',
-		table: {
-			date: 'Date',
-			category: 'Category',
-			type: 'Type',
-			amount: 'Amount',
-			installments: 'Installments',
-		},
+		emptyStatements: 'No statements yet.',
+		closingDate: 'Closes',
+		dueDate: 'Due',
+		installmentCount_one: '{{count}} installment',
+		installmentCount_other: '{{count}} installments',
 		deleteTransactionAriaLabel: 'Delete transaction',
 		action: {
 			notFoundError: 'Credit card not found',
@@ -41,6 +38,21 @@ export default {
 			deleteTransactionSuccessToast: 'Transaction deleted',
 			transactionNotFoundToast: 'Transaction not found',
 			unknownActionToast: 'Unknown action',
+		},
+	},
+	statement: {
+		details: {
+			meta: {
+				title: 'Statement · {{brand}} •••• {{last4}} | Finway',
+			},
+			loader: {
+				notFoundError: 'Statement not found',
+			},
+			closingDate: 'Closing Date',
+			dueDate: 'Due Date',
+			installmentsTitle: 'Installments ({{total}})',
+			emptyInstallments: 'No installments in this statement.',
+			installmentOf: '{{number}} / {{total}}',
 		},
 	},
 	filters: {

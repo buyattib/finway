@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm'
+import { and, desc, eq, lte } from 'drizzle-orm'
 
 import {
 	creditCard as creditCardTable,
@@ -244,6 +244,136 @@ export async function getTransactionInstallments({
 			),
 		)
 		.orderBy(creditCardTransactionInstallmentTable.installmentNumber)
+}
+
+export async function getCreditCardStatements({
+	db,
+	creditCardId,
+	maxClosingDate,
+	page,
+	pageSize,
+}: {
+	db: DB
+	creditCardId: string
+	maxClosingDate: string
+	page: number
+	pageSize: number
+}) {
+	const whereFilter = and(
+		eq(creditCardStatementTable.creditCardId, creditCardId),
+		lte(creditCardStatementTable.closingDate, maxClosingDate),
+	)
+
+	const statements = await db.query.creditCardStatement.findMany({
+		where: whereFilter,
+		orderBy: (s, { desc }) => [desc(s.closingDate)],
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		columns: {
+			id: true,
+			closingDate: true,
+			dueDate: true,
+		},
+		with: {
+			installments: {
+				columns: { amount: true },
+				with: {
+					creditCardTransaction: {
+						columns: {},
+						with: {
+							currency: { columns: { code: true } },
+						},
+					},
+				},
+			},
+		},
+	})
+
+	const total = await db.$count(
+		db
+			.select({ id: creditCardStatementTable.id })
+			.from(creditCardStatementTable)
+			.where(whereFilter),
+	)
+
+	return { statements, total }
+}
+
+export async function getStatementById({
+	db,
+	statementId,
+}: {
+	db: DB
+	statementId: string
+}) {
+	return db.query.creditCardStatement.findFirst({
+		where: (s, { eq }) => eq(s.id, statementId),
+	})
+}
+
+export async function getStatementInstallments({
+	db,
+	statementId,
+	page,
+	pageSize,
+}: {
+	db: DB
+	statementId: string
+	page: number
+	pageSize: number
+}) {
+	const installmentsQuery = db
+		.select({
+			id: creditCardTransactionInstallmentTable.id,
+			installmentNumber:
+				creditCardTransactionInstallmentTable.installmentNumber,
+			amount: creditCardTransactionInstallmentTable.amount,
+			transactionId: creditCardTransactionTable.id,
+			transactionDate: creditCardTransactionTable.date,
+			transactionType: creditCardTransactionTable.type,
+			transactionDescription: creditCardTransactionTable.description,
+			categoryName: transactionCategoryTable.name,
+			currencyCode: currencyTable.code,
+			totalInstallments: db.$count(
+				creditCardTransactionInstallmentTable,
+				eq(
+					creditCardTransactionTable.id,
+					creditCardTransactionInstallmentTable.creditCardTransactionId,
+				),
+			),
+		})
+		.from(creditCardTransactionInstallmentTable)
+		.innerJoin(
+			creditCardTransactionTable,
+			eq(
+				creditCardTransactionInstallmentTable.creditCardTransactionId,
+				creditCardTransactionTable.id,
+			),
+		)
+		.innerJoin(
+			transactionCategoryTable,
+			eq(
+				creditCardTransactionTable.transactionCategoryId,
+				transactionCategoryTable.id,
+			),
+		)
+		.innerJoin(
+			currencyTable,
+			eq(creditCardTransactionTable.currencyId, currencyTable.id),
+		)
+		.where(
+			eq(creditCardTransactionInstallmentTable.statementId, statementId),
+		)
+		.orderBy(
+			desc(creditCardTransactionTable.date),
+		)
+
+	const total = await db.$count(installmentsQuery)
+	const installments = await installmentsQuery
+		.limit(pageSize)
+		.offset((page - 1) * pageSize)
+
+	return { installments, total }
 }
 
 export async function getLatestStatement({

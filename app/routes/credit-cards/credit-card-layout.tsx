@@ -22,8 +22,10 @@ export default function CreditCardLayout({
 	loaderData: { creditCard },
 }: Route.ComponentProps) {
 	const location = useLocation()
-	const isTransactionDetail = location.pathname.includes('/transactions/')
-	const backTo = isTransactionDetail
+	const isNestedDetail =
+		location.pathname.includes('/transactions/') ||
+		location.pathname.includes('/statements/')
+	const backTo = isNestedDetail
 		? `/app/credit-cards/${creditCard.id}`
 		: '/app/credit-cards'
 
@@ -39,8 +41,6 @@ export default function CreditCardLayout({
 				last4={creditCard.last4}
 				expiryMonth={creditCard.expiryMonth}
 				expiryYear={creditCard.expiryYear}
-				closingDate={creditCard.closingDate}
-				dueDate={creditCard.dueDate}
 				accountName={creditCard.accountName}
 				className='w-full max-w-sm shrink-0'
 			/>

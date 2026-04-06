@@ -8,7 +8,7 @@ import {
 } from 'react-router'
 import { SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/credit-card'
 
@@ -20,34 +20,29 @@ import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
 import type { TCurrency } from '~/lib/types'
-import { formatDate, formatNumber } from '~/lib/utils'
-import { getSelectData } from '~/lib/queries'
+import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { PAGE_SIZE } from '~/lib/constants'
-
-import {
-	getCreditCardById,
-	getCreditCardTransactions,
-	deleteCreditCard,
-} from './lib/queries'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
 import { PageSection, PageHeader } from '~/components/ui/page'
-import { TransactionType } from '~/components/transaction-type'
-import { CurrencyIcon } from '~/components/currency-icon'
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
+import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
-import { CreditCardTransactionFilters } from './components/filters'
 import { DeleteCreditCardFormSchema } from './lib/schemas'
-import type { TCCTransactionType } from './lib/types'
 import { creditCardContext } from './lib/context'
+import {
+	getCreditCardById,
+	getCreditCardStatements,
+	deleteCreditCard,
+} from './lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title
@@ -64,7 +59,6 @@ export async function loader({
 	params: { creditCardId },
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
-	const user = context.get(userContext)
 	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
@@ -72,29 +66,39 @@ export async function loader({
 	const searchParams = url.searchParams
 
 	const page = Number(searchParams.get('page') ?? '1')
-	const type = (searchParams.get('type') as TCCTransactionType) ?? ''
-	const categoryId = searchParams.get('categoryId') ?? ''
 
-	const selectData = await getSelectData(db, user.id)
-
-	const { transactions, total } = await getCreditCardTransactions({
+	const { statements: _statements, total } = await getCreditCardStatements({
 		db,
 		creditCardId,
-		type,
-		categoryId,
+		maxClosingDate: creditCard.closingDate,
 		page,
 		pageSize: PAGE_SIZE,
 	})
 
+	const statements = _statements.map(s => {
+		const totalsByCurrency = new Map<TCurrency, number>()
+		for (const inst of s.installments) {
+			const code = inst.creditCardTransaction.currency.code
+			totalsByCurrency.set(
+				code,
+				(totalsByCurrency.get(code) ?? 0) + inst.amount,
+			)
+		}
+		return {
+			id: s.id,
+			closingDate: s.closingDate,
+			dueDate: s.dueDate,
+			totals: Array.from(totalsByCurrency, ([currencyCode, amount]) => ({
+				currencyCode,
+				total: String(amount / 100),
+			})),
+		}
+	})
+
 	return {
 		creditCard,
-		transactions: transactions.map(t => ({
-			...t,
-			amount: String(t.amount / 100),
-		})),
+		statements,
 		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
-		filters: { type, categoryId },
-		selectData,
 		meta: {
 			title: t('details.meta.title', {
 				brand: creditCard.brand,
@@ -153,7 +157,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreditCardDetails({
-	loaderData: { creditCard, transactions, pagination, filters, selectData },
+	loaderData: { creditCard, statements, pagination },
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
@@ -221,10 +225,10 @@ export default function CreditCardDetails({
 				</Tooltip>
 			</div>
 
-			<PageSection id='cc-transactions-section'>
+			<PageSection id='cc-statements-section'>
 				<PageHeader>
-					<Title id='cc-transactions-section' level='h3'>
-						{t('details.transactionsTitle', {
+					<Title id='cc-statements-section' level='h3'>
+						{t('details.statementsTitle', {
 							total: pagination.total,
 						})}
 					</Title>
@@ -238,85 +242,79 @@ export default function CreditCardDetails({
 					</Button>
 				</PageHeader>
 
-				<CreditCardTransactionFilters
-					filters={filters}
-					selectData={selectData}
-				/>
-
 				<div className='h-6'>
 					{isLoading && <Spinner size='md' className='mx-auto' />}
 				</div>
 
-				{transactions.length === 0 ? (
+				{statements.length === 0 ? (
 					<Text size='md' weight='medium' alignment='center'>
-						<Trans
-							i18nKey='details.emptyMessage'
-							ns='credit-cards'
-							components={[
-								<Link
-									key='0'
-									to='transactions/create'
-									className='text-primary'
-								/>,
-							]}
-						/>
+						{t('details.emptyStatements')}
 					</Text>
 				) : (
 					<ul className='flex flex-col gap-2'>
-						{transactions.map(
-							({
-								id: txId,
-								date,
-								type,
-								amount,
-								currencyCode,
-								categoryName,
-								installments,
-							}) => {
-								return (
-									<li
-										key={txId}
-										className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
-										onClick={() =>
-											navigate(`transactions/${txId}`)
-										}
-									>
-										<div className='grid grid-cols-3 sm:grid-cols-5 items-center gap-4'>
-											<Text size='sm' theme='muted'>
-												{formatDate(new Date(date))}
-											</Text>
-											<TransactionType
-												variant='icon-text'
-												size='xs'
-												transactionType={type}
-											/>
-											<Text
-												size='sm'
-												weight='medium'
-												className='flex items-center gap-2'
-											>
-												<CurrencyIcon
-													currency={
-														currencyCode as TCurrency
-													}
-													size='sm'
-												/>
-												<b>{currencyCode}</b>{' '}
-												{formatNumber(amount)}
-											</Text>
-											<Text size='sm' theme='muted'>
-												{categoryName}
-											</Text>
+						{statements.map(
+							({ id, closingDate, dueDate, totals }) => (
+								<li
+									key={id}
+									className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
+									onClick={() => navigate(`statements/${id}`)}
+								>
+									<div className='grid grid-cols-2 sm:grid-cols-3 items-center gap-4'>
+										<div className='flex flex-col gap-1'>
 											<Text size='xs' theme='muted'>
-												{installments}{' '}
-												{t(
-													'details.table.installments',
+												{t('details.closingDate')}
+											</Text>
+											<Text size='sm' weight='medium'>
+												{formatDate(
+													new Date(closingDate),
 												)}
 											</Text>
 										</div>
-									</li>
-								)
-							},
+										<div className='flex flex-col gap-1'>
+											<Text size='xs' theme='muted'>
+												{t('details.dueDate')}
+											</Text>
+											<Text size='sm' weight='medium'>
+												{formatDate(new Date(dueDate))}
+											</Text>
+										</div>
+										<div className='flex flex-col gap-1 sm:items-end'>
+											{totals.length > 0 ? (
+												totals.map(
+													({
+														currencyCode,
+														total,
+													}) => (
+														<Text
+															key={currencyCode}
+															size='sm'
+															weight='medium'
+															className='flex items-center gap-1'
+														>
+															<CurrencyIcon
+																currency={
+																	currencyCode
+																}
+																size='sm'
+															/>
+															{getCurrencySymbol(
+																currencyCode,
+															)}{' '}
+															{formatNumber(
+																total,
+															)}
+														</Text>
+													),
+												)
+											) : (
+												<Text size='sm' theme='muted'>
+													—
+												</Text>
+											)}
+										</div>
+									</div>
+								</li>
+							),
 						)}
 					</ul>
 				)}

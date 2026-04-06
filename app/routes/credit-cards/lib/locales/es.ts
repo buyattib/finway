@@ -22,16 +22,13 @@ export default {
 		editAriaLabel: 'Editar {{brand}} •••• {{last4}}',
 		deleteAriaLabel: 'Eliminar tarjeta de crédito {{brand}} •••• {{last4}}',
 		deleteTooltip: 'Eliminar una tarjeta de crédito no se puede deshacer.',
-		transactionsTitle: 'Transacciones ({{total}})',
+		statementsTitle: 'Resúmenes ({{total}})',
 		addTransactionLabel: 'Transacción',
-		emptyMessage: 'Aún no hay transacciones. <0>Crear una</0>',
-		table: {
-			date: 'Fecha',
-			category: 'Categoría',
-			type: 'Tipo',
-			amount: 'Monto',
-			installments: 'Cuotas',
-		},
+		emptyStatements: 'Aún no hay resúmenes.',
+		closingDate: 'Cierre',
+		dueDate: 'Vencimiento',
+		installmentCount_one: '{{count}} cuota',
+		installmentCount_other: '{{count}} cuotas',
 		deleteTransactionAriaLabel: 'Eliminar transacción',
 		action: {
 			notFoundError: 'Tarjeta de crédito no encontrada',
@@ -44,6 +41,21 @@ export default {
 			deleteTransactionSuccessToast: 'Transacción eliminada',
 			transactionNotFoundToast: 'Transacción no encontrada',
 			unknownActionToast: 'Acción desconocida',
+		},
+	},
+	statement: {
+		details: {
+			meta: {
+				title: 'Resumen · {{brand}} •••• {{last4}} | Finway',
+			},
+			loader: {
+				notFoundError: 'Resumen no encontrado',
+			},
+			closingDate: 'Fecha de Cierre',
+			dueDate: 'Fecha de Vencimiento',
+			installmentsTitle: 'Cuotas ({{total}})',
+			emptyInstallments: 'No hay cuotas en este resumen.',
+			installmentOf: '{{number}} / {{total}}',
 		},
 	},
 	filters: {
