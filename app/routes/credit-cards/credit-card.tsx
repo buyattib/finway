@@ -6,7 +6,7 @@ import {
 	useLocation,
 	useNavigate,
 } from 'react-router'
-import { ArrowLeftIcon, SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
+import { SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { Trans, useTranslation } from 'react-i18next'
 
@@ -26,7 +26,6 @@ import { PAGE_SIZE } from '~/lib/constants'
 
 import {
 	getCreditCardById,
-	getStatementByDate,
 	getCreditCardTransactions,
 	deleteCreditCard,
 } from './lib/queries'
@@ -44,22 +43,13 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 import { TablePagination } from '~/components/table-pagination'
-import { CreditCard } from '~/components/credit-card'
 
 import { CreditCardTransactionFilters } from './components/filters'
 import { DeleteCreditCardFormSchema } from './lib/schemas'
 import type { TCCTransactionType } from './lib/types'
+import { creditCardContext } from './lib/context'
 
 export function meta({ loaderData }: Route.MetaArgs) {
-	if (!loaderData?.creditCard) {
-		const title = loaderData?.meta.notFoundTitle
-		return [
-			{ title },
-			{ property: 'og:title', content: title },
-			{ name: 'description', content: title },
-		]
-	}
-
 	const title = loaderData?.meta.title
 	return [
 		{ title },
@@ -75,24 +65,8 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
-
-	const creditCard = await getCreditCardById({ db, creditCardId })
-	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response(t('details.loader.notFoundError'), { status: 404 })
-	}
-
-	const currentStatement = await getStatementByDate({
-		db,
-		creditCardId,
-		date: new Date(),
-	})
-
-	if (!currentStatement) {
-		throw new Error('There is a problem with your credit card statements')
-	}
-
-	const { account, ...creditCardData } = creditCard
 
 	const url = new URL(request.url)
 	const searchParams = url.searchParams
@@ -113,12 +87,7 @@ export async function loader({
 	})
 
 	return {
-		creditCard: {
-			...creditCardData,
-			closingDate: currentStatement.closingDate,
-			dueDate: currentStatement.dueDate,
-			accountName: account.name,
-		},
+		creditCard,
 		transactions: transactions.map(t => ({
 			...t,
 			amount: String(t.amount / 100),
@@ -128,11 +97,8 @@ export async function loader({
 		selectData,
 		meta: {
 			title: t('details.meta.title', {
-				brand: creditCardData.brand,
-				last4: creditCardData.last4,
-			}),
-			notFoundTitle: t('details.meta.notFoundTitle', {
-				creditCardId,
+				brand: creditCard.brand,
+				last4: creditCard.last4,
 			}),
 		},
 	}
@@ -189,16 +155,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 export default function CreditCardDetails({
 	loaderData: { creditCard, transactions, pagination, filters, selectData },
 }: Route.ComponentProps) {
-	const {
-		id,
-		brand,
-		last4,
-		expiryMonth,
-		expiryYear,
-		closingDate,
-		dueDate,
-		accountName,
-	} = creditCard
 	const location = useLocation()
 	const navigation = useNavigation()
 	const navigate = useNavigate()
@@ -216,70 +172,53 @@ export default function CreditCardDetails({
 		navigation.formData?.get('intent') === 'delete-card'
 
 	return (
-		<PageSection id={id}>
-			<Button asChild variant='link' width='fit' size='icon'>
-				<Link to='/app/credit-cards'>
-					<ArrowLeftIcon />
-				</Link>
-			</Button>
-			<div className='flex flex-col sm:flex-row gap-6 items-start'>
-				<CreditCard
-					brand={brand}
-					last4={last4}
-					expiryMonth={expiryMonth}
-					expiryYear={expiryYear}
-					closingDate={closingDate}
-					dueDate={dueDate}
-					accountName={accountName}
-					className='w-full max-w-sm shrink-0'
-				/>
-				<div className='flex sm:items-center gap-2 sm:ml-auto'>
-					<Button size='icon' variant='outline' asChild>
-						<Link to='edit'>
-							<SquarePenIcon />
-							<span className='sr-only'>
-								{t('details.editAriaLabel', {
-									brand,
-									last4,
-								})}
-							</span>
-						</Link>
-					</Button>
-					<Tooltip>
-						<Form method='post'>
-							<input
-								type='hidden'
-								name='creditCardId'
-								value={id}
-							/>
-							<TooltipTrigger asChild>
-								<Button
-									size='icon'
-									variant='destructive-outline'
-									type='submit'
-									name='intent'
-									value='delete-card'
-									disabled={isDeletingCard}
-								>
-									{isDeletingCard ? (
-										<Spinner size='sm' />
-									) : (
-										<TrashIcon aria-hidden />
-									)}
-									<span className='sr-only'>
-										{t('details.deleteAriaLabel', {
-											brand,
-											last4,
-										})}
-									</span>
-								</Button>
-							</TooltipTrigger>
-						</Form>
-						<TooltipContent>
-							{t('details.deleteTooltip')}
-						</TooltipContent>
-					</Tooltip>
-				</div>
+		<>
+			<div className='flex sm:items-center gap-2 sm:ml-auto'>
+				<Button size='icon' variant='outline' asChild>
+					<Link to='edit'>
+						<SquarePenIcon />
+						<span className='sr-only'>
+							{t('details.editAriaLabel', {
+								brand: creditCard.brand,
+								last4: creditCard.last4,
+							})}
+						</span>
+					</Link>
+				</Button>
+				<Tooltip>
+					<Form method='post'>
+						<input
+							type='hidden'
+							name='creditCardId'
+							value={creditCard.id}
+						/>
+						<TooltipTrigger asChild>
+							<Button
+								size='icon'
+								variant='destructive-outline'
+								type='submit'
+								name='intent'
+								value='delete-card'
+								disabled={isDeletingCard}
+							>
+								{isDeletingCard ? (
+									<Spinner size='sm' />
+								) : (
+									<TrashIcon aria-hidden />
+								)}
+								<span className='sr-only'>
+									{t('details.deleteAriaLabel', {
+										brand: creditCard.brand,
+										last4: creditCard.last4,
+									})}
+								</span>
+							</Button>
+						</TooltipTrigger>
+					</Form>
+					<TooltipContent>
+						{t('details.deleteTooltip')}
+					</TooltipContent>
+				</Tooltip>
 			</div>
 
 			<PageSection id='cc-transactions-section'>
@@ -387,6 +326,6 @@ export default function CreditCardDetails({
 					pages={pagination.pages}
 				/>
 			</PageSection>
-		</PageSection>
+		</>
 	)
 }

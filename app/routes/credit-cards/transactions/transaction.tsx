@@ -1,5 +1,5 @@
-import { Form, Link, data, useNavigation, useLocation } from 'react-router'
-import { ArrowLeftIcon, TrashIcon } from 'lucide-react'
+import { Form, data, useNavigation, useLocation } from 'react-router'
+import { TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
@@ -13,35 +13,28 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
-import {
-	getCreditCardById,
-	getCreditCardTransactionById,
-	getTransactionInstallments,
-	getStatementByDate,
-	deleteCreditCardTransaction,
-} from '../lib/queries'
-
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
-import { CreditCard } from '~/components/credit-card'
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
+import {
+	getCreditCardById,
+	getCreditCardTransactionById,
+	getTransactionInstallments,
+	deleteCreditCardTransaction,
+} from '../lib/queries'
 import { DeleteCreditCardTransactionFormSchema } from '../lib/schemas'
+import { creditCardContext } from '../lib/context'
 
 export function meta({ loaderData }: Route.MetaArgs) {
-	if (!loaderData?.creditCard) {
-		const title = loaderData?.meta.notFoundTitle
-		return [{ title }]
-	}
-
 	const title = loaderData?.meta.title
 	return [
 		{ title },
@@ -55,16 +48,8 @@ export async function loader({
 	params: { creditCardId, transactionId },
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
-	const user = context.get(userContext)
+	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
-
-	const creditCard = await getCreditCardById({ db, creditCardId })
-	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response(
-			t('transaction.details.loader.creditCardNotFoundError'),
-			{ status: 404 },
-		)
-	}
 
 	const transaction = await getCreditCardTransactionById({
 		db,
@@ -81,26 +66,9 @@ export async function loader({
 		transactionId,
 	})
 
-	const currentStatement = await getStatementByDate({
-		db,
-		creditCardId,
-		date: new Date(),
-	})
-
-	const {
-		account: { ownerId: _ownerId, ...account },
-		...creditCardData
-	} = creditCard
-
 	const { transactionCategory, currency, ...transactionData } = transaction
 
 	return {
-		creditCard: {
-			...creditCardData,
-			closingDate: currentStatement?.closingDate ?? '',
-			dueDate: currentStatement?.dueDate ?? '',
-			accountName: account.name,
-		},
 		transaction: {
 			...transactionData,
 			categoryName: transactionCategory.name,
@@ -113,10 +81,9 @@ export async function loader({
 		})),
 		meta: {
 			title: t('transaction.details.meta.title', {
-				brand: creditCardData.brand,
-				last4: creditCardData.last4,
+				brand: creditCard.brand,
+				last4: creditCard.last4,
 			}),
-			notFoundTitle: t('transaction.details.meta.notFoundTitle'),
 		},
 	}
 }
@@ -184,7 +151,7 @@ export async function action({
 }
 
 export default function CreditCardTransaction({
-	loaderData: { creditCard, transaction, installments },
+	loaderData: { transaction, installments },
 }: Route.ComponentProps) {
 	const {
 		id: transactionId,
@@ -205,49 +172,39 @@ export default function CreditCardTransaction({
 		navigation.state === 'submitting'
 
 	return (
-		<div className='flex flex-col gap-6'>
-			<Button asChild variant='link' width='fit' size='icon'>
-				<Link to={`/app/credit-cards/${creditCard.id}`}>
-					<ArrowLeftIcon />
-				</Link>
-			</Button>
-			<div className='flex flex-col sm:flex-row gap-6 items-start'>
-				<CreditCard {...creditCard} className='max-w-sm' />
-				<div className='flex sm:items-center sm:ml-auto'>
-					<Tooltip>
-						<Form method='post'>
-							<input
-								type='hidden'
-								name='creditCardTransactionId'
-								value={transactionId}
-							/>
-							<TooltipTrigger asChild>
-								<Button
-									size='icon'
-									variant='destructive-outline'
-									type='submit'
-									name='intent'
-									value='delete-transaction'
-									disabled={isDeleting}
-								>
-									{isDeleting ? (
-										<Spinner size='sm' />
-									) : (
-										<TrashIcon aria-hidden />
-									)}
-									<span className='sr-only'>
-										{t(
-											'details.deleteTransactionAriaLabel',
-										)}
-									</span>
-								</Button>
-							</TooltipTrigger>
-						</Form>
-						<TooltipContent>
-							{t('details.deleteTransactionAriaLabel')}
-						</TooltipContent>
-					</Tooltip>
-				</div>
+		<>
+			<div className='flex sm:items-center sm:ml-auto'>
+				<Tooltip>
+					<Form method='post'>
+						<input
+							type='hidden'
+							name='creditCardTransactionId'
+							value={transactionId}
+						/>
+						<TooltipTrigger asChild>
+							<Button
+								size='icon'
+								variant='destructive-outline'
+								type='submit'
+								name='intent'
+								value='delete-transaction'
+								disabled={isDeleting}
+							>
+								{isDeleting ? (
+									<Spinner size='sm' />
+								) : (
+									<TrashIcon aria-hidden />
+								)}
+								<span className='sr-only'>
+									{t('details.deleteTransactionAriaLabel')}
+								</span>
+							</Button>
+						</TooltipTrigger>
+					</Form>
+					<TooltipContent>
+						{t('details.deleteTransactionAriaLabel')}
+					</TooltipContent>
+				</Tooltip>
 			</div>
 
 			<div className='rounded-lg border p-4 flex flex-col gap-3'>
@@ -337,6 +294,6 @@ export default function CreditCardTransaction({
 					))}
 				</div>
 			</section>
-		</div>
+		</>
 	)
 }
