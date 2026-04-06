@@ -13,8 +13,6 @@ export default {
 	details: {
 		meta: {
 			title: 'Tarjeta de Crédito {{brand}} •••• {{last4}} | Finway',
-			notFoundTitle:
-				'Tarjeta de crédito {{creditCardId}} no encontrada | Finway',
 		},
 		loader: {
 			notFoundError: 'Tarjeta de crédito no encontrada',
@@ -27,8 +25,6 @@ export default {
 		emptyStatements: 'Aún no hay resúmenes.',
 		closingDate: 'Cierre',
 		dueDate: 'Vencimiento',
-		installmentCount_one: '{{count}} cuota',
-		installmentCount_other: '{{count}} cuotas',
 		deleteTransactionAriaLabel: 'Eliminar transacción',
 		action: {
 			notFoundError: 'Tarjeta de crédito no encontrada',
@@ -65,7 +61,6 @@ export default {
 			action: {
 				notFoundError: 'Resumen no encontrado',
 				editSuccessToast: 'Fechas del resumen actualizadas',
-				unknownActionToast: 'Acción desconocida',
 				closingDateAfterPrevious:
 					'La fecha de cierre debe ser posterior a la del resumen anterior',
 				closingDateBeforeNext:
@@ -107,8 +102,6 @@ export default {
 			expiryYearFuture: 'Debe ser un año válido en el futuro',
 			currentClosingDateRequired: 'La fecha de cierre es requerida',
 			currentDueDateRequired: 'La fecha de vencimiento es requerida',
-			dueDateAfterClosingDate:
-				'La fecha de vencimiento debe ser posterior a la fecha de cierre',
 			dueDateMaxDifference:
 				'La fecha de vencimiento debe estar dentro de los 20 días de la fecha de cierre',
 			accountRequired: 'La cuenta es requerida',
@@ -193,18 +186,10 @@ export default {
 		details: {
 			meta: {
 				title: 'Transacción · {{brand}} •••• {{last4}} | Finway',
-				notFoundTitle: 'Transacción no encontrada | Finway',
 			},
 			loader: {
-				creditCardNotFoundError: 'Tarjeta de crédito no encontrada',
 				notFoundError: 'Transacción no encontrada',
 			},
-			date: 'Fecha',
-			type: 'Tipo',
-			amount: 'Monto',
-			category: 'Categoría',
-			description: 'Descripción',
-			currency: 'Moneda',
 			installmentsTitle: 'Cuotas ({{count}})',
 			dueDate: 'Fecha de Vencimiento',
 			installmentAmount: 'Monto de Cuota',

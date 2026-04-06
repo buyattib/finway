@@ -11,7 +11,6 @@ export default {
 	details: {
 		meta: {
 			title: 'Credit Card {{brand}} •••• {{last4}} | Finway',
-			notFoundTitle: 'Credit card {{creditCardId}} not found | Finway',
 		},
 		loader: {
 			notFoundError: 'Credit card not found',
@@ -24,8 +23,6 @@ export default {
 		emptyStatements: 'No statements yet.',
 		closingDate: 'Closes',
 		dueDate: 'Due',
-		installmentCount_one: '{{count}} installment',
-		installmentCount_other: '{{count}} installments',
 		deleteTransactionAriaLabel: 'Delete transaction',
 		action: {
 			notFoundError: 'Credit card not found',
@@ -61,7 +58,6 @@ export default {
 			action: {
 				notFoundError: 'Statement not found',
 				editSuccessToast: 'Statement dates updated',
-				unknownActionToast: 'Unknown action',
 				closingDateAfterPrevious:
 					'Closing date must be after the previous statement closing date',
 				closingDateBeforeNext:
@@ -102,7 +98,6 @@ export default {
 			expiryYearFuture: 'Must be a valid year in the future',
 			currentClosingDateRequired: 'Closing date is required',
 			currentDueDateRequired: 'Due date is required',
-			dueDateAfterClosingDate: 'Due date must be after closing date',
 			dueDateMaxDifference:
 				'Due date must be within 20 days of closing date',
 			accountRequired: 'Account is required',
@@ -186,18 +181,10 @@ export default {
 		details: {
 			meta: {
 				title: 'Transaction · {{brand}} •••• {{last4}} | Finway',
-				notFoundTitle: 'Transaction not found | Finway',
 			},
 			loader: {
-				creditCardNotFoundError: 'Credit card not found',
 				notFoundError: 'Transaction not found',
 			},
-			date: 'Date',
-			type: 'Type',
-			amount: 'Amount',
-			category: 'Category',
-			description: 'Description',
-			currency: 'Currency',
 			installmentsTitle: 'Installments ({{count}})',
 			dueDate: 'Due Date',
 			installmentAmount: 'Installment Amount',

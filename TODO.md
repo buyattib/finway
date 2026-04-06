@@ -1,4 +1,5 @@
-- Clean unused code and locales
+- Remove all charts
+- Use transaction icon on the dashboard cards
 
 - Edit cc transactions
 
