@@ -87,6 +87,28 @@ export async function getStatementByDate({
 	})
 }
 
+export async function getStatementsFromDate({
+	db,
+	creditCardId,
+	date,
+	limit,
+}: {
+	db: DB
+	creditCardId: string
+	date: string
+	limit: number
+}) {
+	return db.query.creditCardStatement.findMany({
+		where: (s, { eq, gte, and }) =>
+			and(
+				eq(s.creditCardId, creditCardId),
+				gte(s.closingDate, date),
+			),
+		orderBy: (s, { asc }) => [asc(s.closingDate)],
+		limit,
+	})
+}
+
 export async function getCreditCardTransactions({
 	db,
 	creditCardId,

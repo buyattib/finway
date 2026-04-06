@@ -38,6 +38,7 @@ import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/
 import {
 	getCreditCardById,
 	getStatementByDate,
+	getStatementsFromDate,
 	createCreditCardTransaction,
 	ensureStatementsExist,
 } from '../lib/queries'
@@ -196,13 +197,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 	)
 	await ensureStatementsExist({ db, creditCardId, targetDate: lastInstallmentDate })
 
-	const statements = await db.query.creditCardStatement.findMany({
-		where: (s, { eq, gte, and }) =>
-			and(
-				eq(s.creditCardId, creditCardId),
-				gte(s.closingDate, transactionStatement.closingDate),
-			),
-		orderBy: (s, { asc }) => [asc(s.closingDate)],
+	const statements = await getStatementsFromDate({
+		db,
+		creditCardId,
+		date: transactionStatement.closingDate,
 		limit: installmentCount,
 	})
 
