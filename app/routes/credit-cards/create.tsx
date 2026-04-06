@@ -8,10 +8,11 @@ import { dbContext, userContext } from '~/lib/context'
 import { getSelectData } from '~/lib/queries'
 import { ACTION_CREATION } from '~/lib/constants'
 
+import { getAccountById } from '~/routes/accounts/lib/queries'
+
 import { CreditCardForm } from './components/form'
 import { createCreditCardFormSchema } from './lib/schemas'
 import { createCreditCard } from './lib/queries'
-import { getAccountById } from '~/routes/accounts/lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -84,7 +85,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 		...creditCardData
 	} = submission.value
 
-	const account = await getAccountById({ db, accountId: creditCardData.accountId })
+	const account = await getAccountById({
+		db,
+		accountId: creditCardData.accountId,
+	})
 	if (!account || account.ownerId !== user.id) {
 		return data(
 			{

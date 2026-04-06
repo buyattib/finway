@@ -44,7 +44,7 @@ import {
 	useSidebar,
 } from '~/components/ui/sidebar'
 
-import { ensureStatementsExist } from '~/routes/credit-cards/lib/utils'
+import { ensureStatementsExist } from '~/routes/credit-cards/lib/queries'
 
 export const middleware: MiddlewareFunction[] = [authMiddleware]
 
@@ -61,7 +61,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		.then(cards => {
 			void Promise.all(
 				cards.map(({ id }) =>
-					ensureStatementsExist(db, id, new Date()),
+					ensureStatementsExist({ db, creditCardId: id, targetDate: new Date() }),
 				),
 			)
 		})

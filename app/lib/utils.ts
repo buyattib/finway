@@ -53,6 +53,27 @@ export function initializeDate() {
 	return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
 }
 
+export function addMonth(dateStr: string): string {
+	const date = new Date(dateStr)
+	const targetDay = date.getUTCDate()
+	date.setUTCMonth(date.getUTCMonth() + 1)
+	// Handle overflow (e.g., Jan 31 -> Feb 28)
+	if (date.getUTCDate() !== targetDay) {
+		date.setUTCDate(0)
+	}
+	return date.toISOString()
+}
+
+export function subtractMonth(dateStr: string): string {
+	const date = new Date(dateStr)
+	const targetDay = date.getUTCDate()
+	date.setUTCMonth(date.getUTCMonth() - 1)
+	if (date.getUTCDate() !== targetDay) {
+		date.setUTCDate(0)
+	}
+	return date.toISOString()
+}
+
 export function formatDate(
 	date: Date,
 	config: Intl.DateTimeFormatOptions = {},

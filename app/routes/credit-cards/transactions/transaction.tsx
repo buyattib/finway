@@ -17,7 +17,7 @@ import {
 	getCreditCardById,
 	getCreditCardTransactionById,
 	getTransactionInstallments,
-	getCurrentStatement,
+	getStatementByDate,
 	deleteCreditCardTransaction,
 } from '../lib/queries'
 
@@ -81,7 +81,11 @@ export async function loader({
 		transactionId,
 	})
 
-	const currentStatement = await getCurrentStatement({ db, creditCardId })
+	const currentStatement = await getStatementByDate({
+		db,
+		creditCardId,
+		date: new Date(),
+	})
 
 	const {
 		account: { ownerId: _ownerId, ...account },

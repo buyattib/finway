@@ -11,10 +11,7 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { removeCommas, initializeDate, formatNumber } from '~/lib/utils'
 import { ACTION_CREATION } from '~/lib/constants'
-import { CC_TRANSACTION_TYPE_CHARGE, CC_TRANSACTION_TYPES } from '../lib/constants'
 import { getSelectData, getCurrencyById } from '~/lib/queries'
-import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/queries'
-import { getCreditCardById, createCreditCardTransaction } from '../lib/queries'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -36,8 +33,19 @@ import {
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 
+import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/queries'
+
+import {
+	getCreditCardById,
+	getStatementByDate,
+	createCreditCardTransaction,
+	ensureStatementsExist,
+} from '../lib/queries'
 import { createCreditCardTransactionFormSchema } from '../lib/schemas'
-import { getStatementForDate, ensureStatementsExist } from '../lib/utils'
+import {
+	CC_TRANSACTION_TYPE_CHARGE,
+	CC_TRANSACTION_TYPES,
+} from '../lib/constants'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -129,7 +137,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 		)
 	}
 
-	const currency = await getCurrencyById({ db, currencyId: values.currencyId })
+	const currency = await getCurrencyById({
+		db,
+		currencyId: values.currencyId,
+	})
 	if (!currency) {
 		return data(
 			{
@@ -167,17 +178,23 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const transactionDate = new Date(values.date)
 	const installmentCount = Number(totalInstallments)
 
-	const transactionStatement = await getStatementForDate(
+	await ensureStatementsExist({ db, creditCardId, targetDate: transactionDate })
+
+	const transactionStatement = await getStatementByDate({
 		db,
 		creditCardId,
-		transactionDate,
-	)
+		date: transactionDate,
+	})
+
+	if (!transactionStatement) {
+		throw new Error('Could not find statement for date')
+	}
 
 	const lastInstallmentDate = new Date(transactionStatement.closingDate)
 	lastInstallmentDate.setMonth(
 		lastInstallmentDate.getMonth() + installmentCount - 1,
 	)
-	await ensureStatementsExist(db, creditCardId, lastInstallmentDate)
+	await ensureStatementsExist({ db, creditCardId, targetDate: lastInstallmentDate })
 
 	const statements = await db.query.creditCardStatement.findMany({
 		where: (s, { eq, gte, and }) =>

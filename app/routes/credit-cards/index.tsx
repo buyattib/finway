@@ -7,13 +7,13 @@ import type { Route } from './+types'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 
-import { getCreditCards } from './lib/queries'
-
 import { Button } from '~/components/ui/button'
 import { Title } from '~/components/ui/title'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { EmptyState } from '~/components/empty-state'
 import { CreditCard } from '~/components/credit-card'
+
+import { getCreditCards } from './lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [

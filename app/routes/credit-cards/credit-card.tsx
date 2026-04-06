@@ -26,7 +26,7 @@ import { PAGE_SIZE } from '~/lib/constants'
 
 import {
 	getCreditCardById,
-	getCurrentStatement,
+	getStatementByDate,
 	getCreditCardTransactions,
 	deleteCreditCard,
 } from './lib/queries'
@@ -82,7 +82,11 @@ export async function loader({
 		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
 
-	const currentStatement = await getCurrentStatement({ db, creditCardId })
+	const currentStatement = await getStatementByDate({
+		db,
+		creditCardId,
+		date: new Date(),
+	})
 
 	if (!currentStatement) {
 		throw new Error('There is a problem with your credit card statements')
