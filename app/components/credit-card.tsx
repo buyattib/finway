@@ -38,7 +38,7 @@ export function CreditCard({
 	return (
 		<div
 			className={cn(
-				`bg-linear-to-br ${gradient} rounded-xl p-6 shadow-lg aspect-[1.586/1] flex flex-col justify-between text-white`,
+				`bg-linear-to-br ${gradient} rounded-xl p-6 shadow-lg aspect-[1.586/1] flex flex-col justify-between text-white max-h-76`,
 				className,
 			)}
 		>

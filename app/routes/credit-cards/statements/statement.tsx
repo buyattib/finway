@@ -111,24 +111,16 @@ export default function StatementDetails({
 
 	return (
 		<>
-			<Button asChild variant='link' width='fit' size='icon'>
-				<Link to={`/app/credit-cards/${creditCard.id}`}>
-					<ArrowLeftIcon />
-				</Link>
-			</Button>
-			<CreditCard
-				brand={creditCard.brand}
-				last4={creditCard.last4}
-				expiryMonth={creditCard.expiryMonth}
-				expiryYear={creditCard.expiryYear}
-				accountName={creditCard.accountName}
-				className='w-full max-w-sm shrink-0'
-			/>
-			<div className='rounded-lg border p-4 flex flex-col gap-3 relative'>
+			<div className='flex items-center gap-2'>
+				<Button asChild variant='link' width='fit' size='icon'>
+					<Link to={`/app/credit-cards/${creditCard.id}`}>
+						<ArrowLeftIcon />
+					</Link>
+				</Button>
 				<Button
 					size='icon'
-					variant='ghost'
-					className='absolute top-2 right-2'
+					variant='outline'
+					className='ml-auto'
 					onClick={() => setEditOpen(true)}
 				>
 					<SquarePenIcon aria-hidden />
@@ -136,6 +128,18 @@ export default function StatementDetails({
 						{t('statement.details.editButton')}
 					</span>
 				</Button>
+			</div>
+
+			<div className='flex flex-col lg:flex-row lg:items-start gap-6'>
+				<CreditCard
+					brand={creditCard.brand}
+					last4={creditCard.last4}
+					expiryMonth={creditCard.expiryMonth}
+					expiryYear={creditCard.expiryYear}
+					accountName={creditCard.accountName}
+					className='w-full shrink-0 md:max-w-sm'
+				/>
+				<div className='rounded-lg border p-4 flex flex-col gap-3 w-full'>
 				<div className='flex flex-col gap-1'>
 					<Text size='xs' theme='muted'>
 						{t('statement.details.closingDate')}
@@ -171,6 +175,7 @@ export default function StatementDetails({
 						))}
 					</div>
 				)}
+				</div>
 			</div>
 
 			{editOpen && (

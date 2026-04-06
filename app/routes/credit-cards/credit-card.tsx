@@ -178,74 +178,13 @@ export default function CreditCardDetails({
 
 	return (
 		<>
-			<Button asChild variant='link' width='fit' size='icon'>
-				<Link to='/app/credit-cards'>
-					<ArrowLeftIcon />
-				</Link>
-			</Button>
-			<CreditCard
-				brand={creditCard.brand}
-				last4={creditCard.last4}
-				expiryMonth={creditCard.expiryMonth}
-				expiryYear={creditCard.expiryYear}
-				accountName={creditCard.accountName}
-				className='w-full max-w-sm shrink-0'
-			/>
-			<div className='flex sm:items-center gap-2 sm:ml-auto'>
-				<Button size='icon' variant='outline' asChild>
-					<Link to='edit'>
-						<SquarePenIcon />
-						<span className='sr-only'>
-							{t('details.editAriaLabel', {
-								brand: creditCard.brand,
-								last4: creditCard.last4,
-							})}
-						</span>
+			<div className='flex items-center gap-2'>
+				<Button asChild variant='link' width='fit' size='icon'>
+					<Link to='/app/credit-cards'>
+						<ArrowLeftIcon />
 					</Link>
 				</Button>
-				<Tooltip>
-					<Form method='post'>
-						<input
-							type='hidden'
-							name='creditCardId'
-							value={creditCard.id}
-						/>
-						<TooltipTrigger asChild>
-							<Button
-								size='icon'
-								variant='destructive-outline'
-								type='submit'
-								name='intent'
-								value='delete-card'
-								disabled={isDeletingCard}
-							>
-								{isDeletingCard ? (
-									<Spinner size='sm' />
-								) : (
-									<TrashIcon aria-hidden />
-								)}
-								<span className='sr-only'>
-									{t('details.deleteAriaLabel', {
-										brand: creditCard.brand,
-										last4: creditCard.last4,
-									})}
-								</span>
-							</Button>
-						</TooltipTrigger>
-					</Form>
-					<TooltipContent>
-						{t('details.deleteTooltip')}
-					</TooltipContent>
-				</Tooltip>
-			</div>
-
-			<PageSection id='cc-statements-section'>
-				<PageHeader>
-					<Title id='cc-statements-section' level='h3'>
-						{t('details.statementsTitle', {
-							total: pagination.total,
-						})}
-					</Title>
+				<div className='flex items-center gap-2 ml-auto'>
 					<Button asChild variant='default'>
 						<Link to='transactions/create'>
 							<PlusIcon aria-hidden />
@@ -254,90 +193,170 @@ export default function CreditCardDetails({
 							</span>
 						</Link>
 					</Button>
-				</PageHeader>
-
-				<div className='h-6'>
-					{isLoading && <Spinner size='md' className='mx-auto' />}
-				</div>
-
-				{statements.length === 0 ? (
-					<Text size='md' weight='medium' alignment='center'>
-						{t('details.emptyStatements')}
-					</Text>
-				) : (
-					<ul className='flex flex-col gap-2'>
-						{statements.map(
-							({ id, closingDate, dueDate, totals }) => (
-								<li
-									key={id}
-									className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
-									onClick={() => navigate(`statements/${id}`)}
+					<Button size='icon' variant='outline' asChild>
+						<Link to='edit'>
+							<SquarePenIcon />
+							<span className='sr-only'>
+								{t('details.editAriaLabel', {
+									brand: creditCard.brand,
+									last4: creditCard.last4,
+								})}
+							</span>
+						</Link>
+					</Button>
+					<Tooltip>
+						<Form method='post'>
+							<input
+								type='hidden'
+								name='creditCardId'
+								value={creditCard.id}
+							/>
+							<TooltipTrigger asChild>
+								<Button
+									size='icon'
+									variant='destructive-outline'
+									type='submit'
+									name='intent'
+									value='delete-card'
+									disabled={isDeletingCard}
 								>
-									<div className='grid grid-cols-2 sm:grid-cols-3 items-center gap-4'>
-										<div className='flex flex-col gap-1'>
-											<Text size='xs' theme='muted'>
-												{t('details.closingDate')}
-											</Text>
-											<Text size='sm' weight='medium'>
-												{formatDate(
-													new Date(closingDate),
-												)}
-											</Text>
-										</div>
-										<div className='flex flex-col gap-1'>
-											<Text size='xs' theme='muted'>
-												{t('details.dueDate')}
-											</Text>
-											<Text size='sm' weight='medium'>
-												{formatDate(new Date(dueDate))}
-											</Text>
-										</div>
-										<div className='flex flex-col gap-1 sm:items-end'>
-											{totals.length > 0 ? (
-												totals.map(
-													({
-														currencyCode,
-														total,
-													}) => (
-														<Text
-															key={currencyCode}
-															size='sm'
-															weight='medium'
-															className='flex items-center gap-1'
-														>
-															<CurrencyIcon
-																currency={
+									{isDeletingCard ? (
+										<Spinner size='sm' />
+									) : (
+										<TrashIcon aria-hidden />
+									)}
+									<span className='sr-only'>
+										{t('details.deleteAriaLabel', {
+											brand: creditCard.brand,
+											last4: creditCard.last4,
+										})}
+									</span>
+								</Button>
+							</TooltipTrigger>
+						</Form>
+						<TooltipContent>
+							{t('details.deleteTooltip')}
+						</TooltipContent>
+					</Tooltip>
+				</div>
+			</div>
+
+			<div className='flex flex-col lg:flex-row lg:items-start gap-6'>
+				<CreditCard
+					brand={creditCard.brand}
+					last4={creditCard.last4}
+					expiryMonth={creditCard.expiryMonth}
+					expiryYear={creditCard.expiryYear}
+					accountName={creditCard.accountName}
+					className='w-full shrink-0 md:max-w-sm'
+				/>
+
+				<PageSection
+					id='cc-statements-section'
+					className='min-w-0 flex-1'
+				>
+					<PageHeader>
+						<Title id='cc-statements-section' level='h3'>
+							{t('details.statementsTitle', {
+								total: pagination.total,
+							})}
+						</Title>
+					</PageHeader>
+
+					{isLoading && (
+						<div className='h-4'>
+							<Spinner size='md' className='mx-auto' />
+						</div>
+					)}
+
+					{statements.length === 0 ? (
+						<Text size='md' weight='medium' alignment='center'>
+							{t('details.emptyStatements')}
+						</Text>
+					) : (
+						<ul className='flex flex-col gap-2'>
+							{statements.map(
+								({ id, closingDate, dueDate, totals }) => (
+									<li
+										key={id}
+										className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
+										onClick={() =>
+											navigate(`statements/${id}`)
+										}
+									>
+										<div className='grid grid-cols-2 md:grid-cols-3 items-center gap-4'>
+											<div className='flex flex-col gap-1'>
+												<Text size='xs' theme='muted'>
+													{t('details.closingDate')}
+												</Text>
+												<Text size='sm' weight='medium'>
+													{formatDate(
+														new Date(closingDate),
+													)}
+												</Text>
+											</div>
+											<div className='flex flex-col gap-1'>
+												<Text size='xs' theme='muted'>
+													{t('details.dueDate')}
+												</Text>
+												<Text size='sm' weight='medium'>
+													{formatDate(
+														new Date(dueDate),
+													)}
+												</Text>
+											</div>
+											<div className='flex flex-col gap-1 lg:items-end'>
+												{totals.length > 0 ? (
+													totals.map(
+														({
+															currencyCode,
+															total,
+														}) => (
+															<Text
+																key={
 																	currencyCode
 																}
 																size='sm'
-															/>
-															{getCurrencySymbol(
-																currencyCode,
-															)}{' '}
-															{formatNumber(
-																total,
-															)}
-														</Text>
-													),
-												)
-											) : (
-												<Text size='sm' theme='muted'>
-													—
-												</Text>
-											)}
+																weight='medium'
+																className='flex items-center gap-1'
+															>
+																<CurrencyIcon
+																	currency={
+																		currencyCode
+																	}
+																	size='sm'
+																/>
+																{getCurrencySymbol(
+																	currencyCode,
+																)}{' '}
+																{formatNumber(
+																	total,
+																)}
+															</Text>
+														),
+													)
+												) : (
+													<Text
+														size='sm'
+														theme='muted'
+													>
+														—
+													</Text>
+												)}
+											</div>
 										</div>
-									</div>
-								</li>
-							),
-						)}
-					</ul>
-				)}
+									</li>
+								),
+							)}
+						</ul>
+					)}
 
-				<TablePagination
-					page={pagination.page}
-					pages={pagination.pages}
-				/>
-			</PageSection>
+					<TablePagination
+						page={pagination.page}
+						pages={pagination.pages}
+					/>
+				</PageSection>
+			</div>
 		</>
 	)
 }
