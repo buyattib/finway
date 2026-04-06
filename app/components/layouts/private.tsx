@@ -1,9 +1,4 @@
-import {
-	NavLink,
-	Outlet,
-	useNavigation,
-	type MiddlewareFunction,
-} from 'react-router'
+import { NavLink, Outlet, type MiddlewareFunction } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import {
 	ArrowRightLeftIcon,
@@ -26,6 +21,7 @@ import { authMiddleware } from '~/middleware/auth'
 import { userContext, dbContext } from '~/lib/context'
 import { cn } from '~/lib/utils'
 
+import { NavigationProgress } from '~/components/ui/navigation-progress'
 import { FinwayLink } from '~/components/finway-link'
 import { LogoutButton } from '~/components/logout-button'
 import { ThemeToggle } from '~/components/theme-toggle'
@@ -122,12 +118,6 @@ function PrivateLayoutContent({
 	user: Route.ComponentProps['loaderData']['user']
 }) {
 	const { t } = useTranslation('components')
-	const navigation = useNavigation()
-	const isLoading =
-		navigation.state === 'loading' &&
-		navigation.location &&
-		!navigation.location.search
-
 	const { isMobile, toggleSidebar } = useSidebar()
 	const closeSidebar = () => {
 		if (isMobile) toggleSidebar()
@@ -135,6 +125,7 @@ function PrivateLayoutContent({
 
 	return (
 		<>
+			<NavigationProgress />
 			<Sidebar>
 				<SidebarHeader className='p-4'>
 					<FinwayLink onClick={closeSidebar} />
@@ -183,14 +174,7 @@ function PrivateLayoutContent({
 						<LogoutButton />
 					</div>
 				</header>
-				<main
-					className={cn(
-						'flex-1 mx-auto w-full lg:max-w-6xl md:max-w-3xl py-6 lg:px-12 md:px-8 sm:px-6 px-4 overflow-auto',
-						{
-							'opacity-50 pointer-events-none': isLoading,
-						},
-					)}
-				>
+				<main className='flex-1 mx-auto w-full lg:max-w-6xl md:max-w-3xl py-6 lg:px-12 md:px-8 sm:px-6 px-4 overflow-auto'>
 					<Outlet />
 				</main>
 			</div>
