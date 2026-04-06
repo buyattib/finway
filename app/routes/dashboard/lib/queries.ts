@@ -44,9 +44,9 @@ export async function getMonthTransactions({
 	group,
 }: Args) {
 	const now = new Date()
-	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-	const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-	const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1)
+	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
+	const monthEnd = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0))
+	const yearAgo = new Date(Date.UTC(now.getFullYear() - 1, now.getMonth(), 1))
 
 	const groups = {
 		currency: {
@@ -139,8 +139,8 @@ export async function getCurrentStatementCreditCardTotals({
 	ownerId: string
 }) {
 	const now = new Date()
-	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-	const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
+	const monthEnd = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0))
 
 	return db
 		.select({
