@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import { SquarePenIcon } from 'lucide-react'
+import { ArrowLeftIcon, SquarePenIcon } from 'lucide-react'
 
 import type { Route } from './+types/statement'
 
@@ -16,6 +16,7 @@ import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
 import { PageSection, PageHeader } from '~/components/ui/page'
 import { TransactionType } from '~/components/transaction-type'
+import { CreditCard } from '~/components/credit-card'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
@@ -70,7 +71,14 @@ export async function loader({
 	])
 
 	return {
-		creditCardId,
+		creditCard: {
+			id: creditCardId,
+			brand: creditCard.brand,
+			last4: creditCard.last4,
+			expiryMonth: creditCard.expiryMonth,
+			expiryYear: creditCard.expiryYear,
+			accountName: creditCard.accountName,
+		},
 		statement: {
 			id: statement.id,
 			closingDate: statement.closingDate,
@@ -95,7 +103,7 @@ export async function loader({
 }
 
 export default function StatementDetails({
-	loaderData: { creditCardId, statement, totals, installments, pagination },
+	loaderData: { creditCard, statement, totals, installments, pagination },
 }: Route.ComponentProps) {
 	const { t } = useTranslation('credit-cards')
 	const navigate = useNavigate()
@@ -103,6 +111,19 @@ export default function StatementDetails({
 
 	return (
 		<>
+			<Button asChild variant='link' width='fit' size='icon'>
+				<Link to={`/app/credit-cards/${creditCard.id}`}>
+					<ArrowLeftIcon />
+				</Link>
+			</Button>
+			<CreditCard
+				brand={creditCard.brand}
+				last4={creditCard.last4}
+				expiryMonth={creditCard.expiryMonth}
+				expiryYear={creditCard.expiryYear}
+				accountName={creditCard.accountName}
+				className='w-full max-w-sm shrink-0'
+			/>
 			<div className='rounded-lg border p-4 flex flex-col gap-3 relative'>
 				<Button
 					size='icon'
@@ -155,7 +176,7 @@ export default function StatementDetails({
 			{editOpen && (
 				<EditStatementModal
 					onClose={() => setEditOpen(false)}
-					creditCardId={creditCardId}
+					creditCardId={creditCard.id}
 					statementId={statement.id}
 					closingDate={statement.closingDate}
 					dueDate={statement.dueDate}
@@ -194,7 +215,7 @@ export default function StatementDetails({
 									className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
 									onClick={() =>
 										navigate(
-											`/app/credit-cards/${creditCardId}/transactions/${transactionId}`,
+											`/app/credit-cards/${creditCard.id}/transactions/${transactionId}`,
 										)
 									}
 								>

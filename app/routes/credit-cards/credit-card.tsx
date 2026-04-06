@@ -6,7 +6,7 @@ import {
 	useLocation,
 	useNavigate,
 } from 'react-router'
-import { SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
+import { ArrowLeftIcon, SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
@@ -33,6 +33,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
+import { CreditCard } from '~/components/credit-card'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
@@ -177,6 +178,19 @@ export default function CreditCardDetails({
 
 	return (
 		<>
+			<Button asChild variant='link' width='fit' size='icon'>
+				<Link to='/app/credit-cards'>
+					<ArrowLeftIcon />
+				</Link>
+			</Button>
+			<CreditCard
+				brand={creditCard.brand}
+				last4={creditCard.last4}
+				expiryMonth={creditCard.expiryMonth}
+				expiryYear={creditCard.expiryYear}
+				accountName={creditCard.accountName}
+				className='w-full max-w-sm shrink-0'
+			/>
 			<div className='flex sm:items-center gap-2 sm:ml-auto'>
 				<Button size='icon' variant='outline' asChild>
 					<Link to='edit'>

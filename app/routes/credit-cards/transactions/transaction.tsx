@@ -1,5 +1,5 @@
-import { Form, data, useNavigation, useLocation } from 'react-router'
-import { TrashIcon } from 'lucide-react'
+import { Form, Link, data, useNavigation, useLocation } from 'react-router'
+import { ArrowLeftIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
@@ -17,6 +17,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
+import { CreditCard } from '~/components/credit-card'
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 import {
@@ -70,6 +71,14 @@ export async function loader({
 	const { transactionCategory, currency, ...transactionData } = transaction
 
 	return {
+		creditCard: {
+			id: creditCardId,
+			brand: creditCard.brand,
+			last4: creditCard.last4,
+			expiryMonth: creditCard.expiryMonth,
+			expiryYear: creditCard.expiryYear,
+			accountName: creditCard.accountName,
+		},
 		transaction: {
 			...transactionData,
 			categoryName: transactionCategory.name,
@@ -152,7 +161,7 @@ export async function action({
 }
 
 export default function CreditCardTransaction({
-	loaderData: { transaction, installments },
+	loaderData: { creditCard, transaction, installments },
 }: Route.ComponentProps) {
 	const {
 		id: transactionId,
@@ -174,6 +183,19 @@ export default function CreditCardTransaction({
 
 	return (
 		<>
+			<Button asChild variant='link' width='fit' size='icon'>
+				<Link to={`/app/credit-cards/${creditCard.id}`}>
+					<ArrowLeftIcon />
+				</Link>
+			</Button>
+			<CreditCard
+				brand={creditCard.brand}
+				last4={creditCard.last4}
+				expiryMonth={creditCard.expiryMonth}
+				expiryYear={creditCard.expiryYear}
+				accountName={creditCard.accountName}
+				className='w-full max-w-sm shrink-0'
+			/>
 			<div className='flex sm:items-center sm:ml-auto'>
 				<Tooltip>
 					<Form method='post'>
