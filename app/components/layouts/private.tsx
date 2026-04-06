@@ -61,7 +61,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		.then(cards => {
 			void Promise.all(
 				cards.map(({ id }) =>
-					ensureStatementsExist({ db, creditCardId: id, targetDate: new Date() }),
+					ensureStatementsExist({ db, creditCardId: id, date: new Date() }),
 				),
 			)
 		})

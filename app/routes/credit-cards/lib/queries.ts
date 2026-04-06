@@ -277,11 +277,11 @@ export async function getEarliestStatement({
 export async function ensureStatementsExist({
 	db,
 	creditCardId,
-	targetDate,
+	date,
 }: {
 	db: DB
 	creditCardId: string
-	targetDate: Date
+	date: Date
 }) {
 	await db.transaction(async tx => {
 		const latestStatement = await getLatestStatement({
@@ -297,7 +297,7 @@ export async function ensureStatementsExist({
 		// Generate future statements
 		let lastClosing = latestStatement.closingDate
 		let lastDue = latestStatement.dueDate
-		while (new Date(lastClosing) < targetDate) {
+		while (new Date(lastClosing) < date) {
 			lastClosing = addMonth(lastClosing)
 			lastDue = addMonth(lastDue)
 			newStatements.push({
@@ -318,7 +318,7 @@ export async function ensureStatementsExist({
 		// Generate past statements
 		let firstClosing = earliestStatement.closingDate
 		let firstDue = earliestStatement.dueDate
-		while (new Date(firstClosing) > targetDate) {
+		while (new Date(firstClosing) > date) {
 			firstClosing = subtractMonth(firstClosing)
 			firstDue = subtractMonth(firstDue)
 			newStatements.push({

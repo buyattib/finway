@@ -179,7 +179,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const transactionDate = new Date(values.date)
 	const installmentCount = Number(totalInstallments)
 
-	await ensureStatementsExist({ db, creditCardId, targetDate: transactionDate })
+	await ensureStatementsExist({ db, creditCardId, date: transactionDate })
 
 	const transactionStatement = await getStatementByDate({
 		db,
@@ -195,7 +195,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	lastInstallmentDate.setMonth(
 		lastInstallmentDate.getMonth() + installmentCount - 1,
 	)
-	await ensureStatementsExist({ db, creditCardId, targetDate: lastInstallmentDate })
+	await ensureStatementsExist({ db, creditCardId, date: lastInstallmentDate })
 
 	const statements = await getStatementsFromDate({
 		db,
