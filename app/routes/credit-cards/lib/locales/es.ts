@@ -53,9 +53,24 @@ export default {
 			},
 			closingDate: 'Fecha de Cierre',
 			dueDate: 'Fecha de Vencimiento',
+			editButton: 'Editar',
+			editTitle: 'Editar Fechas del Resumen',
+			editDescription:
+				'Actualiza las fechas de cierre y vencimiento de este resumen.',
+			editCancelButton: 'Cancelar',
+			editSubmitButton: 'Guardar',
 			installmentsTitle: 'Cuotas ({{total}})',
 			emptyInstallments: 'No hay cuotas en este resumen.',
 			installmentOf: '{{number}} / {{total}}',
+			action: {
+				notFoundError: 'Resumen no encontrado',
+				editSuccessToast: 'Fechas del resumen actualizadas',
+				unknownActionToast: 'Acción desconocida',
+				closingDateAfterPrevious:
+					'La fecha de cierre debe ser posterior a la del resumen anterior',
+				closingDateBeforeNext:
+					'La fecha de cierre debe ser anterior a la del resumen siguiente',
+			},
 		},
 	},
 	filters: {

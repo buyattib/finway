@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
+import { SquarePenIcon } from 'lucide-react'
 
 import type { Route } from './+types/statement'
 
@@ -11,6 +13,7 @@ import { PAGE_SIZE } from '~/lib/constants'
 
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
+import { Button } from '~/components/ui/button'
 import { PageSection, PageHeader } from '~/components/ui/page'
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
@@ -22,6 +25,7 @@ import {
 	getStatementTotalsByCurrency,
 } from '../lib/queries'
 import { creditCardContext } from '../lib/context'
+import { EditStatementModal } from '../components/edit-statement-modal'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title
@@ -68,6 +72,7 @@ export async function loader({
 	return {
 		creditCardId,
 		statement: {
+			id: statement.id,
 			closingDate: statement.closingDate,
 			dueDate: statement.dueDate,
 		},
@@ -94,30 +99,40 @@ export default function StatementDetails({
 }: Route.ComponentProps) {
 	const { t } = useTranslation('credit-cards')
 	const navigate = useNavigate()
+	const [editOpen, setEditOpen] = useState(false)
 
 	return (
 		<>
-			<div className='rounded-lg border p-4 flex flex-col gap-3'>
-				<div className='grid grid-cols-2 gap-4'>
-					<div className='flex flex-col gap-1'>
-						<Text size='xs' theme='muted'>
-							{t('statement.details.closingDate')}
-						</Text>
-						<Text size='sm' weight='medium'>
-							{formatDate(new Date(statement.closingDate))}
-						</Text>
-					</div>
-					<div className='flex flex-col gap-1'>
-						<Text size='xs' theme='muted'>
-							{t('statement.details.dueDate')}
-						</Text>
-						<Text size='sm' weight='medium'>
-							{formatDate(new Date(statement.dueDate))}
-						</Text>
-					</div>
+			<div className='rounded-lg border p-4 flex flex-col gap-3 relative'>
+				<Button
+					size='icon'
+					variant='ghost'
+					className='absolute top-2 right-2'
+					onClick={() => setEditOpen(true)}
+				>
+					<SquarePenIcon aria-hidden />
+					<span className='sr-only'>
+						{t('statement.details.editButton')}
+					</span>
+				</Button>
+				<div className='flex flex-col gap-1'>
+					<Text size='xs' theme='muted'>
+						{t('statement.details.closingDate')}
+					</Text>
+					<Text size='sm' weight='medium'>
+						{formatDate(new Date(statement.closingDate))}
+					</Text>
+				</div>
+				<div className='flex flex-col gap-1'>
+					<Text size='xs' theme='muted'>
+						{t('statement.details.dueDate')}
+					</Text>
+					<Text size='sm' weight='medium'>
+						{formatDate(new Date(statement.dueDate))}
+					</Text>
 				</div>
 				{totals.length > 0 && (
-					<div className='flex items-center gap-4 border-t pt-3'>
+					<div className='flex flex-col gap-2 border-t pt-3'>
 						{totals.map(({ currencyCode, total }) => (
 							<Text
 								key={currencyCode}
@@ -136,6 +151,16 @@ export default function StatementDetails({
 					</div>
 				)}
 			</div>
+
+			{editOpen && (
+				<EditStatementModal
+					onClose={() => setEditOpen(false)}
+					creditCardId={creditCardId}
+					statementId={statement.id}
+					closingDate={statement.closingDate}
+					dueDate={statement.dueDate}
+				/>
+			)}
 
 			<PageSection id='statement-installments-section'>
 				<PageHeader>

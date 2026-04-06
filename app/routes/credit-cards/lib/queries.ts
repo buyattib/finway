@@ -1,4 +1,4 @@
-import { and, desc, eq, lte, sum } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, lt, lte, sum } from 'drizzle-orm'
 
 import {
 	creditCard as creditCardTable,
@@ -437,6 +437,37 @@ export async function getEarliestStatement({
 	})
 }
 
+export async function getAdjacentStatements({
+	db,
+	creditCardId,
+	closingDate,
+}: {
+	db: DB
+	creditCardId: string
+	closingDate: string
+}) {
+	const [previous, next] = await Promise.all([
+		db.query.creditCardStatement.findFirst({
+			where: (s, { and: _and, eq: _eq }) =>
+				_and(
+					_eq(s.creditCardId, creditCardId),
+					lt(s.closingDate, closingDate),
+				),
+			orderBy: (s) => [desc(s.closingDate)],
+		}),
+		db.query.creditCardStatement.findFirst({
+			where: (s, { and: _and, eq: _eq }) =>
+				_and(
+					_eq(s.creditCardId, creditCardId),
+					gt(s.closingDate, closingDate),
+				),
+			orderBy: (s) => [asc(s.closingDate)],
+		}),
+	])
+
+	return { previous, next }
+}
+
 // mutations --------
 
 export async function ensureStatementsExist({
@@ -550,6 +581,21 @@ export async function deleteCreditCard({
 	creditCardId: string
 }) {
 	await db.delete(creditCardTable).where(eq(creditCardTable.id, creditCardId))
+}
+
+export async function updateStatement({
+	db,
+	statementId,
+	body,
+}: {
+	db: DB
+	statementId: string
+	body: { closingDate: string; dueDate: string }
+}) {
+	await db
+		.update(creditCardStatementTable)
+		.set(body)
+		.where(eq(creditCardStatementTable.id, statementId))
 }
 
 export async function deleteCreditCardTransaction({

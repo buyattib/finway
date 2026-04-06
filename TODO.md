@@ -1,5 +1,6 @@
+- Clean unused code and locales
+
 - Edit cc transactions
-- Edit statement dates
 
 - Consolidated balance in one currency (external api to fetch fx)
 - Recurring transactions

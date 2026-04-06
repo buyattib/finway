@@ -72,6 +72,10 @@ export default [
 				]),
 				route('edit', 'routes/credit-cards/edit.tsx'),
 				route(
+					'statements/:statementId/edit',
+					'routes/credit-cards/statements/edit.tsx',
+				),
+				route(
 					'transactions/create',
 					'routes/credit-cards/transactions/create.tsx',
 				),

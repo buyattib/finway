@@ -50,9 +50,23 @@ export default {
 			},
 			closingDate: 'Closing Date',
 			dueDate: 'Due Date',
+			editButton: 'Edit',
+			editTitle: 'Edit Statement Dates',
+			editDescription: 'Update the closing and due dates for this statement.',
+			editCancelButton: 'Cancel',
+			editSubmitButton: 'Save',
 			installmentsTitle: 'Installments ({{total}})',
 			emptyInstallments: 'No installments in this statement.',
 			installmentOf: '{{number}} / {{total}}',
+			action: {
+				notFoundError: 'Statement not found',
+				editSuccessToast: 'Statement dates updated',
+				unknownActionToast: 'Unknown action',
+				closingDateAfterPrevious:
+					'Closing date must be after the previous statement closing date',
+				closingDateBeforeNext:
+					'Closing date must be before the next statement closing date',
+			},
 		},
 	},
 	filters: {

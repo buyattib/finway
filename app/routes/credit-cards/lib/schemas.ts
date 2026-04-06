@@ -54,23 +54,11 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 		.and(ActionSchema)
 		.refine(
 			data => {
-				return (
-					new Date(data.currentDueDate) >
-					new Date(data.currentClosingDate)
-				)
-			},
-			{
-				message: t('form.schema.dueDateAfterClosingDate'),
-				path: ['currentDueDate'],
-			},
-		)
-		.refine(
-			data => {
 				const closing = new Date(data.currentClosingDate)
 				const due = new Date(data.currentDueDate)
 				const diffDays =
 					(due.getTime() - closing.getTime()) / (1000 * 60 * 60 * 24)
-				return diffDays <= 20
+				return Math.abs(diffDays) <= 20
 			},
 			{
 				message: t('form.schema.dueDateMaxDifference'),
@@ -80,6 +68,30 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 }
 
 export type CreditCardFormSchema = ReturnType<typeof createCreditCardFormSchema>
+
+export function editStatementFormSchema(t: TFunction<'credit-cards'>) {
+	return z
+		.object({
+			statementId: z.string(),
+			closingDate: z.iso.datetime(
+				t('form.schema.currentClosingDateRequired'),
+			),
+			dueDate: z.iso.datetime(t('form.schema.currentDueDateRequired')),
+		})
+		.refine(
+			data => {
+				const closing = new Date(data.closingDate)
+				const due = new Date(data.dueDate)
+				const diffDays =
+					(due.getTime() - closing.getTime()) / (1000 * 60 * 60 * 24)
+				return Math.abs(diffDays) <= 20
+			},
+			{
+				message: t('form.schema.dueDateMaxDifference'),
+				path: ['dueDate'],
+			},
+		)
+}
 
 export const DeleteCreditCardFormSchema = z.object({
 	creditCardId: z.string(),
