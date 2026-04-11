@@ -1,4 +1,15 @@
+- move all cc routes under layout
+
+- add skeletons on route loaders?
+
+- transfer, exchange edition
+- transaction, transfer, exchange simplify and unify
+
 - Edit cc transactions
+
+- use import * as schema from 'db' instead of importing individual tables?
+
+- improve agents.md
 
 - Consolidated balance in one currency (external api to fetch fx)
 - Recurring transactions

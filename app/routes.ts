@@ -60,11 +60,16 @@ export default [
 
 			...prefix(':creditCardId', [
 				layout('routes/credit-cards/credit-card-layout.tsx', [
+					// cc details
 					index('routes/credit-cards/credit-card.tsx'),
+
+					// cc statement details
 					route(
 						'statements/:statementId',
 						'routes/credit-cards/statements/statement.tsx',
 					),
+
+					// cc transaction
 					route(
 						'transactions/:transactionId',
 						'routes/credit-cards/transactions/transaction.tsx',
