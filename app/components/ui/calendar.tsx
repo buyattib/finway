@@ -9,9 +9,17 @@ import {
 	DayPicker,
 	getDefaultClassNames,
 } from 'react-day-picker'
+import { enUS, es } from 'date-fns/locale'
+import type { Locale } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 
 import { cn } from '~/lib/utils'
 import { Button, buttonVariants } from '~/components/ui/button'
+
+const DATE_FNS_LOCALES: Record<string, Locale> = {
+	en: enUS,
+	es,
+}
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
 	buttonVariant?: React.ComponentProps<typeof Button>['variant']
@@ -25,13 +33,17 @@ export function Calendar({
 	buttonVariant = 'ghost',
 	formatters,
 	components,
+	locale,
 	...props
 }: CalendarProps) {
 	const defaultClassNames = getDefaultClassNames()
+	const { i18n } = useTranslation()
+	const resolvedLocale = locale ?? DATE_FNS_LOCALES[i18n.language] ?? enUS
 
 	return (
 		<DayPicker
 			showOutsideDays={showOutsideDays}
+			locale={resolvedLocale}
 			className={cn(
 				'bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
 				String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
@@ -41,7 +53,7 @@ export function Calendar({
 			captionLayout={captionLayout}
 			formatters={{
 				formatMonthDropdown: date =>
-					date.toLocaleString('default', { month: 'short' }),
+					date.toLocaleString(i18n.language, { month: 'short' }),
 				...formatters,
 			}}
 			classNames={{
