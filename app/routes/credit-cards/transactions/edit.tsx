@@ -1,31 +1,29 @@
 import { data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
-import type { Route } from './+types/create'
+import type { Route } from './+types/edit'
 
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
 import { removeCommas } from '~/lib/utils'
-import { ACTION_CREATION } from '~/lib/constants'
+import { ACTION_EDITION } from '~/lib/constants'
 import { getSelectData, getCurrencyById } from '~/lib/queries'
 
 import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/queries'
 
 import {
+	getCreditCardTransactionById,
+	getTransactionInstallmentCount,
 	getStatementByDate,
 	getStatementsFromDate,
-	createCreditCardTransaction,
 	ensureStatementsExist,
+	updateCreditCardTransaction,
 } from '../lib/queries'
 import { createCreditCardTransactionFormSchema } from '../lib/schemas'
-import { CC_TRANSACTION_TYPE_CHARGE } from '../lib/constants'
 import { creditCardContext } from '../lib/context'
 
-import {
-	CreditCardTransactionForm,
-	type TCreditCardTransactionFormInitialData,
-} from './components/form'
+import { CreditCardTransactionForm } from './components/form'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -37,31 +35,51 @@ export function meta({ loaderData }: Route.MetaArgs) {
 
 export async function loader({
 	context,
-	params: { creditCardId },
+	params: { transactionId },
 }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
 	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
-	const selectData = await getSelectData(db, user.id)
+	const transaction = await getCreditCardTransactionById({
+		db,
+		transactionId,
+	})
+	if (!transaction || transaction.creditCard.id !== creditCard.id) {
+		throw new Response(t('transaction.edit.loader.notFoundError'), {
+			status: 404,
+		})
+	}
+
+	const [selectData, totalInstallments] = await Promise.all([
+		getSelectData(db, user.id),
+		getTransactionInstallmentCount({ db, transactionId }),
+	])
 
 	return {
 		creditCard: { brand: creditCard.brand, last4: creditCard.last4 },
 		selectData,
 		initialData: {
-			creditCardId,
-			type: CC_TRANSACTION_TYPE_CHARGE,
-			amount: '0',
-			totalInstallments: '1',
-			description: '',
-			currencyId: selectData.currencies?.[0]?.id || '',
-			transactionCategoryId:
-				selectData.transactionCategories?.[0]?.id || '',
-		} satisfies TCreditCardTransactionFormInitialData,
+			id: transaction.id,
+			creditCardId: creditCard.id,
+			date: transaction.date,
+			type: transaction.type,
+			amount: String(transaction.amount / 100),
+			totalInstallments: String(totalInstallments),
+			description: transaction.description ?? '',
+			currencyId: transaction.currencyId,
+			transactionCategoryId: transaction.transactionCategoryId,
+		},
 		meta: {
-			title: t('transaction.create.meta.title'),
-			description: t('transaction.create.meta.description'),
+			title: t('transaction.edit.meta.title', {
+				brand: creditCard.brand,
+				last4: creditCard.last4,
+			}),
+			description: t('transaction.edit.meta.description', {
+				brand: creditCard.brand,
+				last4: creditCard.last4,
+			}),
 		},
 	}
 }
@@ -69,10 +87,11 @@ export async function loader({
 export async function action({
 	request,
 	context,
-	params: { creditCardId },
+	params: { transactionId },
 }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -84,20 +103,41 @@ export async function action({
 		return data({ submission: submission.reply() }, { status: 422 })
 	}
 
-	if (submission.value.action !== ACTION_CREATION) {
-		throw new Response(t('transaction.create.action.invalidActionError'), {
+	if (submission.value.action !== ACTION_EDITION) {
+		throw new Response(t('transaction.edit.action.invalidActionError'), {
 			status: 422,
 		})
 	}
 
 	const {
 		action: _action,
-		creditCardId: _submittedCreditCardId,
+		id: _id,
+		creditCardId: _creditCardId,
 		totalInstallments,
 		...values
 	} = submission.value
 
 	const amount = Number(removeCommas(values.amount)) * 100
+
+	const existingTransaction = await getCreditCardTransactionById({
+		db,
+		transactionId,
+	})
+	if (
+		!existingTransaction ||
+		existingTransaction.creditCard.id !== creditCard.id
+	) {
+		return data(
+			{
+				submission: submission.reply({
+					formErrors: [
+						t('transaction.edit.action.transactionNotFound'),
+					],
+				}),
+			},
+			{ status: 422 },
+		)
+	}
 
 	const currency = await getCurrencyById({
 		db,
@@ -109,7 +149,7 @@ export async function action({
 				submission: submission.reply({
 					fieldErrors: {
 						currencyId: [
-							t('transaction.create.action.currencyNotFound'),
+							t('transaction.edit.action.currencyNotFound'),
 						],
 					},
 				}),
@@ -128,7 +168,7 @@ export async function action({
 				submission: submission.reply({
 					fieldErrors: {
 						transactionCategoryId: [
-							t('transaction.create.action.categoryNotFound'),
+							t('transaction.edit.action.categoryNotFound'),
 						],
 					},
 				}),
@@ -140,14 +180,17 @@ export async function action({
 	const transactionDate = new Date(values.date)
 	const installmentCount = Number(totalInstallments)
 
-	await ensureStatementsExist({ db, creditCardId, date: transactionDate })
-
-	const transactionStatement = await getStatementByDate({
+	await ensureStatementsExist({
 		db,
-		creditCardId,
+		creditCardId: creditCard.id,
 		date: transactionDate,
 	})
 
+	const transactionStatement = await getStatementByDate({
+		db,
+		creditCardId: creditCard.id,
+		date: transactionDate,
+	})
 	if (!transactionStatement) {
 		throw new Error('Could not find statement for date')
 	}
@@ -156,11 +199,15 @@ export async function action({
 	lastInstallmentDate.setMonth(
 		lastInstallmentDate.getMonth() + installmentCount - 1,
 	)
-	await ensureStatementsExist({ db, creditCardId, date: lastInstallmentDate })
+	await ensureStatementsExist({
+		db,
+		creditCardId: creditCard.id,
+		date: lastInstallmentDate,
+	})
 
 	const statements = await getStatementsFromDate({
 		db,
-		creditCardId,
+		creditCardId: creditCard.id,
 		date: transactionStatement.closingDate,
 		limit: installmentCount,
 	})
@@ -174,14 +221,14 @@ export async function action({
 	const baseAmount = Math.floor(amount / installmentCount)
 	const remainder = amount - baseAmount * installmentCount
 
-	await createCreditCardTransaction({
+	await updateCreditCardTransaction({
 		db,
+		creditCardTransactionId: transactionId,
 		transactionData: {
 			...values,
 			amount,
 			description: values.description ?? '',
 		},
-		creditCardId,
 		installments: statements.map((statement, i) => ({
 			installmentNumber: i + 1,
 			amount: baseAmount + (i < remainder ? 1 : 0),
@@ -190,22 +237,22 @@ export async function action({
 	})
 
 	return await redirectWithToast(
-		`/app/credit-cards/${creditCardId}`,
+		`/app/credit-cards/${creditCard.id}/transactions/${transactionId}`,
 		request,
 		{
 			type: 'success',
-			title: t('transaction.create.action.successToast'),
+			title: t('transaction.edit.action.successToast'),
 		},
 	)
 }
 
-export default function CreateCreditCardTransaction({
+export default function EditCreditCardTransaction({
 	loaderData: { creditCard, initialData, selectData },
 	actionData,
 }: Route.ComponentProps) {
 	return (
 		<CreditCardTransactionForm
-			action={ACTION_CREATION}
+			action={ACTION_EDITION}
 			creditCard={creditCard}
 			selectData={selectData}
 			initialData={initialData}

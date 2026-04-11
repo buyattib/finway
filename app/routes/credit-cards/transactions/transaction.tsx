@@ -1,5 +1,5 @@
 import { Form, Link, data, useNavigation, useLocation } from 'react-router'
-import { ArrowLeftIcon, TrashIcon } from 'lucide-react'
+import { ArrowLeftIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
@@ -190,7 +190,22 @@ export default function CreditCardTransaction({
 					</Link>
 				</Button>
 				<Tooltip>
-					<Form method='post' className='ml-auto'>
+					<TooltipTrigger asChild>
+						<Button asChild size='icon' variant='outline' className='ml-auto'>
+							<Link to='edit'>
+								<SquarePenIcon aria-hidden />
+								<span className='sr-only'>
+									{t('transaction.details.editTransactionAriaLabel')}
+								</span>
+							</Link>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>
+						{t('transaction.details.editTransactionAriaLabel')}
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<Form method='post'>
 						<input
 							type='hidden'
 							name='creditCardTransactionId'

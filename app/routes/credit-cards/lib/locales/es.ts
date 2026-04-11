@@ -183,6 +183,28 @@ export default {
 				creditCardRequired: 'La tarjeta de crédito es requerida',
 			},
 		},
+		edit: {
+			meta: {
+				title: 'Editar transacción · {{brand}} •••• {{last4}} | Finway',
+				description:
+					'Edita un cargo o reembolso en tu tarjeta {{brand}} •••• {{last4}}.',
+			},
+			loader: {
+				notFoundError: 'Transacción no encontrada',
+			},
+			title: 'Editar transacción',
+			description:
+				'Edita un cargo o reembolso en tu tarjeta {{brand}} •••• {{last4}}.',
+			submitButton: 'Actualizar',
+			action: {
+				invalidActionError: 'Acción inválida',
+				successToast: 'Transacción actualizada exitosamente',
+				transactionNotFound: 'Transacción no encontrada',
+				creditCardNotFound: 'Tarjeta de crédito no encontrada',
+				currencyNotFound: 'Moneda no encontrada',
+				categoryNotFound: 'Categoría de transacción no encontrada',
+			},
+		},
 		details: {
 			meta: {
 				title: 'Transacción · {{brand}} •••• {{last4}} | Finway',
@@ -190,6 +212,7 @@ export default {
 			loader: {
 				notFoundError: 'Transacción no encontrada',
 			},
+			editTransactionAriaLabel: 'Editar transacción',
 			installmentsTitle: 'Cuotas ({{count}})',
 			dueDate: 'Fecha de Vencimiento',
 			installmentAmount: 'Monto de Cuota',

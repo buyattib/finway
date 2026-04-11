@@ -200,6 +200,8 @@ export async function getCreditCardTransactionById({
 			type: true,
 			amount: true,
 			description: true,
+			currencyId: true,
+			transactionCategoryId: true,
 		},
 		with: {
 			creditCard: {
@@ -213,6 +215,22 @@ export async function getCreditCardTransactionById({
 			},
 		},
 	})
+}
+
+export async function getTransactionInstallmentCount({
+	db,
+	transactionId,
+}: {
+	db: DB
+	transactionId: string
+}) {
+	return db.$count(
+		creditCardTransactionInstallmentTable,
+		eq(
+			creditCardTransactionInstallmentTable.creditCardTransactionId,
+			transactionId,
+		),
+	)
 }
 
 export async function getTransactionInstallments({
@@ -608,6 +626,52 @@ export async function deleteCreditCardTransaction({
 	await db
 		.delete(creditCardTransactionTable)
 		.where(eq(creditCardTransactionTable.id, creditCardTransactionId))
+}
+
+export async function updateCreditCardTransaction({
+	db,
+	creditCardTransactionId,
+	transactionData,
+	installments,
+}: {
+	db: DB
+	creditCardTransactionId: string
+	transactionData: {
+		date: string
+		type: TCCTransactionType
+		amount: number
+		description: string
+		currencyId: string
+		transactionCategoryId: string
+	}
+	installments: Array<{
+		installmentNumber: number
+		amount: number
+		statementId: string
+	}>
+}) {
+	await db.transaction(async tx => {
+		await tx
+			.update(creditCardTransactionTable)
+			.set(transactionData)
+			.where(eq(creditCardTransactionTable.id, creditCardTransactionId))
+
+		await tx
+			.delete(creditCardTransactionInstallmentTable)
+			.where(
+				eq(
+					creditCardTransactionInstallmentTable.creditCardTransactionId,
+					creditCardTransactionId,
+				),
+			)
+
+		await tx.insert(creditCardTransactionInstallmentTable).values(
+			installments.map(i => ({
+				...i,
+				creditCardTransactionId,
+			})),
+		)
+	})
 }
 
 export async function createCreditCardTransaction({

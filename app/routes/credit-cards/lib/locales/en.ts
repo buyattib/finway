@@ -178,6 +178,28 @@ export default {
 				creditCardRequired: 'Credit card is required',
 			},
 		},
+		edit: {
+			meta: {
+				title: 'Edit transaction · {{brand}} •••• {{last4}} | Finway',
+				description:
+					'Edit a charge or refund on your {{brand}} •••• {{last4}} card.',
+			},
+			loader: {
+				notFoundError: 'Transaction not found',
+			},
+			title: 'Edit transaction',
+			description:
+				'Edit a charge or refund on your {{brand}} •••• {{last4}} card.',
+			submitButton: 'Update',
+			action: {
+				invalidActionError: 'Invalid action',
+				successToast: 'Transaction updated successfully',
+				transactionNotFound: 'Transaction not found',
+				creditCardNotFound: 'Credit card not found',
+				currencyNotFound: 'Currency not found',
+				categoryNotFound: 'Transaction category not found',
+			},
+		},
 		details: {
 			meta: {
 				title: 'Transaction · {{brand}} •••• {{last4}} | Finway',
@@ -185,6 +207,7 @@ export default {
 			loader: {
 				notFoundError: 'Transaction not found',
 			},
+			editTransactionAriaLabel: 'Edit transaction',
 			installmentsTitle: 'Installments ({{count}})',
 			dueDate: 'Due Date',
 			installmentAmount: 'Installment Amount',
