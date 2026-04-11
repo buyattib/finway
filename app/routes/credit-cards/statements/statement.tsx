@@ -105,7 +105,7 @@ export async function loader({
 export default function StatementDetails({
 	loaderData: { creditCard, statement, totals, installments, pagination },
 }: Route.ComponentProps) {
-	const { t } = useTranslation('credit-cards')
+	const { t, i18n } = useTranslation('credit-cards')
 	const navigate = useNavigate()
 	const [editOpen, setEditOpen] = useState(false)
 
@@ -145,7 +145,10 @@ export default function StatementDetails({
 						{t('statement.details.closingDate')}
 					</Text>
 					<Text size='sm' weight='medium'>
-						{formatDate(new Date(statement.closingDate))}
+						{formatDate(
+							new Date(statement.closingDate),
+							i18n.language,
+						)}
 					</Text>
 				</div>
 				<div className='flex flex-col gap-1'>
@@ -153,7 +156,10 @@ export default function StatementDetails({
 						{t('statement.details.dueDate')}
 					</Text>
 					<Text size='sm' weight='medium'>
-						{formatDate(new Date(statement.dueDate))}
+						{formatDate(
+							new Date(statement.dueDate),
+							i18n.language,
+						)}
 					</Text>
 				</div>
 				{totals.length > 0 && (

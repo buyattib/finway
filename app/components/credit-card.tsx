@@ -32,7 +32,7 @@ export function CreditCard({
 	accountName,
 	className,
 }: Props) {
-	const { t } = useTranslation('components')
+	const { t, i18n } = useTranslation('components')
 	const gradient = BRAND_GRADIENTS[brand] ?? DEFAULT_GRADIENT
 
 	return (
@@ -70,12 +70,18 @@ export function CreditCard({
 					<div className='flex flex-col items-end gap-1'>
 						<p className='text-xs text-white/70'>
 							{t('creditCard.closingDay', {
-								date: formatDate(new Date(closingDate)),
+								date: formatDate(
+									new Date(closingDate),
+									i18n.language,
+								),
 							})}
 						</p>
 						<p className='text-xs text-white/70'>
 							{t('creditCard.dueDay', {
-								date: formatDate(new Date(dueDate)),
+								date: formatDate(
+									new Date(dueDate),
+									i18n.language,
+								),
 							})}
 						</p>
 					</div>

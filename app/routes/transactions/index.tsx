@@ -151,7 +151,7 @@ export default function Transactions({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['transactions', 'constants'])
+	const { t, i18n } = useTranslation(['transactions', 'constants'])
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
@@ -256,6 +256,7 @@ export default function Transactions({
 													<TableCell className='text-muted-foreground'>
 														{formatDate(
 															new Date(date),
+															i18n.language,
 														)}
 													</TableCell>
 													<TableCell>
@@ -377,7 +378,10 @@ export default function Transactions({
 										>
 											<div className='flex items-center justify-between'>
 												<Text size='sm' theme='muted'>
-													{formatDate(new Date(date))}
+													{formatDate(
+														new Date(date),
+														i18n.language,
+													)}
 												</Text>
 												<div className='flex items-center gap-2'>
 													<Button

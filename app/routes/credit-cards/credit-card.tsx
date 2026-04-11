@@ -163,7 +163,7 @@ export default function CreditCardDetails({
 	const location = useLocation()
 	const navigation = useNavigation()
 	const navigate = useNavigate()
-	const { t } = useTranslation('credit-cards')
+	const { t, i18n } = useTranslation('credit-cards')
 
 	const isLoading =
 		navigation.state === 'loading' &&
@@ -292,6 +292,7 @@ export default function CreditCardDetails({
 												<Text size='sm' weight='medium'>
 													{formatDate(
 														new Date(closingDate),
+														i18n.language,
 													)}
 												</Text>
 											</div>
@@ -302,6 +303,7 @@ export default function CreditCardDetails({
 												<Text size='sm' weight='medium'>
 													{formatDate(
 														new Date(dueDate),
+														i18n.language,
 													)}
 												</Text>
 											</div>

@@ -129,7 +129,7 @@ export default function Exchanges({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation('exchanges')
+	const { t, i18n } = useTranslation('exchanges')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
@@ -224,6 +224,7 @@ export default function Exchanges({
 													<TableCell className='text-muted-foreground'>
 														{formatDate(
 															new Date(date),
+															i18n.language,
 														)}
 													</TableCell>
 													<TableCell>
@@ -340,7 +341,10 @@ export default function Exchanges({
 										>
 											<div className='flex items-center justify-between'>
 												<Text size='sm' theme='muted'>
-													{formatDate(new Date(date))}
+													{formatDate(
+														new Date(date),
+														i18n.language,
+													)}
 												</Text>
 												<Form method='post'>
 													<input

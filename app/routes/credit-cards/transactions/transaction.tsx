@@ -172,7 +172,7 @@ export default function CreditCardTransaction({
 		categoryName,
 		currencyCode,
 	} = transaction
-	const { t } = useTranslation('credit-cards')
+	const { t, i18n } = useTranslation('credit-cards')
 	const navigation = useNavigation()
 	const location = useLocation()
 
@@ -247,7 +247,7 @@ export default function CreditCardTransaction({
 						</Text>
 					</div>
 					<Text size='sm' theme='muted'>
-						{formatDate(new Date(date))}
+						{formatDate(new Date(date), i18n.language)}
 					</Text>
 				</div>
 				<div className='flex items-center gap-2'>
@@ -298,7 +298,7 @@ export default function CreditCardTransaction({
 									{t('transaction.details.dueDate')}
 								</Text>
 								<Text size='sm' theme='foreground'>
-									{formatDate(new Date(date))}
+									{formatDate(new Date(date), i18n.language)}
 								</Text>
 							</div>
 

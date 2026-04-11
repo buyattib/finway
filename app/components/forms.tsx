@@ -6,6 +6,7 @@ import {
 	type FieldMetadata,
 } from '@conform-to/react'
 import { PlusCircleIcon, CalendarIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import { cn, removeCommas, isValueNumeric, formatDate } from '~/lib/utils'
 
@@ -398,7 +399,7 @@ export function AmountField({
 			<Input
 				aria-invalid={errorId ? true : undefined}
 				aria-describedby={errorId}
-				inputMode='numeric'
+				inputMode='decimal'
 				{...props}
 				value={formatNumberWithCommas(control.value)}
 				onChange={e => {
@@ -499,6 +500,7 @@ export function DateField({
 	disabled?: boolean
 }) {
 	const [open, setOpen] = useState(false)
+	const { i18n } = useTranslation()
 
 	const errors = field.errors as ListOfErrors
 	const fieldProps = getInputProps(field, { type: 'date' })
@@ -552,7 +554,9 @@ export function DateField({
 						})}
 					>
 						<CalendarIcon />
-						{dateValue ? formatDate(dateValue) : placeholder}
+						{dateValue
+							? formatDate(dateValue, i18n.language)
+							: placeholder}
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent className='w-auto p-0'>

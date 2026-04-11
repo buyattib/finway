@@ -76,9 +76,10 @@ export function subtractMonth(dateStr: string): string {
 
 export function formatDate(
 	date: Date,
+	locale: string,
 	config: Intl.DateTimeFormatOptions = {},
 ) {
-	return date.toLocaleDateString('en', {
+	return date.toLocaleDateString(locale, {
 		day: '2-digit',
 		month: 'short',
 		year: 'numeric',

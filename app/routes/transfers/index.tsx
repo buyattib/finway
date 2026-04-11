@@ -138,7 +138,7 @@ export default function Transfers({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation('transfers')
+	const { t, i18n } = useTranslation('transfers')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
@@ -228,6 +228,7 @@ export default function Transfers({
 													<TableCell className='text-muted-foreground'>
 														{formatDate(
 															new Date(date),
+															i18n.language,
 														)}
 													</TableCell>
 													<TableCell>
@@ -331,7 +332,10 @@ export default function Transfers({
 										>
 											<div className='flex items-center justify-between'>
 												<Text size='sm' theme='muted'>
-													{formatDate(new Date(date))}
+													{formatDate(
+														new Date(date),
+														i18n.language,
+													)}
 												</Text>
 												<Form method='post'>
 													<input
