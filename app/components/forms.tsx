@@ -563,6 +563,7 @@ export function DateField({
 					<Calendar
 						mode='single'
 						selected={dateValue}
+						defaultMonth={dateValue}
 						onSelect={date => {
 							if (!date) return
 							const utcDate = new Date(
