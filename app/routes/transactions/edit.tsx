@@ -7,7 +7,6 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
-import { removeCommas } from '~/lib/utils'
 import { getBalances, getCurrencyById, getSelectData } from '~/lib/queries'
 import { ACTION_EDITION } from '~/lib/constants'
 
@@ -92,7 +91,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const { action: _action, id: transactionId, ...values } = submission.value
-	const amount = Number(removeCommas(values.amount)) * 100
+	const amount = Number(values.amount) * 100
 
 	const existingTransaction = await getTransactionById({
 		db,

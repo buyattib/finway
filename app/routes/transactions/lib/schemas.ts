@@ -1,8 +1,6 @@
 import { z } from 'zod'
 import type { TFunction } from 'i18next'
 
-import { removeCommas } from '~/lib/utils'
-
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 import { TRANSACTION_TYPES } from './constants'
 
@@ -26,24 +24,12 @@ export function createTransactionFormSchema(t: TFunction<'transactions'>) {
 			),
 			amount: z
 				.string({ message: t('form.schema.amountRequired') })
-				.refine(
-					value => {
-						const formatted = removeCommas(value)
-						return !isNaN(Number(formatted))
-					},
-					{
-						message: t('form.schema.amountInvalid'),
-					},
-				)
-				.refine(
-					value => {
-						const formatted = removeCommas(value)
-						return Number(formatted) > 0
-					},
-					{
-						message: t('form.schema.amountPositive'),
-					},
-				),
+				.refine(value => !isNaN(Number(value)), {
+					message: t('form.schema.amountInvalid'),
+				})
+				.refine(value => Number(value) > 0, {
+					message: t('form.schema.amountPositive'),
+				}),
 			description: z
 				.string()
 				.default('')

@@ -27,13 +27,14 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
 
-export function removeCommas(value: string) {
-	return value.replace(/,/g, '')
-}
+export function getNumberParts(locale: string) {
+	const formatter = new Intl.NumberFormat(locale)
+	const formatted = formatter.formatToParts(10000.1)
 
-export function isValueNumeric(value: string) {
-	const NUMERIC_PATTERN = /^$|^\d+\.?\d*$/
-	return NUMERIC_PATTERN.test(value)
+	const group = formatted.find(v => v.type === 'group')!.value
+	const decimal = formatted.find(v => v.type === 'decimal')!.value
+
+	return { group, decimal }
 }
 
 export function formatNumber(

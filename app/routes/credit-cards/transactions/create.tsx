@@ -6,7 +6,6 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
-import { removeCommas } from '~/lib/utils'
 import { ACTION_CREATION } from '~/lib/constants'
 import { getSelectData, getCurrencyById } from '~/lib/queries'
 
@@ -97,7 +96,7 @@ export async function action({
 		...values
 	} = submission.value
 
-	const amount = Number(removeCommas(values.amount)) * 100
+	const amount = Number(values.amount) * 100
 
 	const currency = await getCurrencyById({
 		db,

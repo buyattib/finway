@@ -70,8 +70,6 @@ export function TransactionForm({
 
 	const { accounts, currencies, transactionCategories } = selectData
 
-	const TransactionFormSchema = createTransactionFormSchema(t)
-
 	const { defaultValue, title, buttonLabel, to } = {
 		[ACTION_CREATION]: {
 			defaultValue: {
@@ -95,10 +93,10 @@ export function TransactionForm({
 		id: 'transaction-form',
 		shouldValidate: 'onBlur',
 		defaultValue,
-		constraint: getZodConstraint(TransactionFormSchema),
+		constraint: getZodConstraint(createTransactionFormSchema(t)),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: TransactionFormSchema,
+				schema: createTransactionFormSchema(t),
 			})
 		},
 	})
@@ -131,7 +129,10 @@ export function TransactionForm({
 		fields.type.value === TRANSACTION_TYPE_EXPENSE && selectedBalance
 			? t('form.availableBalance', {
 					symbol: getCurrencySymbol(selectedBalance.currency),
-					amount: formatNumber(selectedBalance.balance, i18n.language),
+					amount: formatNumber(
+						selectedBalance.balance,
+						i18n.language,
+					),
 					currency: selectedBalance.currency,
 				})
 			: undefined

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { Route as CreateRoute } from '../+types/create'
 
-import { removeCommas, initializeDate, formatNumber } from '~/lib/utils'
+import { initializeDate, formatNumber } from '~/lib/utils'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
@@ -112,7 +112,7 @@ export function CreditCardTransactionForm({
 	const installmentCount = Number(fields.totalInstallments.value) || 1
 	const hasInstallments = installmentCount > 1
 
-	const amountValue = Number(removeCommas(fields.amount.value ?? '0'))
+	const amountValue = Number(fields.amount.value ?? '0')
 
 	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,

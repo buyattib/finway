@@ -15,7 +15,7 @@ import type { Route } from './+types/create'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { initializeDate, removeCommas } from '~/lib/utils'
+import { initializeDate } from '~/lib/utils'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -89,8 +89,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const { accountId, fromCurrencyId, toCurrencyId } = submission.value
-	const fromAmount = Number(removeCommas(submission.value.fromAmount)) * 100
-	const toAmount = Number(removeCommas(submission.value.toAmount)) * 100
+	const fromAmount = Number(submission.value.fromAmount) * 100
+	const toAmount = Number(submission.value.toAmount) * 100
 
 	const account = await getAccountById({ db, accountId })
 	if (!account || account.ownerId !== user.id) {

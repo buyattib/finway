@@ -1,7 +1,5 @@
 - move all cc routes under layout
 
-- add skeletons on route loaders?
-
 - transfer, exchange edition
 - transaction, transfer, exchange simplify and unify
 

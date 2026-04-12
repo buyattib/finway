@@ -3,7 +3,6 @@ import type { TFunction } from 'i18next'
 
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 import { CC_TRANSACTION_TYPES, CC_BRANDS } from './constants'
-import { removeCommas } from '~/lib/utils'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({
@@ -112,24 +111,12 @@ export function createCreditCardTransactionFormSchema(
 				.string({
 					message: t('transaction.create.schema.amountRequired'),
 				})
-				.refine(
-					value => {
-						const formatted = removeCommas(value)
-						return !isNaN(Number(formatted))
-					},
-					{
-						message: t('transaction.create.schema.amountInvalid'),
-					},
-				)
-				.refine(
-					value => {
-						const formatted = removeCommas(value)
-						return Number(formatted) > 0
-					},
-					{
-						message: t('transaction.create.schema.amountPositive'),
-					},
-				),
+				.refine(value => !isNaN(Number(value)), {
+					message: t('transaction.create.schema.amountInvalid'),
+				})
+				.refine(value => Number(value) > 0, {
+					message: t('transaction.create.schema.amountPositive'),
+				}),
 			totalInstallments: z
 				.string()
 				.refine(value => !isNaN(Number(value)) && Number(value) >= 1, {

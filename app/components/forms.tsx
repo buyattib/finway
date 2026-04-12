@@ -8,7 +8,7 @@ import {
 import { PlusCircleIcon, CalendarIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { cn, removeCommas, isValueNumeric, formatDate } from '~/lib/utils'
+import { cn, formatDate, formatNumber, getNumberParts } from '~/lib/utils'
 
 import { Label } from './ui/label'
 import { Input } from './ui/input'
@@ -359,6 +359,9 @@ export function AmountField({
 	description?: string
 	maxValue?: string
 } & React.InputHTMLAttributes<HTMLInputElement>) {
+	const { i18n } = useTranslation()
+	const parts = getNumberParts(i18n.language)
+
 	const fallbackId = useId()
 	const fieldProps = getInputProps(field, { type: 'text' })
 	const errors = field.errors as ListOfErrors
@@ -376,19 +379,19 @@ export function AmountField({
 		initialValue: defaultValue,
 	})
 
-	function formatNumberWithCommas(value: string | undefined) {
+	function formatDisplayNumber(value: string | undefined) {
 		if (!value) return ''
 
 		const [integerPart, decimalPart] = value.split('.')
 
-		const formattedInteger = integerPart.replace(
-			/\B(?=(\d{3})+(?!\d))/g,
-			',',
-		)
+		const formatted = formatNumber(integerPart, i18n.language, {
+			minimumFractionDigits: 0,
+		})
 
-		return decimalPart !== undefined
-			? `${formattedInteger}.${decimalPart}`
-			: formattedInteger
+		if (decimalPart !== undefined)
+			return `${formatted}${parts.decimal}${decimalPart}`
+
+		return formatted
 	}
 
 	return (
@@ -401,20 +404,21 @@ export function AmountField({
 				aria-describedby={errorId}
 				inputMode='decimal'
 				{...props}
-				value={formatNumberWithCommas(control.value)}
+				name={undefined}
+				value={formatDisplayNumber(control.value)}
 				onChange={e => {
-					const value = removeCommas(e.target.value).trim()
+					const value = e.target.value
+					const raw = value
+						.replaceAll(parts.group, '')
+						.replace(parts.decimal, '.')
 
-					if (!isValueNumeric(value)) return
-					if (
-						value.length > 1 &&
-						value[0] === '0' &&
-						value[1] !== '.'
-					) {
+					if (isNaN(Number(raw))) return
+
+					if (raw.length > 1 && raw[0] === '0' && raw[1] !== '.') {
 						return
 					}
 
-					control.change(value)
+					control.change(raw)
 				}}
 			/>
 			{description && (
