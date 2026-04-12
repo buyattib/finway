@@ -10,7 +10,7 @@ import {
 	redirectWithToast,
 } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
-import { dbContext, userContext } from '~/lib/context'
+import { dbContext } from '~/lib/context'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
 import { Spinner } from '~/components/ui/spinner'
@@ -27,7 +27,6 @@ import {
 } from '~/components/ui/tooltip'
 
 import {
-	getCreditCardById,
 	getCreditCardTransactionById,
 	getTransactionInstallments,
 	deleteCreditCardTransaction,
@@ -46,7 +45,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 
 export async function loader({
 	context,
-	params: { creditCardId, transactionId },
+	params: { transactionId },
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const creditCard = context.get(creditCardContext)
@@ -56,7 +55,7 @@ export async function loader({
 		db,
 		transactionId,
 	})
-	if (!transaction || transaction.creditCard.id !== creditCardId) {
+	if (!transaction || transaction.creditCard.id !== creditCard.id) {
 		throw new Response(t('transaction.details.loader.notFoundError'), {
 			status: 404,
 		})
@@ -72,7 +71,7 @@ export async function loader({
 
 	return {
 		creditCard: {
-			id: creditCardId,
+			id: creditCard.id,
 			brand: creditCard.brand,
 			last4: creditCard.last4,
 			expiryMonth: creditCard.expiryMonth,
@@ -101,10 +100,9 @@ export async function loader({
 export async function action({
 	request,
 	context,
-	params: { creditCardId },
 }: Route.ActionArgs) {
-	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -136,22 +134,10 @@ export async function action({
 		return data({}, { headers: toastHeaders })
 	}
 
-	const creditCard = await getCreditCardById({
-		db,
-		creditCardId: transaction.creditCard.id,
-	})
-	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'error',
-			title: t('details.action.transactionNotFoundToast'),
-		})
-		return data({}, { headers: toastHeaders })
-	}
-
 	await deleteCreditCardTransaction({ db, creditCardTransactionId })
 
 	return await redirectWithToast(
-		`/app/credit-cards/${creditCardId}`,
+		`/app/credit-cards/${creditCard.id}`,
 		request,
 		{
 			type: 'success',

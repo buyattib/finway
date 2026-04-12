@@ -5,11 +5,11 @@ import type { Route } from './+types/edit'
 
 import { createToastHeaders } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
-import { dbContext, userContext } from '~/lib/context'
+import { dbContext } from '~/lib/context'
 
 import { editStatementFormSchema } from '../lib/schemas'
+import { creditCardContext } from '../lib/context'
 import {
-	getCreditCardById,
 	getStatementById,
 	getAdjacentStatements,
 	updateStatement,
@@ -18,18 +18,11 @@ import {
 export async function action({
 	request,
 	context,
-	params: { creditCardId, statementId },
+	params: { statementId },
 }: Route.ActionArgs) {
 	const db = context.get(dbContext)
-	const user = context.get(userContext)
+	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
-
-	const creditCard = await getCreditCardById({ db, creditCardId })
-	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response(t('statement.details.action.notFoundError'), {
-			status: 404,
-		})
-	}
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -41,7 +34,7 @@ export async function action({
 	}
 
 	const statement = await getStatementById({ db, statementId })
-	if (!statement || statement.creditCardId !== creditCardId) {
+	if (!statement || statement.creditCardId !== creditCard.id) {
 		const toastHeaders = await createToastHeaders(request, {
 			type: 'error',
 			title: t('statement.details.action.notFoundError'),
@@ -56,7 +49,7 @@ export async function action({
 
 	const { previous, next } = await getAdjacentStatements({
 		db,
-		creditCardId,
+		creditCardId: creditCard.id,
 		closingDate: statement.closingDate,
 	})
 

@@ -62,11 +62,16 @@ export default [
 				layout('routes/credit-cards/credit-card-layout.tsx', [
 					// cc details
 					index('routes/credit-cards/credit-card.tsx'),
+					route('edit', 'routes/credit-cards/edit.tsx'),
 
 					// cc statement details
 					route(
 						'statements/:statementId',
 						'routes/credit-cards/statements/statement.tsx',
+					),
+					route(
+						'statements/:statementId/edit',
+						'routes/credit-cards/statements/edit.tsx',
 					),
 
 					// cc transaction
@@ -83,11 +88,6 @@ export default [
 						'routes/credit-cards/transactions/create.tsx',
 					),
 				]),
-				route('edit', 'routes/credit-cards/edit.tsx'),
-				route(
-					'statements/:statementId/edit',
-					'routes/credit-cards/statements/edit.tsx',
-				),
 			]),
 		]),
 	]),

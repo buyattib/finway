@@ -40,7 +40,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 export async function loader({
 	context,
 	request,
-	params: { creditCardId, statementId },
+	params: { statementId },
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const creditCard = context.get(creditCardContext)
@@ -49,7 +49,7 @@ export async function loader({
 	const statement = await getStatementById({ db, statementId })
 	if (
 		!statement ||
-		statement.creditCardId !== creditCardId ||
+		statement.creditCardId !== creditCard.id ||
 		statement.closingDate > creditCard.closingDate
 	) {
 		throw new Response(t('statement.details.loader.notFoundError'), {
@@ -72,7 +72,7 @@ export async function loader({
 
 	return {
 		creditCard: {
-			id: creditCardId,
+			id: creditCard.id,
 			brand: creditCard.brand,
 			last4: creditCard.last4,
 			expiryMonth: creditCard.expiryMonth,

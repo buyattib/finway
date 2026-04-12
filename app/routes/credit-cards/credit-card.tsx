@@ -18,7 +18,7 @@ import {
 } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
-import { dbContext, userContext } from '~/lib/context'
+import { dbContext } from '~/lib/context'
 import type { TCurrency } from '~/lib/types'
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { PAGE_SIZE } from '~/lib/constants'
@@ -39,11 +39,7 @@ import { TablePagination } from '~/components/table-pagination'
 
 import { DeleteCreditCardFormSchema } from './lib/schemas'
 import { creditCardContext } from './lib/context'
-import {
-	getCreditCardById,
-	getCreditCardStatements,
-	deleteCreditCard,
-} from './lib/queries'
+import { getCreditCardStatements, deleteCreditCard } from './lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title
@@ -57,7 +53,6 @@ export function meta({ loaderData }: Route.MetaArgs) {
 export async function loader({
 	context,
 	request,
-	params: { creditCardId },
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const creditCard = context.get(creditCardContext)
@@ -70,7 +65,7 @@ export async function loader({
 
 	const { statements: _statements, total } = await getCreditCardStatements({
 		db,
-		creditCardId,
+		creditCardId: creditCard.id,
 		maxClosingDate: creditCard.closingDate,
 		page,
 		pageSize: PAGE_SIZE,
@@ -110,8 +105,8 @@ export async function loader({
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
-	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -132,12 +127,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 		}
 
 		const { creditCardId } = submission.value
-		const creditCard = await getCreditCardById({ db, creditCardId })
-		if (!creditCard || creditCard.account.ownerId !== user.id) {
-			throw new Response(t('details.action.notFoundError'), {
-				status: 404,
-			})
-		}
 
 		await deleteCreditCard({ db, creditCardId })
 

@@ -11,18 +11,10 @@ import { ACTION_EDITION } from '~/lib/constants'
 
 import { CreditCardForm } from './components/form'
 import { createCreditCardFormSchema } from './lib/schemas'
-import { getCreditCardById, updateCreditCard } from './lib/queries'
+import { creditCardContext } from './lib/context'
+import { updateCreditCard } from './lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
-	if (!loaderData?.initialData) {
-		const title = loaderData?.meta.notFoundTitle
-		return [
-			{ title },
-			{ property: 'og:title', content: title },
-			{ name: 'description', content: title },
-		]
-	}
-
 	const title = loaderData?.meta.title
 	return [
 		{ title },
@@ -31,45 +23,38 @@ export function meta({ loaderData }: Route.MetaArgs) {
 	]
 }
 
-export async function loader({
-	context,
-	params: { creditCardId },
-}: Route.LoaderArgs) {
+export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
+	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
-	const creditCard = await getCreditCardById({ db, creditCardId })
-	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
-	}
-
-	const { account: _account, statements, ...rest } = creditCard
-	const initialData = {
-		...rest,
-		currentClosingDate: statements[0]?.closingDate ?? '',
-		currentDueDate: statements[0]?.dueDate ?? '',
-	}
 	const selectData = await getSelectData(db, user.id)
 
 	return {
 		selectData,
-		initialData,
+		initialData: {
+			id: creditCard.id,
+			brand: creditCard.brand,
+			last4: creditCard.last4,
+			expiryMonth: creditCard.expiryMonth,
+			expiryYear: creditCard.expiryYear,
+			accountId: creditCard.accountId,
+			currentClosingDate: creditCard.closingDate,
+			currentDueDate: creditCard.dueDate,
+		},
 		meta: {
 			title: t('form.edit.meta.title', {
-				brand: initialData.brand,
-				last4: initialData.last4,
-			}),
-			notFoundTitle: t('form.edit.meta.notFoundTitle', {
-				creditCardId,
+				brand: creditCard.brand,
+				last4: creditCard.last4,
 			}),
 		},
 	}
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
-	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -89,19 +74,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const { action: _action, id, accountId: _accountId, ...body } = submission.value
 
-	const creditCard = await getCreditCardById({ db, creditCardId: id! })
-	if (!creditCard || creditCard.account.ownerId !== user.id) {
-		return data(
-			{
-				submission: submission.reply({
-					formErrors: [t('form.edit.action.creditCardNotFound')],
-				}),
-			},
-			{ status: 422 },
-		)
-	}
-
-	await updateCreditCard({ db, id: id!, body })
+	await updateCreditCard({ db, id: creditCard.id, body })
 
 	return await redirectWithToast('/app/credit-cards', request, {
 		type: 'success',

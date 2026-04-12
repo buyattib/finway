@@ -34,10 +34,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 	]
 }
 
-export async function loader({
-	context,
-	params: { creditCardId },
-}: Route.LoaderArgs) {
+export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
 	const creditCard = context.get(creditCardContext)
@@ -49,7 +46,7 @@ export async function loader({
 		creditCard: { brand: creditCard.brand, last4: creditCard.last4 },
 		selectData,
 		initialData: {
-			creditCardId,
+			creditCardId: creditCard.id,
 			type: CC_TRANSACTION_TYPE_CHARGE,
 			amount: '0',
 			totalInstallments: '1',
@@ -65,13 +62,10 @@ export async function loader({
 	}
 }
 
-export async function action({
-	request,
-	context,
-	params: { creditCardId },
-}: Route.ActionArgs) {
+export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
+	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -139,11 +133,11 @@ export async function action({
 	const transactionDate = new Date(values.date)
 	const installmentCount = Number(totalInstallments)
 
-	await ensureStatementsExist({ db, creditCardId, date: transactionDate })
+	await ensureStatementsExist({ db, creditCardId: creditCard.id, date: transactionDate })
 
 	const transactionStatement = await getStatementByDate({
 		db,
-		creditCardId,
+		creditCardId: creditCard.id,
 		date: transactionDate,
 	})
 
@@ -155,11 +149,11 @@ export async function action({
 	lastInstallmentDate.setMonth(
 		lastInstallmentDate.getMonth() + installmentCount - 1,
 	)
-	await ensureStatementsExist({ db, creditCardId, date: lastInstallmentDate })
+	await ensureStatementsExist({ db, creditCardId: creditCard.id, date: lastInstallmentDate })
 
 	const statements = await getStatementsFromDate({
 		db,
-		creditCardId,
+		creditCardId: creditCard.id,
 		date: transactionStatement.closingDate,
 		limit: installmentCount,
 	})
@@ -180,7 +174,7 @@ export async function action({
 			amount,
 			description: values.description ?? '',
 		},
-		creditCardId,
+		creditCardId: creditCard.id,
 		installments: statements.map((statement, i) => ({
 			installmentNumber: i + 1,
 			amount: baseAmount + (i < remainder ? 1 : 0),
@@ -189,7 +183,7 @@ export async function action({
 	})
 
 	return await redirectWithToast(
-		`/app/credit-cards/${creditCardId}`,
+		`/app/credit-cards/${creditCard.id}`,
 		request,
 		{
 			type: 'success',

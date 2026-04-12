@@ -1,9 +1,5 @@
-- move all cc routes under layout
-
 - transfer, exchange edition
 - transaction, transfer, exchange simplify and unify
-
-- Edit cc transactions
 
 - use import * as schema from 'db' instead of importing individual tables?
 
