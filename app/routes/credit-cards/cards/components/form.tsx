@@ -8,7 +8,7 @@ import type { Route as EditRoute } from '../+types/edit'
 
 import type { TSelectData } from '~/lib/types'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-import { CC_BRANDS } from '../lib/constants'
+import { CC_BRANDS } from '../../lib/constants'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -29,7 +29,7 @@ import {
 } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
-import { createCreditCardFormSchema } from '../lib/schemas'
+import { createCreditCardFormSchema } from '../../lib/schemas'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 

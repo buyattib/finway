@@ -26,7 +26,7 @@ import {
 	getStatementTotalsByCurrency,
 } from '../lib/queries'
 import { creditCardContext } from '../lib/context'
-import { EditStatementModal } from '../components/edit-statement-modal'
+import { EditStatementModal } from './components/edit-statement-modal'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title

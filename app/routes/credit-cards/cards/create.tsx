@@ -11,8 +11,8 @@ import { ACTION_CREATION } from '~/lib/constants'
 import { getAccountById } from '~/routes/accounts/lib/queries'
 
 import { CreditCardForm } from './components/form'
-import { createCreditCardFormSchema } from './lib/schemas'
-import { createCreditCard } from './lib/queries'
+import { createCreditCardFormSchema } from '../lib/schemas'
+import { createCreditCard } from '../lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [

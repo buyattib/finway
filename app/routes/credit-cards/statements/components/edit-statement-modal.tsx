@@ -15,7 +15,7 @@ import {
 	DialogFooter,
 } from '~/components/ui/dialog'
 
-import { editStatementFormSchema } from '../lib/schemas'
+import { editStatementFormSchema } from '../../lib/schemas'
 
 export function EditStatementModal({
 	onClose,

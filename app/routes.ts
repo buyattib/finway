@@ -55,14 +55,14 @@ export default [
 
 		// credit cards
 		...prefix('credit-cards', [
-			index('routes/credit-cards/index.tsx'),
-			route('create', 'routes/credit-cards/create.tsx'),
+			index('routes/credit-cards/cards/index.tsx'),
+			route('create', 'routes/credit-cards/cards/create.tsx'),
 
 			...prefix(':creditCardId', [
-				layout('routes/credit-cards/credit-card-layout.tsx', [
+				layout('routes/credit-cards/cards/credit-card-layout.tsx', [
 					// cc details
-					index('routes/credit-cards/credit-card.tsx'),
-					route('edit', 'routes/credit-cards/edit.tsx'),
+					index('routes/credit-cards/cards/credit-card.tsx'),
+					route('edit', 'routes/credit-cards/cards/edit.tsx'),
 
 					// cc statement details
 					route(

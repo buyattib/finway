@@ -13,7 +13,7 @@ import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { EmptyState } from '~/components/empty-state'
 import { CreditCard } from '~/components/credit-card'
 
-import { getCreditCards } from './lib/queries'
+import { getCreditCards } from '../lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [

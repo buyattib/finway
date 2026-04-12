@@ -10,9 +10,9 @@ import { getSelectData } from '~/lib/queries'
 import { ACTION_EDITION } from '~/lib/constants'
 
 import { CreditCardForm } from './components/form'
-import { createCreditCardFormSchema } from './lib/schemas'
-import { creditCardContext } from './lib/context'
-import { updateCreditCard } from './lib/queries'
+import { createCreditCardFormSchema } from '../lib/schemas'
+import { creditCardContext } from '../lib/context'
+import { updateCreditCard } from '../lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title
@@ -72,7 +72,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 		})
 	}
 
-	const { action: _action, id, accountId: _accountId, ...body } = submission.value
+	const {
+		action: _action,
+		id: _id,
+		accountId: _accountId,
+		...body
+	} = submission.value
 
 	await updateCreditCard({ db, id: creditCard.id, body })
 

@@ -2,7 +2,7 @@ import { Outlet } from 'react-router'
 
 import { PageSection } from '~/components/ui/page'
 
-import { creditCardMiddleware } from './lib/middleware'
+import { creditCardMiddleware } from '../lib/middleware'
 
 export const middleware = [creditCardMiddleware]
 

@@ -37,9 +37,9 @@ import { CreditCard } from '~/components/credit-card'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
-import { DeleteCreditCardFormSchema } from './lib/schemas'
-import { creditCardContext } from './lib/context'
-import { getCreditCardStatements, deleteCreditCard } from './lib/queries'
+import { DeleteCreditCardFormSchema } from '../lib/schemas'
+import { creditCardContext } from '../lib/context'
+import { getCreditCardStatements, deleteCreditCard } from '../lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title
