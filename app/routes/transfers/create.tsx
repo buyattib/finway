@@ -180,7 +180,7 @@ export default function CreateTransfer({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation('transfers')
+	const { t, i18n } = useTranslation('transfers')
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
@@ -216,7 +216,7 @@ export default function CreateTransfer({
 	const balanceDescription = selectedBalance
 		? t('form.availableBalance', {
 				symbol: getCurrencySymbol(selectedBalance.currency),
-				amount: formatNumber(selectedBalance.balance),
+				amount: formatNumber(selectedBalance.balance, i18n.language),
 				currency: selectedBalance.currency,
 			})
 		: undefined

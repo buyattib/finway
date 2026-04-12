@@ -268,7 +268,7 @@ export default function CreditCardTransaction({
 				<div className='flex items-center gap-2'>
 					<CurrencyIcon currency={currencyCode} size='sm' />
 					<Text size='lg' weight='bold'>
-						{getCurrencySymbol(currencyCode)} {formatNumber(amount)}
+						{getCurrencySymbol(currencyCode)} {formatNumber(amount, i18n.language)}
 					</Text>
 					<Text size='sm' theme='muted'>
 						{currencyCode}
@@ -327,7 +327,7 @@ export default function CreditCardTransaction({
 									weight='medium'
 								>
 									{getCurrencySymbol(currencyCode)}{' '}
-									{formatNumber(amount)}
+									{formatNumber(amount, i18n.language)}
 								</Text>
 							</div>
 						</div>

@@ -62,7 +62,7 @@ export function TransactionForm({
 }: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['transactions', 'constants'])
+	const { t, i18n } = useTranslation(['transactions', 'constants'])
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
@@ -131,7 +131,7 @@ export function TransactionForm({
 		fields.type.value === TRANSACTION_TYPE_EXPENSE && selectedBalance
 			? t('form.availableBalance', {
 					symbol: getCurrencySymbol(selectedBalance.currency),
-					amount: formatNumber(selectedBalance.balance),
+					amount: formatNumber(selectedBalance.balance, i18n.language),
 					currency: selectedBalance.currency,
 				})
 			: undefined

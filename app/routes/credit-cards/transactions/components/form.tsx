@@ -64,7 +64,7 @@ export function CreditCardTransactionForm({
 }: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['credit-cards', 'constants'])
+	const { t, i18n } = useTranslation(['credit-cards', 'constants'])
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
@@ -193,6 +193,7 @@ export function CreditCardTransactionForm({
 										{
 											amount: formatNumber(
 												amountValue / installmentCount,
+												i18n.language,
 												{
 													maximumFractionDigits: 2,
 												},

@@ -38,9 +38,10 @@ export function isValueNumeric(value: string) {
 
 export function formatNumber(
 	num: number | string,
+	locale: string,
 	config: Intl.NumberFormatOptions = {},
 ) {
-	const formatter = new Intl.NumberFormat(undefined, {
+	const formatter = new Intl.NumberFormat(locale, {
 		style: 'decimal',
 		minimumFractionDigits: 2,
 		...config,

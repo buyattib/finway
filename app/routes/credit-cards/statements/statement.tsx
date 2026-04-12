@@ -176,7 +176,7 @@ export default function StatementDetails({
 									size='sm'
 								/>
 								{getCurrencySymbol(currencyCode)}{' '}
-								{formatNumber(total)}
+								{formatNumber(total, i18n.language)}
 							</Text>
 						))}
 					</div>
@@ -270,7 +270,7 @@ export default function StatementDetails({
 												size='sm'
 											/>
 											{getCurrencySymbol(currencyCode)}{' '}
-											{formatNumber(amount)}
+											{formatNumber(amount, i18n.language)}
 										</Text>
 									</div>
 								</li>

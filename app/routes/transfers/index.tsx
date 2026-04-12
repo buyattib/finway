@@ -264,6 +264,7 @@ export default function Transfers({
 															{symbol}{' '}
 															{formatNumber(
 																amount,
+																i18n.language,
 															)}
 														</span>
 													</TableCell>
@@ -395,7 +396,7 @@ export default function Transfers({
 														{getCurrencySymbol(
 															currency,
 														)}{' '}
-														{formatNumber(amount)}
+														{formatNumber(amount, i18n.language)}
 													</Text>
 													<ArrowRightIcon className='size-4 text-muted-foreground' />
 												</div>

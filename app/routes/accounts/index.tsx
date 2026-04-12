@@ -88,7 +88,7 @@ export default function Accounts({
 }: Route.ComponentProps) {
 	const navigation = useNavigation()
 	const submit = useSubmit()
-	const { t } = useTranslation(['accounts', 'constants'])
+	const { t, i18n } = useTranslation(['accounts', 'constants'])
 
 	useEffect(() => {
 		// sync search field with query params value
@@ -256,6 +256,7 @@ export default function Accounts({
 															{symbol}{' '}
 															{formatNumber(
 																balance,
+																i18n.language,
 															)}
 														</Text>
 													</li>

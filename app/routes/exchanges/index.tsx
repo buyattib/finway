@@ -249,6 +249,7 @@ export default function Exchanges({
 															{fromSymbol}{' '}
 															{formatNumber(
 																fromAmount,
+																i18n.language,
 															)}
 														</span>
 													</TableCell>
@@ -263,6 +264,7 @@ export default function Exchanges({
 															{toSymbol}{' '}
 															{formatNumber(
 																toAmount,
+																i18n.language,
 															)}
 														</span>
 													</TableCell>
@@ -272,6 +274,7 @@ export default function Exchanges({
 																Number(
 																	toAmount,
 																),
+															i18n.language,
 														)}{' '}
 														{fromCurrency}/
 														{toCurrency}
@@ -399,7 +402,7 @@ export default function Exchanges({
 													{getCurrencySymbol(
 														fromCurrency,
 													)}{' '}
-													{formatNumber(fromAmount)}
+													{formatNumber(fromAmount, i18n.language)}
 												</Text>
 												<RefreshCwIcon className='size-4 text-muted-foreground shrink-0' />
 												<Text
@@ -414,7 +417,7 @@ export default function Exchanges({
 													{getCurrencySymbol(
 														toCurrency,
 													)}{' '}
-													{formatNumber(toAmount)}
+													{formatNumber(toAmount, i18n.language)}
 												</Text>
 											</div>
 											<Text size='xs' theme='muted'>
@@ -422,6 +425,7 @@ export default function Exchanges({
 												{formatNumber(
 													Number(fromAmount) /
 														Number(toAmount),
+													i18n.language,
 												)}{' '}
 												{fromCurrency}/{toCurrency}
 											</Text>

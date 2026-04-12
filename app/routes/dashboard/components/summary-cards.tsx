@@ -18,7 +18,7 @@ import {
 export function SummaryCards({
 	summary,
 }: Pick<Route.ComponentProps['loaderData'], 'summary'>) {
-	const { t } = useTranslation('dashboard')
+	const { t, i18n } = useTranslation('dashboard')
 
 	const cards = [
 		{
@@ -85,7 +85,7 @@ export function SummaryCards({
 												</Text>
 												<Text weight='bold' size='xl'>
 													{symbol}{' '}
-													{formatNumber(amount)}
+													{formatNumber(amount, i18n.language)}
 												</Text>
 											</li>
 										)

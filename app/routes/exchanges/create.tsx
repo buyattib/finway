@@ -186,7 +186,7 @@ export default function CreateExchange({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation('exchanges')
+	const { t, i18n } = useTranslation('exchanges')
 
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
@@ -223,7 +223,7 @@ export default function CreateExchange({
 	const balanceDescription = selectedBalance
 		? t('form.availableBalance', {
 				symbol: getCurrencySymbol(selectedBalance.currency),
-				amount: formatNumber(selectedBalance.balance),
+				amount: formatNumber(selectedBalance.balance, i18n.language),
 				currency: selectedBalance.currency,
 			})
 		: undefined

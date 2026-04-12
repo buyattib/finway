@@ -333,6 +333,7 @@ export default function CreditCardDetails({
 																)}{' '}
 																{formatNumber(
 																	total,
+																	i18n.language,
 																)}
 															</Text>
 														),

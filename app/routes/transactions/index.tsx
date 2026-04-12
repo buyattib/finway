@@ -281,6 +281,7 @@ export default function Transactions({
 															{symbol}{' '}
 															{formatNumber(
 																amount,
+																i18n.language,
 															)}
 														</span>
 													</TableCell>
@@ -456,7 +457,7 @@ export default function Transactions({
 													{getCurrencySymbol(
 														currency,
 													)}{' '}
-													{formatNumber(amount)}
+													{formatNumber(amount, i18n.language)}
 												</Text>
 											</div>
 											<Text size='sm' theme='muted'>

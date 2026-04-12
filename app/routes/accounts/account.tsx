@@ -110,7 +110,7 @@ export default function AccountDetails({
 }: Route.ComponentProps) {
 	const location = useLocation()
 	const navigation = useNavigation()
-	const { t } = useTranslation(['accounts', 'constants'])
+	const { t, i18n } = useTranslation(['accounts', 'constants'])
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname &&
@@ -194,7 +194,7 @@ export default function AccountDetails({
 										{t(`constants:currency.${currency}`)}
 									</Text>
 									<Text>
-										{`${symbol} ${formatNumber(balance)}`}
+										{`${symbol} ${formatNumber(balance, i18n.language)}`}
 									</Text>
 								</li>
 							)
