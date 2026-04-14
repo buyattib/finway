@@ -27,7 +27,8 @@ as its used to run multiple statements
 
 ## Run scripts
 
-- pnpm script path/to/script.ts
+- pnpm script-development path/to/script.ts
+- pnpm script-production path/to/script.ts
 
 ## Emails
 

@@ -127,6 +127,20 @@
       "when": 1776173271621,
       "tag": "0017_add_category_col",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1776175054494,
+      "tag": "0018_remove_category_relations",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1776175131805,
+      "tag": "0019_remove_category_table",
+      "breakpoints": true
     }
   ]
 }

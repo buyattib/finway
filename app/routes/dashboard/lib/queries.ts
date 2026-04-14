@@ -4,7 +4,6 @@ import {
 	transaction as transactionTable,
 	account as accountTable,
 	currency as currencyTable,
-	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
 
 import type { DB } from '~/lib/types'
@@ -27,7 +26,9 @@ export async function getMonthTransactions({
 }: Args): Promise<Array<CurrencyResponse>> {
 	const now = new Date()
 	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
-	const monthEnd = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0))
+	const monthEnd = new Date(
+		Date.UTC(now.getFullYear(), now.getMonth() + 1, 0),
+	)
 
 	return db
 		.select({
@@ -48,13 +49,6 @@ export async function getMonthTransactions({
 		.innerJoin(
 			currencyTable,
 			eq(currencyTable.id, transactionTable.currencyId),
-		)
-		.innerJoin(
-			transactionCategoryTable,
-			eq(
-				transactionCategoryTable.id,
-				transactionTable.transactionCategoryId,
-			),
 		)
 		.where(
 			and(

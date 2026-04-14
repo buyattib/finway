@@ -30,28 +30,14 @@ import {
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import type { TCategory } from '~/routes/transactions/lib/types'
 import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
 
-import type { TCCTransactionType } from '../../lib/types'
 import { createCreditCardTransactionFormSchema } from '../../lib/schemas'
 import { CC_TRANSACTION_TYPES } from '../../lib/constants'
 
 type TCreateLoaderData = CreateRoute.ComponentProps['loaderData']
 
 export type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
-// export type TCreditCardTransactionFormInitialData = {
-// 	id?: string
-// 	creditCardId: string
-// 	date?: string
-// 	type: TCCTransactionType
-// 	amount: string
-// 	totalInstallments: string
-// 	description: string
-// 	currencyId: string
-// 	category: TCategory
-// }
-
 type Props = {
 	creditCard: TCreateLoaderData['creditCard']
 	selectData: TCreateLoaderData['selectData']
@@ -131,7 +117,7 @@ export function CreditCardTransactionForm({
 		label: code,
 	}))
 
-	const transactionCategoryOptions = TRANSACTION_CATEGORIES.map(c => ({
+	const categoryOptions = TRANSACTION_CATEGORIES.map(c => ({
 		value: c,
 		label: t(`constants:categories.${c}.name`),
 	}))
@@ -240,7 +226,7 @@ export function CreditCardTransactionForm({
 						buttonPlaceholder={t(
 							'transaction.create.categoryPlaceholder',
 						)}
-						options={transactionCategoryOptions}
+						options={categoryOptions}
 					/>
 
 					<DateField

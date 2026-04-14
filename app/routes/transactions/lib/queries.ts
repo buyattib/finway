@@ -4,7 +4,6 @@ import {
 	currency as currencyTable,
 	account as accountTable,
 	transaction as transactionTable,
-	transactionCategory as transactionCategoryTable,
 } from '~/database/schema'
 import { getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
