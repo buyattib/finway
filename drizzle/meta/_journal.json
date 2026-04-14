@@ -141,6 +141,13 @@
       "when": 1776175131805,
       "tag": "0019_remove_category_table",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1776179473772,
+      "tag": "0020_rename_account_types",
+      "breakpoints": true
     }
   ]
 }

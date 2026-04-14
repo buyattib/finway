@@ -69,11 +69,11 @@ export const transaction = sqliteTable(
 		date: text().notNull(),
 		amount: integer().notNull(),
 		description: text().default(''),
+		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 
-		accountId: text().notNull(),
 		currencyId: text().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
+		accountId: text().notNull(),
 	},
 	table => [
 		foreignKey({
@@ -223,11 +223,11 @@ export const creditCardTransaction = sqliteTable(
 		date: text().notNull(),
 		amount: integer().notNull(),
 		description: text().default(''),
+		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 		type: text({ enum: CC_TRANSACTION_TYPES }).notNull(),
 
-		creditCardId: text().notNull(),
 		currencyId: text().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
+		creditCardId: text().notNull(),
 	},
 	table => [
 		foreignKey({

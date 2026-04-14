@@ -2,8 +2,8 @@ export default {
 	accountType: {
 		bank: 'Bank',
 		cash: 'Cash',
-		'digital-wallet': 'Digital Wallet',
-		'crypto-wallet': 'Crypto Wallet',
+		digital_wallet: 'Digital Wallet',
+		crypto_wallet: 'Crypto Wallet',
 		broker: 'Broker',
 	},
 	transactionType: {

@@ -4,8 +4,8 @@ export default {
 	accountType: {
 		bank: 'Banco',
 		cash: 'Efectivo',
-		'digital-wallet': 'Billetera Digital',
-		'crypto-wallet': 'Billetera Cripto',
+		digital_wallet: 'Billetera Digital',
+		crypto_wallet: 'Billetera Cripto',
 		broker: 'Bróker',
 	},
 	transactionType: {

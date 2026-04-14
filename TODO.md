@@ -1,3 +1,5 @@
+- think about credit cards as accounts with negative balance
+
 - transfer, exchange edition
 - transaction, transfer, exchange simplify and unify
 
