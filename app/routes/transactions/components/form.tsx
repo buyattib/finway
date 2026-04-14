@@ -141,7 +141,7 @@ export function TransactionForm({
 				})
 			: undefined
 
-	const transactionCategoryOptions = TRANSACTION_CATEGORIES.map(c => ({
+	const categoryOptions = TRANSACTION_CATEGORIES.map(c => ({
 		value: c,
 		label: t(`constants:categories.${c}.name`),
 	}))
@@ -237,7 +237,7 @@ export function TransactionForm({
 						label={t('form.categoryLabel')}
 						field={fields.category}
 						buttonPlaceholder={t('form.categoryPlaceholder')}
-						options={transactionCategoryOptions}
+						options={categoryOptions}
 					/>
 
 					<DateField

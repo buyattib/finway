@@ -105,7 +105,7 @@ export async function loader({
 export default function StatementDetails({
 	loaderData: { creditCard, statement, totals, installments, pagination },
 }: Route.ComponentProps) {
-	const { t, i18n } = useTranslation('credit-cards')
+	const { t, i18n } = useTranslation(['credit-cards', 'constants'])
 	const navigate = useNavigate()
 	const [editOpen, setEditOpen] = useState(false)
 
@@ -140,47 +140,47 @@ export default function StatementDetails({
 					className='w-full shrink-0 md:max-w-sm'
 				/>
 				<div className='rounded-lg border p-4 flex flex-col gap-3 w-full'>
-				<div className='flex flex-col gap-1'>
-					<Text size='xs' theme='muted'>
-						{t('statement.details.closingDate')}
-					</Text>
-					<Text size='sm' weight='medium'>
-						{formatDate(
-							new Date(statement.closingDate),
-							i18n.language,
-						)}
-					</Text>
-				</div>
-				<div className='flex flex-col gap-1'>
-					<Text size='xs' theme='muted'>
-						{t('statement.details.dueDate')}
-					</Text>
-					<Text size='sm' weight='medium'>
-						{formatDate(
-							new Date(statement.dueDate),
-							i18n.language,
-						)}
-					</Text>
-				</div>
-				{totals.length > 0 && (
-					<div className='flex flex-col gap-2 border-t pt-3'>
-						{totals.map(({ currencyCode, total }) => (
-							<Text
-								key={currencyCode}
-								size='sm'
-								weight='medium'
-								className='flex items-center gap-1'
-							>
-								<CurrencyIcon
-									currency={currencyCode as TCurrency}
-									size='sm'
-								/>
-								{getCurrencySymbol(currencyCode)}{' '}
-								{formatNumber(total, i18n.language)}
-							</Text>
-						))}
+					<div className='flex flex-col gap-1'>
+						<Text size='xs' theme='muted'>
+							{t('statement.details.closingDate')}
+						</Text>
+						<Text size='sm' weight='medium'>
+							{formatDate(
+								new Date(statement.closingDate),
+								i18n.language,
+							)}
+						</Text>
 					</div>
-				)}
+					<div className='flex flex-col gap-1'>
+						<Text size='xs' theme='muted'>
+							{t('statement.details.dueDate')}
+						</Text>
+						<Text size='sm' weight='medium'>
+							{formatDate(
+								new Date(statement.dueDate),
+								i18n.language,
+							)}
+						</Text>
+					</div>
+					{totals.length > 0 && (
+						<div className='flex flex-col gap-2 border-t pt-3'>
+							{totals.map(({ currencyCode, total }) => (
+								<Text
+									key={currencyCode}
+									size='sm'
+									weight='medium'
+									className='flex items-center gap-1'
+								>
+									<CurrencyIcon
+										currency={currencyCode as TCurrency}
+										size='sm'
+									/>
+									{getCurrencySymbol(currencyCode)}{' '}
+									{formatNumber(total, i18n.language)}
+								</Text>
+							))}
+						</div>
+					)}
 				</div>
 			</div>
 
@@ -218,7 +218,7 @@ export default function StatementDetails({
 								transactionId,
 								transactionType,
 								transactionDescription,
-								categoryName,
+								category,
 								currencyCode,
 							}) => (
 								<li
@@ -237,12 +237,15 @@ export default function StatementDetails({
 												weight='medium'
 												className='truncate'
 											>
-												{transactionDescription ||
-													categoryName}
+												{t(
+													`constants:categories.${category}.name`,
+												)}
 											</Text>
-											<Text size='xs' theme='muted'>
-												{categoryName}
-											</Text>
+											{transactionDescription && (
+												<Text size='xs' theme='muted'>
+													{transactionDescription}
+												</Text>
+											)}
 										</div>
 										<TransactionType
 											variant='icon-text'
@@ -270,7 +273,10 @@ export default function StatementDetails({
 												size='sm'
 											/>
 											{getCurrencySymbol(currencyCode)}{' '}
-											{formatNumber(amount, i18n.language)}
+											{formatNumber(
+												amount,
+												i18n.language,
+											)}
 										</Text>
 									</div>
 								</li>

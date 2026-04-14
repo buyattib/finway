@@ -67,7 +67,7 @@ export async function loader({
 		maxClosingDate: creditCard.closingDate,
 	})
 
-	const { transactionCategory, currency, ...transactionData } = transaction
+	const { currency, ...transactionData } = transaction
 
 	return {
 		creditCard: {
@@ -80,7 +80,6 @@ export async function loader({
 		},
 		transaction: {
 			...transactionData,
-			categoryName: transactionCategory.name,
 			currencyCode: currency.code,
 			amount: String(transactionData.amount / 100),
 		},
@@ -97,10 +96,7 @@ export async function loader({
 	}
 }
 
-export async function action({
-	request,
-	context,
-}: Route.ActionArgs) {
+export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
 	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
@@ -155,10 +151,10 @@ export default function CreditCardTransaction({
 		type,
 		amount,
 		description,
-		categoryName,
+		category,
 		currencyCode,
 	} = transaction
-	const { t, i18n } = useTranslation('credit-cards')
+	const { t, i18n } = useTranslation(['credit-cards', 'constants'])
 	const navigation = useNavigation()
 	const location = useLocation()
 
@@ -177,11 +173,18 @@ export default function CreditCardTransaction({
 				</Button>
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button asChild size='icon' variant='outline' className='ml-auto'>
+						<Button
+							asChild
+							size='icon'
+							variant='outline'
+							className='ml-auto'
+						>
 							<Link to='edit'>
 								<SquarePenIcon aria-hidden />
 								<span className='sr-only'>
-									{t('transaction.details.editTransactionAriaLabel')}
+									{t(
+										'transaction.details.editTransactionAriaLabel',
+									)}
 								</span>
 							</Link>
 						</Button>
@@ -233,38 +236,39 @@ export default function CreditCardTransaction({
 					className='w-full shrink-0 md:max-w-sm'
 				/>
 				<div className='rounded-lg border p-4 flex flex-col gap-3 w-full'>
-				<div className='flex items-center justify-between'>
-					<div className='flex items-center gap-2'>
-						<TransactionType
-							variant='icon-text'
-							size='sm'
-							transactionType={type}
-						/>
+					<div className='flex items-center justify-between'>
+						<div className='flex items-center gap-2'>
+							<TransactionType
+								variant='icon-text'
+								size='sm'
+								transactionType={type}
+							/>
+							<Text size='sm' theme='muted'>
+								·
+							</Text>
+							<Text size='sm' theme='muted'>
+								{t(`constants:categories.${category}.name`)}
+							</Text>
+						</div>
 						<Text size='sm' theme='muted'>
-							·
-						</Text>
-						<Text size='sm' theme='muted'>
-							{categoryName}
+							{formatDate(new Date(date), i18n.language)}
 						</Text>
 					</div>
-					<Text size='sm' theme='muted'>
-						{formatDate(new Date(date), i18n.language)}
-					</Text>
-				</div>
-				<div className='flex items-center gap-2'>
-					<CurrencyIcon currency={currencyCode} size='sm' />
-					<Text size='lg' weight='bold'>
-						{getCurrencySymbol(currencyCode)} {formatNumber(amount, i18n.language)}
-					</Text>
-					<Text size='sm' theme='muted'>
-						{currencyCode}
-					</Text>
-				</div>
-				{description && (
-					<Text size='sm' theme='muted'>
-						{description}
-					</Text>
-				)}
+					<div className='flex items-center gap-2'>
+						<CurrencyIcon currency={currencyCode} size='sm' />
+						<Text size='lg' weight='bold'>
+							{getCurrencySymbol(currencyCode)}{' '}
+							{formatNumber(amount, i18n.language)}
+						</Text>
+						<Text size='sm' theme='muted'>
+							{currencyCode}
+						</Text>
+					</div>
+					{description && (
+						<Text size='sm' theme='muted'>
+							{description}
+						</Text>
+					)}
 				</div>
 			</div>
 

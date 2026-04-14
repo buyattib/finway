@@ -19,7 +19,6 @@ export default {
 		creditCards: 'Tarjetas de Crédito',
 		transfers: 'Transferencias',
 		exchanges: 'Intercambios',
-		transactionCategories: 'Categorías de Transacción',
 		logoutButton: 'Cerrar sesión',
 	},
 	creditCard: {

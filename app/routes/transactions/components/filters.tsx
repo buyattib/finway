@@ -42,7 +42,7 @@ export function TransactionsFilters({
 		label: code,
 	}))
 
-	const transactionCategoryOptions = TRANSACTION_CATEGORIES.map(c => ({
+	const categoryOptions = TRANSACTION_CATEGORIES.map(c => ({
 		value: c,
 		label: t(`constants:categories.${c}.name`),
 	}))
@@ -75,8 +75,8 @@ export function TransactionsFilters({
 					}}
 				/>
 				<Combobox
-					options={transactionCategoryOptions}
-					name='transactionCategoryId'
+					options={categoryOptions}
+					name='category'
 					defaultValue={filters.category}
 					buttonPlaceholder={t('filters.category')}
 					onValueChange={() => {

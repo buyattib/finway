@@ -61,25 +61,6 @@ export const account = sqliteTable(
 	],
 )
 
-export const transactionCategory = sqliteTable(
-	'transaction_categories',
-	{
-		...base,
-		id: cuid2().defaultRandom().primaryKey(),
-		name: text().notNull(),
-		description: text().default(''),
-
-		ownerId: text().notNull(),
-	},
-	table => [
-		foreignKey({
-			name: 'transaction_categories_users_fk',
-			columns: [table.ownerId],
-			foreignColumns: [user.id],
-		}).onDelete('cascade'),
-	],
-)
-
 export const transaction = sqliteTable(
 	'transactions',
 	{
@@ -92,8 +73,7 @@ export const transaction = sqliteTable(
 
 		accountId: text().notNull(),
 		currencyId: text().notNull(),
-		transactionCategoryId: text().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }), //.notNull(),
+		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 	},
 	table => [
 		foreignKey({
@@ -105,11 +85,6 @@ export const transaction = sqliteTable(
 			name: 'transactions_currencies_fk',
 			columns: [table.currencyId],
 			foreignColumns: [currency.id],
-		}).onDelete('cascade'),
-		foreignKey({
-			name: 'transactions_transaction_categories_fk',
-			columns: [table.transactionCategoryId],
-			foreignColumns: [transactionCategory.id],
 		}).onDelete('cascade'),
 		index('transactions_accountId_currencyId_idx').on(
 			table.accountId,
@@ -252,8 +227,7 @@ export const creditCardTransaction = sqliteTable(
 
 		creditCardId: text().notNull(),
 		currencyId: text().notNull(),
-		transactionCategoryId: text().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }), //.notNull(),
+		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 	},
 	table => [
 		foreignKey({
@@ -265,11 +239,6 @@ export const creditCardTransaction = sqliteTable(
 			name: 'credit_card_transactions_currencies_fk',
 			columns: [table.currencyId],
 			foreignColumns: [currency.id],
-		}).onDelete('cascade'),
-		foreignKey({
-			name: 'credit_card_transactions_transaction_categories_fk',
-			columns: [table.transactionCategoryId],
-			foreignColumns: [transactionCategory.id],
 		}).onDelete('cascade'),
 		index('credit_card_transactions_creditCardId_idx').on(
 			table.creditCardId,
@@ -318,10 +287,6 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
 	currency: one(currency, {
 		fields: [transaction.currencyId],
 		references: [currency.id],
-	}),
-	transactionCategory: one(transactionCategory, {
-		fields: [transaction.transactionCategoryId],
-		references: [transactionCategory.id],
 	}),
 }))
 
@@ -384,10 +349,6 @@ export const creditCardTransactionRelations = relations(
 		currency: one(currency, {
 			fields: [creditCardTransaction.currencyId],
 			references: [currency.id],
-		}),
-		transactionCategory: one(transactionCategory, {
-			fields: [creditCardTransaction.transactionCategoryId],
-			references: [transactionCategory.id],
 		}),
 	}),
 )

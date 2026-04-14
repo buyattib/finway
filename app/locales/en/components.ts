@@ -17,7 +17,6 @@ export default {
 		creditCards: 'Credit Cards',
 		transfers: 'Transfers',
 		exchanges: 'Exchanges',
-		transactionCategories: 'Transaction Categories',
 		logoutButton: 'Logout',
 	},
 	creditCard: {
