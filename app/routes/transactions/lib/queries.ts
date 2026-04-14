@@ -10,7 +10,7 @@ import { getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 import type { DB } from '~/lib/types'
 
-import type { TTransactionType } from './types'
+import type { TCategory, TTransactionType } from './types'
 
 // fetch --------
 
@@ -31,7 +31,7 @@ export async function getTransactionById({
 			description: true,
 			accountId: true,
 			currencyId: true,
-			transactionCategoryId: true,
+			category: true,
 		},
 		with: { account: { columns: { ownerId: true } } },
 	})
@@ -43,7 +43,7 @@ export async function getTransactions({
 	page,
 	accountId,
 	currencyId,
-	transactionCategoryId,
+	category,
 	transactionType,
 }: {
 	db: DB
@@ -51,7 +51,7 @@ export async function getTransactions({
 	page: number
 	accountId: string
 	currencyId: string
-	transactionCategoryId: string
+	category: TCategory
 	transactionType: TTransactionType | ''
 }) {
 	const filters = [eq(accountTable.ownerId, ownerId)]
@@ -61,10 +61,8 @@ export async function getTransactions({
 	if (currencyId) {
 		filters.push(eq(transactionTable.currencyId, currencyId))
 	}
-	if (transactionCategoryId) {
-		filters.push(
-			eq(transactionTable.transactionCategoryId, transactionCategoryId),
-		)
+	if (category) {
+		filters.push(eq(transactionTable.category, category))
 	}
 	if (transactionType) {
 		filters.push(eq(transactionTable.type, transactionType))
@@ -79,7 +77,7 @@ export async function getTransactions({
 			currency: currencyTable.code,
 			account: accountTable.name,
 			accountType: accountTable.accountType,
-			transactionCategory: transactionCategoryTable.name,
+			category: transactionTable.category,
 		})
 		.from(transactionTable)
 		.innerJoin(
@@ -89,13 +87,6 @@ export async function getTransactions({
 		.innerJoin(
 			accountTable,
 			eq(transactionTable.accountId, accountTable.id),
-		)
-		.leftJoin(
-			transactionCategoryTable,
-			eq(
-				transactionCategoryTable.id,
-				transactionTable.transactionCategoryId,
-			),
 		)
 		.where(and(...filters))
 		.orderBy(desc(transactionTable.date), desc(transactionTable.createdAt))
@@ -157,7 +148,7 @@ export async function createTransaction({
 		description: string
 		accountId: string
 		currencyId: string
-		transactionCategoryId: string
+		category: TCategory
 	}
 }) {
 	await db.insert(transactionTable).values(data)
@@ -177,7 +168,7 @@ export async function updateTransaction({
 		description: string
 		accountId: string
 		currencyId: string
-		transactionCategoryId: string
+		category: TCategory
 	}
 }) {
 	await db

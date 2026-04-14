@@ -6,11 +6,12 @@ import {
 	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
 	creditCardStatement as creditCardStatementTable,
 	account as accountTable,
-	transactionCategory as transactionCategoryTable,
 	currency as currencyTable,
 } from '~/database/schema'
 import type { DB } from '~/lib/types'
 import { addMonth, subtractMonth } from '~/lib/utils'
+
+import type { TCategory } from '~/routes/transactions/lib/types'
 
 import type { TCCTransactionType } from './types'
 
@@ -100,10 +101,7 @@ export async function getStatementsFromDate({
 }) {
 	return db.query.creditCardStatement.findMany({
 		where: (s, { eq, gte, and }) =>
-			and(
-				eq(s.creditCardId, creditCardId),
-				gte(s.closingDate, date),
-			),
+			and(eq(s.creditCardId, creditCardId), gte(s.closingDate, date)),
 		orderBy: (s, { asc }) => [asc(s.closingDate)],
 		limit,
 	})
@@ -113,14 +111,14 @@ export async function getCreditCardTransactions({
 	db,
 	creditCardId,
 	type,
-	categoryId,
+	category,
 	page,
 	pageSize,
 }: {
 	db: DB
 	creditCardId: string
 	type: TCCTransactionType | ''
-	categoryId: string
+	category: TCategory
 	page: number
 	pageSize: number
 }) {
@@ -128,10 +126,8 @@ export async function getCreditCardTransactions({
 	if (type) {
 		filters.push(eq(creditCardTransactionTable.type, type))
 	}
-	if (categoryId) {
-		filters.push(
-			eq(creditCardTransactionTable.transactionCategoryId, categoryId),
-		)
+	if (category) {
+		filters.push(eq(creditCardTransactionTable.category, category))
 	}
 
 	const transactionsQuery = db
@@ -141,7 +137,7 @@ export async function getCreditCardTransactions({
 			type: creditCardTransactionTable.type,
 			amount: creditCardTransactionTable.amount,
 			description: creditCardTransactionTable.description,
-			categoryName: transactionCategoryTable.name,
+			category: creditCardTransactionTable.category,
 			currencyCode: currencyTable.code,
 			installments: db.$count(
 				creditCardTransactionInstallmentTable,
@@ -152,13 +148,6 @@ export async function getCreditCardTransactions({
 			),
 		})
 		.from(creditCardTransactionTable)
-		.innerJoin(
-			transactionCategoryTable,
-			eq(
-				creditCardTransactionTable.transactionCategoryId,
-				transactionCategoryTable.id,
-			),
-		)
 		.innerJoin(
 			currencyTable,
 			eq(creditCardTransactionTable.currencyId, currencyTable.id),
@@ -201,7 +190,7 @@ export async function getCreditCardTransactionById({
 			amount: true,
 			description: true,
 			currencyId: true,
-			transactionCategoryId: true,
+			category: true,
 		},
 		with: {
 			creditCard: {
@@ -209,9 +198,6 @@ export async function getCreditCardTransactionById({
 			},
 			currency: {
 				columns: { code: true },
-			},
-			transactionCategory: {
-				columns: { name: true },
 			},
 		},
 	})
@@ -385,7 +371,7 @@ export async function getStatementInstallments({
 			transactionDate: creditCardTransactionTable.date,
 			transactionType: creditCardTransactionTable.type,
 			transactionDescription: creditCardTransactionTable.description,
-			categoryName: transactionCategoryTable.name,
+			category: creditCardTransactionTable.category,
 			currencyCode: currencyTable.code,
 			totalInstallments: db.$count(
 				creditCardTransactionInstallmentTable,
@@ -404,22 +390,13 @@ export async function getStatementInstallments({
 			),
 		)
 		.innerJoin(
-			transactionCategoryTable,
-			eq(
-				creditCardTransactionTable.transactionCategoryId,
-				transactionCategoryTable.id,
-			),
-		)
-		.innerJoin(
 			currencyTable,
 			eq(creditCardTransactionTable.currencyId, currencyTable.id),
 		)
 		.where(
 			eq(creditCardTransactionInstallmentTable.statementId, statementId),
 		)
-		.orderBy(
-			desc(creditCardTransactionTable.date),
-		)
+		.orderBy(desc(creditCardTransactionTable.date))
 
 	const total = await db.$count(installmentsQuery)
 	const installments = await installmentsQuery
@@ -471,7 +448,7 @@ export async function getAdjacentStatements({
 					_eq(s.creditCardId, creditCardId),
 					lt(s.closingDate, closingDate),
 				),
-			orderBy: (s) => [desc(s.closingDate)],
+			orderBy: s => [desc(s.closingDate)],
 		}),
 		db.query.creditCardStatement.findFirst({
 			where: (s, { and: _and, eq: _eq }) =>
@@ -479,7 +456,7 @@ export async function getAdjacentStatements({
 					_eq(s.creditCardId, creditCardId),
 					gt(s.closingDate, closingDate),
 				),
-			orderBy: (s) => [asc(s.closingDate)],
+			orderBy: s => [asc(s.closingDate)],
 		}),
 	])
 
@@ -642,7 +619,7 @@ export async function updateCreditCardTransaction({
 		amount: number
 		description: string
 		currencyId: string
-		transactionCategoryId: string
+		category: TCategory
 	}
 	installments: Array<{
 		installmentNumber: number
@@ -687,7 +664,7 @@ export async function createCreditCardTransaction({
 		amount: number
 		description: string
 		currencyId: string
-		transactionCategoryId: string
+		category: TCategory
 	}
 	creditCardId: string
 	installments: Array<{

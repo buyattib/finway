@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next'
 
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 import { CC_TRANSACTION_TYPES, CC_BRANDS } from './constants'
+import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({
@@ -129,7 +130,8 @@ export function createCreditCardTransactionFormSchema(
 			currencyId: z.string(
 				t('transaction.create.schema.currencyRequired'),
 			),
-			transactionCategoryId: z.string(
+			category: z.enum(
+				TRANSACTION_CATEGORIES,
 				t('transaction.create.schema.categoryRequired'),
 			),
 			creditCardId: z.string(

@@ -120,6 +120,13 @@
       "when": 1774709184001,
       "tag": "0016_update_cc_models",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1776173271621,
+      "tag": "0017_add_category_col",
+      "breakpoints": true
     }
   ]
 }

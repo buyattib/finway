@@ -35,12 +35,6 @@ export default [
 			route(':transactionId/edit', 'routes/transactions/edit.tsx'),
 		]),
 
-		// transaction categories
-		...prefix('transaction-categories', [
-			index('routes/transaction-categories/index.tsx'),
-			route('create', 'routes/transaction-categories/create.tsx'),
-		]),
-
 		// transfers
 		...prefix('transfers', [
 			index('routes/transfers/index.tsx'),

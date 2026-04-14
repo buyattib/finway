@@ -11,7 +11,6 @@ import { getBalances, getCurrencyById, getSelectData } from '~/lib/queries'
 import { ACTION_EDITION } from '~/lib/constants'
 
 import { getAccountById } from '~/routes/accounts/lib/queries'
-import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/queries'
 
 import {
 	TRANSACTION_TYPE_EXPENSE,
@@ -47,7 +46,11 @@ export async function loader({
 		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
 
-	const { account: _account, amount: rawAmount, ...transactionData } = transaction
+	const {
+		account: _account,
+		amount: rawAmount,
+		...transactionData
+	} = transaction
 	const amount = (rawAmount / 100).toString()
 
 	const [selectData, balances] = await Promise.all([
@@ -61,7 +64,6 @@ export async function loader({
 		initialData: {
 			...transactionData,
 			amount,
-			transactionCategoryId: transactionData.transactionCategoryId ?? '',
 		},
 		meta: {
 			title: t('form.edit.meta.title', { transactionId }),
@@ -135,25 +137,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 				submission: submission.reply({
 					fieldErrors: {
 						currencyId: [t('form.edit.action.currencyNotFound')],
-					},
-				}),
-			},
-			{ status: 422 },
-		)
-	}
-
-	const transactionCategory = await getTransactionCategoryById({
-		db,
-		transactionCategoryId: values.transactionCategoryId,
-	})
-	if (!transactionCategory || transactionCategory.ownerId !== user.id) {
-		return data(
-			{
-				submission: submission.reply({
-					fieldErrors: {
-						transactionCategoryId: [
-							t('form.edit.action.categoryNotFound'),
-						],
 					},
 				}),
 			},

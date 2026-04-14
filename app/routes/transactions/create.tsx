@@ -11,12 +11,14 @@ import { getBalances, getCurrencyById, getSelectData } from '~/lib/queries'
 import { ACTION_CREATION } from '~/lib/constants'
 
 import { getAccountById } from '~/routes/accounts/lib/queries'
-import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/queries'
 
-import { TRANSACTION_TYPE_EXPENSE } from './lib/constants'
+import {
+	TRANSACTION_CATEGORIES,
+	TRANSACTION_TYPE_EXPENSE,
+} from './lib/constants'
 import { createTransactionFormSchema } from './lib/schemas'
 import { createTransaction, getTransactionBalance } from './lib/queries'
-import { TransactionForm } from './components/form'
+import { TransactionForm, type TInitialData } from './components/form'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -61,13 +63,12 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		balances,
 		initialData: {
 			type: TRANSACTION_TYPE_EXPENSE,
-			amount: '0',
+			amount: '',
 			description: '',
 			accountId,
 			currencyId,
-			transactionCategoryId:
-				selectData.transactionCategories?.[0]?.id || '',
-		} as const,
+			category: TRANSACTION_CATEGORIES[0],
+		} satisfies Partial<TInitialData>,
 		meta: {
 			title: t('form.create.meta.title'),
 			description: t('form.create.meta.description'),
@@ -122,25 +123,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 				submission: submission.reply({
 					fieldErrors: {
 						currencyId: [t('form.create.action.currencyNotFound')],
-					},
-				}),
-			},
-			{ status: 422 },
-		)
-	}
-
-	const transactionCategory = await getTransactionCategoryById({
-		db,
-		transactionCategoryId: values.transactionCategoryId,
-	})
-	if (!transactionCategory || transactionCategory.ownerId !== user.id) {
-		return data(
-			{
-				submission: submission.reply({
-					fieldErrors: {
-						transactionCategoryId: [
-							t('form.create.action.categoryNotFound'),
-						],
 					},
 				}),
 			},

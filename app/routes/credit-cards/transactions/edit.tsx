@@ -1,5 +1,6 @@
 import { data } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4'
+
 import type { Route } from './+types/edit'
 
 import { redirectWithToast } from '~/utils-server/toast.server'
@@ -8,8 +9,6 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { ACTION_EDITION } from '~/lib/constants'
 import { getSelectData, getCurrencyById } from '~/lib/queries'
-
-import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/queries'
 
 import {
 	getCreditCardTransactionById,
@@ -68,7 +67,7 @@ export async function loader({
 			totalInstallments: String(totalInstallments),
 			description: transaction.description ?? '',
 			currencyId: transaction.currencyId,
-			transactionCategoryId: transaction.transactionCategoryId,
+			category: transaction.category,
 		},
 		meta: {
 			title: t('transaction.edit.meta.title', {
@@ -88,7 +87,6 @@ export async function action({
 	context,
 	params: { transactionId },
 }: Route.ActionArgs) {
-	const user = context.get(userContext)
 	const db = context.get(dbContext)
 	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
@@ -149,25 +147,6 @@ export async function action({
 					fieldErrors: {
 						currencyId: [
 							t('transaction.edit.action.currencyNotFound'),
-						],
-					},
-				}),
-			},
-			{ status: 422 },
-		)
-	}
-
-	const transactionCategory = await getTransactionCategoryById({
-		db,
-		transactionCategoryId: values.transactionCategoryId,
-	})
-	if (!transactionCategory || transactionCategory.ownerId !== user.id) {
-		return data(
-			{
-				submission: submission.reply({
-					fieldErrors: {
-						transactionCategoryId: [
-							t('transaction.edit.action.categoryNotFound'),
 						],
 					},
 				}),

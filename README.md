@@ -27,7 +27,7 @@ as its used to run multiple statements
 
 ## Run scripts
 
-- tsx path/to/script.ts
+- pnpm script path/to/script.ts
 
 ## Emails
 
