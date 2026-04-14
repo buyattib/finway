@@ -9,7 +9,7 @@ import { dbContext, userContext } from '~/lib/context'
 import { ACTION_CREATION } from '~/lib/constants'
 import { getSelectData, getCurrencyById } from '~/lib/queries'
 
-import { getTransactionCategoryById } from '~/routes/transaction-categories/lib/queries'
+import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
 
 import {
 	getStatementByDate,
@@ -21,10 +21,7 @@ import { createCreditCardTransactionFormSchema } from '../lib/schemas'
 import { CC_TRANSACTION_TYPE_CHARGE } from '../lib/constants'
 import { creditCardContext } from '../lib/context'
 
-import {
-	CreditCardTransactionForm,
-	type TCreditCardTransactionFormInitialData,
-} from './components/form'
+import { CreditCardTransactionForm, type TInitialData } from './components/form'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -52,9 +49,8 @@ export async function loader({ context }: Route.LoaderArgs) {
 			totalInstallments: '1',
 			description: '',
 			currencyId: selectData.currencies?.[0]?.id || '',
-			transactionCategoryId:
-				selectData.transactionCategories?.[0]?.id || '',
-		} satisfies TCreditCardTransactionFormInitialData,
+			category: TRANSACTION_CATEGORIES[0],
+		} satisfies Partial<TInitialData>,
 		meta: {
 			title: t('transaction.create.meta.title'),
 			description: t('transaction.create.meta.description'),
@@ -63,7 +59,6 @@ export async function loader({ context }: Route.LoaderArgs) {
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
-	const user = context.get(userContext)
 	const db = context.get(dbContext)
 	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
@@ -111,29 +106,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 		)
 	}
 
-	const transactionCategory = await getTransactionCategoryById({
-		db,
-		transactionCategoryId: values.transactionCategoryId,
-	})
-	if (!transactionCategory || transactionCategory.ownerId !== user.id) {
-		return data(
-			{
-				submission: submission.reply({
-					fieldErrors: {
-						transactionCategoryId: [
-							t('transaction.create.action.categoryNotFound'),
-						],
-					},
-				}),
-			},
-			{ status: 422 },
-		)
-	}
-
 	const transactionDate = new Date(values.date)
 	const installmentCount = Number(totalInstallments)
 
-	await ensureStatementsExist({ db, creditCardId: creditCard.id, date: transactionDate })
+	await ensureStatementsExist({
+		db,
+		creditCardId: creditCard.id,
+		date: transactionDate,
+	})
 
 	const transactionStatement = await getStatementByDate({
 		db,
@@ -149,7 +129,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 	lastInstallmentDate.setMonth(
 		lastInstallmentDate.getMonth() + installmentCount - 1,
 	)
-	await ensureStatementsExist({ db, creditCardId: creditCard.id, date: lastInstallmentDate })
+	await ensureStatementsExist({
+		db,
+		creditCardId: creditCard.id,
+		date: lastInstallmentDate,
+	})
 
 	const statements = await getStatementsFromDate({
 		db,

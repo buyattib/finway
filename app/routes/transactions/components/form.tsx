@@ -15,7 +15,6 @@ import type { Route as EditRoute } from '../+types/edit'
 
 import { initializeDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-import { TRANSACTION_TYPES, TRANSACTION_TYPE_EXPENSE } from '../lib/constants'
 import type { TSelectData } from '~/lib/types'
 
 import { Button } from '~/components/ui/button'
@@ -41,8 +40,13 @@ import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createTransactionFormSchema } from '../lib/schemas'
+import {
+	TRANSACTION_TYPES,
+	TRANSACTION_TYPE_EXPENSE,
+	TRANSACTION_CATEGORIES,
+} from '../lib/constants'
 
-type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
+export type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 type TBalances = CreateRoute.ComponentProps['loaderData']['balances']
 
 type Props = {
@@ -68,7 +72,7 @@ export function TransactionForm({
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
 
-	const { accounts, currencies, transactionCategories } = selectData
+	const { accounts, currencies } = selectData
 
 	const { defaultValue, title, buttonLabel, to } = {
 		[ACTION_CREATION]: {
@@ -137,12 +141,10 @@ export function TransactionForm({
 				})
 			: undefined
 
-	const transactionCategoryOptions = transactionCategories.map(
-		({ id, name }) => ({
-			value: id,
-			label: name,
-		}),
-	)
+	const transactionCategoryOptions = TRANSACTION_CATEGORIES.map(c => ({
+		value: c,
+		label: t(`constants:categories.${c}.name`),
+	}))
 
 	return (
 		<Card className='md:max-w-2xl w-full mx-auto'>
@@ -231,34 +233,12 @@ export function TransactionForm({
 						maxValue={selectedBalance?.balance}
 					/>
 
-					{transactionCategories.length !== 0 ? (
-						<ComboboxField
-							label={t('form.categoryLabel')}
-							field={fields.transactionCategoryId}
-							buttonPlaceholder={t('form.categoryPlaceholder')}
-							options={transactionCategoryOptions}
-						/>
-					) : (
-						<Text size='sm' theme='muted' alignment='center'>
-							<Trans
-								ns='transactions'
-								i18nKey='form.noCategoryMessage'
-								components={[
-									<Link
-										key='0'
-										to={{
-											pathname:
-												'/app/transaction-categories/create',
-											search: createSearchParams({
-												redirectTo: location.pathname,
-											}).toString(),
-										}}
-										className='text-primary'
-									/>,
-								]}
-							/>
-						</Text>
-					)}
+					<ComboboxField
+						label={t('form.categoryLabel')}
+						field={fields.category}
+						buttonPlaceholder={t('form.categoryPlaceholder')}
+						options={transactionCategoryOptions}
+					/>
 
 					<DateField
 						label={t('form.dateLabel')}

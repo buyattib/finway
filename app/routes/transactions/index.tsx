@@ -1,5 +1,10 @@
 import { Link, Form, data, useNavigation, useLocation } from 'react-router'
-import { PlusIcon, ReceiptTextIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
+import {
+	PlusIcon,
+	ReceiptTextIcon,
+	SquarePenIcon,
+	TrashIcon,
+} from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
@@ -37,7 +42,7 @@ import {
 	getTransactionById,
 	deleteTransaction,
 } from './lib/queries'
-import type { TTransactionType } from './lib/types'
+import type { TCategory, TTransactionType } from './lib/types'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -59,15 +64,14 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 	const accountId = searchParams.get('accountId') ?? ''
 	const currencyId = searchParams.get('currencyId') ?? ''
-	const transactionCategoryId =
-		searchParams.get('transactionCategoryId') ?? ''
+	const category = (searchParams.get('category') as TCategory) ?? ''
 	const transactionType =
 		(searchParams.get('transactionType') as TTransactionType) ?? ''
 
 	const filters = {
 		accountId,
 		currencyId,
-		transactionCategoryId,
+		category,
 		transactionType,
 	}
 
@@ -247,7 +251,7 @@ export default function Transactions({
 											currency,
 											account,
 											accountType,
-											transactionCategory,
+											category,
 										}) => {
 											const symbol =
 												getCurrencySymbol(currency)
@@ -295,8 +299,9 @@ export default function Transactions({
 														/>
 													</TableCell>
 													<TableCell className='text-muted-foreground'>
-														{transactionCategory ??
-															'-'}
+														{t(
+															`constants:categories.${category}.name`,
+														)}
 													</TableCell>
 													<TableCell className='text-right'>
 														<div className='flex items-center justify-end gap-2'>
@@ -370,7 +375,7 @@ export default function Transactions({
 									currency,
 									account,
 									accountType,
-									transactionCategory,
+									category,
 								}) => {
 									return (
 										<li
@@ -457,11 +462,16 @@ export default function Transactions({
 													{getCurrencySymbol(
 														currency,
 													)}{' '}
-													{formatNumber(amount, i18n.language)}
+													{formatNumber(
+														amount,
+														i18n.language,
+													)}
 												</Text>
 											</div>
 											<Text size='sm' theme='muted'>
-												{transactionCategory ?? '-'}
+												{t(
+													`constants:categories.${category}.name`,
+												)}
 											</Text>
 										</li>
 									)

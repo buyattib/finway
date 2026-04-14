@@ -10,7 +10,10 @@ import {
 
 import { CURRENCIES } from '~/lib/constants'
 import { ACCOUNT_TYPES } from '~/routes/accounts/lib/constants'
-import { TRANSACTION_TYPES } from '~/routes/transactions/lib/constants'
+import {
+	TRANSACTION_CATEGORIES,
+	TRANSACTION_TYPES,
+} from '~/routes/transactions/lib/constants'
 import { CC_TRANSACTION_TYPES } from '~/routes/credit-cards/lib/constants'
 
 const base = {
@@ -90,6 +93,7 @@ export const transaction = sqliteTable(
 		accountId: text().notNull(),
 		currencyId: text().notNull(),
 		transactionCategoryId: text().notNull(),
+		category: text({ enum: TRANSACTION_CATEGORIES }), //.notNull(),
 	},
 	table => [
 		foreignKey({
@@ -249,6 +253,7 @@ export const creditCardTransaction = sqliteTable(
 		creditCardId: text().notNull(),
 		currencyId: text().notNull(),
 		transactionCategoryId: text().notNull(),
+		category: text({ enum: TRANSACTION_CATEGORIES }), //.notNull(),
 	},
 	table => [
 		foreignKey({

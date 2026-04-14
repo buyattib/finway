@@ -230,19 +230,9 @@ export async function getSelectData(db: DB, ownerId: string) {
 		columns: { id: true, code: true },
 	})
 
-	const transactionCategories = await db.query.transactionCategory.findMany({
-		where: (transactionCategory, { eq }) =>
-			eq(transactionCategory.ownerId, ownerId),
-		orderBy: (transactionCategory, { desc }) => [
-			desc(transactionCategory.createdAt),
-		],
-		columns: { id: true, name: true, description: true },
-	})
-
 	return {
 		accounts,
 		currencies,
-		transactionCategories,
 	}
 }
 

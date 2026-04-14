@@ -5,6 +5,7 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { Route as CreateRoute } from '../+types/create'
+import type { Route as EditRoute } from '../+types/edit'
 
 import { initializeDate, formatNumber } from '~/lib/utils'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
@@ -29,35 +30,39 @@ import {
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 
+import type { TCategory } from '~/routes/transactions/lib/types'
+import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
+
 import type { TCCTransactionType } from '../../lib/types'
 import { createCreditCardTransactionFormSchema } from '../../lib/schemas'
 import { CC_TRANSACTION_TYPES } from '../../lib/constants'
 
 type TCreateLoaderData = CreateRoute.ComponentProps['loaderData']
 
-export type TCreditCardTransactionFormInitialData = {
-	id?: string
-	creditCardId: string
-	date?: string
-	type: TCCTransactionType
-	amount: string
-	totalInstallments: string
-	description: string
-	currencyId: string
-	transactionCategoryId: string
-}
+export type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
+// export type TCreditCardTransactionFormInitialData = {
+// 	id?: string
+// 	creditCardId: string
+// 	date?: string
+// 	type: TCCTransactionType
+// 	amount: string
+// 	totalInstallments: string
+// 	description: string
+// 	currencyId: string
+// 	category: TCategory
+// }
 
 type Props = {
 	creditCard: TCreateLoaderData['creditCard']
 	selectData: TCreateLoaderData['selectData']
 	lastResult?: SubmissionResult
-	initialData: TCreditCardTransactionFormInitialData
+	initialData: Partial<TInitialData>
 	action: typeof ACTION_CREATION | typeof ACTION_EDITION
 }
 
 export function CreditCardTransactionForm({
 	creditCard,
-	selectData: { transactionCategories, currencies },
+	selectData: { currencies },
 	lastResult,
 	initialData,
 	action,
@@ -126,12 +131,10 @@ export function CreditCardTransactionForm({
 		label: code,
 	}))
 
-	const transactionCategoryOptions = transactionCategories.map(
-		({ id, name }) => ({
-			value: id,
-			label: name,
-		}),
-	)
+	const transactionCategoryOptions = TRANSACTION_CATEGORIES.map(c => ({
+		value: c,
+		label: t(`constants:categories.${c}.name`),
+	}))
 
 	return (
 		<Card className='md:max-w-2xl w-full mx-auto'>
@@ -233,7 +236,7 @@ export function CreditCardTransactionForm({
 
 					<ComboboxField
 						label={t('transaction.create.categoryLabel')}
-						field={fields.transactionCategoryId}
+						field={fields.category}
 						buttonPlaceholder={t(
 							'transaction.create.categoryPlaceholder',
 						)}

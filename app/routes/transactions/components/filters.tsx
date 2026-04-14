@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next'
 
 import type { Route } from '../+types'
 
-import { TRANSACTION_TYPES } from '../lib/constants'
-
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { Combobox } from '~/components/ui/combobox'
+
+import { TRANSACTION_CATEGORIES, TRANSACTION_TYPES } from '../lib/constants'
 
 export function TransactionsFilters({
 	filters,
@@ -42,12 +42,10 @@ export function TransactionsFilters({
 		label: code,
 	}))
 
-	const transactionCategoryOptions = selectData.transactionCategories.map(
-		({ id, name }) => ({
-			value: id,
-			label: name,
-		}),
-	)
+	const transactionCategoryOptions = TRANSACTION_CATEGORIES.map(c => ({
+		value: c,
+		label: t(`constants:categories.${c}.name`),
+	}))
 
 	return (
 		<>
@@ -79,7 +77,7 @@ export function TransactionsFilters({
 				<Combobox
 					options={transactionCategoryOptions}
 					name='transactionCategoryId'
-					defaultValue={filters.transactionCategoryId}
+					defaultValue={filters.category}
 					buttonPlaceholder={t('filters.category')}
 					onValueChange={() => {
 						if (!form.current) return
