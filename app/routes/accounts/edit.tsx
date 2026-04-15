@@ -16,6 +16,7 @@ import {
 	updateAccount,
 } from './lib/queries'
 import { createAccountFormSchema } from './lib/schemas'
+import { isAssetType } from './lib/utils'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.initialData
@@ -41,9 +42,13 @@ export async function loader({
 		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
 	}
 
-	const { ownerId: _ownerId, ...accountData } = account
+	const { ownerId: _ownerId, accountType, ...accountData } = account
+	if (!isAssetType(accountType)) {
+		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
+	}
+
 	return {
-		initialData: accountData,
+		initialData: { ...accountData, accountType },
 		meta: {
 			title: t('form.edit.meta.title', { name: account.name }),
 			notFoundTitle: t('form.edit.meta.notFoundTitle', { accountId }),
@@ -75,7 +80,11 @@ export async function action({ context, request }: Route.ActionArgs) {
 	}
 
 	const account = await getAccountById({ db, accountId: submission.value.id })
-	if (!account || account.ownerId !== user.id) {
+	if (
+		!account ||
+		account.ownerId !== user.id ||
+		!isAssetType(account.accountType)
+	) {
 		return data(
 			{
 				submission: submission.reply({

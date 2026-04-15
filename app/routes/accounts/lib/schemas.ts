@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { TFunction } from 'i18next'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-import { ACCOUNT_TYPES } from './constants'
+import { ASSETS_ACCOUNT_TYPES } from './constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({
@@ -21,7 +21,7 @@ export function createAccountFormSchema(t: TFunction<'accounts'>) {
 				.string(t('form.schema.nameRequired'))
 				.transform(value => value.trim()),
 			accountType: z.enum(
-				ACCOUNT_TYPES,
+				ASSETS_ACCOUNT_TYPES,
 				t('form.schema.accountTypeRequired'),
 			),
 			description: z

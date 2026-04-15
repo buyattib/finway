@@ -3,10 +3,10 @@ import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Link, Form, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
 import type { Route as EditRoute } from '../+types/edit'
 
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-import { ACCOUNT_TYPES } from '../lib/constants'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -20,6 +20,7 @@ import {
 import { ErrorList, TextField, SelectField } from '~/components/forms'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 
+import { ASSETS_ACCOUNT_TYPES } from '../lib/constants'
 import { createAccountFormSchema } from '../lib/schemas'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
@@ -124,7 +125,7 @@ export function AccountForm({
 						label={t('form.accountTypeLabel')}
 						field={fields.accountType}
 						placeholder={t('form.accountTypePlaceholder')}
-						items={ACCOUNT_TYPES.map(i => ({
+						items={ASSETS_ACCOUNT_TYPES.map(i => ({
 							icon: <AccountTypeIcon size='sm' accountType={i} />,
 							value: i,
 							label: t(`constants:accountType.${i}`),

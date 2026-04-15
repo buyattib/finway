@@ -3,7 +3,7 @@ export const ACCOUNT_TYPE_CASH = 'cash'
 export const ACCOUNT_TYPE_DIGITAL_WALLET = 'digital_wallet'
 export const ACCOUNT_TYPE_CRYPTO_WALLET = 'crypto_wallet'
 export const ACCOUNT_TYPE_BROKER = 'broker'
-export const ACCOUNT_TYPE_CREDIT_CARD = 'credt_card'
+export const ACCOUNT_TYPE_CREDIT_CARD = 'credit_card'
 
 export const ASSETS_ACCOUNT_TYPES = [
 	ACCOUNT_TYPE_BANK,

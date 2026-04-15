@@ -5,6 +5,7 @@ import { getBalances } from '~/lib/queries'
 import type { DB } from '~/lib/types'
 
 import type { TAccountType, TBalanceByAccount } from './types'
+import { ACCOUNT_TYPE_CREDIT_CARD } from './constants'
 
 // fetch --------
 
@@ -38,7 +39,10 @@ export async function getAccounts({
 	ownerId: string
 	search: string | null
 }) {
-	const filters = [eq(accountTable.ownerId, ownerId)]
+	const filters = [
+		eq(accountTable.ownerId, ownerId),
+		ne(accountTable.accountType, ACCOUNT_TYPE_CREDIT_CARD),
+	]
 	if (search) {
 		filters.push(
 			like(sql`lower(${accountTable.name})`, `%${search.toLowerCase()}%`),

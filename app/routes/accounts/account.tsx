@@ -2,6 +2,7 @@ import { Link, Form, data, useNavigation, useLocation } from 'react-router'
 import { SquarePenIcon, TrashIcon } from 'lucide-react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
+
 import type { Route } from './+types/account'
 
 import {
@@ -13,8 +14,6 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { getBalances } from '~/lib/queries'
-
-import { deleteAccount, getAccountById } from './lib/queries'
 
 import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
@@ -29,7 +28,9 @@ import {
 	TooltipTrigger,
 } from '~/components/ui/tooltip'
 
+import { deleteAccount, getAccountById } from './lib/queries'
 import { DeleteAccountFormSchema } from './lib/schemas'
+import { isAssetType } from './lib/utils'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.account
@@ -51,7 +52,11 @@ export async function loader({
 	const t = getServerT(context, 'accounts')
 
 	const account = await getAccountById({ db, accountId })
-	if (!account || account.ownerId !== user.id) {
+	if (
+		!account ||
+		account.ownerId !== user.id ||
+		!isAssetType(account.accountType)
+	) {
 		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
 
@@ -91,7 +96,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const { accountId } = submission.value
 	const account = await getAccountById({ db, accountId })
-	if (!account || account.ownerId !== user.id) {
+	if (
+		!account ||
+		account.ownerId !== user.id ||
+		!isAssetType(account.accountType)
+	) {
 		throw new Response(t('details.action.notFoundError'), { status: 404 })
 	}
 

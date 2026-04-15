@@ -9,7 +9,7 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { ACTION_CREATION } from '~/lib/constants'
 
-import type { TAccountType } from './lib/types'
+import type { TAssetAccountType } from './lib/types'
 import { AccountForm } from './components/form'
 import { createAccount, getDuplicateAccountCount } from './lib/queries'
 import { createAccountFormSchema } from './lib/schemas'
@@ -30,7 +30,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		redirectTo,
 		initialData: {
 			name: '',
-			accountType: '' as TAccountType,
+			accountType: '' as TAssetAccountType,
 			description: '',
 		},
 		meta: {
