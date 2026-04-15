@@ -41,11 +41,6 @@ export async function getCreditCardById({
 			account: {
 				columns: { ownerId: true },
 			},
-			statements: {
-				orderBy: (s, { desc }) => [desc(s.closingDate)],
-				limit: 1,
-				columns: { closingDate: true, dueDate: true },
-			},
 		},
 	})
 }
@@ -653,6 +648,7 @@ export async function deleteCreditCard({
 	await db.delete(accountTable).where(eq(accountTable.id, accountId))
 }
 
+// statement
 export async function updateStatement({
 	db,
 	statementId,
@@ -668,6 +664,7 @@ export async function updateStatement({
 		.where(eq(creditCardStatementTable.id, statementId))
 }
 
+// cc transactions
 export async function deleteCreditCardTransaction({
 	db,
 	creditCardTransactionId,

@@ -23,18 +23,14 @@ export function meta({ loaderData }: Route.MetaArgs) {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
-	const creditCard = context.get(creditCardContext)
+	const {
+		creditCard: { accountId: _accountId, ...creditCard },
+		statement: { id: _id, ...statement },
+	} = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
-	const {
-		accountId: _accountId,
-		dueDate: _dueDate,
-		closingDate: _closingDate,
-		...initialData
-	} = creditCard
-
 	return {
-		initialData,
+		initialData: { ...creditCard, ...statement },
 		meta: {
 			title: t('form.edit.meta.title', {
 				brand: creditCard.brand,
@@ -47,7 +43,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
-	const creditCard = context.get(creditCardContext)
+	const { creditCard } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()

@@ -9,11 +9,7 @@ import { dbContext } from '~/lib/context'
 
 import { editStatementFormSchema } from '../lib/schemas'
 import { creditCardContext } from '../lib/context'
-import {
-	getStatementById,
-	getAdjacentStatements,
-	updateStatement,
-} from '../lib/queries'
+import { getAdjacentStatements, updateStatement } from '../lib/queries'
 
 export async function action({
 	request,
@@ -21,7 +17,7 @@ export async function action({
 	params: { statementId },
 }: Route.ActionArgs) {
 	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+	const { creditCard, statement } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -31,18 +27,6 @@ export async function action({
 
 	if (submission.status !== 'success') {
 		return data({ submission: submission.reply() }, { status: 422 })
-	}
-
-	const statement = await getStatementById({ db, statementId })
-	if (!statement || statement.creditCardId !== creditCard.id) {
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'error',
-			title: t('statement.details.action.notFoundError'),
-		})
-		return data(
-			{ submission: submission.reply() },
-			{ headers: toastHeaders },
-		)
 	}
 
 	const { closingDate, dueDate } = submission.value

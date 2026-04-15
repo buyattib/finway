@@ -34,15 +34,18 @@ export const creditCardMiddleware: MiddlewareFunction = async ({
 		throw new Error('There is a problem with your credit card statements')
 	}
 
-	const {
-		account: _account,
-		statements: _statements,
-		...creditCardData
-	} = creditCard
+	const { account: _account, ...creditCardData } = creditCard
 
 	context.set(creditCardContext, {
 		...creditCardData,
+		statementId: currentStatement.id,
 		closingDate: currentStatement.closingDate,
 		dueDate: currentStatement.dueDate,
+		creditCard: creditCardData,
+		statement: {
+			id: currentStatement.id,
+			closingDate: currentStatement.closingDate,
+			dueDate: currentStatement.dueDate,
+		},
 	})
 }

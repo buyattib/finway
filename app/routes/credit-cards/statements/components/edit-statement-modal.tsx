@@ -20,15 +20,15 @@ import { editStatementFormSchema } from '../../lib/schemas'
 export function EditStatementModal({
 	onClose,
 	creditCardId,
-	statementId,
-	closingDate,
-	dueDate,
+	statement: { id, ...statementDate },
 }: {
 	onClose: () => void
 	creditCardId: string
-	statementId: string
-	closingDate: string
-	dueDate: string
+	statement: {
+		id: string
+		closingDate: string
+		dueDate: string
+	}
 }) {
 	const { t } = useTranslation('credit-cards')
 	const fetcher = useFetcher<{ submission?: Record<string, unknown> }>()
@@ -37,7 +37,7 @@ export function EditStatementModal({
 
 	const [form, fields] = useForm({
 		lastResult: fetcher.data?.submission,
-		defaultValue: { closingDate, dueDate },
+		defaultValue: statementDate,
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
 				schema: editStatementFormSchema(t),
@@ -64,14 +64,10 @@ export function EditStatementModal({
 				</DialogHeader>
 				<fetcher.Form
 					method='post'
-					action={`/app/credit-cards/${creditCardId}/statements/${statementId}/edit`}
+					action={`/app/credit-cards/${creditCardId}/statements/${id}/edit`}
 					{...getFormProps(form)}
 				>
-					<input
-						type='hidden'
-						name='statementId'
-						value={statementId}
-					/>
+					<input type='hidden' name='statementId' value={id} />
 					<div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
 						<DateField
 							field={fields.closingDate}
