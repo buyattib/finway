@@ -9,7 +9,10 @@ import { dbContext, userContext } from '~/lib/context'
 import { ACTION_CREATION } from '~/lib/constants'
 import { getSelectData, getCurrencyById } from '~/lib/queries'
 
-import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
+import {
+	TRANSACTION_CATEGORIES,
+	TRANSACTION_TYPE_EXPENSE,
+} from '~/routes/transactions/lib/constants'
 
 import {
 	getStatementByDate,
@@ -18,7 +21,6 @@ import {
 	ensureStatementsExist,
 } from '../lib/queries'
 import { creditCardTransactionFormSchema } from '../lib/schemas'
-import { CC_TRANSACTION_TYPE_CHARGE } from '../lib/constants'
 import { creditCardContext } from '../lib/context'
 
 import { CreditCardTransactionForm, type TInitialData } from './components/form'
@@ -34,17 +36,19 @@ export function meta({ loaderData }: Route.MetaArgs) {
 export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+	const {
+		creditCard: { id: creditCardId, brand, last4 },
+	} = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const selectData = await getSelectData(db, user.id)
 
 	return {
-		creditCard: { brand: creditCard.brand, last4: creditCard.last4 },
+		creditCard: { brand, last4 },
 		selectData,
 		initialData: {
-			creditCardId: creditCard.id,
-			type: CC_TRANSACTION_TYPE_CHARGE,
+			creditCardId: creditCardId,
+			type: TRANSACTION_TYPE_EXPENSE,
 			amount: '0',
 			totalInstallments: '1',
 			description: '',
@@ -60,7 +64,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+	const { creditCard } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -80,7 +84,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const {
 		action: _action,
-		creditCardId: _submittedCreditCardId,
+		creditCardId: _creditCardId,
 		totalInstallments,
 		...values
 	} = submission.value
@@ -109,12 +113,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const transactionDate = new Date(values.date)
 	const installmentCount = Number(totalInstallments)
 
-	await ensureStatementsExist({
-		db,
-		creditCardId: creditCard.id,
-		date: transactionDate,
-	})
-
 	const transactionStatement = await getStatementByDate({
 		db,
 		creditCardId: creditCard.id,
@@ -126,8 +124,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const lastInstallmentDate = new Date(transactionStatement.closingDate)
-	lastInstallmentDate.setMonth(
-		lastInstallmentDate.getMonth() + installmentCount - 1,
+	lastInstallmentDate.setUTCMonth(
+		lastInstallmentDate.getUTCMonth() + installmentCount - 1,
 	)
 	await ensureStatementsExist({
 		db,
@@ -158,11 +156,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 			amount,
 			description: values.description ?? '',
 		},
-		creditCardId: creditCard.id,
+		creditCard: {
+			id: creditCard.id,
+			accountId: creditCard.accountId,
+		},
 		installments: statements.map((statement, i) => ({
 			installmentNumber: i + 1,
 			amount: baseAmount + (i < remainder ? 1 : 0),
 			statementId: statement.id,
+			dueDate: statement.dueDate,
 		})),
 	})
 

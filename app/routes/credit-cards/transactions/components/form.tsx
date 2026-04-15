@@ -30,10 +30,12 @@ import {
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
+import {
+	TRANSACTION_CATEGORIES,
+	TRANSACTION_TYPES,
+} from '~/routes/transactions/lib/constants'
 
 import { creditCardTransactionFormSchema } from '../../lib/schemas'
-import { CC_TRANSACTION_TYPES } from '../../lib/constants'
 
 type TCreateLoaderData = CreateRoute.ComponentProps['loaderData']
 
@@ -105,10 +107,10 @@ export function CreditCardTransactionForm({
 
 	const amountValue = Number(fields.amount.value ?? '0')
 
-	const transactionTypeOptions = CC_TRANSACTION_TYPES.map(i => ({
+	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
 		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
 		value: i,
-		label: t(`constants:ccTransactionType.${i}`),
+		label: t(`constants:transactionType.${i}`),
 	}))
 
 	const currencyOptions = currencies.map(({ id, code }) => ({

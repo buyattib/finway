@@ -71,13 +71,14 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 	const statements = _statements.map(s => {
 		const totalsByCurrency = new Map<TCurrency, number>()
-		for (const inst of s.installments) {
-			const code = inst.creditCardTransaction.currency.code
-			totalsByCurrency.set(
-				code,
-				(totalsByCurrency.get(code) ?? 0) + inst.amount,
-			)
-		}
+		// for (const inst of s.installments) {
+		// 	const code = inst.creditCardTransaction.currency.code
+		// 	totalsByCurrency.set(
+		// 		code,
+		// 		(totalsByCurrency.get(code) ?? 0) + inst.amount,
+		// 	)
+		// }
+
 		return {
 			id: s.id,
 			closingDate: s.closingDate,

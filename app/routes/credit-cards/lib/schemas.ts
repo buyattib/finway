@@ -2,8 +2,11 @@ import { z } from 'zod'
 import type { TFunction } from 'i18next'
 
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
-import { CC_TRANSACTION_TYPES, CC_BRANDS } from './constants'
+import {
+	TRANSACTION_CATEGORIES,
+	TRANSACTION_TYPES,
+} from '~/routes/transactions/lib/constants'
+import { CC_BRANDS } from './constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({
@@ -80,7 +83,7 @@ export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 		.object({
 			date: z.iso.datetime(t('transaction.create.schema.dateRequired')),
 			type: z.enum(
-				CC_TRANSACTION_TYPES,
+				TRANSACTION_TYPES,
 				t('transaction.create.schema.transactionTypeRequired'),
 			),
 			amount: z

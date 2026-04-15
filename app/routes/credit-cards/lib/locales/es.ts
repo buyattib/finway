@@ -110,7 +110,7 @@ export default {
 			action: {
 				invalidActionError: 'Acción inválida',
 				duplicateError:
-					'Una tarjéta de crédito con estos valores ya existe',
+					'Una tarjeta de crédito con estos valores ya existe',
 				successToast: 'Tarjeta de crédito creada exitosamente',
 			},
 		},
@@ -123,7 +123,7 @@ export default {
 			action: {
 				invalidActionError: 'Acción inválida',
 				duplicateError:
-					'Una tarjéta de crédito con estos valores ya existe',
+					'Una tarjeta de crédito con estos valores ya existe',
 				successToast: 'Tarjeta de crédito actualizada exitosamente',
 			},
 		},

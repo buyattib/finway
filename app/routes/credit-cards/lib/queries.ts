@@ -7,15 +7,17 @@ import {
 	creditCardStatement as creditCardStatementTable,
 	account as accountTable,
 	currency as currencyTable,
+	transaction as transactionTable,
 } from '~/database/schema'
 import type { DB } from '~/lib/types'
 import { addMonth, subtractMonth, initializeDate } from '~/lib/utils'
 
 import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 import { createAccount } from '~/routes/accounts/lib/queries'
-import type { TCategory } from '~/routes/transactions/lib/types'
-
-import type { TCCTransactionType } from './types'
+import type {
+	TCategory,
+	TTransactionType,
+} from '~/routes/transactions/lib/types'
 
 // fetch --------
 
@@ -151,7 +153,7 @@ export async function getCreditCardTransactions({
 }: {
 	db: DB
 	creditCardId: string
-	type: TCCTransactionType | ''
+	type: TTransactionType | ''
 	category: TCategory
 	page: number
 	pageSize: number
@@ -316,19 +318,6 @@ export async function getCreditCardStatements({
 			id: true,
 			closingDate: true,
 			dueDate: true,
-		},
-		with: {
-			installments: {
-				columns: { amount: true },
-				with: {
-					creditCardTransaction: {
-						columns: {},
-						with: {
-							currency: { columns: { code: true } },
-						},
-					},
-				},
-			},
 		},
 	})
 
@@ -687,7 +676,7 @@ export async function updateCreditCardTransaction({
 	creditCardTransactionId: string
 	transactionData: {
 		date: string
-		type: TCCTransactionType
+		type: TTransactionType
 		amount: number
 		description: string
 		currencyId: string
@@ -726,37 +715,47 @@ export async function updateCreditCardTransaction({
 export async function createCreditCardTransaction({
 	db,
 	transactionData,
-	creditCardId,
+	creditCard,
 	installments,
 }: {
 	db: DB
 	transactionData: {
 		date: string
-		type: TCCTransactionType
+		type: TTransactionType
 		amount: number
 		description: string
 		currencyId: string
 		category: TCategory
 	}
-	creditCardId: string
+	creditCard: {
+		id: string
+		accountId: string
+	}
 	installments: Array<{
 		installmentNumber: number
 		amount: number
 		statementId: string
+		dueDate: string
 	}>
 }) {
 	await db.transaction(async tx => {
+		const { date: _date, amount: _amount, ...commonData } = transactionData
 		const [{ id: creditCardTransactionId }] = await tx
 			.insert(creditCardTransactionTable)
 			.values({
 				...transactionData,
-				creditCardId,
+				creditCardId: creditCard.id,
+				installmentCount: installments.length,
 			})
 			.returning({ id: creditCardTransactionTable.id })
 
-		await tx.insert(creditCardTransactionInstallmentTable).values(
+		await tx.insert(transactionTable).values(
 			installments.map(i => ({
-				...i,
+				...commonData,
+				date: i.dueDate,
+				amount: i.amount,
+				statementId: i.statementId,
+				accountId: creditCard.accountId,
 				creditCardTransactionId,
 			})),
 		)
