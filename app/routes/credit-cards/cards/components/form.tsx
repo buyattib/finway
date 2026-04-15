@@ -2,13 +2,11 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Link, Form, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon } from 'lucide-react'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 import type { Route as EditRoute } from '../+types/edit'
 
-import type { TSelectData } from '~/lib/types'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-import { CC_BRANDS } from '../../lib/constants'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -19,33 +17,25 @@ import {
 	CardHeader,
 	CardTitle,
 } from '~/components/ui/card'
-import { Text } from '~/components/ui/text'
 import {
-	DateField,
 	ErrorList,
 	NumberField,
 	SelectField,
-	ComboboxField,
+	TextField,
 } from '~/components/forms'
-import { AccountTypeIcon } from '~/components/account-type-icon'
 
-import { createCreditCardFormSchema } from '../../lib/schemas'
+import { CC_BRANDS } from '../../lib/constants'
+import { creditCardFormSchema } from '../../lib/schemas'
 
 type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 
 type Props = {
-	selectData: Pick<TSelectData, 'accounts'>
 	lastResult?: SubmissionResult
 	initialData: Partial<TInitialData>
 	action: typeof ACTION_CREATION | typeof ACTION_EDITION
 }
 
-export function CreditCardForm({
-	selectData,
-	lastResult,
-	initialData,
-	action,
-}: Props) {
+export function CreditCardForm({ lastResult, initialData, action }: Props) {
 	const location = useLocation()
 	const navigation = useNavigation()
 	const { t } = useTranslation('credit-cards')
@@ -53,9 +43,6 @@ export function CreditCardForm({
 	const isSubmitting =
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting'
-
-	const { accounts } = selectData
-	const isEditing = action === ACTION_EDITION
 
 	const { title, buttonLabel } = {
 		[ACTION_CREATION]: {
@@ -73,19 +60,13 @@ export function CreditCardForm({
 		id: 'credit-card-form',
 		shouldValidate: 'onBlur',
 		defaultValue: initialData,
-		constraint: getZodConstraint(createCreditCardFormSchema(t)),
+		constraint: getZodConstraint(creditCardFormSchema(t)),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: createCreditCardFormSchema(t),
+				schema: creditCardFormSchema(t),
 			})
 		},
 	})
-
-	const accountOptions = accounts.map(({ id, name, accountType }) => ({
-		icon: <AccountTypeIcon accountType={accountType} size='xs' />,
-		value: id,
-		label: name,
-	}))
 
 	return (
 		<Card className='md:max-w-2xl w-full mx-auto'>
@@ -121,8 +102,14 @@ export function CreditCardForm({
 						id={form.errorId}
 					/>
 
-					<SelectField
+					<TextField
 						autoFocus
+						label={t('form.institutionLabel')}
+						field={fields.institution}
+						placeholder={t('form.institutionPlaceholder')}
+					/>
+
+					<SelectField
 						label={t('form.brandLabel')}
 						field={fields.brand}
 						placeholder={t('form.brandPlaceholder')}
@@ -153,56 +140,6 @@ export function CreditCardForm({
 							maxLength={4}
 						/>
 					</div>
-
-					{isEditing ? (
-						<>
-							<input
-								type='hidden'
-								name={fields.currentClosingDate.name}
-								value={fields.currentClosingDate.value}
-							/>
-							<input
-								type='hidden'
-								name={fields.currentDueDate.name}
-								value={fields.currentDueDate.value}
-							/>
-						</>
-					) : (
-						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
-							<DateField
-								label={t('form.currentClosingDateLabel')}
-								field={fields.currentClosingDate}
-							/>
-							<DateField
-								label={t('form.currentDueDateLabel')}
-								field={fields.currentDueDate}
-							/>
-						</div>
-					)}
-
-					{accounts.length !== 0 ? (
-						<ComboboxField
-							label={t('form.accountLabel')}
-							field={fields.accountId}
-							buttonPlaceholder={t('form.accountPlaceholder')}
-							options={accountOptions}
-							disabled={isEditing}
-						/>
-					) : (
-						<Text size='sm' theme='muted' alignment='center'>
-							<Trans
-								i18nKey='form.noAccountMessage'
-								ns='credit-cards'
-								components={[
-									<Link
-										key='0'
-										to='/app/accounts/create'
-										className='text-primary'
-									/>,
-								]}
-							/>
-						</Text>
-					)}
 				</Form>
 			</CardContent>
 			<CardFooter className='gap-2'>

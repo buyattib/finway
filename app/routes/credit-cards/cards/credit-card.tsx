@@ -7,7 +7,6 @@ import {
 	useNavigate,
 } from 'react-router'
 import { ArrowLeftIcon, SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
-import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/credit-card'
@@ -37,7 +36,6 @@ import { CreditCard } from '~/components/credit-card'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
-import { DeleteCreditCardFormSchema } from '../lib/schemas'
 import { creditCardContext } from '../lib/context'
 import { getCreditCardStatements, deleteCreditCard } from '../lib/queries'
 
@@ -50,10 +48,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 	]
 }
 
-export async function loader({
-	context,
-	request,
-}: Route.LoaderArgs) {
+export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
@@ -112,23 +107,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const formData = await request.formData()
 	const intent = formData.get('intent')
 
-	if (intent === 'delete-card') {
-		const submission = parseWithZod(formData, {
-			schema: DeleteCreditCardFormSchema,
+	if (intent === 'delete') {
+		await deleteCreditCard({
+			db,
+			accountId: creditCard.accountId,
 		})
-
-		if (submission.status !== 'success') {
-			const toastHeaders = await createToastHeaders(request, {
-				type: 'error',
-				title: t('details.action.deleteCardErrorToast'),
-				description: t('details.action.deleteCardErrorDescription'),
-			})
-			return data({}, { headers: toastHeaders })
-		}
-
-		const { creditCardId } = submission.value
-
-		await deleteCreditCard({ db, creditCardId })
 
 		return await redirectWithToast('/app/credit-cards', request, {
 			type: 'success',
@@ -163,7 +146,7 @@ export default function CreditCardDetails({
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting' &&
-		navigation.formData?.get('intent') === 'delete-card'
+		navigation.formData?.get('intent') === 'delete'
 
 	return (
 		<>
@@ -195,18 +178,13 @@ export default function CreditCardDetails({
 					</Button>
 					<Tooltip>
 						<Form method='post'>
-							<input
-								type='hidden'
-								name='creditCardId'
-								value={creditCard.id}
-							/>
 							<TooltipTrigger asChild>
 								<Button
 									size='icon'
 									variant='destructive-outline'
 									type='submit'
 									name='intent'
-									value='delete-card'
+									value='delete'
 									disabled={isDeletingCard}
 								>
 									{isDeletingCard ? (
@@ -236,7 +214,7 @@ export default function CreditCardDetails({
 					last4={creditCard.last4}
 					expiryMonth={creditCard.expiryMonth}
 					expiryYear={creditCard.expiryYear}
-					accountName={creditCard.accountName}
+					institution={creditCard.institution}
 					className='w-full shrink-0 md:max-w-sm'
 				/>
 

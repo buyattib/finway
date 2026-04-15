@@ -25,9 +25,6 @@ export default {
 		dueDate: 'Due',
 		deleteTransactionAriaLabel: 'Delete transaction',
 		action: {
-			notFoundError: 'Credit card not found',
-			deleteCardErrorToast: 'Could not delete credit card',
-			deleteCardErrorDescription: 'Please try again',
 			deleteCardSuccessToast:
 				'Credit card {{brand}} •••• {{last4}} deleted',
 			deleteTransactionErrorToast: 'Could not delete transaction',
@@ -49,7 +46,8 @@ export default {
 			dueDate: 'Due Date',
 			editButton: 'Edit',
 			editTitle: 'Edit Statement Dates',
-			editDescription: 'Update the closing and due dates for this statement.',
+			editDescription:
+				'Update the closing and due dates for this statement.',
 			editCancelButton: 'Cancel',
 			editSubmitButton: 'Save',
 			installmentsTitle: 'Installments ({{total}})',
@@ -79,13 +77,9 @@ export default {
 		expiryMonthPlaceholder: 'MM',
 		expiryYearLabel: 'Expiry Year',
 		expiryYearPlaceholder: 'YYYY',
-		currentClosingDateLabel: 'Current Closing Date',
-		currentDueDateLabel: 'Current Due Date',
-		accountLabel: 'Account',
-		accountPlaceholder: 'Select an account',
+		institutionLabel: 'Institution',
+		institutionPlaceholder: 'Bank, issuer, etc.',
 		resetButton: 'Reset',
-		noAccountMessage:
-			'You need to create an account first. Do it <0>here</0>',
 		schema: {
 			brandRequired: 'Brand is required',
 			last4Required: 'Last 4 digits are required',
@@ -96,11 +90,11 @@ export default {
 			expiryYearRequired: 'Expiry year is required',
 			expiryYearInvalid: 'Must be a 4-digit year',
 			expiryYearFuture: 'Must be a valid year in the future',
+			institutionRequired: 'Institution is required',
 			currentClosingDateRequired: 'Closing date is required',
 			currentDueDateRequired: 'Due date is required',
 			dueDateMaxDifference:
 				'Due date must be within 20 days of closing date',
-			accountRequired: 'Account is required',
 		},
 		create: {
 			meta: {
@@ -111,25 +105,20 @@ export default {
 			submitButton: 'Create',
 			action: {
 				invalidActionError: 'Invalid action',
+				duplicateError: 'A credit card with this values already exists',
 				successToast: 'Credit card created successfully',
-				accountNotFound: 'Account not found',
 			},
 		},
 		edit: {
 			meta: {
 				title: 'Edit Credit Card {{brand}} •••• {{last4}} | Finway',
-				notFoundTitle:
-					'Credit card {{creditCardId}} not found | Finway',
 			},
 			title: 'Edit credit card',
 			submitButton: 'Update',
-			loader: {
-				notFoundError: 'Credit card not found',
-			},
 			action: {
 				invalidActionError: 'Invalid action',
+				duplicateError: 'A credit card with this values already exists',
 				successToast: 'Credit card updated successfully',
-				creditCardNotFound: 'Credit card not found',
 			},
 		},
 	},
@@ -162,9 +151,7 @@ export default {
 			action: {
 				invalidActionError: 'Invalid action',
 				successToast: 'Transaction created successfully',
-				creditCardNotFound: 'Credit card not found',
 				currencyNotFound: 'Currency not found',
-				categoryNotFound: 'Transaction category not found',
 			},
 			schema: {
 				dateRequired: 'Date is required',
@@ -195,9 +182,7 @@ export default {
 				invalidActionError: 'Invalid action',
 				successToast: 'Transaction updated successfully',
 				transactionNotFound: 'Transaction not found',
-				creditCardNotFound: 'Credit card not found',
 				currencyNotFound: 'Currency not found',
-				categoryNotFound: 'Transaction category not found',
 			},
 		},
 		details: {

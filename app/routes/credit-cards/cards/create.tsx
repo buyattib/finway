@@ -5,14 +5,11 @@ import type { Route } from './+types/create'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { getSelectData } from '~/lib/queries'
 import { ACTION_CREATION } from '~/lib/constants'
 
-import { getAccountById } from '~/routes/accounts/lib/queries'
-
 import { CreditCardForm } from './components/form'
-import { createCreditCardFormSchema } from '../lib/schemas'
-import { createCreditCard } from '../lib/queries'
+import { creditCardFormSchema } from '../lib/schemas'
+import { createCreditCard, validateExistingCreditCard } from '../lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -22,34 +19,16 @@ export function meta({ loaderData }: Route.MetaArgs) {
 	]
 }
 
-export async function loader({ context, request }: Route.LoaderArgs) {
-	const user = context.get(userContext)
-	const db = context.get(dbContext)
+export async function loader({ context }: Route.LoaderArgs) {
 	const t = getServerT(context, 'credit-cards')
 
-	const url = new URL(request.url)
-	const accountIdParam = url.searchParams.get('accountId')
-
-	const selectData = await getSelectData(db, user.id)
-
-	let accountId = selectData.accounts?.[0]?.id || ''
-	if (
-		accountIdParam &&
-		selectData.accounts.some(acc => acc.id === accountIdParam)
-	) {
-		accountId = accountIdParam
-	}
-
 	return {
-		selectData,
 		initialData: {
 			last4: '',
 			brand: '',
 			expiryMonth: '',
 			expiryYear: '',
-			currentClosingDate: '',
-			currentDueDate: '',
-			accountId,
+			institution: '',
 		},
 		meta: {
 			title: t('form.create.meta.title'),
@@ -65,7 +44,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
-		schema: createCreditCardFormSchema(t),
+		schema: creditCardFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
@@ -78,24 +57,20 @@ export async function action({ request, context }: Route.ActionArgs) {
 		})
 	}
 
-	const {
-		action: _action,
-		currentClosingDate,
-		currentDueDate,
-		...creditCardData
-	} = submission.value
+	const { action: _action, ...creditCardData } = submission.value
 
-	const account = await getAccountById({
+	const existingCount = await validateExistingCreditCard({
 		db,
-		accountId: creditCardData.accountId,
+		ownerId: user.id,
+		brand: creditCardData.brand,
+		last4: creditCardData.last4,
+		institution: creditCardData.institution,
 	})
-	if (!account || account.ownerId !== user.id) {
+	if (existingCount) {
 		return data(
 			{
 				submission: submission.reply({
-					fieldErrors: {
-						accountId: [t('form.create.action.accountNotFound')],
-					},
+					formErrors: [t('form.create.action.duplicateError')],
 				}),
 			},
 			{ status: 422 },
@@ -104,9 +79,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const creditCardId = await createCreditCard({
 		db,
+		ownerId: user.id,
 		creditCardData,
-		currentClosingDate: currentClosingDate!,
-		currentDueDate: currentDueDate!,
 	})
 
 	return await redirectWithToast(
@@ -120,13 +94,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateCreditCard({
-	loaderData: { selectData, initialData },
+	loaderData: { initialData },
 	actionData,
 }: Route.ComponentProps) {
 	return (
 		<CreditCardForm
 			action={ACTION_CREATION}
-			selectData={selectData}
 			initialData={initialData}
 			lastResult={actionData?.submission}
 		/>

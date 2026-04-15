@@ -16,9 +16,9 @@ type Props = {
 	last4: string
 	expiryMonth: string
 	expiryYear: string
+	institution: string
 	closingDate?: string
 	dueDate?: string
-	accountName: string
 	className?: string
 }
 
@@ -27,9 +27,9 @@ export function CreditCard({
 	last4,
 	expiryMonth,
 	expiryYear,
+	institution,
 	closingDate,
 	dueDate,
-	accountName,
 	className,
 }: Props) {
 	const { t, i18n } = useTranslation('components')
@@ -49,7 +49,7 @@ export function CreditCard({
 						{brand}
 					</span>
 				</div>
-				<p className='text-sm text-white/70'>{accountName}</p>
+				<p className='text-sm text-white/70'>{institution}</p>
 			</div>
 			<div>
 				<p className='text-lg tracking-[0.25em] font-mono'>

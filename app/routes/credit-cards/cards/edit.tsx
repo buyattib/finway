@@ -6,13 +6,12 @@ import type { Route } from './+types/edit'
 import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { getSelectData } from '~/lib/queries'
 import { ACTION_EDITION } from '~/lib/constants'
 
 import { CreditCardForm } from './components/form'
-import { createCreditCardFormSchema } from '../lib/schemas'
+import { creditCardFormSchema } from '../lib/schemas'
 import { creditCardContext } from '../lib/context'
-import { updateCreditCard } from '../lib/queries'
+import { updateCreditCard, validateExistingCreditCard } from '../lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title
@@ -24,25 +23,18 @@ export function meta({ loaderData }: Route.MetaArgs) {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
-	const db = context.get(dbContext)
-	const user = context.get(userContext)
 	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
-	const selectData = await getSelectData(db, user.id)
+	const {
+		accountId: _accountId,
+		dueDate: _dueDate,
+		closingDate: _closingDate,
+		...initialData
+	} = creditCard
 
 	return {
-		selectData,
-		initialData: {
-			id: creditCard.id,
-			brand: creditCard.brand,
-			last4: creditCard.last4,
-			expiryMonth: creditCard.expiryMonth,
-			expiryYear: creditCard.expiryYear,
-			accountId: creditCard.accountId,
-			currentClosingDate: creditCard.closingDate,
-			currentDueDate: creditCard.dueDate,
-		},
+		initialData,
 		meta: {
 			title: t('form.edit.meta.title', {
 				brand: creditCard.brand,
@@ -54,12 +46,13 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
+	const user = context.get(userContext)
 	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
-		schema: createCreditCardFormSchema(t),
+		schema: creditCardFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {
@@ -72,14 +65,33 @@ export async function action({ request, context }: Route.ActionArgs) {
 		})
 	}
 
-	const {
-		action: _action,
-		id: _id,
-		accountId: _accountId,
-		...body
-	} = submission.value
+	const { action: _action, id: _id, ...creditCardData } = submission.value
 
-	await updateCreditCard({ db, id: creditCard.id, body })
+	const existingCount = await validateExistingCreditCard({
+		db,
+		ownerId: user.id,
+		brand: creditCardData.brand,
+		last4: creditCardData.last4,
+		institution: creditCardData.institution,
+		excludeId: creditCard.id,
+	})
+	if (existingCount) {
+		return data(
+			{
+				submission: submission.reply({
+					formErrors: [t('form.edit.action.duplicateError')],
+				}),
+			},
+			{ status: 422 },
+		)
+	}
+
+	await updateCreditCard({
+		db,
+		id: creditCard.id,
+		accountId: creditCard.accountId,
+		creditCardData,
+	})
 
 	return await redirectWithToast('/app/credit-cards', request, {
 		type: 'success',
@@ -88,13 +100,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function EditCreditCard({
-	loaderData: { selectData, initialData },
+	loaderData: { initialData },
 	actionData,
 }: Route.ComponentProps) {
 	return (
 		<CreditCardForm
 			action={ACTION_EDITION}
-			selectData={selectData}
 			initialData={initialData}
 			lastResult={actionData?.submission}
 		/>

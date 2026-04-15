@@ -17,7 +17,7 @@ import {
 	createCreditCardTransaction,
 	ensureStatementsExist,
 } from '../lib/queries'
-import { createCreditCardTransactionFormSchema } from '../lib/schemas'
+import { creditCardTransactionFormSchema } from '../lib/schemas'
 import { CC_TRANSACTION_TYPE_CHARGE } from '../lib/constants'
 import { creditCardContext } from '../lib/context'
 
@@ -65,7 +65,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
-		schema: createCreditCardTransactionFormSchema(t),
+		schema: creditCardTransactionFormSchema(t),
 	})
 
 	if (submission.status !== 'success') {

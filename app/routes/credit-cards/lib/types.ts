@@ -8,8 +8,8 @@ export type TCreditCardContext = {
 	last4: string
 	expiryMonth: string
 	expiryYear: string
+	institution: string
 	accountId: string
 	closingDate: string
 	dueDate: string
-	accountName: string
 }

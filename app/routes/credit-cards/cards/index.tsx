@@ -83,7 +83,7 @@ export default function CreditCards({
 								brand,
 								expiryMonth,
 								expiryYear,
-								accountName,
+								institution,
 							}) => (
 								<li key={id}>
 									<Link
@@ -95,7 +95,7 @@ export default function CreditCards({
 											last4={last4}
 											expiryMonth={expiryMonth}
 											expiryYear={expiryYear}
-											accountName={accountName}
+											institution={institution}
 										/>
 									</Link>
 								</li>

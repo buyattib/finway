@@ -182,6 +182,7 @@ export const creditCard = sqliteTable(
 		last4: text().notNull(),
 		expiryMonth: text().notNull(),
 		expiryYear: text().notNull(),
+		institution: text().notNull().default(''),
 
 		accountId: text().notNull(),
 	},

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, lt, lte, sum } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, lt, lte, sum, ne } from 'drizzle-orm'
 
 import {
 	creditCard as creditCardTable,
@@ -9,35 +9,15 @@ import {
 	currency as currencyTable,
 } from '~/database/schema'
 import type { DB } from '~/lib/types'
-import { addMonth, subtractMonth } from '~/lib/utils'
+import { addMonth, subtractMonth, initializeDate } from '~/lib/utils'
 
+import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
+import { createAccount } from '~/routes/accounts/lib/queries'
 import type { TCategory } from '~/routes/transactions/lib/types'
 
 import type { TCCTransactionType } from './types'
 
 // fetch --------
-
-export async function getCreditCards({
-	db,
-	ownerId,
-}: {
-	db: DB
-	ownerId: string
-}) {
-	return db
-		.select({
-			id: creditCardTable.id,
-			last4: creditCardTable.last4,
-			brand: creditCardTable.brand,
-			expiryMonth: creditCardTable.expiryMonth,
-			expiryYear: creditCardTable.expiryYear,
-			accountName: accountTable.name,
-		})
-		.from(creditCardTable)
-		.innerJoin(accountTable, eq(creditCardTable.accountId, accountTable.id))
-		.where(eq(accountTable.ownerId, ownerId))
-		.orderBy(desc(creditCardTable.createdAt))
-}
 
 export async function getCreditCardById({
 	db,
@@ -54,11 +34,12 @@ export async function getCreditCardById({
 			last4: true,
 			expiryMonth: true,
 			expiryYear: true,
+			institution: true,
 			accountId: true,
 		},
 		with: {
 			account: {
-				columns: { name: true, ownerId: true },
+				columns: { ownerId: true },
 			},
 			statements: {
 				orderBy: (s, { desc }) => [desc(s.closingDate)],
@@ -67,6 +48,64 @@ export async function getCreditCardById({
 			},
 		},
 	})
+}
+
+export async function getCreditCards({
+	db,
+	ownerId,
+}: {
+	db: DB
+	ownerId: string
+}) {
+	return db
+		.select({
+			id: creditCardTable.id,
+			last4: creditCardTable.last4,
+			brand: creditCardTable.brand,
+			expiryMonth: creditCardTable.expiryMonth,
+			expiryYear: creditCardTable.expiryYear,
+			institution: creditCardTable.institution,
+		})
+		.from(creditCardTable)
+		.innerJoin(accountTable, eq(creditCardTable.accountId, accountTable.id))
+		.where(eq(accountTable.ownerId, ownerId))
+		.orderBy(desc(creditCardTable.createdAt))
+}
+
+export async function validateExistingCreditCard({
+	db,
+	ownerId,
+	brand,
+	last4,
+	institution,
+	excludeId,
+}: {
+	db: DB
+	ownerId: string
+	brand: string
+	last4: string
+	institution: string
+	excludeId?: string
+}) {
+	const filters = [
+		eq(accountTable.ownerId, ownerId),
+		eq(creditCardTable.last4, last4),
+		eq(creditCardTable.brand, brand),
+		eq(creditCardTable.institution, institution),
+	]
+	if (excludeId) {
+		filters.push(ne(creditCardTable.id, excludeId))
+	}
+	return db.$count(
+		db
+			.select()
+			.from(creditCardTable)
+			.innerJoin(
+				accountTable,
+				eq(creditCardTable.accountId, accountTable.id),
+			)
+			.where(and(...filters)),
+	)
 }
 
 export async function getStatementByDate({
@@ -525,57 +564,93 @@ export async function ensureStatementsExist({
 	})
 }
 
+// CC
 export async function createCreditCard({
 	db,
+	ownerId,
 	creditCardData,
-	currentClosingDate,
-	currentDueDate,
 }: {
 	db: DB
+	ownerId: string
 	creditCardData: {
 		last4: string
 		brand: string
 		expiryMonth: string
 		expiryYear: string
-		accountId: string
+		institution: string
 	}
-	currentClosingDate: string
-	currentDueDate: string
 }) {
-	const [{ id: creditCardId }] = await db
-		.insert(creditCardTable)
-		.values(creditCardData)
-		.returning({ id: creditCardTable.id })
-
-	await db.insert(creditCardStatementTable).values({
-		closingDate: currentClosingDate,
-		dueDate: currentDueDate,
-		creditCardId,
+	// Initialize dates for first statement
+	const currentClosingDate = initializeDate()
+	const currentDueDate = initializeDate({
+		day: currentClosingDate.getUTCDate() + 10,
 	})
 
-	return creditCardId
+	return await db.transaction(async tx => {
+		const name = `${creditCardData.brand}-${creditCardData.last4}-${creditCardData.institution}`
+		const accountId = await createAccount({
+			db: tx,
+			ownerId,
+			name,
+			accountType: ACCOUNT_TYPE_CREDIT_CARD,
+			description: '',
+		})
+
+		const [{ id: creditCardId }] = await tx
+			.insert(creditCardTable)
+			.values({ ...creditCardData, accountId })
+			.returning({ id: creditCardTable.id })
+
+		await tx.insert(creditCardStatementTable).values({
+			closingDate: currentClosingDate.toISOString(),
+			dueDate: currentDueDate.toISOString(),
+			creditCardId,
+		})
+
+		return creditCardId
+	})
 }
 
 export async function updateCreditCard({
 	db,
 	id,
-	body,
+	accountId,
+	creditCardData,
 }: {
 	db: DB
 	id: string
-	body: Record<string, unknown>
+	accountId: string
+	creditCardData: {
+		last4: string
+		brand: string
+		expiryMonth: string
+		expiryYear: string
+		institution: string
+	}
 }) {
-	await db.update(creditCardTable).set(body).where(eq(creditCardTable.id, id))
+	await db.transaction(async tx => {
+		const name = `${creditCardData.brand}-${creditCardData.last4}-${creditCardData.institution}`
+		await tx
+			.update(accountTable)
+			.set({ name })
+			.where(eq(accountTable.id, accountId))
+
+		await tx
+			.update(creditCardTable)
+			.set(creditCardData)
+			.where(eq(creditCardTable.id, id))
+	})
 }
 
 export async function deleteCreditCard({
 	db,
-	creditCardId,
+	accountId,
 }: {
 	db: DB
-	creditCardId: string
+	accountId: string
 }) {
-	await db.delete(creditCardTable).where(eq(creditCardTable.id, creditCardId))
+	// Cascades the deletion to the credit card
+	await db.delete(accountTable).where(eq(accountTable.id, accountId))
 }
 
 export async function updateStatement({

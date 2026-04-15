@@ -2,8 +2,8 @@ import { z } from 'zod'
 import type { TFunction } from 'i18next'
 
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-import { CC_TRANSACTION_TYPES, CC_BRANDS } from './constants'
 import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
+import { CC_TRANSACTION_TYPES, CC_BRANDS } from './constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({
@@ -15,7 +15,7 @@ const ActionSchema = z.discriminatedUnion('action', [
 	}),
 ])
 
-export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
+export function creditCardFormSchema(t: TFunction<'credit-cards'>) {
 	return z
 		.object({
 			brand: z.enum(CC_BRANDS, t('form.schema.brandRequired')),
@@ -42,32 +42,14 @@ export function createCreditCardFormSchema(t: TFunction<'credit-cards'>) {
 					},
 					{ message: t('form.schema.expiryYearFuture') },
 				),
-
-			currentClosingDate: z.iso.datetime(
-				t('form.schema.currentClosingDateRequired'),
-			),
-			currentDueDate: z.iso.datetime(
-				t('form.schema.currentDueDateRequired'),
-			),
-			accountId: z.string(t('form.schema.accountRequired')),
+			institution: z
+				.string(t('form.schema.institutionRequired'))
+				.transform(value => value.trim()),
 		})
 		.and(ActionSchema)
-		.refine(
-			data => {
-				const closing = new Date(data.currentClosingDate)
-				const due = new Date(data.currentDueDate)
-				const diffDays =
-					(due.getTime() - closing.getTime()) / (1000 * 60 * 60 * 24)
-				return Math.abs(diffDays) <= 20
-			},
-			{
-				message: t('form.schema.dueDateMaxDifference'),
-				path: ['currentDueDate'],
-			},
-		)
 }
 
-export type CreditCardFormSchema = ReturnType<typeof createCreditCardFormSchema>
+export type CreditCardFormSchema = ReturnType<typeof creditCardFormSchema>
 
 export function editStatementFormSchema(t: TFunction<'credit-cards'>) {
 	return z
@@ -93,14 +75,7 @@ export function editStatementFormSchema(t: TFunction<'credit-cards'>) {
 		)
 }
 
-export const DeleteCreditCardFormSchema = z.object({
-	creditCardId: z.string(),
-	intent: z.literal('delete-card'),
-})
-
-export function createCreditCardTransactionFormSchema(
-	t: TFunction<'credit-cards'>,
-) {
+export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 	return z
 		.object({
 			date: z.iso.datetime(t('transaction.create.schema.dateRequired')),
@@ -142,7 +117,7 @@ export function createCreditCardTransactionFormSchema(
 }
 
 export type CreditCardTransactionFormSchema = ReturnType<
-	typeof createCreditCardTransactionFormSchema
+	typeof creditCardTransactionFormSchema
 >
 
 export const DeleteCreditCardTransactionFormSchema = z.object({

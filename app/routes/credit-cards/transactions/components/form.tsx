@@ -32,7 +32,7 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
 
-import { createCreditCardTransactionFormSchema } from '../../lib/schemas'
+import { creditCardTransactionFormSchema } from '../../lib/schemas'
 import { CC_TRANSACTION_TYPES } from '../../lib/constants'
 
 type TCreateLoaderData = CreateRoute.ComponentProps['loaderData']
@@ -92,10 +92,10 @@ export function CreditCardTransactionForm({
 		id: 'cc-transaction-form',
 		shouldValidate: 'onBlur',
 		defaultValue,
-		constraint: getZodConstraint(createCreditCardTransactionFormSchema(t)),
+		constraint: getZodConstraint(creditCardTransactionFormSchema(t)),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: createCreditCardTransactionFormSchema(t),
+				schema: creditCardTransactionFormSchema(t),
 			})
 		},
 	})

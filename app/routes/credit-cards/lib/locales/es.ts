@@ -27,9 +27,6 @@ export default {
 		dueDate: 'Vencimiento',
 		deleteTransactionAriaLabel: 'Eliminar transacción',
 		action: {
-			notFoundError: 'Tarjeta de crédito no encontrada',
-			deleteCardErrorToast: 'No se pudo eliminar la tarjeta de crédito',
-			deleteCardErrorDescription: 'Por favor intenta de nuevo',
 			deleteCardSuccessToast:
 				'Tarjeta de crédito {{brand}} •••• {{last4}} eliminada',
 			deleteTransactionErrorToast: 'No se pudo eliminar la transacción',
@@ -83,13 +80,9 @@ export default {
 		expiryMonthPlaceholder: 'MM',
 		expiryYearLabel: 'Año de Vencimiento',
 		expiryYearPlaceholder: 'AAAA',
-		currentClosingDateLabel: 'Fecha de Cierre Actual',
-		currentDueDateLabel: 'Fecha de Vencimiento Actual',
-		accountLabel: 'Cuenta',
-		accountPlaceholder: 'Selecciona una cuenta',
+		institutionLabel: 'Institución',
+		institutionPlaceholder: 'Banco, emisor, etc.',
 		resetButton: 'Restablecer',
-		noAccountMessage:
-			'Necesitas crear una cuenta primero. Hazlo <0>aquí</0>',
 		schema: {
 			brandRequired: 'La marca es requerida',
 			last4Required: 'Los últimos 4 dígitos son requeridos',
@@ -100,11 +93,11 @@ export default {
 			expiryYearRequired: 'El año de vencimiento es requerido',
 			expiryYearInvalid: 'Debe ser un año de 4 dígitos',
 			expiryYearFuture: 'Debe ser un año válido en el futuro',
+			institutionRequired: 'La institución es requerida',
 			currentClosingDateRequired: 'La fecha de cierre es requerida',
 			currentDueDateRequired: 'La fecha de vencimiento es requerida',
 			dueDateMaxDifference:
 				'La fecha de vencimiento debe estar dentro de los 20 días de la fecha de cierre',
-			accountRequired: 'La cuenta es requerida',
 		},
 		create: {
 			meta: {
@@ -116,25 +109,22 @@ export default {
 			submitButton: 'Crear',
 			action: {
 				invalidActionError: 'Acción inválida',
+				duplicateError:
+					'Una tarjéta de crédito con estos valores ya existe',
 				successToast: 'Tarjeta de crédito creada exitosamente',
-				accountNotFound: 'Cuenta no encontrada',
 			},
 		},
 		edit: {
 			meta: {
 				title: 'Editar Tarjeta de Crédito {{brand}} •••• {{last4}} | Finway',
-				notFoundTitle:
-					'Tarjeta de crédito {{creditCardId}} no encontrada | Finway',
 			},
 			title: 'Editar tarjeta de crédito',
 			submitButton: 'Actualizar',
-			loader: {
-				notFoundError: 'Tarjeta de crédito no encontrada',
-			},
 			action: {
 				invalidActionError: 'Acción inválida',
+				duplicateError:
+					'Una tarjéta de crédito con estos valores ya existe',
 				successToast: 'Tarjeta de crédito actualizada exitosamente',
-				creditCardNotFound: 'Tarjeta de crédito no encontrada',
 			},
 		},
 	},
@@ -167,9 +157,7 @@ export default {
 			action: {
 				invalidActionError: 'Acción inválida',
 				successToast: 'Transacción creada exitosamente',
-				creditCardNotFound: 'Tarjeta de crédito no encontrada',
 				currencyNotFound: 'Moneda no encontrada',
-				categoryNotFound: 'Categoría de transacción no encontrada',
 			},
 			schema: {
 				dateRequired: 'La fecha es requerida',
@@ -200,9 +188,7 @@ export default {
 				invalidActionError: 'Acción inválida',
 				successToast: 'Transacción actualizada exitosamente',
 				transactionNotFound: 'Transacción no encontrada',
-				creditCardNotFound: 'Tarjeta de crédito no encontrada',
 				currencyNotFound: 'Moneda no encontrada',
-				categoryNotFound: 'Categoría de transacción no encontrada',
 			},
 		},
 		details: {
