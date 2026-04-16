@@ -50,9 +50,23 @@ export function formatNumber(
 	return formatter.format(Number(num))
 }
 
-export function initializeDate() {
+export function initializeDate({
+	year,
+	month,
+	day,
+}: {
+	year?: number
+	month?: number
+	day?: number
+} = {}) {
 	const now = new Date()
-	return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+	return new Date(
+		Date.UTC(
+			year ?? now.getFullYear(),
+			month ?? now.getMonth(),
+			day ?? now.getDate(),
+		),
+	)
 }
 
 export function addMonth(dateStr: string): string {
