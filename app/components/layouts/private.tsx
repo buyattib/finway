@@ -51,8 +51,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 	void db
 		.select({ id: creditCardTable.id })
 		.from(creditCardTable)
-		.innerJoin(accountTable, eq(creditCardTable.accountId, accountTable.id))
-		.where(eq(accountTable.ownerId, user.id))
+		.where(eq(creditCardTable.ownerId, user.id))
 		.orderBy(desc(creditCardTable.createdAt))
 		.then(async cards => {
 			for (const { id } of cards) {
