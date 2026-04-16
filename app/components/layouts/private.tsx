@@ -18,7 +18,7 @@ import {
 } from '~/database/schema'
 import { authMiddleware } from '~/middleware/auth'
 import { userContext, dbContext } from '~/lib/context'
-import { cn } from '~/lib/utils'
+import { cn, initializeDate } from '~/lib/utils'
 
 import { NavigationProgress } from '~/components/ui/navigation-progress'
 import { FinwayLink } from '~/components/finway-link'
@@ -59,7 +59,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 				await ensureStatementsExist({
 					db,
 					creditCardId: id,
-					date: new Date(),
+					date: initializeDate(),
 				})
 			}
 		})

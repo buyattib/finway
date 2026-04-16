@@ -21,6 +21,7 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
 import {
+	getStatementById,
 	getStatementInstallments,
 	getStatementTotalsByCurrency,
 } from '../lib/queries'
@@ -36,33 +37,47 @@ export function meta({ loaderData }: Route.MetaArgs) {
 	]
 }
 
-export async function loader({ context, request }: Route.LoaderArgs) {
+export async function loader({
+	context,
+	request,
+	params: { statementId },
+}: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const {
 		creditCard: { accountId: _accountId, ...creditCard },
-		statement,
 	} = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const url = new URL(request.url)
 	const page = Number(url.searchParams.get('page') ?? '1')
 
+	const statement = await getStatementById({ db, statementId })
+	if (!statement || statement.creditCardId !== creditCard.id) {
+		throw new Response(t('statement.details.loader.notFoundError'), {
+			status: 404,
+		})
+	}
+
 	const [{ installments, total }, currencyTotals] = await Promise.all([
 		getStatementInstallments({
 			db,
-			statementId: statement.id,
+			statementId,
 			page,
 			pageSize: PAGE_SIZE,
 		}),
 		getStatementTotalsByCurrency({
 			db,
-			statementId: statement.id,
+			statementId,
 		}),
 	])
 
 	return {
 		creditCard,
-		statement,
+		statement: {
+			id: statement.id,
+			closingDate: statement.closingDate,
+			dueDate: statement.dueDate,
+		},
 		totals: currencyTotals.map(t => ({
 			currencyCode: t.currencyCode,
 			total: String(Number(t.total) / 100),
@@ -188,21 +203,20 @@ export default function StatementDetails({
 				) : (
 					<ul className='flex flex-col gap-2'>
 						{installments.map(
-							(
-								{
-									id,
-									amount,
-									category,
-									type,
-									currencyCode,
+							({
+								id,
+								amount,
+								category,
+								type,
+								currencyCode,
 
-									transactionId,
-									transactionDescription,
+								transactionId,
+								transactionDescription,
+								transactionDate,
 
-									totalInstallments,
-								},
-								idx,
-							) => (
+								totalInstallments,
+								installmentNumber,
+							}) => (
 								<li
 									key={id}
 									className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
@@ -212,7 +226,19 @@ export default function StatementDetails({
 										)
 									}
 								>
-									<div className='grid grid-cols-2 sm:grid-cols-4 items-center gap-4'>
+									<div className='grid grid-cols-2 sm:grid-cols-5 items-center gap-4'>
+										<Text
+											size='xs'
+											weight='medium'
+											theme='muted'
+											className='flex items-center gap-2'
+										>
+											{formatDate(
+												new Date(transactionDate),
+												i18n.language,
+											)}
+										</Text>
+
 										<div className='flex flex-col gap-1'>
 											<Text
 												size='sm'
@@ -238,7 +264,7 @@ export default function StatementDetails({
 											{t(
 												'statement.details.installmentOf',
 												{
-													number: idx + 1,
+													number: installmentNumber,
 													total: totalInstallments,
 												},
 											)}

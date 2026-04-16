@@ -60,6 +60,10 @@ export default {
 					'Closing date must be after the previous statement closing date',
 				closingDateBeforeNext:
 					'Closing date must be before the next statement closing date',
+				dueDateAfterPrevious:
+					'Due date must be after the previous statement due date',
+				dueDateBeforeNext:
+					'Due date must be before the next statement due date',
 			},
 		},
 	},

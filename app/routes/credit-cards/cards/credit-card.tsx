@@ -52,7 +52,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const {
 		creditCard: { accountId: _accountId, ...creditCard },
-		statement,
+		currentStatement,
 	} = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
@@ -64,7 +64,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const { statements: _statements, total } = await getCreditCardStatements({
 		db,
 		creditCardId: creditCard.id,
-		maxClosingDate: statement.closingDate,
+		maxClosingDate: currentStatement.closingDate,
 		page,
 		pageSize: PAGE_SIZE,
 	})

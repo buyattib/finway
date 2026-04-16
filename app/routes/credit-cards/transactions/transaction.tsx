@@ -48,7 +48,7 @@ export async function loader({
 	params: { transactionId },
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
-	const { creditCard, statement } = context.get(creditCardContext)
+	const { creditCard } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const transaction = await getCreditCardTransactionById({
@@ -64,7 +64,6 @@ export async function loader({
 	const installments = await getTransactionInstallments({
 		db,
 		transactionId,
-		maxClosingDate: statement.closingDate,
 	})
 
 	const { currency, ...transactionData } = transaction
@@ -289,7 +288,8 @@ export default function CreditCardTransaction({
 							className='flex flex-col sm:flex-row sm:items-center gap-6 rounded-lg border p-3'
 						>
 							<Text size='sm' theme='muted'>
-								{idx + 1} / {installments.length}
+								{installments.length - idx} /{' '}
+								{installments.length}
 							</Text>
 							<Text
 								size='sm'

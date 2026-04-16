@@ -1,9 +1,8 @@
-import { and, asc, desc, eq, gt, lt, lte, sum, ne } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, lt, lte, sum, ne, sql } from 'drizzle-orm'
 
 import {
 	creditCard as creditCardTable,
 	creditCardTransaction as creditCardTransactionTable,
-	creditCardTransactionInstallment as creditCardTransactionInstallmentTable,
 	creditCardStatement as creditCardStatementTable,
 	account as accountTable,
 	currency as currencyTable,
@@ -188,11 +187,9 @@ export async function getTransactionInstallmentCount({
 export async function getTransactionInstallments({
 	db,
 	transactionId,
-	maxClosingDate,
 }: {
 	db: DB
 	transactionId: string
-	maxClosingDate: string
 }) {
 	return db
 		.select({
@@ -201,16 +198,7 @@ export async function getTransactionInstallments({
 			date: transactionTable.date,
 		})
 		.from(transactionTable)
-		.innerJoin(
-			creditCardStatementTable,
-			eq(transactionTable.statementId, creditCardStatementTable.id),
-		)
-		.where(
-			and(
-				eq(transactionTable.creditCardTransactionId, transactionId),
-				lte(creditCardStatementTable.closingDate, maxClosingDate),
-			),
-		)
+		.where(eq(transactionTable.creditCardTransactionId, transactionId))
 		.orderBy(desc(transactionTable.date))
 }
 
@@ -323,6 +311,11 @@ export async function getStatementInstallments({
 					transactionTable.creditCardTransactionId,
 				),
 			),
+			installmentNumber: sql<number>`(
+			    SELECT count(*) FROM "transactions" AS "prev_tx"
+			    WHERE "prev_tx"."creditCardTransactionId" = ${transactionTable.creditCardTransactionId}
+			      AND "prev_tx"."date" <= ${transactionTable.date}
+			)`.as('installmentNumber'),
 		})
 		.from(transactionTable)
 		.innerJoin(
@@ -337,7 +330,10 @@ export async function getStatementInstallments({
 			eq(transactionTable.currencyId, currencyTable.id),
 		)
 		.where(eq(transactionTable.statementId, statementId))
-		.orderBy(desc(creditCardTransactionTable.date))
+		.orderBy(
+			desc(creditCardTransactionTable.date),
+			desc(creditCardTransactionTable.createdAt),
+		)
 
 	const total = await db.$count(installmentsQuery)
 	const installments = await installmentsQuery
@@ -565,10 +561,17 @@ export async function updateStatement({
 	statementId: string
 	body: { closingDate: string; dueDate: string }
 }) {
-	await db
-		.update(creditCardStatementTable)
-		.set(body)
-		.where(eq(creditCardStatementTable.id, statementId))
+	await db.transaction(async tx => {
+		await tx
+			.update(creditCardStatementTable)
+			.set(body)
+			.where(eq(creditCardStatementTable.id, statementId))
+
+		await tx
+			.update(transactionTable)
+			.set({ date: body.dueDate })
+			.where(eq(transactionTable.statementId, statementId))
+	})
 }
 
 // cc transactions
@@ -588,6 +591,7 @@ export async function updateCreditCardTransaction({
 	db,
 	creditCardTransactionId,
 	transactionData,
+	creditCard,
 	installments,
 }: {
 	db: DB
@@ -600,30 +604,42 @@ export async function updateCreditCardTransaction({
 		currencyId: string
 		category: TCategory
 	}
+	creditCard: { accountId: string }
 	installments: Array<{
-		installmentNumber: number
-		amount: number
 		statementId: string
+		amount: number
+		dueDate: string
 	}>
 }) {
+	const {
+		date: _date,
+		amount: _amount,
+		description: _description,
+		...commonData
+	} = transactionData
+
 	await db.transaction(async tx => {
 		await tx
 			.update(creditCardTransactionTable)
-			.set(transactionData)
+			.set({ ...transactionData, installmentCount: installments.length })
 			.where(eq(creditCardTransactionTable.id, creditCardTransactionId))
 
 		await tx
-			.delete(creditCardTransactionInstallmentTable)
+			.delete(transactionTable)
 			.where(
 				eq(
-					creditCardTransactionInstallmentTable.creditCardTransactionId,
+					transactionTable.creditCardTransactionId,
 					creditCardTransactionId,
 				),
 			)
 
-		await tx.insert(creditCardTransactionInstallmentTable).values(
+		await tx.insert(transactionTable).values(
 			installments.map(i => ({
-				...i,
+				...commonData,
+				date: i.dueDate,
+				amount: i.amount,
+				accountId: creditCard.accountId,
+				statementId: i.statementId,
 				creditCardTransactionId,
 			})),
 		)
@@ -650,7 +666,6 @@ export async function createCreditCardTransaction({
 		accountId: string
 	}
 	installments: Array<{
-		installmentNumber: number
 		amount: number
 		statementId: string
 		dueDate: string

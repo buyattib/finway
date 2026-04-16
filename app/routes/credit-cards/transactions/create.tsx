@@ -8,6 +8,7 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { ACTION_CREATION } from '~/lib/constants'
 import { getSelectData, getCurrencyById } from '~/lib/queries'
+import { addMonth } from '~/lib/utils'
 
 import {
 	TRANSACTION_CATEGORIES,
@@ -113,6 +114,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const transactionDate = new Date(values.date)
 	const installmentCount = Number(totalInstallments)
 
+	await ensureStatementsExist({
+		db,
+		creditCardId: creditCard.id,
+		date: transactionDate,
+	})
+
 	const transactionStatement = await getStatementByDate({
 		db,
 		creditCardId: creditCard.id,
@@ -123,14 +130,14 @@ export async function action({ request, context }: Route.ActionArgs) {
 		throw new Error('Could not find statement for date')
 	}
 
-	const lastInstallmentDate = new Date(transactionStatement.closingDate)
-	lastInstallmentDate.setUTCMonth(
-		lastInstallmentDate.getUTCMonth() + installmentCount - 1,
-	)
+	let lastInstallmentClosing = transactionStatement.closingDate
+	for (let i = 1; i < installmentCount; i++) {
+		lastInstallmentClosing = addMonth(lastInstallmentClosing)
+	}
 	await ensureStatementsExist({
 		db,
 		creditCardId: creditCard.id,
-		date: lastInstallmentDate,
+		date: new Date(lastInstallmentClosing),
 	})
 
 	const statements = await getStatementsFromDate({
@@ -161,7 +168,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 			accountId: creditCard.accountId,
 		},
 		installments: statements.map((statement, i) => ({
-			installmentNumber: i + 1,
 			amount: baseAmount + (i < remainder ? 1 : 0),
 			statementId: statement.id,
 			dueDate: statement.dueDate,

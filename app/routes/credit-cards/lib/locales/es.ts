@@ -62,6 +62,10 @@ export default {
 					'La fecha de cierre debe ser posterior a la del resumen anterior',
 				closingDateBeforeNext:
 					'La fecha de cierre debe ser anterior a la del resumen siguiente',
+				dueDateAfterPrevious:
+					'La fecha de vencimiento debe ser posterior a la del resumen anterior',
+				dueDateBeforeNext:
+					'La fecha de vencimiento debe ser anterior a la del resumen siguiente',
 			},
 		},
 	},

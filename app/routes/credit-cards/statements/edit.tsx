@@ -9,7 +9,11 @@ import { dbContext } from '~/lib/context'
 
 import { editStatementFormSchema } from '../lib/schemas'
 import { creditCardContext } from '../lib/context'
-import { getAdjacentStatements, updateStatement } from '../lib/queries'
+import {
+	getAdjacentStatements,
+	getStatementById,
+	updateStatement,
+} from '../lib/queries'
 
 export async function action({
 	request,
@@ -17,7 +21,7 @@ export async function action({
 	params: { statementId },
 }: Route.ActionArgs) {
 	const db = context.get(dbContext)
-	const { creditCard, statement } = context.get(creditCardContext)
+	const { creditCard } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -27,6 +31,13 @@ export async function action({
 
 	if (submission.status !== 'success') {
 		return data({ submission: submission.reply() }, { status: 422 })
+	}
+
+	const statement = await getStatementById({ db, statementId })
+	if (!statement || statement.creditCardId !== creditCard.id) {
+		throw new Response(t('statement.details.loader.notFoundError'), {
+			status: 404,
+		})
 	}
 
 	const { closingDate, dueDate } = submission.value
@@ -47,11 +58,24 @@ export async function action({
 		closingErrors.push(t('statement.details.action.closingDateBeforeNext'))
 	}
 
-	if (closingErrors.length > 0) {
+	const dueErrors: string[] = []
+	if (previous && dueDate <= previous.dueDate) {
+		dueErrors.push(t('statement.details.action.dueDateAfterPrevious'))
+	}
+	if (next && dueDate >= next.dueDate) {
+		dueErrors.push(t('statement.details.action.dueDateBeforeNext'))
+	}
+
+	if (closingErrors.length > 0 || dueErrors.length > 0) {
 		return data(
 			{
 				submission: submission.reply({
-					fieldErrors: { closingDate: closingErrors },
+					fieldErrors: {
+						...(closingErrors.length > 0 && {
+							closingDate: closingErrors,
+						}),
+						...(dueErrors.length > 0 && { dueDate: dueErrors }),
+					},
 				}),
 			},
 			{ status: 422 },

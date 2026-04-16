@@ -96,11 +96,15 @@ export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 				.refine(value => Number(value) > 0, {
 					message: t('transaction.create.schema.amountPositive'),
 				}),
-			totalInstallments: z
-				.string()
-				.refine(value => !isNaN(Number(value)) && Number(value) >= 1, {
+			totalInstallments: z.string().refine(
+				value => {
+					const n = Number(value)
+					return !isNaN(n) && n >= 1 && Number.isInteger(n)
+				},
+				{
 					message: t('transaction.create.schema.installmentsMin'),
-				}),
+				},
+			),
 			description: z
 				.string()
 				.default('')

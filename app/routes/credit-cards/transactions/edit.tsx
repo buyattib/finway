@@ -9,6 +9,7 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { ACTION_EDITION } from '~/lib/constants'
 import { getSelectData, getCurrencyById } from '~/lib/queries'
+import { addMonth } from '~/lib/utils'
 
 import {
 	getCreditCardTransactionById,
@@ -88,7 +89,7 @@ export async function action({
 	params: { transactionId },
 }: Route.ActionArgs) {
 	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+	const { creditCard } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -107,8 +108,8 @@ export async function action({
 	}
 
 	const {
-		action: _action,
 		id: _id,
+		action: _action,
 		creditCardId: _creditCardId,
 		totalInstallments,
 		...values
@@ -173,14 +174,14 @@ export async function action({
 		throw new Error('Could not find statement for date')
 	}
 
-	const lastInstallmentDate = new Date(transactionStatement.closingDate)
-	lastInstallmentDate.setMonth(
-		lastInstallmentDate.getMonth() + installmentCount - 1,
-	)
+	let lastInstallmentClosing = transactionStatement.closingDate
+	for (let i = 1; i < installmentCount; i++) {
+		lastInstallmentClosing = addMonth(lastInstallmentClosing)
+	}
 	await ensureStatementsExist({
 		db,
 		creditCardId: creditCard.id,
-		date: lastInstallmentDate,
+		date: new Date(lastInstallmentClosing),
 	})
 
 	const statements = await getStatementsFromDate({
@@ -207,10 +208,11 @@ export async function action({
 			amount,
 			description: values.description ?? '',
 		},
+		creditCard: { accountId: creditCard.accountId },
 		installments: statements.map((statement, i) => ({
-			installmentNumber: i + 1,
-			amount: baseAmount + (i < remainder ? 1 : 0),
 			statementId: statement.id,
+			amount: baseAmount + (i < remainder ? 1 : 0),
+			dueDate: statement.dueDate,
 		})),
 	})
 

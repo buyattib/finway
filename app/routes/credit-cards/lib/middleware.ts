@@ -37,12 +37,8 @@ export const creditCardMiddleware: MiddlewareFunction = async ({
 	const { account: _account, ...creditCardData } = creditCard
 
 	context.set(creditCardContext, {
-		...creditCardData,
-		statementId: currentStatement.id,
-		closingDate: currentStatement.closingDate,
-		dueDate: currentStatement.dueDate,
 		creditCard: creditCardData,
-		statement: {
+		currentStatement: {
 			id: currentStatement.id,
 			closingDate: currentStatement.closingDate,
 			dueDate: currentStatement.dueDate,
