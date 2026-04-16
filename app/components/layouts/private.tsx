@@ -8,14 +8,9 @@ import {
 	LayoutDashboard,
 	WalletIcon,
 } from 'lucide-react'
-import { eq, desc } from 'drizzle-orm'
 
 import type { Route } from './+types/private'
 
-import {
-	creditCard as creditCardTable,
-	account as accountTable,
-} from '~/database/schema'
 import { authMiddleware } from '~/middleware/auth'
 import { userContext, dbContext } from '~/lib/context'
 import { cn, initializeDate } from '~/lib/utils'
@@ -39,7 +34,10 @@ import {
 	useSidebar,
 } from '~/components/ui/sidebar'
 
-import { ensureStatementsExist } from '~/routes/credit-cards/lib/queries'
+import {
+	ensureStatementsExist,
+	getCreditCards,
+} from '~/routes/credit-cards/lib/queries'
 
 export const middleware: MiddlewareFunction[] = [authMiddleware]
 
@@ -48,11 +46,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 
 	// Credit card statements check on every load of the app running on the background
-	void db
-		.select({ id: creditCardTable.id })
-		.from(creditCardTable)
-		.where(eq(creditCardTable.ownerId, user.id))
-		.orderBy(desc(creditCardTable.createdAt))
+	void getCreditCards({ db, ownerId: user.id })
 		.then(async cards => {
 			for (const { id } of cards) {
 				await ensureStatementsExist({
