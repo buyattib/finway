@@ -25,9 +25,6 @@ export default {
 		dueDate: 'Due',
 		deleteTransactionAriaLabel: 'Delete transaction',
 		action: {
-			notFoundError: 'Credit card not found',
-			deleteCardErrorToast: 'Could not delete credit card',
-			deleteCardErrorDescription: 'Please try again',
 			deleteCardSuccessToast:
 				'Credit card {{brand}} •••• {{last4}} deleted',
 			deleteTransactionErrorToast: 'Could not delete transaction',
@@ -71,6 +68,8 @@ export default {
 	},
 	form: {
 		description: 'Add a credit card to track expenses associated with it.',
+		institutionLabel: 'Institution',
+		institutionPlaceholder: 'Issuing bank or institution',
 		brandLabel: 'Brand',
 		brandPlaceholder: 'Visa, Mastercard, etc.',
 		last4Label: 'Last 4 digits',
@@ -79,13 +78,7 @@ export default {
 		expiryMonthPlaceholder: 'MM',
 		expiryYearLabel: 'Expiry Year',
 		expiryYearPlaceholder: 'YYYY',
-		currentClosingDateLabel: 'Current Closing Date',
-		currentDueDateLabel: 'Current Due Date',
-		accountLabel: 'Account',
-		accountPlaceholder: 'Select an account',
 		resetButton: 'Reset',
-		noAccountMessage:
-			'You need to create an account first. Do it <0>here</0>',
 		schema: {
 			brandRequired: 'Brand is required',
 			last4Required: 'Last 4 digits are required',
@@ -100,7 +93,7 @@ export default {
 			currentDueDateRequired: 'Due date is required',
 			dueDateMaxDifference:
 				'Due date must be within 20 days of closing date',
-			accountRequired: 'Account is required',
+			institutionRequired: 'Institution is required',
 		},
 		create: {
 			meta: {
@@ -112,24 +105,21 @@ export default {
 			action: {
 				invalidActionError: 'Invalid action',
 				successToast: 'Credit card created successfully',
-				accountNotFound: 'Account not found',
+				duplicateError:
+					'A credit card with these details already exists',
 			},
 		},
 		edit: {
 			meta: {
 				title: 'Edit Credit Card {{brand}} •••• {{last4}} | Finway',
-				notFoundTitle:
-					'Credit card {{creditCardId}} not found | Finway',
 			},
 			title: 'Edit credit card',
 			submitButton: 'Update',
-			loader: {
-				notFoundError: 'Credit card not found',
-			},
 			action: {
 				invalidActionError: 'Invalid action',
 				successToast: 'Credit card updated successfully',
-				creditCardNotFound: 'Credit card not found',
+				duplicateError:
+					'A credit card with these details already exists',
 			},
 		},
 	},

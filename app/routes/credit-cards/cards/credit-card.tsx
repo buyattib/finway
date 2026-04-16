@@ -51,10 +51,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const t = getServerT(context, 'credit-cards')
 	const db = context.get(dbContext)
-	const {
-		creditCard: { accountId: _accountId, ...creditCard },
-		currentStatement,
-	} = context.get(creditCardContext)
+	const { creditCard, currentStatement } = context.get(creditCardContext)
 
 	const url = new URL(request.url)
 	const searchParams = url.searchParams
@@ -112,7 +109,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const intent = formData.get('intent')
 
 	if (intent === 'delete') {
-		await deleteCreditCard({ db, accountId: creditCard.accountId })
+		await deleteCreditCard({ db, id: creditCard.id })
 
 		return await redirectWithToast('/app/credit-cards', request, {
 			type: 'success',

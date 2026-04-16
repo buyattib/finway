@@ -24,9 +24,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
 
 export async function loader({ context }: Route.LoaderArgs) {
 	const t = getServerT(context, 'credit-cards')
-	const {
-		creditCard: { accountId: _accountId, ...initialData },
-	} = context.get(creditCardContext)
+	const { creditCard: initialData } = context.get(creditCardContext)
 
 	return {
 		initialData,

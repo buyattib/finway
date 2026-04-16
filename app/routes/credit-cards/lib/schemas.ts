@@ -74,9 +74,7 @@ export function editStatementFormSchema(t: TFunction<'credit-cards'>) {
 		)
 }
 
-export function createCreditCardTransactionFormSchema(
-	t: TFunction<'credit-cards'>,
-) {
+export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 	return z
 		.object({
 			date: z.iso.datetime(t('transaction.create.schema.dateRequired')),
@@ -94,11 +92,15 @@ export function createCreditCardTransactionFormSchema(
 				.refine(value => Number(value) > 0, {
 					message: t('transaction.create.schema.amountPositive'),
 				}),
-			totalInstallments: z
-				.string()
-				.refine(value => !isNaN(Number(value)) && Number(value) >= 1, {
+			totalInstallments: z.string().refine(
+				value => {
+					const n = Number(value)
+					return !isNaN(n) && n >= 1 && Number.isInteger(n)
+				},
+				{
 					message: t('transaction.create.schema.installmentsMin'),
-				}),
+				},
+			),
 			description: z
 				.string()
 				.default('')
@@ -118,7 +120,7 @@ export function createCreditCardTransactionFormSchema(
 }
 
 export type CreditCardTransactionFormSchema = ReturnType<
-	typeof createCreditCardTransactionFormSchema
+	typeof creditCardTransactionFormSchema
 >
 
 export const DeleteCreditCardTransactionFormSchema = z.object({
