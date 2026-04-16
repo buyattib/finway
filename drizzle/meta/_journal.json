@@ -162,6 +162,13 @@
       "when": 1776265755557,
       "tag": "0022_cc_installments_to_transactions",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1776338337142,
+      "tag": "0023_update_transactions_references",
+      "breakpoints": true
     }
   ]
 }

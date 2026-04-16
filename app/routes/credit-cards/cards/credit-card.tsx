@@ -70,14 +70,14 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	})
 
 	const statements = _statements.map(s => {
-		const totalsByCurrency = new Map<TCurrency, number>()
-		// for (const inst of s.installments) {
-		// 	const code = inst.creditCardTransaction.currency.code
-		// 	totalsByCurrency.set(
-		// 		code,
-		// 		(totalsByCurrency.get(code) ?? 0) + inst.amount,
-		// 	)
-		// }
+		const totalsByCurrency = s.transactions.reduce<Map<TCurrency, number>>(
+			(acc, tx) => {
+				const code = tx.currency.code
+				acc.set(code, (acc.get(code) ?? 0) + tx.amount)
+				return acc
+			},
+			new Map(),
+		)
 
 		return {
 			id: s.id,
@@ -105,7 +105,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+	const { creditCard } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()

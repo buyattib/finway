@@ -48,7 +48,7 @@ export async function loader({
 	params: { transactionId },
 }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+	const { creditCard, statement } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const transaction = await getCreditCardTransactionById({
@@ -64,7 +64,7 @@ export async function loader({
 	const installments = await getTransactionInstallments({
 		db,
 		transactionId,
-		maxClosingDate: creditCard.closingDate,
+		maxClosingDate: statement.closingDate,
 	})
 
 	const { currency, ...transactionData } = transaction
@@ -76,7 +76,7 @@ export async function loader({
 			last4: creditCard.last4,
 			expiryMonth: creditCard.expiryMonth,
 			expiryYear: creditCard.expiryYear,
-			accountName: creditCard.accountName,
+			institution: creditCard.institution,
 		},
 		transaction: {
 			...transactionData,
@@ -98,7 +98,7 @@ export async function loader({
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+	const { creditCard } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
@@ -232,7 +232,7 @@ export default function CreditCardTransaction({
 					last4={creditCard.last4}
 					expiryMonth={creditCard.expiryMonth}
 					expiryYear={creditCard.expiryYear}
-					accountName={creditCard.accountName}
+					institution={creditCard.institution}
 					className='w-full shrink-0 md:max-w-sm'
 				/>
 				<div className='rounded-lg border p-4 flex flex-col gap-3 w-full'>
@@ -283,13 +283,13 @@ export default function CreditCardTransaction({
 				</Title>
 
 				<div className='flex flex-col gap-2'>
-					{installments.map(({ installmentNumber, amount, date }) => (
+					{installments.map(({ id, amount, date }, idx) => (
 						<div
-							key={installmentNumber}
+							key={id}
 							className='flex flex-col sm:flex-row sm:items-center gap-6 rounded-lg border p-3'
 						>
 							<Text size='sm' theme='muted'>
-								{installmentNumber} / {installments.length}
+								{idx + 1} / {installments.length}
 							</Text>
 							<Text
 								size='sm'

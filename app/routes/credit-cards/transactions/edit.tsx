@@ -37,7 +37,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+	const { creditCard } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const transaction = await getCreditCardTransactionById({

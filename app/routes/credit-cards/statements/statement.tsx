@@ -188,17 +188,21 @@ export default function StatementDetails({
 				) : (
 					<ul className='flex flex-col gap-2'>
 						{installments.map(
-							({
-								id,
-								installmentNumber,
-								totalInstallments,
-								amount,
-								transactionId,
-								transactionType,
-								transactionDescription,
-								category,
-								currencyCode,
-							}) => (
+							(
+								{
+									id,
+									amount,
+									category,
+									type,
+									currencyCode,
+
+									transactionId,
+									transactionDescription,
+
+									totalInstallments,
+								},
+								idx,
+							) => (
 								<li
 									key={id}
 									className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
@@ -228,13 +232,13 @@ export default function StatementDetails({
 										<TransactionType
 											variant='icon-text'
 											size='xs'
-											transactionType={transactionType}
+											transactionType={type}
 										/>
 										<Text size='xs' theme='muted'>
 											{t(
 												'statement.details.installmentOf',
 												{
-													number: installmentNumber,
+													number: idx + 1,
 													total: totalInstallments,
 												},
 											)}

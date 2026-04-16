@@ -49,7 +49,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		initialData: {
 			creditCardId: creditCardId,
 			type: TRANSACTION_TYPE_EXPENSE,
-			amount: '0',
+			amount: '',
 			totalInstallments: '1',
 			description: '',
 			currencyId: selectData.currencies?.[0]?.id || '',
