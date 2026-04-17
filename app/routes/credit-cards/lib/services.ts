@@ -23,7 +23,7 @@ export async function creditCardTransactionAction({
 	action,
 }: {
 	request: Request
-	context: RouterContextProvider
+	context: Readonly<RouterContextProvider>
 	action: TFormAction
 }) {
 	const t = getServerT(context, 'credit-cards')
