@@ -15,3 +15,5 @@ export const CC_BRANDS = [
 	CC_BRAND_MASTERCARD,
 	CC_BRAND_AMEX,
 ] as const
+
+export const CC_INSTALLMENT_OPTIONS = ['1', '3', '6', '9', '12', '18', '24']

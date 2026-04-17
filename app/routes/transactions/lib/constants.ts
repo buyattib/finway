@@ -10,7 +10,7 @@ export const TRANSACTION_CATEGORIES = [
 	'housing',
 	'utilities',
 	'groceries',
-	'dining_out',
+	'food_dining',
 	'transportation',
 	'health',
 	'shopping',

@@ -28,8 +28,8 @@ export default {
 			name: 'Groceries',
 			description: 'Supermarket, food delivered for home cooking',
 		},
-		dining_out: {
-			name: 'Dining Out',
+		food_dining: {
+			name: 'Food & Dining',
 			description: 'Restaurants, cafés, takeout, bars, coffee, delivery',
 		},
 		transportation: {

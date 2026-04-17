@@ -418,13 +418,76 @@ export async function getAdjacentStatements({
 
 // cc transactions
 
+export async function makeTransactionInstallments({
+	db,
+	creditCardId,
+	amount,
+	transactionDate,
+	installmentCount,
+}: {
+	db: DB
+	creditCardId: string
+	amount: number
+	transactionDate: Date
+	installmentCount: number
+}) {
+	await ensureStatementsExist({
+		db,
+		creditCardId,
+		date: transactionDate,
+	})
+
+	const transactionStatement = await getStatementByDate({
+		db,
+		creditCardId,
+		date: transactionDate,
+	})
+	if (!transactionStatement) {
+		throw new Error('Could not find statement for date')
+	}
+
+	let lastInstallmentClosing = transactionStatement.closingDate
+	for (let i = 1; i < installmentCount; i++) {
+		lastInstallmentClosing = addMonth(lastInstallmentClosing)
+	}
+	await ensureStatementsExist({
+		db,
+		creditCardId,
+		date: new Date(lastInstallmentClosing),
+	})
+
+	const statements = await getStatementsFromDate({
+		db,
+		creditCardId,
+		date: transactionStatement.closingDate,
+		limit: installmentCount,
+	})
+	if (statements.length < installmentCount) {
+		throw new Error(
+			`Expected ${installmentCount} statements but found ${statements.length}`,
+		)
+	}
+
+	const baseAmount = Math.floor(amount / installmentCount)
+	const remainder = amount - baseAmount * installmentCount
+
+	const installments = statements.map((statement, i) => ({
+		installmentNumber: i + 1,
+		amount: baseAmount + (i < remainder ? 1 : 0),
+		statementId: statement.id,
+	}))
+
+	return installments
+}
+
 export async function createCreditCardTransaction({
 	db,
-	transactionData,
 	creditCardId,
+	transactionData,
 	installments,
 }: {
 	db: DB
+	creditCardId: string
 	transactionData: {
 		date: string
 		type: TCCTransactionType
@@ -433,7 +496,6 @@ export async function createCreditCardTransaction({
 		currencyId: string
 		category: TCategory
 	}
-	creditCardId: string
 	installments: Array<{
 		installmentNumber: number
 		amount: number

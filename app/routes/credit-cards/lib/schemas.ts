@@ -112,9 +112,6 @@ export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 				TRANSACTION_CATEGORIES,
 				t('transaction.create.schema.categoryRequired'),
 			),
-			creditCardId: z.string(
-				t('transaction.create.schema.creditCardRequired'),
-			),
 		})
 		.and(ActionSchema)
 }
