@@ -119,8 +119,3 @@ export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 export type CreditCardTransactionFormSchema = ReturnType<
 	typeof creditCardTransactionFormSchema
 >
-
-export const DeleteCreditCardTransactionFormSchema = z.object({
-	creditCardTransactionId: z.string(),
-	intent: z.literal('delete-transaction'),
-})

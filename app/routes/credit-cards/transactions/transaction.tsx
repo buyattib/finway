@@ -1,6 +1,5 @@
 import { Form, Link, data, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
-import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/transaction'
@@ -31,7 +30,6 @@ import {
 	getTransactionInstallments,
 	deleteCreditCardTransaction,
 } from '../lib/queries'
-import { DeleteCreditCardTransactionFormSchema } from '../lib/schemas'
 import { creditCardContext } from '../lib/context'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -145,15 +143,8 @@ export async function action({
 export default function CreditCardTransaction({
 	loaderData: { creditCard, transaction, installments },
 }: Route.ComponentProps) {
-	const {
-		id: transactionId,
-		date,
-		type,
-		amount,
-		description,
-		category,
-		currencyCode,
-	} = transaction
+	const { date, type, amount, description, category, currencyCode } =
+		transaction
 	const { t, i18n } = useTranslation(['credit-cards', 'constants'])
 	const navigation = useNavigation()
 	const location = useLocation()
@@ -161,7 +152,8 @@ export default function CreditCardTransaction({
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname &&
-		navigation.state === 'submitting'
+		navigation.state === 'submitting' &&
+		navigation.formData?.get('intent') === 'delete'
 
 	return (
 		<>
@@ -194,19 +186,14 @@ export default function CreditCardTransaction({
 					</TooltipContent>
 				</Tooltip>
 				<Tooltip>
-					<Form method='post'>
-						<input
-							type='hidden'
-							name='creditCardTransactionId'
-							value={transactionId}
-						/>
-						<TooltipTrigger asChild>
+					<TooltipTrigger asChild>
+						<Form method='post'>
 							<Button
 								size='icon'
 								variant='destructive-outline'
 								type='submit'
 								name='intent'
-								value='delete-transaction'
+								value='delete'
 								disabled={isDeleting}
 							>
 								{isDeleting ? (
@@ -218,8 +205,8 @@ export default function CreditCardTransaction({
 									{t('details.deleteTransactionAriaLabel')}
 								</span>
 							</Button>
-						</TooltipTrigger>
-					</Form>
+						</Form>
+					</TooltipTrigger>
 					<TooltipContent>
 						{t('details.deleteTransactionAriaLabel')}
 					</TooltipContent>
