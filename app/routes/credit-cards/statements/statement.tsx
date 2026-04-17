@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeftIcon, SquarePenIcon } from 'lucide-react'
 
@@ -42,15 +42,15 @@ export async function loader({
 	request,
 	params: { statementId },
 }: Route.LoaderArgs) {
-	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
+	const db = context.get(dbContext)
+	const { creditCard, currentStatement } = context.get(creditCardContext)
 
 	const statement = await getStatementById({ db, statementId })
 	if (
 		!statement ||
 		statement.creditCardId !== creditCard.id ||
-		statement.closingDate > creditCard.closingDate
+		statement.closingDate > currentStatement.closingDate
 	) {
 		throw new Response(t('statement.details.loader.notFoundError'), {
 			status: 404,
@@ -77,7 +77,7 @@ export async function loader({
 			last4: creditCard.last4,
 			expiryMonth: creditCard.expiryMonth,
 			expiryYear: creditCard.expiryYear,
-			accountName: creditCard.accountName,
+			institution: creditCard.institution,
 		},
 		statement: {
 			id: statement.id,
@@ -106,7 +106,6 @@ export default function StatementDetails({
 	loaderData: { creditCard, statement, totals, installments, pagination },
 }: Route.ComponentProps) {
 	const { t, i18n } = useTranslation(['credit-cards', 'constants'])
-	const navigate = useNavigate()
 	const [editOpen, setEditOpen] = useState(false)
 
 	return (
@@ -136,7 +135,7 @@ export default function StatementDetails({
 					last4={creditCard.last4}
 					expiryMonth={creditCard.expiryMonth}
 					expiryYear={creditCard.expiryYear}
-					accountName={creditCard.accountName}
+					institution={creditCard.institution}
 					className='w-full shrink-0 md:max-w-sm'
 				/>
 				<div className='rounded-lg border p-4 flex flex-col gap-3 w-full'>
@@ -218,67 +217,83 @@ export default function StatementDetails({
 								transactionId,
 								transactionType,
 								transactionDescription,
+								transactionDate,
 								category,
 								currencyCode,
 							}) => (
-								<li
-									key={id}
-									className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
-									onClick={() =>
-										navigate(
-											`/app/credit-cards/${creditCard.id}/transactions/${transactionId}`,
-										)
-									}
-								>
-									<div className='grid grid-cols-2 sm:grid-cols-4 items-center gap-4'>
-										<div className='flex flex-col gap-1'>
+								<li key={id}>
+									<Link
+										to={`/app/credit-cards/${creditCard.id}/transactions/${transactionId}`}
+										className='block rounded-lg border p-3 hover:bg-muted/50 transition-colors'
+									>
+										<div className='grid grid-cols-2 sm:grid-cols-5 items-center gap-4'>
 											<Text
 												size='sm'
 												weight='medium'
-												className='truncate'
+												theme='muted'
 											>
-												{t(
-													`constants:categories.${category}.name`,
+												{formatDate(
+													new Date(transactionDate),
+													i18n.language,
 												)}
 											</Text>
-											{transactionDescription && (
-												<Text size='xs' theme='muted'>
-													{transactionDescription}
+
+											<div className='flex flex-col gap-1'>
+												<Text
+													size='sm'
+													weight='medium'
+													className='truncate'
+												>
+													{t(
+														`constants:categories.${category}.name`,
+													)}
 												</Text>
-											)}
-										</div>
-										<TransactionType
-											variant='icon-text'
-											size='xs'
-											transactionType={transactionType}
-										/>
-										<Text size='xs' theme='muted'>
-											{t(
-												'statement.details.installmentOf',
-												{
-													number: installmentNumber,
-													total: totalInstallments,
-												},
-											)}
-										</Text>
-										<Text
-											size='sm'
-											weight='medium'
-											className='flex items-center gap-2'
-										>
-											<CurrencyIcon
-												currency={
-													currencyCode as TCurrency
+												{transactionDescription && (
+													<Text
+														size='xs'
+														theme='muted'
+													>
+														{transactionDescription}
+													</Text>
+												)}
+											</div>
+											<TransactionType
+												variant='icon-text'
+												size='xs'
+												transactionType={
+													transactionType
 												}
-												size='sm'
 											/>
-											{getCurrencySymbol(currencyCode)}{' '}
-											{formatNumber(
-												amount,
-												i18n.language,
-											)}
-										</Text>
-									</div>
+											<Text size='xs' theme='muted'>
+												{t(
+													'statement.details.installmentOf',
+													{
+														number: installmentNumber,
+														total: totalInstallments,
+													},
+												)}
+											</Text>
+											<Text
+												size='sm'
+												weight='medium'
+												className='flex items-center gap-2'
+											>
+												<CurrencyIcon
+													currency={
+														currencyCode as TCurrency
+													}
+													size='sm'
+												/>
+												{getCurrencySymbol(
+													currencyCode,
+												)}{' '}
+												{formatNumber(
+													amount,
+													i18n.language,
+												)}
+											</Text>
+										</div>
+									</Link>
 								</li>
 							),
 						)}

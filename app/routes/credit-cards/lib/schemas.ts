@@ -48,8 +48,6 @@ export function creditCardFormSchema(t: TFunction<'credit-cards'>) {
 		.and(ActionSchema)
 }
 
-export type CreditCardFormSchema = ReturnType<typeof creditCardFormSchema>
-
 export function editStatementFormSchema(t: TFunction<'credit-cards'>) {
 	return z
 		.object({
@@ -63,9 +61,11 @@ export function editStatementFormSchema(t: TFunction<'credit-cards'>) {
 			data => {
 				const closing = new Date(data.closingDate)
 				const due = new Date(data.dueDate)
-				const diffDays =
-					(due.getTime() - closing.getTime()) / (1000 * 60 * 60 * 24)
-				return Math.abs(diffDays) <= 20
+
+				const diff = due.getTime() - closing.getTime()
+				const diffDays = diff / (1000 * 60 * 60 * 24)
+
+				return diff > 0 && Math.abs(diffDays) <= 20
 			},
 			{
 				message: t('form.schema.dueDateMaxDifference'),
@@ -115,7 +115,3 @@ export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 		})
 		.and(ActionSchema)
 }
-
-export type CreditCardTransactionFormSchema = ReturnType<
-	typeof creditCardTransactionFormSchema
->

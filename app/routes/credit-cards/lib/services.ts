@@ -68,7 +68,7 @@ export async function creditCardTransactionAction({
 						],
 					}),
 				},
-				{ status: 422 },
+				{ status: 404 },
 			)
 		}
 	}
