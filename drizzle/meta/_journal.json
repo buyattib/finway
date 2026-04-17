@@ -145,22 +145,8 @@
     {
       "idx": 20,
       "version": "6",
-      "when": 1776373904528,
-      "tag": "0020_cc_to_user_relation",
-      "breakpoints": true
-    },
-    {
-      "idx": 21,
-      "version": "6",
-      "when": 1776373975908,
-      "tag": "0021_update_cc_model",
-      "breakpoints": true
-    },
-    {
-      "idx": 22,
-      "version": "6",
-      "when": 1776424546131,
-      "tag": "0022_udpate_category",
+      "when": 1776434336247,
+      "tag": "0020_update_category",
       "breakpoints": true
     }
   ]

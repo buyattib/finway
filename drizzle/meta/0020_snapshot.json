@@ -1,8 +1,8 @@
 {
+  "id": "6e3e4ed5-da3e-4470-9ea8-34bea07593a4",
+  "prevId": "247a31f3-c006-4dec-9ea4-b5fdeef66935",
   "version": "6",
   "dialect": "sqlite",
-  "id": "420274df-b4e6-4a7d-a855-8e6a0b6c2ae9",
-  "prevId": "247a31f3-c006-4dec-9ea4-b5fdeef66935",
   "tables": {
     "accounts": {
       "name": "accounts",
@@ -71,15 +71,15 @@
         "accounts_users_fk": {
           "name": "accounts_users_fk",
           "tableFrom": "accounts",
-          "tableTo": "users",
           "columnsFrom": [
             "ownerId"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -138,8 +138,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "ownerId": {
-          "name": "ownerId",
+        "accountId": {
+          "name": "accountId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -147,27 +147,27 @@
         }
       },
       "indexes": {
-        "credit_cards_ownerId_idx": {
-          "name": "credit_cards_ownerId_idx",
+        "credit_cards_accountId_idx": {
+          "name": "credit_cards_accountId_idx",
           "columns": [
-            "ownerId"
+            "accountId"
           ],
           "isUnique": false
         }
       },
       "foreignKeys": {
-        "credit_cards_users_fk": {
-          "name": "credit_cards_users_fk",
+        "credit_cards_accounts_fk": {
+          "name": "credit_cards_accounts_fk",
           "tableFrom": "credit_cards",
-          "tableTo": "users",
           "columnsFrom": [
-            "ownerId"
+            "accountId"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -233,15 +233,15 @@
         "credit_card_statements_credit_cards_fk": {
           "name": "credit_card_statements_credit_cards_fk",
           "tableFrom": "credit_card_statements",
-          "tableTo": "credit_cards",
           "columnsFrom": [
             "creditCardId"
           ],
+          "tableTo": "credit_cards",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -336,28 +336,28 @@
         "credit_card_transactions_credit_cards_fk": {
           "name": "credit_card_transactions_credit_cards_fk",
           "tableFrom": "credit_card_transactions",
-          "tableTo": "credit_cards",
           "columnsFrom": [
             "creditCardId"
           ],
+          "tableTo": "credit_cards",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "credit_card_transactions_currencies_fk": {
           "name": "credit_card_transactions_currencies_fk",
           "tableFrom": "credit_card_transactions",
-          "tableTo": "currencies",
           "columnsFrom": [
             "currencyId"
           ],
+          "tableTo": "currencies",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -437,28 +437,28 @@
         "credit_card_transaction_installments_credit_card_transactions_fk": {
           "name": "credit_card_transaction_installments_credit_card_transactions_fk",
           "tableFrom": "credit_card_transaction_installments",
-          "tableTo": "credit_card_transactions",
           "columnsFrom": [
             "creditCardTransactionId"
           ],
+          "tableTo": "credit_card_transactions",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "credit_card_transaction_installments_credit_card_statements_fk": {
           "name": "credit_card_transaction_installments_credit_card_statements_fk",
           "tableFrom": "credit_card_transaction_installments",
-          "tableTo": "credit_card_statements",
           "columnsFrom": [
             "statementId"
           ],
+          "tableTo": "credit_card_statements",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -600,41 +600,41 @@
         "exchanges_accounts_fk": {
           "name": "exchanges_accounts_fk",
           "tableFrom": "exchanges",
-          "tableTo": "accounts",
           "columnsFrom": [
             "accountId"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "exchanges_from_currencies_fk": {
           "name": "exchanges_from_currencies_fk",
           "tableFrom": "exchanges",
-          "tableTo": "currencies",
           "columnsFrom": [
             "fromCurrencyId"
           ],
+          "tableTo": "currencies",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "exchanges_to_currencies_fk": {
           "name": "exchanges_to_currencies_fk",
           "tableFrom": "exchanges",
-          "tableTo": "currencies",
           "columnsFrom": [
             "toCurrencyId"
           ],
+          "tableTo": "currencies",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -730,28 +730,28 @@
         "transactions_accounts_fk": {
           "name": "transactions_accounts_fk",
           "tableFrom": "transactions",
-          "tableTo": "accounts",
           "columnsFrom": [
             "accountId"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "transactions_currencies_fk": {
           "name": "transactions_currencies_fk",
           "tableFrom": "transactions",
-          "tableTo": "currencies",
           "columnsFrom": [
             "currencyId"
           ],
+          "tableTo": "currencies",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -840,41 +840,41 @@
         "transfers_from_accounts_fk": {
           "name": "transfers_from_accounts_fk",
           "tableFrom": "transfers",
-          "tableTo": "accounts",
           "columnsFrom": [
             "fromAccountId"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "transfers_to_accounts_fk": {
           "name": "transfers_to_accounts_fk",
           "tableFrom": "transfers",
-          "tableTo": "accounts",
           "columnsFrom": [
             "toAccountId"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "transfers_currencies_fk": {
           "name": "transfers_currencies_fk",
           "tableFrom": "transfers",
-          "tableTo": "currencies",
           "columnsFrom": [
             "currencyId"
           ],
+          "tableTo": "currencies",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -931,9 +931,9 @@
   "views": {},
   "enums": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
+    "tables": {}
   },
   "internal": {
     "indexes": {}

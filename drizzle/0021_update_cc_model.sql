@@ -1,1 +1,0 @@
-ALTER TABLE `credit_cards` ADD `institution` text NOT NULL;
