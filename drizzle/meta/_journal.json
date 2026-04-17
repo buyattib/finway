@@ -148,6 +148,13 @@
       "when": 1776434336247,
       "tag": "0020_update_category",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1776434505267,
+      "tag": "0021_add_cc_fields",
+      "breakpoints": true
     }
   ]
 }
