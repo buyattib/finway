@@ -27,8 +27,6 @@ export default {
 		action: {
 			deleteCardSuccessToast:
 				'Credit card {{brand}} •••• {{last4}} deleted',
-			deleteTransactionErrorToast: 'Could not delete transaction',
-			deleteTransactionErrorDescription: 'Please try again',
 			deleteTransactionSuccessToast: 'Transaction deleted',
 			transactionNotFoundToast: 'Transaction not found',
 			unknownActionToast: 'Unknown action',
@@ -59,12 +57,12 @@ export default {
 					'Closing date must be after the previous statement closing date',
 				closingDateBeforeNext:
 					'Closing date must be before the next statement closing date',
+				dueDateAfterPrevious:
+					'Due date must be after the previous statement due date',
+				dueDateBeforeNext:
+					'Due date must be before the next statement due date',
 			},
 		},
-	},
-	filters: {
-		type: 'Filter by type',
-		category: 'Filter by category',
 	},
 	form: {
 		description: 'Add a credit card to track expenses associated with it.',
@@ -152,9 +150,7 @@ export default {
 			action: {
 				invalidActionError: 'Invalid action',
 				successToast: 'Transaction created successfully',
-				creditCardNotFound: 'Credit card not found',
 				currencyNotFound: 'Currency not found',
-				categoryNotFound: 'Transaction category not found',
 			},
 			schema: {
 				dateRequired: 'Date is required',
@@ -165,7 +161,6 @@ export default {
 				installmentsMin: 'Must be at least 1',
 				currencyRequired: 'Currency is required',
 				categoryRequired: 'Category is required',
-				creditCardRequired: 'Credit card is required',
 			},
 		},
 		edit: {
@@ -185,9 +180,7 @@ export default {
 				invalidActionError: 'Invalid action',
 				successToast: 'Transaction updated successfully',
 				transactionNotFound: 'Transaction not found',
-				creditCardNotFound: 'Credit card not found',
 				currencyNotFound: 'Currency not found',
-				categoryNotFound: 'Transaction category not found',
 			},
 		},
 		details: {

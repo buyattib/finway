@@ -29,8 +29,6 @@ export default {
 		action: {
 			deleteCardSuccessToast:
 				'Tarjeta de crédito {{brand}} •••• {{last4}} eliminada',
-			deleteTransactionErrorToast: 'No se pudo eliminar la transacción',
-			deleteTransactionErrorDescription: 'Por favor intenta de nuevo',
 			deleteTransactionSuccessToast: 'Transacción eliminada',
 			transactionNotFoundToast: 'Transacción no encontrada',
 			unknownActionToast: 'Acción desconocida',
@@ -62,12 +60,12 @@ export default {
 					'La fecha de cierre debe ser posterior a la del resumen anterior',
 				closingDateBeforeNext:
 					'La fecha de cierre debe ser anterior a la del resumen siguiente',
+				dueDateAfterPrevious:
+					'La fecha de vencimiento debe ser posterior a la del resumen anterior',
+				dueDateBeforeNext:
+					'La fecha de vencimiento debe ser anterior a la del resumen siguiente',
 			},
 		},
-	},
-	filters: {
-		type: 'Filtrar por tipo',
-		category: 'Filtrar por categoría',
 	},
 	form: {
 		description:
@@ -157,9 +155,7 @@ export default {
 			action: {
 				invalidActionError: 'Acción inválida',
 				successToast: 'Transacción creada exitosamente',
-				creditCardNotFound: 'Tarjeta de crédito no encontrada',
 				currencyNotFound: 'Moneda no encontrada',
-				categoryNotFound: 'Categoría de transacción no encontrada',
 			},
 			schema: {
 				dateRequired: 'La fecha es requerida',
@@ -170,7 +166,6 @@ export default {
 				installmentsMin: 'Debe ser al menos 1',
 				currencyRequired: 'La moneda es requerida',
 				categoryRequired: 'La categoría es requerida',
-				creditCardRequired: 'La tarjeta de crédito es requerida',
 			},
 		},
 		edit: {
@@ -190,9 +185,7 @@ export default {
 				invalidActionError: 'Acción inválida',
 				successToast: 'Transacción actualizada exitosamente',
 				transactionNotFound: 'Transacción no encontrada',
-				creditCardNotFound: 'Tarjeta de crédito no encontrada',
 				currencyNotFound: 'Moneda no encontrada',
-				categoryNotFound: 'Categoría de transacción no encontrada',
 			},
 		},
 		details: {
