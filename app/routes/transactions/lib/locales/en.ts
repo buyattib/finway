@@ -55,6 +55,7 @@ export default {
 			'You need to create a transaction category first. Do it <0>here</0>',
 		schema: {
 			dateRequired: 'Date is required',
+			dateFuture: 'Date cannot be in the future',
 			transactionTypeRequired: 'Transaction type is required',
 			amountRequired: 'Amount is required',
 			amountInvalid: 'Amount must be a valid number',

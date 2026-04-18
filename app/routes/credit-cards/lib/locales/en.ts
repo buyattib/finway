@@ -154,6 +154,7 @@ export default {
 			},
 			schema: {
 				dateRequired: 'Date is required',
+				dateFuture: 'Date cannot be in the future',
 				transactionTypeRequired: 'Transaction type is required',
 				amountRequired: 'Amount is required',
 				amountInvalid: 'Amount must be a valid number',

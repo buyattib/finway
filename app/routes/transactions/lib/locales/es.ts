@@ -58,6 +58,7 @@ export default {
 			'Necesitas crear una categoría de transacción primero. Hazlo <0>aquí</0>',
 		schema: {
 			dateRequired: 'La fecha es requerida',
+			dateFuture: 'La fecha no puede ser futura',
 			transactionTypeRequired: 'El tipo de transacción es requerido',
 			amountRequired: 'El monto es requerido',
 			amountInvalid: 'El monto debe ser un número válido',

@@ -77,7 +77,11 @@ export function editStatementFormSchema(t: TFunction<'credit-cards'>) {
 export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 	return z
 		.object({
-			date: z.iso.datetime(t('transaction.create.schema.dateRequired')),
+			date: z.iso
+				.datetime(t('transaction.create.schema.dateRequired'))
+				.refine(value => new Date(value) <= new Date(), {
+					message: t('transaction.create.schema.dateFuture'),
+				}),
 			type: z.enum(
 				CC_TRANSACTION_TYPES,
 				t('transaction.create.schema.transactionTypeRequired'),
