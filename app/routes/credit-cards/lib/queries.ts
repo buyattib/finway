@@ -267,9 +267,9 @@ export async function updateStatement({
 				installmentCount:
 					ccTransactionInstallmentCount.installmentCount,
 			})
-			.from(creditCardTransactionTable)
+			.from(creditCardTransactionInstallmentTable)
 			.innerJoin(
-				creditCardTransactionInstallmentTable,
+				creditCardTransactionTable,
 				eq(
 					creditCardTransactionInstallmentTable.creditCardTransactionId,
 					creditCardTransactionTable.id,
@@ -289,8 +289,10 @@ export async function updateStatement({
 				),
 			)
 
+		if (!statementCCTransactions.length) return
+
 		// Delete all installments from cc transactions which have an installment in the statement
-		tx.delete(creditCardTransactionInstallmentTable).where(
+		await tx.delete(creditCardTransactionInstallmentTable).where(
 			inArray(
 				creditCardTransactionInstallmentTable.creditCardTransactionId,
 				statementCCTransactions.map(t => t.id),
@@ -298,17 +300,27 @@ export async function updateStatement({
 		)
 
 		// Recreate the installments for each transaction
-		statementCCTransactions.forEach(
-			async ({ amount, date, installmentCount }) => {
-				await makeTransactionInstallments({
-					db: tx,
-					creditCardId,
-					amount,
-					transactionDate: new Date(date),
-					installmentCount,
-				})
-			},
-		)
+		for (const {
+			id,
+			amount,
+			date,
+			installmentCount,
+		} of statementCCTransactions) {
+			const installments = await makeTransactionInstallments({
+				db: tx,
+				creditCardId,
+				amount,
+				transactionDate: new Date(date),
+				installmentCount,
+			})
+
+			await tx.insert(creditCardTransactionInstallmentTable).values(
+				installments.map(i => ({
+					...i,
+					creditCardTransactionId: id,
+				})),
+			)
+		}
 	})
 }
 
