@@ -83,8 +83,8 @@ export default {
 			name: 'Otros',
 			description: 'Debería mantenerse bajo ~5% del gasto',
 		},
-		income: {
-			name: 'Ingresos',
+		salary: {
+			name: 'Salario',
 			description: 'Sueldo, freelance, ingresos extra',
 		},
 		savings_and_investments: {

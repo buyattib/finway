@@ -76,8 +76,8 @@ export default {
 			name: 'Other',
 			description: 'Should stay under ~5% of spend',
 		},
-		income: {
-			name: 'Income',
+		salary: {
+			name: 'Salary',
 			description: 'Salary, freelance, side income',
 		},
 		savings_and_investments: {
