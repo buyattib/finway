@@ -15,6 +15,7 @@ export default {
 			actions: 'Actions',
 		},
 		emptyTitle: 'You have not created any exchanges yet',
+		emptyFilteredMessage: 'No exchanges found with applied filters',
 		deleteAriaLabel: 'Delete exchange',
 		action: {
 			deleteErrorToast: 'Could not delete exchange',
@@ -24,6 +25,10 @@ export default {
 				'Cannot delete exchange as account would hold a negative balance',
 			successToast: 'Exchange deleted',
 		},
+	},
+	filters: {
+		account: 'Filter by account',
+		currency: 'Filter by currency',
 	},
 	form: {
 		description:

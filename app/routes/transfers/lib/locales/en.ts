@@ -14,6 +14,7 @@ export default {
 			actions: 'Actions',
 		},
 		emptyTitle: 'You have not created any transfers yet',
+		emptyFilteredMessage: 'No transfers found with applied filters',
 		deleteAriaLabel: 'Delete transfer',
 		action: {
 			deleteErrorToast: 'Could not delete transfer',
@@ -23,6 +24,11 @@ export default {
 				'Cannot delete transfer as account would hold a negative balance',
 			successToast: 'Transfer deleted',
 		},
+	},
+	filters: {
+		fromAccount: 'Filter by from account',
+		toAccount: 'Filter by to account',
+		currency: 'Filter by currency',
 	},
 	form: {
 		description:

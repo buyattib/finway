@@ -17,6 +17,8 @@ export default {
 			actions: 'Acciones',
 		},
 		emptyTitle: 'Aún no has creado ningún intercambio',
+		emptyFilteredMessage:
+			'No se encontraron intercambios con los filtros aplicados',
 		deleteAriaLabel: 'Eliminar intercambio',
 		action: {
 			deleteErrorToast: 'No se pudo eliminar el intercambio',
@@ -26,6 +28,10 @@ export default {
 				'No se puede eliminar el intercambio porque la cuenta tendría un saldo negativo',
 			successToast: 'Intercambio eliminado',
 		},
+	},
+	filters: {
+		account: 'Filtrar por cuenta',
+		currency: 'Filtrar por moneda',
 	},
 	form: {
 		description:

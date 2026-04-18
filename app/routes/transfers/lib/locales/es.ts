@@ -16,6 +16,8 @@ export default {
 			actions: 'Acciones',
 		},
 		emptyTitle: 'Aún no has creado ninguna transferencia',
+		emptyFilteredMessage:
+			'No se encontraron transferencias con los filtros aplicados',
 		deleteAriaLabel: 'Eliminar transferencia',
 		action: {
 			deleteErrorToast: 'No se pudo eliminar la transferencia',
@@ -25,6 +27,11 @@ export default {
 				'No se puede eliminar la transferencia porque la cuenta tendría un saldo negativo',
 			successToast: 'Transferencia eliminada',
 		},
+	},
+	filters: {
+		fromAccount: 'Filtrar por cuenta de origen',
+		toAccount: 'Filtrar por cuenta de destino',
+		currency: 'Filtrar por moneda',
 	},
 	form: {
 		description:
