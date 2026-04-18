@@ -23,7 +23,14 @@ export function TransactionsFilters({
 	const { t } = useTranslation(['transactions', 'constants'])
 
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
-		icon: <TransactionType variant='icon' size='sm' transactionType={i} />,
+		icon: (
+			<TransactionType
+				type='transaction'
+				variant='icon'
+				size='sm'
+				transactionType={i}
+			/>
+		),
 		value: i,
 		label: t(`constants:transactionType.${i}`),
 	}))

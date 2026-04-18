@@ -291,6 +291,7 @@ export default function Transactions({
 													</TableCell>
 													<TableCell>
 														<TransactionType
+															type='transaction'
 															variant='icon-text'
 															size='xs'
 															transactionType={
@@ -446,6 +447,7 @@ export default function Transactions({
 											</div>
 											<div className='flex items-center justify-between'>
 												<TransactionType
+													type='transaction'
 													variant='icon-text'
 													size='xs'
 													transactionType={type}

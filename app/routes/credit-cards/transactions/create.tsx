@@ -6,9 +6,11 @@ import { dbContext, userContext } from '~/lib/context'
 import { ACTION_CREATION } from '~/lib/constants'
 import { getSelectData } from '~/lib/queries'
 
-import { TRANSACTION_CATEGORIES } from '~/routes/transactions/lib/constants'
+import {
+	TRANSACTION_CATEGORIES,
+	TRANSACTION_TYPE_EXPENSE,
+} from '~/routes/transactions/lib/constants'
 
-import { CC_TRANSACTION_TYPE_CHARGE } from '../lib/constants'
 import { creditCardContext } from '../lib/context'
 import { creditCardTransactionAction } from '../lib/services'
 import { CreditCardTransactionForm, type TInitialData } from './components/form'
@@ -35,7 +37,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		creditCard: { brand: brand, last4: last4 },
 		selectData,
 		initialData: {
-			type: CC_TRANSACTION_TYPE_CHARGE,
+			type: TRANSACTION_TYPE_EXPENSE,
 			amount: '0',
 			totalInstallments: '1',
 			description: '',

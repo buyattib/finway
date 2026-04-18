@@ -14,7 +14,6 @@ import {
 	TRANSACTION_CATEGORIES,
 	TRANSACTION_TYPES,
 } from '~/routes/transactions/lib/constants'
-import { CC_TRANSACTION_TYPES } from '~/routes/credit-cards/lib/constants'
 
 const base = {
 	createdAt: text()
@@ -224,7 +223,7 @@ export const creditCardTransaction = sqliteTable(
 		date: text().notNull(),
 		amount: integer().notNull(),
 		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
-		type: text({ enum: CC_TRANSACTION_TYPES }).notNull(),
+		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 		description: text().default(''),
 
 		creditCardId: text().notNull(),

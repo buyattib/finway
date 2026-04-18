@@ -1,4 +1,5 @@
 - transfer, exchange edition
+
 - transaction, transfer, exchange simplify and unify
 
 - use import * as schema from 'db' instead of importing individual tables?
@@ -8,6 +9,8 @@
 
 - Consolidated balance in one currency (external api to fetch fx)
 - Recurring transactions
+
+- Tag system for categories
 
 - Unify transaction/transfer/exchange views?
 

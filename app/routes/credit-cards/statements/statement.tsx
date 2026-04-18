@@ -21,14 +21,15 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
 import {
+	TRANSACTION_TYPE_EXPENSE,
+	TRANSACTION_TYPE_INCOME,
+} from '~/routes/transactions/lib/constants'
+
+import {
 	getStatementById,
 	getStatementInstallments,
 	getStatementTotalsByCurrency,
 } from '../lib/queries'
-import {
-	CC_TRANSACTION_TYPE_CHARGE,
-	CC_TRANSACTION_TYPE_REFUND,
-} from '../lib/constants'
 import { creditCardContext } from '../lib/context'
 import { EditStatementModal } from './components/edit-statement-modal'
 
@@ -89,11 +90,11 @@ export async function loader({
 			dueDate: statement.dueDate,
 		},
 		totals: Array.from(
-			currencyTotals.reduce<Map<string, number>>((acc, row) => {
+			currencyTotals.reduce<Map<TCurrency, number>>((acc, row) => {
 				const amount = Number(row.total)
 				const signed = {
-					[CC_TRANSACTION_TYPE_CHARGE]: amount,
-					[CC_TRANSACTION_TYPE_REFUND]: -amount,
+					[TRANSACTION_TYPE_EXPENSE]: amount,
+					[TRANSACTION_TYPE_INCOME]: -amount,
 				}[row.type]
 				acc.set(
 					row.currencyCode,
@@ -276,6 +277,7 @@ export default function StatementDetails({
 												)}
 											</div>
 											<TransactionType
+												type='credit_card'
 												variant='icon-text'
 												size='xs'
 												transactionType={

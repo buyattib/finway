@@ -31,6 +31,7 @@ export function SummaryCards({
 			title: t('index.summaryCards.monthExpenses'),
 			icon: (
 				<TransactionType
+					type='transaction'
 					transactionType={TRANSACTION_TYPE_EXPENSE}
 					variant='icon'
 				/>
@@ -42,6 +43,7 @@ export function SummaryCards({
 			title: t('index.summaryCards.monthIncomes'),
 			icon: (
 				<TransactionType
+					type='transaction'
 					transactionType={TRANSACTION_TYPE_INCOME}
 					variant='icon'
 				/>
@@ -55,7 +57,10 @@ export function SummaryCards({
 		<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 			{cards.map(({ title, icon, data, empty }) => {
 				return (
-					<Card key={title} className='border-l-4 border-l-primary/20'>
+					<Card
+						key={title}
+						className='border-l-4 border-l-primary/20'
+					>
 						<CardHeader className='flex items-center justify-between'>
 							<CardTitle>{title}</CardTitle>
 							{icon}
@@ -85,7 +90,10 @@ export function SummaryCards({
 												</Text>
 												<Text weight='bold' size='xl'>
 													{symbol}{' '}
-													{formatNumber(amount, i18n.language)}
+													{formatNumber(
+														amount,
+														i18n.language,
+													)}
 												</Text>
 											</li>
 										)

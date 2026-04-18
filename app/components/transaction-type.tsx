@@ -13,11 +13,6 @@ import {
 	TRANSACTION_TYPE_INCOME,
 } from '~/routes/transactions/lib/constants'
 import type { TTransactionType } from '~/routes/transactions/lib/types'
-import {
-	CC_TRANSACTION_TYPE_CHARGE,
-	CC_TRANSACTION_TYPE_REFUND,
-} from '~/routes/credit-cards/lib/constants'
-import type { TCCTransactionType } from '~/routes/credit-cards/lib/types'
 
 const iconVariants = cva('', {
 	variants: {
@@ -45,7 +40,9 @@ type BaseProps = Pick<LucideProps, 'className'> &
 	)
 
 type TransactionTypeProps = BaseProps & {
-	transactionType: TTransactionType | TCCTransactionType
+	transactionType: TTransactionType
+} & {
+	type: 'transaction' | 'credit_card'
 }
 
 export function TransactionType({
@@ -53,6 +50,7 @@ export function TransactionType({
 	size,
 	className,
 	variant,
+	type,
 }: TransactionTypeProps) {
 	const { t } = useTranslation('constants')
 
@@ -61,27 +59,31 @@ export function TransactionType({
 		label,
 		textCn,
 	} = {
-		[TRANSACTION_TYPE_EXPENSE]: {
-			icon: BanknoteArrowUpIcon,
-			label: t(`transactionType.${TRANSACTION_TYPE_EXPENSE}`),
-			textCn: 'text-danger',
+		transaction: {
+			[TRANSACTION_TYPE_EXPENSE]: {
+				icon: BanknoteArrowUpIcon,
+				label: t(`transactionType.${TRANSACTION_TYPE_EXPENSE}`),
+				textCn: 'text-danger',
+			},
+			[TRANSACTION_TYPE_INCOME]: {
+				icon: BanknoteArrowDownIcon,
+				label: t(`transactionType.${TRANSACTION_TYPE_INCOME}`),
+				textCn: 'text-success',
+			},
 		},
-		[TRANSACTION_TYPE_INCOME]: {
-			icon: BanknoteArrowDownIcon,
-			label: t(`transactionType.${TRANSACTION_TYPE_INCOME}`),
-			textCn: 'text-success',
+		credit_card: {
+			[TRANSACTION_TYPE_EXPENSE]: {
+				icon: BanknoteArrowUpIcon,
+				label: t(`ccTransactionType.${TRANSACTION_TYPE_EXPENSE}`),
+				textCn: 'text-danger',
+			},
+			[TRANSACTION_TYPE_INCOME]: {
+				icon: BanknoteArrowDownIcon,
+				label: t(`ccTransactionType.${TRANSACTION_TYPE_INCOME}`),
+				textCn: 'text-success',
+			},
 		},
-		[CC_TRANSACTION_TYPE_CHARGE]: {
-			icon: BanknoteArrowUpIcon,
-			label: t(`ccTransactionType.${CC_TRANSACTION_TYPE_CHARGE}`),
-			textCn: 'text-danger',
-		},
-		[CC_TRANSACTION_TYPE_REFUND]: {
-			icon: BanknoteArrowDownIcon,
-			label: t(`ccTransactionType.${CC_TRANSACTION_TYPE_REFUND}`),
-			textCn: 'text-success',
-		},
-	}[transactionType]
+	}[type][transactionType]
 
 	if (variant === 'text') {
 		return <span className={cn(textCn, className)}>{label}</span>

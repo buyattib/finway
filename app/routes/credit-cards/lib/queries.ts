@@ -6,7 +6,6 @@ import {
 	gt,
 	lt,
 	lte,
-	sql,
 	sum,
 	ne,
 	inArray,

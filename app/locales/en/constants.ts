@@ -11,8 +11,8 @@ export default {
 		INCOME: 'Income',
 	},
 	ccTransactionType: {
-		CHARGE: 'Charge',
-		REFUND: 'Refund',
+		EXPENSE: 'Charge',
+		INCOME: 'Refund',
 	},
 	categories: {
 		housing: {

@@ -13,8 +13,8 @@ export default {
 		INCOME: 'Ingreso',
 	},
 	ccTransactionType: {
-		CHARGE: 'Cargo',
-		REFUND: 'Reembolso',
+		EXPENSE: 'Cargo',
+		INCOME: 'Reembolso',
 	},
 	categories: {
 		housing: {

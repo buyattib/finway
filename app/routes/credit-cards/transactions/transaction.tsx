@@ -226,6 +226,7 @@ export default function CreditCardTransaction({
 					<div className='flex items-center justify-between'>
 						<div className='flex items-center gap-2'>
 							<TransactionType
+								type='transaction'
 								variant='icon-text'
 								size='sm'
 								transactionType={type}

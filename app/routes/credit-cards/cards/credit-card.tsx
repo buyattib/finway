@@ -36,12 +36,13 @@ import { CreditCard } from '~/components/credit-card'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
+import {
+	TRANSACTION_TYPE_EXPENSE,
+	TRANSACTION_TYPE_INCOME,
+} from '~/routes/transactions/lib/constants'
+
 import { creditCardContext } from '../lib/context'
 import { getCreditCardStatements, deleteCreditCard } from '../lib/queries'
-import {
-	CC_TRANSACTION_TYPE_CHARGE,
-	CC_TRANSACTION_TYPE_REFUND,
-} from '../lib/constants'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title
@@ -75,8 +76,8 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			(acc, tx) => {
 				const code = tx.creditCardTransaction.currency.code
 				const signed = {
-					[CC_TRANSACTION_TYPE_CHARGE]: tx.amount,
-					[CC_TRANSACTION_TYPE_REFUND]: -tx.amount,
+					[TRANSACTION_TYPE_EXPENSE]: tx.amount,
+					[TRANSACTION_TYPE_INCOME]: -tx.amount,
 				}[tx.creditCardTransaction.type]
 				acc.set(code, (acc.get(code) ?? 0) + signed)
 				return acc

@@ -169,6 +169,13 @@
       "when": 1776518422058,
       "tag": "0023_cc_remove_account",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1776525889770,
+      "tag": "0024_rename_cc_transaction_type",
+      "breakpoints": true
     }
   ]
 }
