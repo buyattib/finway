@@ -176,6 +176,13 @@
       "when": 1776525889770,
       "tag": "0024_rename_cc_transaction_type",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1776537386391,
+      "tag": "0025_update_income_category",
+      "breakpoints": true
     }
   ]
 }

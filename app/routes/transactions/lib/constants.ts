@@ -10,7 +10,7 @@ const _COMMON_TRANSACTION_CATEGORIES = [
 	'savings_and_investments',
 	'other',
 ] as const
-const _ONLY_INCOME_TRANSACTION_CATEGORIES = ['income'] as const
+const _ONLY_INCOME_TRANSACTION_CATEGORIES = ['salary'] as const
 const _ONLY_EXPENSE_TRANSACTION_CATEGORIES = [
 	'housing',
 	'utilities',
@@ -44,23 +44,3 @@ export const ALL_TRANSACTION_CATEGORIES = [
 	..._ONLY_EXPENSE_TRANSACTION_CATEGORIES,
 	..._ONLY_INCOME_TRANSACTION_CATEGORIES,
 ] as const
-
-// export const TRANSACTION_CATEGORIES = [
-// 	'housing',
-// 	'utilities',
-// 	'groceries',
-// 	'food_dining',
-// 	'transportation',
-// 	'health',
-// 	'shopping',
-// 	'entertainment',
-// 	'subscriptions',
-// 	'personal_care',
-// 	'pets',
-// 	'travel',
-// 	'taxes',
-// 	'other',
-// 	'income',
-// 	'savings_and_investments',
-// 	'debt_payments',
-// ] as const
