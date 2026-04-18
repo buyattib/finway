@@ -2,7 +2,7 @@
 UPDATE credit_card_transactions
 SET category = 'food_dining'
 WHERE category = 'dining_out';
-
+--> statement-breakpoint
 UPDATE transactions
 SET category = 'food_dining'
 WHERE category = 'dining_out';
