@@ -28,6 +28,9 @@ export default [
 			route('create', 'routes/accounts/create.tsx'),
 		]),
 
+		// movements (wraps transactions/transfers/exchanges under tabs)
+		...prefix('movements', [index('routes/movements/index.tsx')]),
+
 		// transactions
 		...prefix('transactions', [
 			index('routes/transactions/index.tsx'),

@@ -38,13 +38,33 @@ export async function getTransfers({
 	db,
 	ownerId,
 	page,
+	fromAccountId,
+	toAccountId,
+	currencyId,
 }: {
 	db: DB
 	ownerId: string
 	page: number
+	fromAccountId?: string
+	toAccountId?: string
+	currencyId?: string
 }) {
 	const fromAccountAlias = alias(accountTable, 'fromAccount')
 	const toAccountAlias = alias(accountTable, 'toAccount')
+
+	const filters = [
+		eq(fromAccountAlias.ownerId, ownerId),
+		eq(toAccountAlias.ownerId, ownerId),
+	]
+	if (fromAccountId) {
+		filters.push(eq(transferTable.fromAccountId, fromAccountId))
+	}
+	if (toAccountId) {
+		filters.push(eq(transferTable.toAccountId, toAccountId))
+	}
+	if (currencyId) {
+		filters.push(eq(transferTable.currencyId, currencyId))
+	}
 
 	const query = db
 		.select({
@@ -73,12 +93,7 @@ export async function getTransfers({
 			toAccountAlias,
 			eq(transferTable.toAccountId, toAccountAlias.id),
 		)
-		.where(
-			and(
-				eq(fromAccountAlias.ownerId, ownerId),
-				eq(toAccountAlias.ownerId, ownerId),
-			),
-		)
+		.where(and(...filters))
 		.orderBy(desc(transferTable.date), desc(transferTable.createdAt))
 
 	const total = await db.$count(query)

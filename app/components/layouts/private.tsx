@@ -6,6 +6,7 @@ import {
 	BanknoteArrowDownIcon,
 	CreditCardIcon,
 	LayoutDashboard,
+	ListIcon,
 	WalletIcon,
 } from 'lucide-react'
 
@@ -93,6 +94,11 @@ const links = [
 		to: '/app/exchanges',
 		labelKey: 'layout.exchanges' as const,
 		icon: <RefreshCwIcon />,
+	},
+	{
+		to: '/app/movements',
+		labelKey: 'layout.movements' as const,
+		icon: <ListIcon />,
 	},
 ]
 
