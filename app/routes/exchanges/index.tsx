@@ -36,6 +36,7 @@ import {
 	deleteExchange,
 } from './lib/queries'
 import { DeleteExchangeFormSchema } from './lib/schemas'
+import { calculateRate } from './lib/utils'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -219,6 +220,15 @@ export default function Exchanges({
 												getCurrencySymbol(fromCurrency)
 											const toSymbol =
 												getCurrencySymbol(toCurrency)
+
+											const rate = calculateRate({
+												fromAmount,
+												toAmount,
+												fromCurrency,
+												toCurrency,
+												locale: i18n.language,
+											})
+
 											return (
 												<TableRow key={id}>
 													<TableCell className='text-muted-foreground'>
@@ -269,15 +279,7 @@ export default function Exchanges({
 														</span>
 													</TableCell>
 													<TableCell className='text-muted-foreground'>
-														{formatNumber(
-															Number(fromAmount) /
-																Number(
-																	toAmount,
-																),
-															i18n.language,
-														)}{' '}
-														{fromCurrency}/
-														{toCurrency}
+														{rate}
 													</TableCell>
 													<TableCell className='text-right'>
 														<Form method='post'>
@@ -402,7 +404,10 @@ export default function Exchanges({
 													{getCurrencySymbol(
 														fromCurrency,
 													)}{' '}
-													{formatNumber(fromAmount, i18n.language)}
+													{formatNumber(
+														fromAmount,
+														i18n.language,
+													)}
 												</Text>
 												<RefreshCwIcon className='size-4 text-muted-foreground shrink-0' />
 												<Text
@@ -417,7 +422,10 @@ export default function Exchanges({
 													{getCurrencySymbol(
 														toCurrency,
 													)}{' '}
-													{formatNumber(toAmount, i18n.language)}
+													{formatNumber(
+														toAmount,
+														i18n.language,
+													)}
 												</Text>
 											</div>
 											<Text size='xs' theme='muted'>
