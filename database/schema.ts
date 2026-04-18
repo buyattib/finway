@@ -68,12 +68,12 @@ export const transaction = sqliteTable(
 		id: cuid2().defaultRandom().primaryKey(),
 		date: text().notNull(),
 		amount: integer().notNull(),
-		description: text().default(''),
+		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
+		description: text().default(''),
 
 		accountId: text().notNull(),
 		currencyId: text().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 	},
 	table => [
 		foreignKey({
@@ -230,12 +230,12 @@ export const creditCardTransaction = sqliteTable(
 		id: cuid2().defaultRandom().primaryKey(),
 		date: text().notNull(),
 		amount: integer().notNull(),
-		description: text().default(''),
+		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 		type: text({ enum: CC_TRANSACTION_TYPES }).notNull(),
+		description: text().default(''),
 
 		creditCardId: text().notNull(),
 		currencyId: text().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 	},
 	table => [
 		foreignKey({

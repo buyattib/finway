@@ -1,4 +1,16 @@
-import { and, asc, desc, eq, gt, lt, lte, sum, ne } from 'drizzle-orm'
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	gt,
+	lt,
+	lte,
+	sum,
+	ne,
+	inArray,
+	count,
+} from 'drizzle-orm'
 
 import {
 	creditCard as creditCardTable,
@@ -214,16 +226,90 @@ export async function ensureStatementsExist({
 export async function updateStatement({
 	db,
 	statementId,
+	creditCardId,
 	body,
 }: {
 	db: DB
 	statementId: string
+	creditCardId: string
 	body: { closingDate: string; dueDate: string }
 }) {
-	await db
-		.update(creditCardStatementTable)
-		.set(body)
-		.where(eq(creditCardStatementTable.id, statementId))
+	await db.transaction(async tx => {
+		await tx
+			.update(creditCardStatementTable)
+			.set(body)
+			.where(eq(creditCardStatementTable.id, statementId))
+
+		const ccTransactionInstallmentCount = tx
+			.select({
+				id: creditCardTransactionTable.id,
+				installmentCount: count(
+					creditCardTransactionInstallmentTable.id,
+				).as('installmentCount'),
+			})
+			.from(creditCardTransactionTable)
+			.innerJoin(
+				creditCardTransactionInstallmentTable,
+				eq(
+					creditCardTransactionInstallmentTable.creditCardTransactionId,
+					creditCardTransactionTable.id,
+				),
+			)
+			.groupBy(creditCardTransactionTable.id)
+			.as('ccTransactionInstallmentCount')
+
+		// Get all cc transaction ids that have an installment in the statement
+		const statementCCTransactions = await tx
+			.select({
+				id: creditCardTransactionTable.id,
+				date: creditCardTransactionTable.date,
+				amount: creditCardTransactionTable.amount,
+				installmentCount:
+					ccTransactionInstallmentCount.installmentCount,
+			})
+			.from(creditCardTransactionTable)
+			.innerJoin(
+				creditCardTransactionInstallmentTable,
+				eq(
+					creditCardTransactionInstallmentTable.creditCardTransactionId,
+					creditCardTransactionTable.id,
+				),
+			)
+			.innerJoin(
+				ccTransactionInstallmentCount,
+				eq(
+					ccTransactionInstallmentCount.id,
+					creditCardTransactionTable.id,
+				),
+			)
+			.where(
+				eq(
+					creditCardTransactionInstallmentTable.statementId,
+					statementId,
+				),
+			)
+
+		// Delete all installments from cc transactions which have an installment in the statement
+		tx.delete(creditCardTransactionInstallmentTable).where(
+			inArray(
+				creditCardTransactionInstallmentTable.creditCardTransactionId,
+				statementCCTransactions.map(t => t.id),
+			),
+		)
+
+		// Recreate the installments for each transaction
+		statementCCTransactions.forEach(
+			async ({ amount, date, installmentCount }) => {
+				await makeTransactionInstallments({
+					db: tx,
+					creditCardId,
+					amount,
+					transactionDate: new Date(date),
+					installmentCount,
+				})
+			},
+		)
+	})
 }
 
 export async function getStatementById({

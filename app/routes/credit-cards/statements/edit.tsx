@@ -88,6 +88,7 @@ export async function action({
 	await updateStatement({
 		db,
 		statementId,
+		creditCardId: creditCard.id,
 		body: { closingDate, dueDate },
 	})
 
