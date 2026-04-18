@@ -182,10 +182,9 @@ export const creditCard = sqliteTable(
 		last4: text().notNull(),
 		expiryMonth: text().notNull(),
 		expiryYear: text().notNull(),
-		institution: text().notNull().default(''),
+		institution: text().notNull(),
 
-		ownerId: text().notNull().default(''),
-		accountId: text(),
+		ownerId: text().notNull(),
 	},
 	table => [
 		foreignKey({
@@ -193,13 +192,7 @@ export const creditCard = sqliteTable(
 			columns: [table.ownerId],
 			foreignColumns: [user.id],
 		}).onDelete('cascade'),
-		foreignKey({
-			name: 'credit_cards_accounts_fk',
-			columns: [table.accountId],
-			foreignColumns: [account.id],
-		}).onDelete('set null'),
 		index('credit_cards_ownerId_idx').on(table.ownerId),
-		index('credit_cards_accountId_idx').on(table.accountId),
 	],
 )
 

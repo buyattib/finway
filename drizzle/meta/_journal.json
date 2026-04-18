@@ -162,6 +162,13 @@
       "when": 1776518160990,
       "tag": "0022_cc_backfill",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1776518422058,
+      "tag": "0023_cc_remove_account",
+      "breakpoints": true
     }
   ]
 }
