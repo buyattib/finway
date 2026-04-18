@@ -75,6 +75,7 @@ export function TransactionsFilters({
 			id='transactions-filters'
 			className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2'
 		>
+			<input type='hidden' name='tab' value={MOVEMENT_TAB_TRANSACTIONS} />
 			<Combobox
 				options={accountOptions}
 				name='accountId'

@@ -51,6 +51,7 @@ export function TransfersFilters({
 			id='transfers-filters'
 			className='grid grid-cols-1 sm:grid-cols-3 gap-2'
 		>
+			<input type='hidden' name='tab' value={MOVEMENT_TAB_TRANSFERS} />
 			<Combobox
 				options={accountOptions}
 				name='fromAccountId'

@@ -51,6 +51,7 @@ export function ExchangesFilters({
 			id='exchanges-filters'
 			className='grid grid-cols-1 sm:grid-cols-2 gap-2'
 		>
+			<input type='hidden' name='tab' value={MOVEMENT_TAB_EXCHANGES} />
 			<Combobox
 				options={accountOptions}
 				name='accountId'
