@@ -6,7 +6,7 @@ SET ownerId = (
 	SELECT accounts.ownerId FROM accounts WHERE accounts.id = credit_cards.accountId
 )
 WHERE ownerId = '' AND accountId IS NOT NULL;
-
+--> statement-breakpoint
 UPDATE credit_cards
 SET institution = (
 	SELECT accounts.name FROM accounts WHERE accounts.id = credit_cards.accountId
