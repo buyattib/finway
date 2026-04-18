@@ -2,6 +2,7 @@
 - transaction, transfer, exchange simplify and unify
 
 - use import * as schema from 'db' instead of importing individual tables?
+- ts migrations?
 
 - improve agents.md
 
