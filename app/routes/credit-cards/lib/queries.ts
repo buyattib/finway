@@ -6,6 +6,7 @@ import {
 	gt,
 	lt,
 	lte,
+	sql,
 	sum,
 	ne,
 	inArray,
@@ -427,7 +428,7 @@ export async function getCreditCardStatements({
 				columns: { amount: true },
 				with: {
 					creditCardTransaction: {
-						columns: {},
+						columns: { type: true },
 						with: {
 							currency: { columns: { code: true } },
 						},
@@ -458,6 +459,7 @@ export async function getStatementTotalsByCurrency({
 		.select({
 			currencyCode: currencyTable.code,
 			total: sum(creditCardTransactionInstallmentTable.amount),
+			type: creditCardTransactionTable.type,
 		})
 		.from(creditCardTransactionInstallmentTable)
 		.innerJoin(
@@ -474,7 +476,7 @@ export async function getStatementTotalsByCurrency({
 		.where(
 			eq(creditCardTransactionInstallmentTable.statementId, statementId),
 		)
-		.groupBy(currencyTable.code)
+		.groupBy(currencyTable.code, creditCardTransactionTable.type)
 }
 
 export async function getLatestStatement({
@@ -819,7 +821,10 @@ export async function getStatementInstallments({
 		.where(
 			eq(creditCardTransactionInstallmentTable.statementId, statementId),
 		)
-		.orderBy(desc(creditCardTransactionTable.date))
+		.orderBy(
+			desc(creditCardTransactionTable.date),
+			desc(creditCardTransactionTable.createdAt),
+		)
 
 	const total = await db.$count(installmentsQuery)
 	const installments = await installmentsQuery

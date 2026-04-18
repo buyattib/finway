@@ -38,6 +38,10 @@ import { TablePagination } from '~/components/table-pagination'
 
 import { creditCardContext } from '../lib/context'
 import { getCreditCardStatements, deleteCreditCard } from '../lib/queries'
+import {
+	CC_TRANSACTION_TYPE_CHARGE,
+	CC_TRANSACTION_TYPE_REFUND,
+} from '../lib/constants'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title
@@ -70,7 +74,11 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		const totalsByCurrency = s.installments.reduce<Map<TCurrency, number>>(
 			(acc, tx) => {
 				const code = tx.creditCardTransaction.currency.code
-				acc.set(code, (acc.get(code) ?? 0) + tx.amount)
+				const signed = {
+					[CC_TRANSACTION_TYPE_CHARGE]: tx.amount,
+					[CC_TRANSACTION_TYPE_REFUND]: -tx.amount,
+				}[tx.creditCardTransaction.type]
+				acc.set(code, (acc.get(code) ?? 0) + signed)
 				return acc
 			},
 			new Map(),

@@ -25,6 +25,10 @@ import {
 	getStatementInstallments,
 	getStatementTotalsByCurrency,
 } from '../lib/queries'
+import {
+	CC_TRANSACTION_TYPE_CHARGE,
+	CC_TRANSACTION_TYPE_REFUND,
+} from '../lib/constants'
 import { creditCardContext } from '../lib/context'
 import { EditStatementModal } from './components/edit-statement-modal'
 
@@ -84,10 +88,24 @@ export async function loader({
 			closingDate: statement.closingDate,
 			dueDate: statement.dueDate,
 		},
-		totals: currencyTotals.map(t => ({
-			currencyCode: t.currencyCode,
-			total: String(Number(t.total) / 100),
-		})),
+		totals: Array.from(
+			currencyTotals.reduce<Map<string, number>>((acc, row) => {
+				const amount = Number(row.total)
+				const signed = {
+					[CC_TRANSACTION_TYPE_CHARGE]: amount,
+					[CC_TRANSACTION_TYPE_REFUND]: -amount,
+				}[row.type]
+				acc.set(
+					row.currencyCode,
+					(acc.get(row.currencyCode) ?? 0) + signed,
+				)
+				return acc
+			}, new Map()),
+			([currencyCode, amount]) => ({
+				currencyCode,
+				total: String(amount / 100),
+			}),
+		),
 		installments: installments.map(i => ({
 			...i,
 			amount: String(i.amount / 100),
