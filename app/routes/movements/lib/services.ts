@@ -53,17 +53,16 @@ export async function getTransfersTabData({
 		currencyId: searchParams.get('currencyId') ?? '',
 	}
 
-	const { transfers, total } = await getTransfers({
-		db,
-		ownerId,
-		page,
-		...filters,
-	})
+	const [{ transfers, total }, selectData] = await Promise.all([
+		getTransfers({ db, ownerId, page, ...filters }),
+		getSelectData(db, ownerId),
+	])
 
 	return {
 		transfers,
 		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
 		filters,
+		selectData,
 	}
 }
 
@@ -83,16 +82,15 @@ export async function getExchangesTabData({
 		currencyId: searchParams.get('currencyId') ?? '',
 	}
 
-	const { exchanges, total } = await getExchanges({
-		db,
-		ownerId,
-		page,
-		...filters,
-	})
+	const [{ exchanges, total }, selectData] = await Promise.all([
+		getExchanges({ db, ownerId, page, ...filters }),
+		getSelectData(db, ownerId),
+	])
 
 	return {
 		exchanges,
 		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
 		filters,
+		selectData,
 	}
 }

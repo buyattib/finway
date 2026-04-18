@@ -4,6 +4,7 @@ import { redirect, useSearchParams } from 'react-router'
 import type { Route } from './+types'
 
 import { getServerT } from '~/utils-server/i18n.server'
+import { dbContext, userContext } from '~/lib/context'
 
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { Title } from '~/components/ui/title'
@@ -19,6 +20,11 @@ import {
 	MOVEMENT_TAB_TRANSACTIONS,
 	MOVEMENT_TAB_TRANSFERS,
 } from './lib/constants'
+import {
+	getTransactionsTabData,
+	getTransfersTabData,
+	getExchangesTabData,
+} from './lib/services'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -29,6 +35,8 @@ export function meta({ loaderData }: Route.MetaArgs) {
 }
 
 export async function loader({ context, request }: Route.LoaderArgs) {
+	const db = context.get(dbContext)
+	const user = context.get(userContext)
 	const t = getServerT(context, 'movements')
 
 	const url = new URL(request.url)
@@ -41,18 +49,39 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		throw redirect(url.pathname + url.search)
 	}
 
-	return {
-		tab,
-		meta: {
-			title: t('index.meta.title'),
-			description: t('index.meta.description'),
-		},
+	const meta = {
+		title: t('index.meta.title'),
+		description: t('index.meta.description'),
 	}
+
+	if (tab === MOVEMENT_TAB_TRANSACTIONS) {
+		const data = await getTransactionsTabData({
+			db,
+			ownerId: user.id,
+			searchParams,
+		})
+		return { tab, meta, transactions: data }
+	}
+
+	if (tab === MOVEMENT_TAB_TRANSFERS) {
+		const data = await getTransfersTabData({
+			db,
+			ownerId: user.id,
+			searchParams,
+		})
+		return { tab, meta, transfers: data }
+	}
+
+	const data = await getExchangesTabData({
+		db,
+		ownerId: user.id,
+		searchParams,
+	})
+	return { tab, meta, exchanges: data }
 }
 
-export default function Movements({
-	loaderData: { tab },
-}: Route.ComponentProps) {
+export default function Movements({ loaderData }: Route.ComponentProps) {
+	const { tab } = loaderData
 	const { t } = useTranslation('movements')
 	const [searchParams, setSearchParams] = useSearchParams()
 
@@ -83,15 +112,22 @@ export default function Movements({
 							{t('index.tabs.exchanges')}
 						</TabsTrigger>
 					</TabsList>
-					<TabsContent value={MOVEMENT_TAB_TRANSACTIONS}>
-						<TransactionsTab />
-					</TabsContent>
-					<TabsContent value={MOVEMENT_TAB_TRANSFERS}>
-						<TransfersTab />
-					</TabsContent>
-					<TabsContent value={MOVEMENT_TAB_EXCHANGES}>
-						<ExchangesTab />
-					</TabsContent>
+
+					{loaderData.tab === MOVEMENT_TAB_TRANSACTIONS && (
+						<TabsContent value={MOVEMENT_TAB_TRANSACTIONS}>
+							<TransactionsTab {...loaderData.transactions} />
+						</TabsContent>
+					)}
+					{loaderData.tab === MOVEMENT_TAB_TRANSFERS && (
+						<TabsContent value={MOVEMENT_TAB_TRANSFERS}>
+							<TransfersTab {...loaderData.transfers} />
+						</TabsContent>
+					)}
+					{loaderData.tab === MOVEMENT_TAB_EXCHANGES && (
+						<TabsContent value={MOVEMENT_TAB_EXCHANGES}>
+							<ExchangesTab {...loaderData.exchanges} />
+						</TabsContent>
+					)}
 				</Tabs>
 			</PageContent>
 		</PageSection>
