@@ -16,7 +16,12 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from './popover'
 
 export type ComboboxProps = {
-	options: Array<{ value: string; label: string; icon?: React.ReactNode }>
+	options: Array<{
+		value: string
+		label: string
+		icon?: React.ReactNode
+		description?: string
+	}>
 	id?: string
 	name?: string
 	onValueChange?: (value: string) => void
@@ -95,7 +100,16 @@ export function Combobox({
 											setOpen(false)
 										}}
 									>
-										{option?.icon} {option.label}
+										<div className='flex flex-col gap-0.5'>
+											<div className='flex items-center gap-2'>
+												{option?.icon} {option.label}
+											</div>
+											{option.description && (
+												<span className='text-xs text-muted-foreground'>
+													{option.description}
+												</span>
+											)}
+										</div>
 										<CheckIcon
 											className={cn(
 												'ml-auto h-4 w-4',

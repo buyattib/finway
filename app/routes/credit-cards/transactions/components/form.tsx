@@ -133,6 +133,7 @@ export function CreditCardTransactionForm({
 		? TRANSACTION_CATEGORIES[transactionType].map(c => ({
 				value: c,
 				label: t(`constants:categories.${c}.name`),
+				description: t(`constants:categories.${c}.description`),
 			}))
 		: []
 
