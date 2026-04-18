@@ -243,6 +243,7 @@ export function TransactionForm({
 					<DateField
 						label={t('form.dateLabel')}
 						field={fields.date}
+						disableFuture
 					/>
 
 					<TextField

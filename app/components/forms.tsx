@@ -496,12 +496,14 @@ export function DateField({
 	placeholder,
 	className,
 	disabled,
+	disableFuture,
 }: {
 	field: FieldMetadata<string>
 	label?: string
 	placeholder?: string
 	className?: string
 	disabled?: boolean
+	disableFuture?: boolean
 }) {
 	const [open, setOpen] = useState(false)
 	const { i18n } = useTranslation()
@@ -568,6 +570,9 @@ export function DateField({
 						mode='single'
 						selected={dateValue}
 						defaultMonth={dateValue}
+						disabled={
+							disableFuture ? { after: new Date() } : undefined
+						}
 						onSelect={date => {
 							if (!date) return
 							const utcDate = new Date(

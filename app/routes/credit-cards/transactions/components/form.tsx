@@ -225,6 +225,7 @@ export function CreditCardTransactionForm({
 					<DateField
 						label={t('transaction.create.dateLabel')}
 						field={fields.date}
+						disableFuture
 					/>
 
 					<TextField
