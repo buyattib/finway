@@ -68,12 +68,12 @@ export const transaction = sqliteTable(
 		id: cuid2().defaultRandom().primaryKey(),
 		date: text().notNull(),
 		amount: integer().notNull(),
-		description: text().default(''),
+		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
+		description: text().default(''),
 
 		accountId: text().notNull(),
 		currencyId: text().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 	},
 	table => [
 		foreignKey({
@@ -182,16 +182,17 @@ export const creditCard = sqliteTable(
 		last4: text().notNull(),
 		expiryMonth: text().notNull(),
 		expiryYear: text().notNull(),
+		institution: text().notNull(),
 
-		accountId: text().notNull(),
+		ownerId: text().notNull(),
 	},
 	table => [
 		foreignKey({
-			name: 'credit_cards_accounts_fk',
-			columns: [table.accountId],
-			foreignColumns: [account.id],
+			name: 'credit_cards_users_fk',
+			columns: [table.ownerId],
+			foreignColumns: [user.id],
 		}).onDelete('cascade'),
-		index('credit_cards_accountId_idx').on(table.accountId),
+		index('credit_cards_ownerId_idx').on(table.ownerId),
 	],
 )
 
@@ -222,12 +223,12 @@ export const creditCardTransaction = sqliteTable(
 		id: cuid2().defaultRandom().primaryKey(),
 		date: text().notNull(),
 		amount: integer().notNull(),
-		description: text().default(''),
+		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 		type: text({ enum: CC_TRANSACTION_TYPES }).notNull(),
+		description: text().default(''),
 
 		creditCardId: text().notNull(),
 		currencyId: text().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
 	},
 	table => [
 		foreignKey({
@@ -320,11 +321,7 @@ export const exchangeRelations = relations(exchange, ({ one }) => ({
 	}),
 }))
 
-export const creditCardRelations = relations(creditCard, ({ one, many }) => ({
-	account: one(account, {
-		fields: [creditCard.accountId],
-		references: [account.id],
-	}),
+export const creditCardRelations = relations(creditCard, ({ many }) => ({
 	statements: many(creditCardStatement),
 }))
 

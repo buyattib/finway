@@ -6,20 +6,14 @@ import {
 	BanknoteArrowDownIcon,
 	CreditCardIcon,
 	LayoutDashboard,
-	ListIcon,
 	WalletIcon,
 } from 'lucide-react'
-import { eq, desc } from 'drizzle-orm'
 
 import type { Route } from './+types/private'
 
-import {
-	creditCard as creditCardTable,
-	account as accountTable,
-} from '~/database/schema'
 import { authMiddleware } from '~/middleware/auth'
 import { userContext, dbContext } from '~/lib/context'
-import { cn } from '~/lib/utils'
+import { cn, initializeDate } from '~/lib/utils'
 
 import { NavigationProgress } from '~/components/ui/navigation-progress'
 import { FinwayLink } from '~/components/finway-link'
@@ -40,7 +34,10 @@ import {
 	useSidebar,
 } from '~/components/ui/sidebar'
 
-import { ensureStatementsExist } from '~/routes/credit-cards/lib/queries'
+import {
+	ensureStatementsExist,
+	getCreditCards,
+} from '~/routes/credit-cards/lib/queries'
 
 export const middleware: MiddlewareFunction[] = [authMiddleware]
 
@@ -49,22 +46,20 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 
 	// Credit card statements check on every load of the app running on the background
-	db.select({ id: creditCardTable.id })
-		.from(creditCardTable)
-		.innerJoin(accountTable, eq(creditCardTable.accountId, accountTable.id))
-		.where(eq(accountTable.ownerId, user.id))
-		.orderBy(desc(creditCardTable.createdAt))
-		.then(cards => {
-			void Promise.all(
-				cards.map(({ id }) =>
-					ensureStatementsExist({
-						db,
-						creditCardId: id,
-						date: new Date(),
-					}),
-				),
-			)
+	void getCreditCards({ db, ownerId: user.id })
+		.then(async cards => {
+			for (const { id } of cards) {
+				await ensureStatementsExist({
+					db,
+					creditCardId: id,
+					date: initializeDate(),
+				})
+			}
 		})
+		.catch(err => {
+			console.error('Failed to ensure credit card statements', err)
+		})
+
 	return { user }
 }
 

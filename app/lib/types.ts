@@ -5,7 +5,7 @@ import type { ExtractTablesWithRelations } from 'drizzle-orm'
 import * as schema from '~/database/schema'
 import type { requireAuthenticated } from '~/utils-server/auth.server'
 
-import { CURRENCIES } from './constants'
+import { CURRENCIES, ACTION_CREATION, ACTION_EDITION } from './constants'
 import { type getSelectData } from './queries'
 
 export type DB =
@@ -18,3 +18,5 @@ export type DB =
 export type UserAuth = Awaited<ReturnType<typeof requireAuthenticated>>
 export type TCurrency = (typeof CURRENCIES)[number]
 export type TSelectData = Awaited<ReturnType<typeof getSelectData>>
+
+export type TFormAction = typeof ACTION_CREATION | typeof ACTION_EDITION

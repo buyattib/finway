@@ -7,7 +7,6 @@ import {
 	useNavigate,
 } from 'react-router'
 import { ArrowLeftIcon, SquarePenIcon, TrashIcon, PlusIcon } from 'lucide-react'
-import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/credit-card'
@@ -37,7 +36,6 @@ import { CreditCard } from '~/components/credit-card'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
-import { DeleteCreditCardFormSchema } from '../lib/schemas'
 import { creditCardContext } from '../lib/context'
 import { getCreditCardStatements, deleteCreditCard } from '../lib/queries'
 
@@ -50,13 +48,10 @@ export function meta({ loaderData }: Route.MetaArgs) {
 	]
 }
 
-export async function loader({
-	context,
-	request,
-}: Route.LoaderArgs) {
-	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+export async function loader({ context, request }: Route.LoaderArgs) {
 	const t = getServerT(context, 'credit-cards')
+	const db = context.get(dbContext)
+	const { creditCard, currentStatement } = context.get(creditCardContext)
 
 	const url = new URL(request.url)
 	const searchParams = url.searchParams
@@ -66,20 +61,21 @@ export async function loader({
 	const { statements: _statements, total } = await getCreditCardStatements({
 		db,
 		creditCardId: creditCard.id,
-		maxClosingDate: creditCard.closingDate,
+		maxClosingDate: currentStatement.closingDate,
 		page,
 		pageSize: PAGE_SIZE,
 	})
 
 	const statements = _statements.map(s => {
-		const totalsByCurrency = new Map<TCurrency, number>()
-		for (const inst of s.installments) {
-			const code = inst.creditCardTransaction.currency.code
-			totalsByCurrency.set(
-				code,
-				(totalsByCurrency.get(code) ?? 0) + inst.amount,
-			)
-		}
+		const totalsByCurrency = s.installments.reduce<Map<TCurrency, number>>(
+			(acc, tx) => {
+				const code = tx.creditCardTransaction.currency.code
+				acc.set(code, (acc.get(code) ?? 0) + tx.amount)
+				return acc
+			},
+			new Map(),
+		)
+
 		return {
 			id: s.id,
 			closingDate: s.closingDate,
@@ -106,29 +102,14 @@ export async function loader({
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+	const { creditCard } = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
 
 	const formData = await request.formData()
 	const intent = formData.get('intent')
 
-	if (intent === 'delete-card') {
-		const submission = parseWithZod(formData, {
-			schema: DeleteCreditCardFormSchema,
-		})
-
-		if (submission.status !== 'success') {
-			const toastHeaders = await createToastHeaders(request, {
-				type: 'error',
-				title: t('details.action.deleteCardErrorToast'),
-				description: t('details.action.deleteCardErrorDescription'),
-			})
-			return data({}, { headers: toastHeaders })
-		}
-
-		const { creditCardId } = submission.value
-
-		await deleteCreditCard({ db, creditCardId })
+	if (intent === 'delete') {
+		await deleteCreditCard({ db, id: creditCard.id })
 
 		return await redirectWithToast('/app/credit-cards', request, {
 			type: 'success',
@@ -163,7 +144,7 @@ export default function CreditCardDetails({
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname &&
 		navigation.state === 'submitting' &&
-		navigation.formData?.get('intent') === 'delete-card'
+		navigation.formData?.get('intent') === 'delete'
 
 	return (
 		<>
@@ -195,18 +176,13 @@ export default function CreditCardDetails({
 					</Button>
 					<Tooltip>
 						<Form method='post'>
-							<input
-								type='hidden'
-								name='creditCardId'
-								value={creditCard.id}
-							/>
 							<TooltipTrigger asChild>
 								<Button
 									size='icon'
 									variant='destructive-outline'
 									type='submit'
 									name='intent'
-									value='delete-card'
+									value='delete'
 									disabled={isDeletingCard}
 								>
 									{isDeletingCard ? (
@@ -236,7 +212,7 @@ export default function CreditCardDetails({
 					last4={creditCard.last4}
 					expiryMonth={creditCard.expiryMonth}
 					expiryYear={creditCard.expiryYear}
-					accountName={creditCard.accountName}
+					institution={creditCard.institution}
 					className='w-full shrink-0 md:max-w-sm'
 				/>
 

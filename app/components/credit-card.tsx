@@ -1,7 +1,7 @@
 import { CreditCardIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { cn, formatDate } from '~/lib/utils'
+import { cn } from '~/lib/utils'
 
 const BRAND_GRADIENTS: Record<string, string> = {
 	VISA: 'from-[oklch(0.35_0.05_250)] to-[oklch(0.25_0.04_260)]',
@@ -18,7 +18,7 @@ type Props = {
 	expiryYear: string
 	closingDate?: string
 	dueDate?: string
-	accountName: string
+	institution: string
 	className?: string
 }
 
@@ -27,12 +27,10 @@ export function CreditCard({
 	last4,
 	expiryMonth,
 	expiryYear,
-	closingDate,
-	dueDate,
-	accountName,
+	institution,
 	className,
 }: Props) {
-	const { t, i18n } = useTranslation('components')
+	const { t } = useTranslation('components')
 	const gradient = BRAND_GRADIENTS[brand] ?? DEFAULT_GRADIENT
 
 	return (
@@ -49,7 +47,7 @@ export function CreditCard({
 						{brand}
 					</span>
 				</div>
-				<p className='text-sm text-white/70'>{accountName}</p>
+				<p className='text-sm text-white/70'>{institution}</p>
 			</div>
 			<div>
 				<p className='text-lg tracking-[0.25em] font-mono'>
@@ -66,26 +64,6 @@ export function CreditCard({
 						{String(expiryMonth).padStart(2, '0')}/{expiryYear}
 					</p>
 				</div>
-				{closingDate && dueDate && (
-					<div className='flex flex-col items-end gap-1'>
-						<p className='text-xs text-white/70'>
-							{t('creditCard.closingDay', {
-								date: formatDate(
-									new Date(closingDate),
-									i18n.language,
-								),
-							})}
-						</p>
-						<p className='text-xs text-white/70'>
-							{t('creditCard.dueDay', {
-								date: formatDate(
-									new Date(dueDate),
-									i18n.language,
-								),
-							})}
-						</p>
-					</div>
-				)}
 			</div>
 		</div>
 	)

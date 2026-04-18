@@ -12,7 +12,8 @@ import { creditCardContext } from '../lib/context'
 import {
 	getStatementById,
 	getAdjacentStatements,
-	updateStatement,
+	updateStatementDueDate,
+	updateStatementClosingDate,
 } from '../lib/queries'
 
 export async function action({
@@ -20,9 +21,9 @@ export async function action({
 	context,
 	params: { statementId },
 }: Route.ActionArgs) {
-	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
+	const db = context.get(dbContext)
+	const { creditCard } = context.get(creditCardContext)
 
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, {
@@ -41,7 +42,7 @@ export async function action({
 		})
 		return data(
 			{ submission: submission.reply() },
-			{ headers: toastHeaders },
+			{ headers: toastHeaders, status: 404 },
 		)
 	}
 
@@ -63,22 +64,41 @@ export async function action({
 		closingErrors.push(t('statement.details.action.closingDateBeforeNext'))
 	}
 
-	if (closingErrors.length > 0) {
+	const dueErrors: string[] = []
+	if (previous && dueDate <= previous.dueDate) {
+		dueErrors.push(t('statement.details.action.dueDateAfterPrevious'))
+	}
+	if (next && dueDate >= next.dueDate) {
+		dueErrors.push(t('statement.details.action.dueDateBeforeNext'))
+	}
+
+	if (closingErrors.length > 0 || dueErrors.length > 0) {
 		return data(
 			{
 				submission: submission.reply({
-					fieldErrors: { closingDate: closingErrors },
+					fieldErrors: {
+						closingDate: closingErrors,
+						dueDate: dueErrors,
+					},
 				}),
 			},
 			{ status: 422 },
 		)
 	}
 
-	await updateStatement({
-		db,
-		statementId,
-		body: { closingDate, dueDate },
-	})
+	if (statement.dueDate !== dueDate) {
+		await updateStatementDueDate({ db, statementId, dueDate })
+	}
+
+	if (statement.closingDate !== closingDate) {
+		await updateStatementClosingDate({
+			db,
+			statementId,
+			nextStatementId: next?.id,
+			creditCardId: creditCard.id,
+			closingDate,
+		})
+	}
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',

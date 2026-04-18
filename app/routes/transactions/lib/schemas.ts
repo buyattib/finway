@@ -17,7 +17,11 @@ const ActionSchema = z.discriminatedUnion('action', [
 export function createTransactionFormSchema(t: TFunction<'transactions'>) {
 	return z
 		.object({
-			date: z.iso.datetime(t('form.schema.dateRequired')),
+			date: z.iso
+				.datetime(t('form.schema.dateRequired'))
+				.refine(value => new Date(value) <= new Date(), {
+					message: t('form.schema.dateFuture'),
+				}),
 			type: z.enum(
 				TRANSACTION_TYPES,
 				t('form.schema.transactionTypeRequired'),

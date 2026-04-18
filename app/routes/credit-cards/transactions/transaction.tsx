@@ -1,6 +1,5 @@
 import { Form, Link, data, useNavigation, useLocation } from 'react-router'
 import { ArrowLeftIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
-import { parseWithZod } from '@conform-to/zod/v4'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types/transaction'
@@ -31,7 +30,6 @@ import {
 	getTransactionInstallments,
 	deleteCreditCardTransaction,
 } from '../lib/queries'
-import { DeleteCreditCardTransactionFormSchema } from '../lib/schemas'
 import { creditCardContext } from '../lib/context'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -47,9 +45,9 @@ export async function loader({
 	context,
 	params: { transactionId },
 }: Route.LoaderArgs) {
-	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
 	const t = getServerT(context, 'credit-cards')
+	const db = context.get(dbContext)
+	const { creditCard } = context.get(creditCardContext)
 
 	const transaction = await getCreditCardTransactionById({
 		db,
@@ -64,7 +62,6 @@ export async function loader({
 	const installments = await getTransactionInstallments({
 		db,
 		transactionId,
-		maxClosingDate: creditCard.closingDate,
 	})
 
 	const { currency, ...transactionData } = transaction
@@ -76,7 +73,7 @@ export async function loader({
 			last4: creditCard.last4,
 			expiryMonth: creditCard.expiryMonth,
 			expiryYear: creditCard.expiryYear,
-			accountName: creditCard.accountName,
+			institution: creditCard.institution,
 		},
 		transaction: {
 			...transactionData,
@@ -96,64 +93,58 @@ export async function loader({
 	}
 }
 
-export async function action({ request, context }: Route.ActionArgs) {
-	const db = context.get(dbContext)
-	const creditCard = context.get(creditCardContext)
+export async function action({
+	request,
+	context,
+	params: { transactionId },
+}: Route.ActionArgs) {
 	const t = getServerT(context, 'credit-cards')
+	const db = context.get(dbContext)
+	const { creditCard } = context.get(creditCardContext)
 
 	const formData = await request.formData()
+	const intent = formData.get('intent')
 
-	const submission = parseWithZod(formData, {
-		schema: DeleteCreditCardTransactionFormSchema,
-	})
-
-	if (submission.status !== 'success') {
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'error',
-			title: t('details.action.deleteTransactionErrorToast'),
-			description: t('details.action.deleteTransactionErrorDescription'),
+	if (intent === 'delete') {
+		const transaction = await getCreditCardTransactionById({
+			db,
+			transactionId,
 		})
-		return data({}, { headers: toastHeaders })
+		if (!transaction || transaction.creditCard.id !== creditCard.id) {
+			const toastHeaders = await createToastHeaders(request, {
+				type: 'error',
+				title: t('details.action.transactionNotFoundToast'),
+			})
+			return data({}, { headers: toastHeaders })
+		}
+
+		await deleteCreditCardTransaction({
+			db,
+			creditCardTransactionId: transactionId,
+		})
+
+		return await redirectWithToast(
+			`/app/credit-cards/${creditCard.id}`,
+			request,
+			{
+				type: 'success',
+				title: t('details.action.deleteTransactionSuccessToast'),
+			},
+		)
 	}
 
-	const { creditCardTransactionId } = submission.value
-
-	const transaction = await getCreditCardTransactionById({
-		db,
-		transactionId: creditCardTransactionId,
+	const toastHeaders = await createToastHeaders(request, {
+		type: 'error',
+		title: t('details.action.unknownActionToast'),
 	})
-	if (!transaction) {
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'error',
-			title: t('details.action.transactionNotFoundToast'),
-		})
-		return data({}, { headers: toastHeaders })
-	}
-
-	await deleteCreditCardTransaction({ db, creditCardTransactionId })
-
-	return await redirectWithToast(
-		`/app/credit-cards/${creditCard.id}`,
-		request,
-		{
-			type: 'success',
-			title: t('details.action.deleteTransactionSuccessToast'),
-		},
-	)
+	return data({}, { headers: toastHeaders })
 }
 
 export default function CreditCardTransaction({
 	loaderData: { creditCard, transaction, installments },
 }: Route.ComponentProps) {
-	const {
-		id: transactionId,
-		date,
-		type,
-		amount,
-		description,
-		category,
-		currencyCode,
-	} = transaction
+	const { date, type, amount, description, category, currencyCode } =
+		transaction
 	const { t, i18n } = useTranslation(['credit-cards', 'constants'])
 	const navigation = useNavigation()
 	const location = useLocation()
@@ -161,7 +152,8 @@ export default function CreditCardTransaction({
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
 		navigation.formAction === location.pathname &&
-		navigation.state === 'submitting'
+		navigation.state === 'submitting' &&
+		navigation.formData?.get('intent') === 'delete'
 
 	return (
 		<>
@@ -194,19 +186,14 @@ export default function CreditCardTransaction({
 					</TooltipContent>
 				</Tooltip>
 				<Tooltip>
-					<Form method='post'>
-						<input
-							type='hidden'
-							name='creditCardTransactionId'
-							value={transactionId}
-						/>
-						<TooltipTrigger asChild>
+					<TooltipTrigger asChild>
+						<Form method='post'>
 							<Button
 								size='icon'
 								variant='destructive-outline'
 								type='submit'
 								name='intent'
-								value='delete-transaction'
+								value='delete'
 								disabled={isDeleting}
 							>
 								{isDeleting ? (
@@ -218,8 +205,8 @@ export default function CreditCardTransaction({
 									{t('details.deleteTransactionAriaLabel')}
 								</span>
 							</Button>
-						</TooltipTrigger>
-					</Form>
+						</Form>
+					</TooltipTrigger>
 					<TooltipContent>
 						{t('details.deleteTransactionAriaLabel')}
 					</TooltipContent>
@@ -232,7 +219,7 @@ export default function CreditCardTransaction({
 					last4={creditCard.last4}
 					expiryMonth={creditCard.expiryMonth}
 					expiryYear={creditCard.expiryYear}
-					accountName={creditCard.accountName}
+					institution={creditCard.institution}
 					className='w-full shrink-0 md:max-w-sm'
 				/>
 				<div className='rounded-lg border p-4 flex flex-col gap-3 w-full'>

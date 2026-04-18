@@ -24,9 +24,9 @@ export function meta({ loaderData }: Route.MetaArgs) {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
+	const t = getServerT(context, 'credit-cards')
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
-	const t = getServerT(context, 'credit-cards')
 
 	const creditCards = await getCreditCards({ db, ownerId: user.id })
 
@@ -83,7 +83,7 @@ export default function CreditCards({
 								brand,
 								expiryMonth,
 								expiryYear,
-								accountName,
+								institution,
 							}) => (
 								<li key={id}>
 									<Link
@@ -95,7 +95,7 @@ export default function CreditCards({
 											last4={last4}
 											expiryMonth={expiryMonth}
 											expiryYear={expiryYear}
-											accountName={accountName}
+											institution={institution}
 										/>
 									</Link>
 								</li>

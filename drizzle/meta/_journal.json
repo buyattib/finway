@@ -141,6 +141,34 @@
       "when": 1776175131805,
       "tag": "0019_remove_category_table",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1776434336247,
+      "tag": "0020_update_category",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1776434505267,
+      "tag": "0021_add_cc_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "6",
+      "when": 1776518160990,
+      "tag": "0022_cc_backfill",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1776518422058,
+      "tag": "0023_cc_remove_account",
+      "breakpoints": true
     }
   ]
 }

@@ -25,13 +25,8 @@ export default {
 		dueDate: 'Due',
 		deleteTransactionAriaLabel: 'Delete transaction',
 		action: {
-			notFoundError: 'Credit card not found',
-			deleteCardErrorToast: 'Could not delete credit card',
-			deleteCardErrorDescription: 'Please try again',
 			deleteCardSuccessToast:
 				'Credit card {{brand}} •••• {{last4}} deleted',
-			deleteTransactionErrorToast: 'Could not delete transaction',
-			deleteTransactionErrorDescription: 'Please try again',
 			deleteTransactionSuccessToast: 'Transaction deleted',
 			transactionNotFoundToast: 'Transaction not found',
 			unknownActionToast: 'Unknown action',
@@ -62,15 +57,17 @@ export default {
 					'Closing date must be after the previous statement closing date',
 				closingDateBeforeNext:
 					'Closing date must be before the next statement closing date',
+				dueDateAfterPrevious:
+					'Due date must be after the previous statement due date',
+				dueDateBeforeNext:
+					'Due date must be before the next statement due date',
 			},
 		},
 	},
-	filters: {
-		type: 'Filter by type',
-		category: 'Filter by category',
-	},
 	form: {
 		description: 'Add a credit card to track expenses associated with it.',
+		institutionLabel: 'Institution',
+		institutionPlaceholder: 'Issuing bank or institution',
 		brandLabel: 'Brand',
 		brandPlaceholder: 'Visa, Mastercard, etc.',
 		last4Label: 'Last 4 digits',
@@ -79,13 +76,7 @@ export default {
 		expiryMonthPlaceholder: 'MM',
 		expiryYearLabel: 'Expiry Year',
 		expiryYearPlaceholder: 'YYYY',
-		currentClosingDateLabel: 'Current Closing Date',
-		currentDueDateLabel: 'Current Due Date',
-		accountLabel: 'Account',
-		accountPlaceholder: 'Select an account',
 		resetButton: 'Reset',
-		noAccountMessage:
-			'You need to create an account first. Do it <0>here</0>',
 		schema: {
 			brandRequired: 'Brand is required',
 			last4Required: 'Last 4 digits are required',
@@ -100,7 +91,7 @@ export default {
 			currentDueDateRequired: 'Due date is required',
 			dueDateMaxDifference:
 				'Due date must be within 20 days of closing date',
-			accountRequired: 'Account is required',
+			institutionRequired: 'Institution is required',
 		},
 		create: {
 			meta: {
@@ -112,24 +103,21 @@ export default {
 			action: {
 				invalidActionError: 'Invalid action',
 				successToast: 'Credit card created successfully',
-				accountNotFound: 'Account not found',
+				duplicateError:
+					'A credit card with these details already exists',
 			},
 		},
 		edit: {
 			meta: {
 				title: 'Edit Credit Card {{brand}} •••• {{last4}} | Finway',
-				notFoundTitle:
-					'Credit card {{creditCardId}} not found | Finway',
 			},
 			title: 'Edit credit card',
 			submitButton: 'Update',
-			loader: {
-				notFoundError: 'Credit card not found',
-			},
 			action: {
 				invalidActionError: 'Invalid action',
 				successToast: 'Credit card updated successfully',
-				creditCardNotFound: 'Credit card not found',
+				duplicateError:
+					'A credit card with these details already exists',
 			},
 		},
 	},
@@ -162,12 +150,11 @@ export default {
 			action: {
 				invalidActionError: 'Invalid action',
 				successToast: 'Transaction created successfully',
-				creditCardNotFound: 'Credit card not found',
 				currencyNotFound: 'Currency not found',
-				categoryNotFound: 'Transaction category not found',
 			},
 			schema: {
 				dateRequired: 'Date is required',
+				dateFuture: 'Date cannot be in the future',
 				transactionTypeRequired: 'Transaction type is required',
 				amountRequired: 'Amount is required',
 				amountInvalid: 'Amount must be a valid number',
@@ -175,7 +162,6 @@ export default {
 				installmentsMin: 'Must be at least 1',
 				currencyRequired: 'Currency is required',
 				categoryRequired: 'Category is required',
-				creditCardRequired: 'Credit card is required',
 			},
 		},
 		edit: {
@@ -195,9 +181,7 @@ export default {
 				invalidActionError: 'Invalid action',
 				successToast: 'Transaction updated successfully',
 				transactionNotFound: 'Transaction not found',
-				creditCardNotFound: 'Credit card not found',
 				currencyNotFound: 'Currency not found',
-				categoryNotFound: 'Transaction category not found',
 			},
 		},
 		details: {

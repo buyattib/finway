@@ -30,8 +30,8 @@ export default {
 			name: 'Supermercado',
 			description: 'Supermercado, comida para cocinar en casa',
 		},
-		dining_out: {
-			name: 'Salidas a Comer',
+		food_dining: {
+			name: 'Gastronomia',
 			description:
 				'Restaurantes, cafés, comida para llevar, bares, café, delivery',
 		},
