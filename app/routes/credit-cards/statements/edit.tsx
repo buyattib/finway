@@ -12,7 +12,8 @@ import { creditCardContext } from '../lib/context'
 import {
 	getStatementById,
 	getAdjacentStatements,
-	updateStatement,
+	updateStatementDueDate,
+	updateStatementClosingDate,
 } from '../lib/queries'
 
 export async function action({
@@ -85,12 +86,19 @@ export async function action({
 		)
 	}
 
-	await updateStatement({
-		db,
-		statementId,
-		creditCardId: creditCard.id,
-		body: { closingDate, dueDate },
-	})
+	if (statement.dueDate !== dueDate) {
+		await updateStatementDueDate({ db, statementId, dueDate })
+	}
+
+	if (statement.closingDate !== closingDate) {
+		await updateStatementClosingDate({
+			db,
+			statementId,
+			nextStatementId: next?.id,
+			creditCardId: creditCard.id,
+			closingDate,
+		})
+	}
 
 	const toastHeaders = await createToastHeaders(request, {
 		type: 'success',

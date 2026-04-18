@@ -223,21 +223,38 @@ export async function ensureStatementsExist({
 	})
 }
 
-export async function updateStatement({
+export async function updateStatementDueDate({
 	db,
 	statementId,
-	creditCardId,
-	body,
+	dueDate,
 }: {
 	db: DB
 	statementId: string
+	dueDate: string
+}) {
+	await db
+		.update(creditCardStatementTable)
+		.set({ dueDate })
+		.where(eq(creditCardStatementTable.id, statementId))
+}
+
+export async function updateStatementClosingDate({
+	db,
+	creditCardId,
+	statementId,
+	nextStatementId,
+	closingDate,
+}: {
+	db: DB
 	creditCardId: string
-	body: { closingDate: string; dueDate: string }
+	statementId: string
+	nextStatementId?: string
+	closingDate: string
 }) {
 	await db.transaction(async tx => {
 		await tx
 			.update(creditCardStatementTable)
-			.set(body)
+			.set({ closingDate })
 			.where(eq(creditCardStatementTable.id, statementId))
 
 		const ccTransactionInstallmentCount = tx
@@ -258,9 +275,12 @@ export async function updateStatement({
 			.groupBy(creditCardTransactionTable.id)
 			.as('ccTransactionInstallmentCount')
 
+		const statementIds = [statementId]
+		if (nextStatementId) statementIds.push(nextStatementId)
+
 		// Get all cc transaction ids that have an installment in the statement
-		const statementCCTransactions = await tx
-			.select({
+		const statementsCCTransactions = await tx
+			.selectDistinct({
 				id: creditCardTransactionTable.id,
 				date: creditCardTransactionTable.date,
 				amount: creditCardTransactionTable.amount,
@@ -283,19 +303,19 @@ export async function updateStatement({
 				),
 			)
 			.where(
-				eq(
+				inArray(
 					creditCardTransactionInstallmentTable.statementId,
-					statementId,
+					statementIds,
 				),
 			)
 
-		if (!statementCCTransactions.length) return
+		if (!statementsCCTransactions.length) return
 
 		// Delete all installments from cc transactions which have an installment in the statement
 		await tx.delete(creditCardTransactionInstallmentTable).where(
 			inArray(
 				creditCardTransactionInstallmentTable.creditCardTransactionId,
-				statementCCTransactions.map(t => t.id),
+				statementsCCTransactions.map(t => t.id),
 			),
 		)
 
@@ -305,7 +325,7 @@ export async function updateStatement({
 			amount,
 			date,
 			installmentCount,
-		} of statementCCTransactions) {
+		} of statementsCCTransactions) {
 			const installments = await makeTransactionInstallments({
 				db: tx,
 				creditCardId,
