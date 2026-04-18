@@ -20,6 +20,11 @@ export default {
 			description:
 				'Rent, mortgage, property tax, HOA, repairs, furniture',
 		},
+		household_services: {
+			name: 'Household Services',
+			description:
+				'Cleaning, maid, gardening, laundry, home maintenance help',
+		},
 		utilities: {
 			name: 'Utilities',
 			description: 'Electric, gas, water, internet, phone',

@@ -13,6 +13,7 @@ const _COMMON_TRANSACTION_CATEGORIES = [
 const _ONLY_INCOME_TRANSACTION_CATEGORIES = ['salary'] as const
 const _ONLY_EXPENSE_TRANSACTION_CATEGORIES = [
 	'housing',
+	'household_services',
 	'utilities',
 	'groceries',
 	'food_dining',

@@ -22,6 +22,11 @@ export default {
 			description:
 				'Alquiler, hipoteca, impuesto inmobiliario, expensas, arreglos, muebles',
 		},
+		household_services: {
+			name: 'Servicios del hogar',
+			description:
+				'Limpieza, empleada doméstica, jardinería, lavandería, mantenimiento del hogar',
+		},
 		utilities: {
 			name: 'Servicios',
 			description: 'Luz, gas, agua, internet, teléfono',
