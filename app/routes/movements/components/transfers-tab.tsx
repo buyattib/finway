@@ -1,4 +1,4 @@
-import { Form, useLocation, useNavigation } from 'react-router'
+import { Form, useNavigation } from 'react-router'
 import { ArrowRightIcon, ArrowRightLeftIcon, TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -36,17 +36,18 @@ export function TransfersTab({
 	filters,
 	selectData,
 }: Props) {
-	const location = useLocation()
 	const navigation = useNavigation()
 	const { t, i18n } = useTranslation('transfers')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === location.pathname + '?index' &&
 		navigation.state === 'submitting' &&
-		navigation.formData?.get('intent') === 'delete'
+		navigation.formData?.get('intent') === 'delete' &&
+		navigation.formAction?.startsWith(
+			`/app/movements/${MOVEMENT_TAB_TRANSFERS}/`,
+		)
 
-	const deletingId = navigation.formData?.get('transferId')
+	const deletingId = navigation.formAction?.split('/').pop()
 
 	const isLoading =
 		navigation.state === 'loading' &&
@@ -80,7 +81,9 @@ export function TransfersTab({
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>{t('index.table.date')}</TableHead>
+									<TableHead>
+										{t('index.table.date')}
+									</TableHead>
 									<TableHead>
 										{t('index.table.fromAccount')}
 									</TableHead>
@@ -107,7 +110,8 @@ export function TransfersTab({
 										toAccount,
 										toAccountType,
 									}) => {
-										const symbol = getCurrencySymbol(currency)
+										const symbol =
+											getCurrencySymbol(currency)
 										return (
 											<TableRow key={id}>
 												<TableCell className='text-muted-foreground'>
@@ -154,23 +158,21 @@ export function TransfersTab({
 												<TableCell className='text-right'>
 													<Form
 														method='post'
-														action='/app/transfers?index'
+														action={`/app/movements/${MOVEMENT_TAB_TRANSFERS}/${id}`}
 													>
-														<input
-															type='hidden'
-															name='transferId'
-															value={id}
-														/>
 														<Button
 															size='icon-xs'
 															variant='destructive-ghost'
 															type='submit'
 															name='intent'
 															value='delete'
-															disabled={isDeleting}
+															disabled={
+																isDeleting
+															}
 														>
 															{isDeleting &&
-															deletingId === id ? (
+															deletingId ===
+																id ? (
 																<Spinner
 																	aria-hidden
 																	size='sm'
@@ -221,13 +223,8 @@ export function TransfersTab({
 										</Text>
 										<Form
 											method='post'
-											action='/app/transfers?index'
+											action={`/app/movements/${MOVEMENT_TAB_TRANSFERS}/${id}`}
 										>
-											<input
-												type='hidden'
-												name='transferId'
-												value={id}
-											/>
 											<Button
 												size='icon-xs'
 												variant='destructive-ghost'
@@ -270,7 +267,10 @@ export function TransfersTab({
 													size='sm'
 												/>
 												{getCurrencySymbol(currency)}{' '}
-												{formatNumber(amount, i18n.language)}
+												{formatNumber(
+													amount,
+													i18n.language,
+												)}
 											</Text>
 											<ArrowRightIcon className='size-4 text-muted-foreground' />
 										</div>
@@ -289,10 +289,7 @@ export function TransfersTab({
 				</>
 			)}
 
-			<TablePagination
-				page={pagination.page}
-				pages={pagination.pages}
-			/>
+			<TablePagination page={pagination.page} pages={pagination.pages} />
 		</div>
 	)
 }

@@ -1,4 +1,4 @@
-import { Form, useNavigation, useLocation } from 'react-router'
+import { Form, useNavigation } from 'react-router'
 import { RefreshCwIcon, TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -38,17 +38,18 @@ export function ExchangesTab({
 	filters,
 	selectData,
 }: Props) {
-	const location = useLocation()
 	const navigation = useNavigation()
 	const { t, i18n } = useTranslation('exchanges')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === location.pathname + '?index' &&
 		navigation.state === 'submitting' &&
-		navigation.formData?.get('intent') === 'delete'
+		navigation.formData?.get('intent') === 'delete' &&
+		navigation.formAction?.startsWith(
+			`/app/movements/${MOVEMENT_TAB_EXCHANGES}/`,
+		)
 
-	const deletingId = navigation.formData?.get('exchangeId')
+	const deletingId = navigation.formAction?.split('/').pop()
 
 	const isLoading =
 		navigation.state === 'loading' &&
@@ -180,13 +181,8 @@ export function ExchangesTab({
 												<TableCell className='text-right'>
 													<Form
 														method='post'
-														action='/app/exchanges?index'
+														action={`/app/movements/${MOVEMENT_TAB_EXCHANGES}/${id}`}
 													>
-														<input
-															type='hidden'
-															name='exchangeId'
-															value={id}
-														/>
 														<Button
 															size='icon-xs'
 															variant='destructive-ghost'
@@ -250,13 +246,8 @@ export function ExchangesTab({
 										</Text>
 										<Form
 											method='post'
-											action='/app/exchanges?index'
+											action={`/app/movements/${MOVEMENT_TAB_EXCHANGES}/${id}`}
 										>
-											<input
-												type='hidden'
-												name='exchangeId'
-												value={id}
-											/>
 											<Button
 												size='icon-xs'
 												variant='destructive-ghost'

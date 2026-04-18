@@ -1,4 +1,4 @@
-import { Form, Link, useLocation, useNavigation } from 'react-router'
+import { Form, Link, useNavigation } from 'react-router'
 import { ReceiptTextIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -37,17 +37,18 @@ export function TransactionsTab({
 	filters,
 	selectData,
 }: Props) {
-	const location = useLocation()
 	const navigation = useNavigation()
 	const { t, i18n } = useTranslation(['transactions', 'constants'])
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
-		navigation.formAction === location.pathname + '?index' &&
 		navigation.state === 'submitting' &&
-		navigation.formData?.get('intent') === 'delete'
+		navigation.formData?.get('intent') === 'delete' &&
+		navigation.formAction?.startsWith(
+			`/app/movements/${MOVEMENT_TAB_TRANSACTIONS}/`,
+		)
 
-	const deletingId = navigation.formData?.get('transactionId')
+	const deletingId = navigation.formAction?.split('/').pop()
 
 	const isLoading =
 		navigation.state === 'loading' &&
@@ -81,14 +82,18 @@ export function TransactionsTab({
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>{t('index.table.date')}</TableHead>
+									<TableHead>
+										{t('index.table.date')}
+									</TableHead>
 									<TableHead>
 										{t('index.table.account')}
 									</TableHead>
 									<TableHead>
 										{t('index.table.amount')}
 									</TableHead>
-									<TableHead>{t('index.table.type')}</TableHead>
+									<TableHead>
+										{t('index.table.type')}
+									</TableHead>
 									<TableHead>
 										{t('index.table.category')}
 									</TableHead>
@@ -109,7 +114,8 @@ export function TransactionsTab({
 										accountType,
 										category,
 									}) => {
-										const symbol = getCurrencySymbol(currency)
+										const symbol =
+											getCurrencySymbol(currency)
 										return (
 											<TableRow key={id}>
 												<TableCell className='text-muted-foreground'>
@@ -161,7 +167,9 @@ export function TransactionsTab({
 															asChild
 															size='icon-xs'
 															variant='ghost'
-															disabled={isDeleting}
+															disabled={
+																isDeleting
+															}
 														>
 															<Link
 																to={`/app/transactions/${id}/edit`}
@@ -171,13 +179,8 @@ export function TransactionsTab({
 														</Button>
 														<Form
 															method='post'
-															action='/app/transactions?index'
+															action={`/app/movements/${MOVEMENT_TAB_TRANSACTIONS}/${id}`}
 														>
-															<input
-																type='hidden'
-																name='transactionId'
-																value={id}
-															/>
 															<Button
 																size='icon-xs'
 																variant='destructive-ghost'
@@ -255,13 +258,8 @@ export function TransactionsTab({
 											</Button>
 											<Form
 												method='post'
-												action='/app/transactions?index'
+												action={`/app/movements/${MOVEMENT_TAB_TRANSACTIONS}/${id}`}
 											>
-												<input
-													type='hidden'
-													name='transactionId'
-													value={id}
-												/>
 												<Button
 													size='icon-xs'
 													variant='destructive-ghost'
@@ -277,10 +275,14 @@ export function TransactionsTab({
 															size='sm'
 														/>
 													) : (
-														<TrashIcon aria-hidden />
+														<TrashIcon
+															aria-hidden
+														/>
 													)}
 													<span className='sr-only'>
-														{t('index.deleteAriaLabel')}
+														{t(
+															'index.deleteAriaLabel',
+														)}
 													</span>
 												</Button>
 											</Form>
@@ -310,11 +312,16 @@ export function TransactionsTab({
 												size='sm'
 											/>
 											{getCurrencySymbol(currency)}{' '}
-											{formatNumber(amount, i18n.language)}
+											{formatNumber(
+												amount,
+												i18n.language,
+											)}
 										</Text>
 									</div>
 									<Text size='sm' theme='muted'>
-										{t(`constants:categories.${category}.name`)}
+										{t(
+											`constants:categories.${category}.name`,
+										)}
 									</Text>
 								</li>
 							),
@@ -323,10 +330,7 @@ export function TransactionsTab({
 				</>
 			)}
 
-			<TablePagination
-				page={pagination.page}
-				pages={pagination.pages}
-			/>
+			<TablePagination page={pagination.page} pages={pagination.pages} />
 		</div>
 	)
 }

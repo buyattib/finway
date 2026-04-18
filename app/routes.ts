@@ -29,7 +29,13 @@ export default [
 		]),
 
 		// movements (wraps transactions/transfers/exchanges under tabs)
-		...prefix('movements', [index('routes/movements/index.tsx')]),
+		...prefix('movements', [
+			index('routes/movements/index.tsx'),
+			route(
+				':movement/:movementId',
+				'routes/movements/movement.tsx',
+			),
+		]),
 
 		// transactions
 		...prefix('transactions', [
