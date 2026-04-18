@@ -11,9 +11,9 @@ import {
 	getTransactionInstallmentCount,
 } from '../lib/queries'
 import { creditCardContext } from '../lib/context'
+import { creditCardTransactionAction } from '../lib/services'
 
 import { CreditCardTransactionForm } from './components/form'
-import { creditCardTransactionAction } from '../lib/services'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [

@@ -22,9 +22,10 @@ import {
 import type { DB } from '~/lib/types'
 import { addMonth, initializeDate, subtractMonth } from '~/lib/utils'
 
-import type { TCategory } from '~/routes/transactions/lib/types'
-
-import type { TCCTransactionType } from './types'
+import type {
+	TCategory,
+	TTransactionType,
+} from '~/routes/transactions/lib/types'
 
 // cc
 
@@ -609,7 +610,7 @@ export async function createCreditCardTransaction({
 	creditCardId: string
 	transactionData: {
 		date: string
-		type: TCCTransactionType
+		type: TTransactionType
 		amount: number
 		description: string
 		currencyId: string
@@ -649,7 +650,7 @@ export async function updateCreditCardTransaction({
 	creditCardTransactionId: string
 	transactionData: {
 		date: string
-		type: TCCTransactionType
+		type: TTransactionType
 		amount: number
 		description: string
 		currencyId: string

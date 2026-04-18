@@ -162,6 +162,8 @@ export default {
 				installmentsMin: 'Must be at least 1',
 				currencyRequired: 'Currency is required',
 				categoryRequired: 'Category is required',
+				categoryInvalidForType:
+					'Category is not valid for the selected transaction type',
 			},
 		},
 		edit: {

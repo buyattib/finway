@@ -34,6 +34,7 @@ import {
 	TRANSACTION_CATEGORIES,
 	TRANSACTION_TYPES,
 } from '~/routes/transactions/lib/constants'
+import type { TTransactionType } from '~/routes/transactions/lib/types'
 
 import { creditCardTransactionFormSchema } from '../../lib/schemas'
 import { CC_INSTALLMENT_OPTIONS } from '../../lib/constants'
@@ -127,10 +128,13 @@ export function CreditCardTransactionForm({
 		label: code,
 	}))
 
-	const categoryOptions = TRANSACTION_CATEGORIES.map(c => ({
-		value: c,
-		label: t(`constants:categories.${c}.name`),
-	}))
+	const transactionType = fields.type.value as TTransactionType
+	const categoryOptions = transactionType
+		? TRANSACTION_CATEGORIES[transactionType].map(c => ({
+				value: c,
+				label: t(`constants:categories.${c}.name`),
+			}))
+		: []
 
 	return (
 		<Card className='md:max-w-2xl w-full mx-auto'>

@@ -63,6 +63,8 @@ export default {
 			accountRequired: 'Account is required',
 			currencyRequired: 'Currency is required',
 			categoryRequired: 'Category is required',
+			categoryInvalidForType:
+				'Category is not valid for the selected transaction type',
 		},
 		create: {
 			meta: {

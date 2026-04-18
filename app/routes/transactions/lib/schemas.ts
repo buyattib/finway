@@ -2,7 +2,11 @@ import { z } from 'zod'
 import type { TFunction } from 'i18next'
 
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-import { TRANSACTION_CATEGORIES, TRANSACTION_TYPES } from './constants'
+import {
+	ALL_TRANSACTION_CATEGORIES,
+	TRANSACTION_CATEGORIES,
+	TRANSACTION_TYPES,
+} from './constants'
 
 const ActionSchema = z.discriminatedUnion('action', [
 	z.object({
@@ -42,10 +46,20 @@ export function createTransactionFormSchema(t: TFunction<'transactions'>) {
 			accountId: z.string(t('form.schema.accountRequired')),
 			currencyId: z.string(t('form.schema.currencyRequired')),
 			category: z.enum(
-				TRANSACTION_CATEGORIES,
+				ALL_TRANSACTION_CATEGORIES,
 				t('form.schema.categoryRequired'),
 			),
 		})
+		.refine(
+			data =>
+				(
+					TRANSACTION_CATEGORIES[data.type] as readonly string[]
+				).includes(data.category),
+			{
+				message: t('form.schema.categoryInvalidForType'),
+				path: ['category'],
+			},
+		)
 		.and(ActionSchema)
 }
 
@@ -56,11 +70,4 @@ export type TransactionFormSchema = ReturnType<
 export const DeleteTransactionFormSchema = z.object({
 	transactionId: z.string(),
 	intent: z.literal('delete'),
-})
-
-export const TransactionsFiltersSchema = z.object({
-	accountId: z.string().optional(),
-	currencyId: z.string().optional(),
-	category: z.enum(TRANSACTION_CATEGORIES).optional(),
-	transactionType: z.enum(TRANSACTION_TYPES).optional(),
 })

@@ -45,6 +45,7 @@ import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_CATEGORIES,
 } from '../lib/constants'
+import type { TTransactionType } from '../lib/types'
 
 export type TInitialData = EditRoute.ComponentProps['loaderData']['initialData']
 type TBalances = CreateRoute.ComponentProps['loaderData']['balances']
@@ -148,10 +149,13 @@ export function TransactionForm({
 				})
 			: undefined
 
-	const categoryOptions = TRANSACTION_CATEGORIES.map(c => ({
-		value: c,
-		label: t(`constants:categories.${c}.name`),
-	}))
+	const transactionType = fields.type.value as TTransactionType
+	const categoryOptions = transactionType
+		? TRANSACTION_CATEGORIES[transactionType].map(c => ({
+				value: c,
+				label: t(`constants:categories.${c}.name`),
+			}))
+		: []
 
 	return (
 		<Card className='md:max-w-2xl w-full mx-auto'>

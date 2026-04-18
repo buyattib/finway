@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next'
 
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 import {
+	ALL_TRANSACTION_CATEGORIES,
 	TRANSACTION_CATEGORIES,
 	TRANSACTION_TYPES,
 } from '~/routes/transactions/lib/constants'
@@ -116,9 +117,19 @@ export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 				t('transaction.create.schema.currencyRequired'),
 			),
 			category: z.enum(
-				TRANSACTION_CATEGORIES,
+				ALL_TRANSACTION_CATEGORIES,
 				t('transaction.create.schema.categoryRequired'),
 			),
 		})
+		.refine(
+			data =>
+				(
+					TRANSACTION_CATEGORIES[data.type] as readonly string[]
+				).includes(data.category),
+			{
+				message: t('transaction.create.schema.categoryInvalidForType'),
+				path: ['category'],
+			},
+		)
 		.and(ActionSchema)
 }

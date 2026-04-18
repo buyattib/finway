@@ -11,7 +11,7 @@ import {
 import { CURRENCIES } from '~/lib/constants'
 import { ACCOUNT_TYPES } from '~/routes/accounts/lib/constants'
 import {
-	TRANSACTION_CATEGORIES,
+	ALL_TRANSACTION_CATEGORIES,
 	TRANSACTION_TYPES,
 } from '~/routes/transactions/lib/constants'
 
@@ -67,7 +67,7 @@ export const transaction = sqliteTable(
 		id: cuid2().defaultRandom().primaryKey(),
 		date: text().notNull(),
 		amount: integer().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
+		category: text({ enum: ALL_TRANSACTION_CATEGORIES }).notNull(),
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 		description: text().default(''),
 
@@ -222,7 +222,7 @@ export const creditCardTransaction = sqliteTable(
 		id: cuid2().defaultRandom().primaryKey(),
 		date: text().notNull(),
 		amount: integer().notNull(),
-		category: text({ enum: TRANSACTION_CATEGORIES }).notNull(),
+		category: text({ enum: ALL_TRANSACTION_CATEGORIES }).notNull(),
 		type: text({ enum: TRANSACTION_TYPES }).notNull(),
 		description: text().default(''),
 

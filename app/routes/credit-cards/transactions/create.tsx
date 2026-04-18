@@ -42,7 +42,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 			totalInstallments: '1',
 			description: '',
 			currencyId: selectData.currencies?.[0]?.id || '',
-			category: TRANSACTION_CATEGORIES[0],
+			category: TRANSACTION_CATEGORIES[TRANSACTION_TYPE_EXPENSE][0],
 		} satisfies Partial<TInitialData>,
 		meta: {
 			title: t('transaction.create.meta.title'),

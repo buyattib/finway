@@ -67,7 +67,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			description: '',
 			accountId,
 			currencyId,
-			category: TRANSACTION_CATEGORIES[0],
+			category: TRANSACTION_CATEGORIES[TRANSACTION_TYPE_EXPENSE][0],
 		} satisfies Partial<TInitialData>,
 		meta: {
 			title: t('form.create.meta.title'),

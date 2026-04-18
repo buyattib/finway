@@ -9,7 +9,7 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { Combobox } from '~/components/ui/combobox'
 
-import { TRANSACTION_CATEGORIES, TRANSACTION_TYPES } from '../lib/constants'
+import { ALL_TRANSACTION_CATEGORIES, TRANSACTION_TYPES } from '../lib/constants'
 
 export function TransactionsFilters({
 	filters,
@@ -49,10 +49,15 @@ export function TransactionsFilters({
 		label: code,
 	}))
 
-	const categoryOptions = TRANSACTION_CATEGORIES.map(c => ({
+	const categoryOptions = ALL_TRANSACTION_CATEGORIES.map(c => ({
 		value: c,
 		label: t(`constants:categories.${c}.name`),
 	}))
+
+	const onValueChange = () => {
+		if (!form.current) return
+		submit(form.current)
+	}
 
 	return (
 		<>
@@ -66,40 +71,28 @@ export function TransactionsFilters({
 					name='accountId'
 					defaultValue={filters.accountId}
 					buttonPlaceholder={t('filters.account')}
-					onValueChange={() => {
-						if (!form.current) return
-						submit(form.current)
-					}}
+					onValueChange={onValueChange}
 				/>
 				<Combobox
 					options={currencyOptions}
 					name='currencyId'
 					defaultValue={filters.currencyId}
 					buttonPlaceholder={t('filters.currency')}
-					onValueChange={() => {
-						if (!form.current) return
-						submit(form.current)
-					}}
+					onValueChange={onValueChange}
 				/>
 				<Combobox
 					options={categoryOptions}
 					name='category'
 					defaultValue={filters.category}
 					buttonPlaceholder={t('filters.category')}
-					onValueChange={() => {
-						if (!form.current) return
-						submit(form.current)
-					}}
+					onValueChange={onValueChange}
 				/>
 				<Combobox
 					options={transactionTypeOptions}
 					name='transactionType'
 					defaultValue={filters.transactionType}
 					buttonPlaceholder={t('filters.type')}
-					onValueChange={() => {
-						if (!form.current) return
-						submit(form.current)
-					}}
+					onValueChange={onValueChange}
 				/>
 			</Form>
 		</>
