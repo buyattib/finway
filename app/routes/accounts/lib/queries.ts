@@ -1,6 +1,6 @@
 import { and, desc, eq, like, ne, sql } from 'drizzle-orm'
 
-import { account as accountTable } from '~/database/schema'
+import * as schema from '~/database/schema'
 import { getBalances } from '~/lib/queries'
 import type { DB } from '~/lib/types'
 
@@ -38,23 +38,26 @@ export async function getAccounts({
 	ownerId: string
 	search: string | null
 }) {
-	const filters = [eq(accountTable.ownerId, ownerId)]
+	const filters = [eq(schema.account.ownerId, ownerId)]
 	if (search) {
 		filters.push(
-			like(sql`lower(${accountTable.name})`, `%${search.toLowerCase()}%`),
+			like(
+				sql`lower(${schema.account.name})`,
+				`%${search.toLowerCase()}%`,
+			),
 		)
 	}
 
 	const accounts = await db
 		.select({
-			id: accountTable.id,
-			name: accountTable.name,
-			description: accountTable.description,
-			accountType: accountTable.accountType,
+			id: schema.account.id,
+			name: schema.account.name,
+			description: schema.account.description,
+			accountType: schema.account.accountType,
 		})
-		.from(accountTable)
+		.from(schema.account)
 		.where(and(...filters))
-		.orderBy(desc(accountTable.createdAt))
+		.orderBy(desc(schema.account.createdAt))
 
 	return accounts
 }
@@ -98,15 +101,15 @@ export async function getDuplicateAccountCount({
 	excludeId?: string
 }) {
 	const filters = [
-		eq(accountTable.ownerId, ownerId),
-		eq(accountTable.name, name),
-		eq(accountTable.accountType, accountType),
+		eq(schema.account.ownerId, ownerId),
+		eq(schema.account.name, name),
+		eq(schema.account.accountType, accountType),
 	]
 	if (excludeId) {
-		filters.push(ne(accountTable.id, excludeId))
+		filters.push(ne(schema.account.id, excludeId))
 	}
 
-	return db.$count(accountTable, and(...filters))
+	return db.$count(schema.account, and(...filters))
 }
 
 // mutations --------
@@ -118,7 +121,7 @@ export async function deleteAccount({
 	db: DB
 	accountId: string
 }) {
-	await db.delete(accountTable).where(eq(accountTable.id, accountId))
+	await db.delete(schema.account).where(eq(schema.account.id, accountId))
 }
 
 export async function createAccount({
@@ -135,9 +138,9 @@ export async function createAccount({
 	description: string
 }) {
 	const [{ id }] = await db
-		.insert(accountTable)
+		.insert(schema.account)
 		.values({ name, accountType, description, ownerId })
-		.returning({ id: accountTable.id })
+		.returning({ id: schema.account.id })
 
 	return id
 }
@@ -156,7 +159,7 @@ export async function updateAccount({
 	description: string
 }) {
 	await db
-		.update(accountTable)
+		.update(schema.account)
 		.set({ name, accountType, description })
-		.where(eq(accountTable.id, id))
+		.where(eq(schema.account.id, id))
 }
