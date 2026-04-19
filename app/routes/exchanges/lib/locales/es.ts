@@ -31,7 +31,8 @@ export default {
 	},
 	filters: {
 		account: 'Filtrar por cuenta',
-		currency: 'Filtrar por moneda',
+		fromCurrency: 'Filtrar por moneda de origen',
+		toCurrency: 'Filtrar por moneda de destino',
 	},
 	form: {
 		description:

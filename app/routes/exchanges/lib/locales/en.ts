@@ -28,7 +28,8 @@ export default {
 	},
 	filters: {
 		account: 'Filter by account',
-		currency: 'Filter by currency',
+		fromCurrency: 'Filter by from currency',
+		toCurrency: 'Filter by to currency',
 	},
 	form: {
 		description:

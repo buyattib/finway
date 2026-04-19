@@ -1,6 +1,4 @@
-- transfer, exchange edition
-
-- transaction, transfer, exchange simplify and unify
+- unify transaction, transfer, exchange forms
 
 - use import * as schema from 'db' instead of importing individual tables?
 - ts migrations?

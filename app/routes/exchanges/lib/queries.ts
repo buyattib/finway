@@ -1,4 +1,4 @@
-import { and, eq, or, desc, sql } from 'drizzle-orm'
+import { and, eq, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 
 import {
@@ -36,13 +36,15 @@ export async function getExchanges({
 	ownerId,
 	page,
 	accountId,
-	currencyId,
+	fromCurrencyId,
+	toCurrencyId,
 }: {
 	db: DB
 	ownerId: string
 	page: number
 	accountId?: string
-	currencyId?: string
+	fromCurrencyId?: string
+	toCurrencyId?: string
 }) {
 	const fromCurrencyAlias = alias(currencyTable, 'fromCurrency')
 	const toCurrencyAlias = alias(currencyTable, 'toCurrency')
@@ -51,12 +53,11 @@ export async function getExchanges({
 	if (accountId) {
 		filters.push(eq(exchangeTable.accountId, accountId))
 	}
-	if (currencyId) {
-		const currencyMatch = or(
-			eq(exchangeTable.fromCurrencyId, currencyId),
-			eq(exchangeTable.toCurrencyId, currencyId),
-		)
-		if (currencyMatch) filters.push(currencyMatch)
+	if (fromCurrencyId) {
+		filters.push(eq(exchangeTable.fromCurrencyId, fromCurrencyId))
+	}
+	if (toCurrencyId) {
+		filters.push(eq(exchangeTable.toCurrencyId, toCurrencyId))
 	}
 
 	const query = db

@@ -79,7 +79,8 @@ export async function getExchangesTabData({
 
 	const filters = {
 		accountId: searchParams.get('accountId') ?? '',
-		currencyId: searchParams.get('currencyId') ?? '',
+		fromCurrencyId: searchParams.get('fromCurrencyId') ?? '',
+		toCurrencyId: searchParams.get('toCurrencyId') ?? '',
 	}
 
 	const [{ exchanges, total }, selectData] = await Promise.all([

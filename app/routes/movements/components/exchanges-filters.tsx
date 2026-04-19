@@ -49,7 +49,7 @@ export function ExchangesFilters({
 		<Form
 			ref={form}
 			id='exchanges-filters'
-			className='grid grid-cols-1 sm:grid-cols-2 gap-2'
+			className='grid grid-cols-1 sm:grid-cols-3 gap-2'
 		>
 			<input type='hidden' name='tab' value={MOVEMENT_TAB_EXCHANGES} />
 			<Combobox
@@ -61,9 +61,16 @@ export function ExchangesFilters({
 			/>
 			<Combobox
 				options={currencyOptions}
-				name='currencyId'
-				defaultValue={filters.currencyId}
-				buttonPlaceholder={t('filters.currency')}
+				name='fromCurrencyId'
+				defaultValue={filters.fromCurrencyId}
+				buttonPlaceholder={t('filters.fromCurrency')}
+				onValueChange={onValueChange}
+			/>
+			<Combobox
+				options={currencyOptions}
+				name='toCurrencyId'
+				defaultValue={filters.toCurrencyId}
+				buttonPlaceholder={t('filters.toCurrency')}
 				onValueChange={onValueChange}
 			/>
 		</Form>
