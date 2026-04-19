@@ -39,20 +39,17 @@ export default [
 
 		// transactions
 		...prefix('transactions', [
-			index('routes/transactions/index.tsx'),
 			route('create', 'routes/transactions/create.tsx'),
 			route(':transactionId/edit', 'routes/transactions/edit.tsx'),
 		]),
 
 		// transfers
 		...prefix('transfers', [
-			index('routes/transfers/index.tsx'),
 			route('create', 'routes/transfers/create.tsx'),
 		]),
 
 		// exchanges
 		...prefix('exchanges', [
-			index('routes/exchanges/index.tsx'),
 			route('create', 'routes/exchanges/create.tsx'),
 		]),
 

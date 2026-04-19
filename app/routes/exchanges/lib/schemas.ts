@@ -41,8 +41,3 @@ export function createExchangeFormSchema(t: TFunction<'exchanges'>) {
 export type CreateExchangeFormSchema = ReturnType<
 	typeof createExchangeFormSchema
 >
-
-export const DeleteExchangeFormSchema = z.object({
-	exchangeId: z.string(),
-	intent: z.literal('delete'),
-})

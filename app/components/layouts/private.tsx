@@ -1,9 +1,6 @@
 import { NavLink, Outlet, type MiddlewareFunction } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import {
-	ArrowRightLeftIcon,
-	RefreshCwIcon,
-	BanknoteArrowDownIcon,
 	CreditCardIcon,
 	LayoutDashboard,
 	ListIcon,
@@ -76,29 +73,14 @@ const links = [
 		icon: <WalletIcon />,
 	},
 	{
-		to: '/app/transactions',
-		labelKey: 'layout.transactions' as const,
-		icon: <BanknoteArrowDownIcon />,
+		to: '/app/movements',
+		labelKey: 'layout.movements' as const,
+		icon: <ListIcon />,
 	},
 	{
 		to: '/app/credit-cards',
 		labelKey: 'layout.creditCards' as const,
 		icon: <CreditCardIcon />,
-	},
-	{
-		to: '/app/transfers',
-		labelKey: 'layout.transfers' as const,
-		icon: <ArrowRightLeftIcon />,
-	},
-	{
-		to: '/app/exchanges',
-		labelKey: 'layout.exchanges' as const,
-		icon: <RefreshCwIcon />,
-	},
-	{
-		to: '/app/movements',
-		labelKey: 'layout.movements' as const,
-		icon: <ListIcon />,
 	},
 ]
 

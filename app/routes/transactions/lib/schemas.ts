@@ -66,8 +66,3 @@ export function createTransactionFormSchema(t: TFunction<'transactions'>) {
 export type TransactionFormSchema = ReturnType<
 	typeof createTransactionFormSchema
 >
-
-export const DeleteTransactionFormSchema = z.object({
-	transactionId: z.string(),
-	intent: z.literal('delete'),
-})
