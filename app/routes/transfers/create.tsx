@@ -238,7 +238,7 @@ export default function CreateTransfer({
 			<CardHeader>
 				<div className='flex items-center gap-4'>
 					<Button asChild variant='link' width='fit' size='icon'>
-						<Link to='..' relative='path'>
+						<Link to='/app/movements?tab=transfers'>
 							<ArrowLeftIcon />
 						</Link>
 					</Button>

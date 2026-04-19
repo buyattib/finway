@@ -75,7 +75,7 @@ export function TransactionForm({
 
 	const { accounts, currencies } = selectData
 
-	const { defaultValue, title, buttonLabel, to } = {
+	const { defaultValue, title, buttonLabel } = {
 		[ACTION_CREATION]: {
 			defaultValue: {
 				date: initializeDate().toISOString(),
@@ -83,13 +83,11 @@ export function TransactionForm({
 			},
 			title: t('form.create.title'),
 			buttonLabel: t('form.create.submitButton'),
-			to: '..',
 		},
 		[ACTION_EDITION]: {
 			defaultValue: initialData,
 			title: t('form.edit.title'),
 			buttonLabel: t('form.edit.submitButton'),
-			to: '../..',
 		},
 	}[action]
 
@@ -163,7 +161,7 @@ export function TransactionForm({
 			<CardHeader>
 				<div className='flex items-center gap-4'>
 					<Button asChild variant='link' width='fit' size='icon'>
-						<Link to={to} relative='path'>
+						<Link to='/app/movements?tab=transactions'>
 							<ArrowLeftIcon />
 						</Link>
 					</Button>

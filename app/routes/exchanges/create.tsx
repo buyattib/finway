@@ -245,7 +245,7 @@ export default function CreateExchange({
 			<CardHeader>
 				<div className='flex items-center gap-4'>
 					<Button asChild variant='link' width='fit' size='icon'>
-						<Link to='..' relative='path'>
+						<Link to='/app/movements?tab=exchanges'>
 							<ArrowLeftIcon />
 						</Link>
 					</Button>
