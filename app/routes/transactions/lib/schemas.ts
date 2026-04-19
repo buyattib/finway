@@ -62,7 +62,3 @@ export function createTransactionFormSchema(t: TFunction<'transactions'>) {
 		)
 		.and(ActionSchema)
 }
-
-export type TransactionFormSchema = ReturnType<
-	typeof createTransactionFormSchema
->

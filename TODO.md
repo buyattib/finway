@@ -1,7 +1,10 @@
 - unify transaction, transfer, exchange forms
 
+- cc statement payments
+
+- dashboard stats for categories
+
 - use import * as schema from 'db' instead of importing individual tables?
-- ts migrations?
 
 - improve agents.md
 
@@ -9,8 +12,6 @@
 - Recurring transactions
 
 - Tag system for categories
-
-- Unify transaction/transfer/exchange views?
 
 - Ask agent what is needed to be production ready
 

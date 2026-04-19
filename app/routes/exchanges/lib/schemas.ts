@@ -37,7 +37,3 @@ export function createExchangeFormSchema(t: TFunction<'exchanges'>) {
 		},
 	)
 }
-
-export type CreateExchangeFormSchema = ReturnType<
-	typeof createExchangeFormSchema
->

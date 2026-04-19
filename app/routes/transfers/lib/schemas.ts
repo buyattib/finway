@@ -28,7 +28,3 @@ export function createTransferFormSchema(t: TFunction<'transfers'>) {
 		},
 	)
 }
-
-export type CreateTransferFormSchema = ReturnType<
-	typeof createTransferFormSchema
->

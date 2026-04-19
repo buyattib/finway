@@ -1,11 +1,7 @@
 import { and, eq, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 
-import {
-	currency as currencyTable,
-	account as accountTable,
-	exchange as exchangeTable,
-} from '~/database/schema'
+import * as schema from '~/database/schema'
 import { getBalances } from '~/lib/queries'
 import type { DB } from '~/lib/types'
 import { PAGE_SIZE } from '~/lib/constants'
@@ -46,46 +42,49 @@ export async function getExchanges({
 	fromCurrencyId?: string
 	toCurrencyId?: string
 }) {
-	const fromCurrencyAlias = alias(currencyTable, 'fromCurrency')
-	const toCurrencyAlias = alias(currencyTable, 'toCurrency')
+	const fromCurrencyAlias = alias(schema.currency, 'fromCurrency')
+	const toCurrencyAlias = alias(schema.currency, 'toCurrency')
 
-	const filters = [eq(accountTable.ownerId, ownerId)]
+	const filters = [eq(schema.account.ownerId, ownerId)]
 	if (accountId) {
-		filters.push(eq(exchangeTable.accountId, accountId))
+		filters.push(eq(schema.exchange.accountId, accountId))
 	}
 	if (fromCurrencyId) {
-		filters.push(eq(exchangeTable.fromCurrencyId, fromCurrencyId))
+		filters.push(eq(schema.exchange.fromCurrencyId, fromCurrencyId))
 	}
 	if (toCurrencyId) {
-		filters.push(eq(exchangeTable.toCurrencyId, toCurrencyId))
+		filters.push(eq(schema.exchange.toCurrencyId, toCurrencyId))
 	}
 
 	const query = db
 		.select({
-			id: exchangeTable.id,
-			date: exchangeTable.date,
+			id: schema.exchange.id,
+			date: schema.exchange.date,
 
-			account: accountTable.name,
-			accountType: accountTable.accountType,
+			account: schema.account.name,
+			accountType: schema.account.accountType,
 
 			fromCurrency: fromCurrencyAlias.code,
 			toCurrency: toCurrencyAlias.code,
 
-			fromAmount: sql<string>`CAST(${exchangeTable.fromAmount} / 100.0 as TEXT)`,
-			toAmount: sql<string>`CAST(${exchangeTable.toAmount} / 100.0 as TEXT)`,
+			fromAmount: sql<string>`CAST(${schema.exchange.fromAmount} / 100.0 as TEXT)`,
+			toAmount: sql<string>`CAST(${schema.exchange.toAmount} / 100.0 as TEXT)`,
 		})
-		.from(exchangeTable)
-		.innerJoin(accountTable, eq(exchangeTable.accountId, accountTable.id))
+		.from(schema.exchange)
+		.innerJoin(
+			schema.account,
+			eq(schema.exchange.accountId, schema.account.id),
+		)
 		.innerJoin(
 			fromCurrencyAlias,
-			eq(exchangeTable.fromCurrencyId, fromCurrencyAlias.id),
+			eq(schema.exchange.fromCurrencyId, fromCurrencyAlias.id),
 		)
 		.innerJoin(
 			toCurrencyAlias,
-			eq(exchangeTable.toCurrencyId, toCurrencyAlias.id),
+			eq(schema.exchange.toCurrencyId, toCurrencyAlias.id),
 		)
 		.where(and(...filters))
-		.orderBy(desc(exchangeTable.date), desc(exchangeTable.createdAt))
+		.orderBy(desc(schema.exchange.date), desc(schema.exchange.createdAt))
 
 	const total = await db.$count(query)
 	const exchanges = await query
@@ -125,7 +124,7 @@ export async function deleteExchange({
 	db: DB
 	exchangeId: string
 }) {
-	await db.delete(exchangeTable).where(eq(exchangeTable.id, exchangeId))
+	await db.delete(schema.exchange).where(eq(schema.exchange.id, exchangeId))
 }
 
 export async function createExchange({
@@ -142,5 +141,5 @@ export async function createExchange({
 		accountId: string
 	}
 }) {
-	await db.insert(exchangeTable).values(values)
+	await db.insert(schema.exchange).values(values)
 }

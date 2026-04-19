@@ -1,10 +1,7 @@
 import { and, desc, eq, sql } from 'drizzle-orm'
 
-import {
-	currency as currencyTable,
-	account as accountTable,
-	transaction as transactionTable,
-} from '~/database/schema'
+import * as schema from '~/database/schema'
+
 import { getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 import type { DB } from '~/lib/types'
@@ -53,42 +50,45 @@ export async function getTransactions({
 	category: TCategory
 	transactionType: TTransactionType | ''
 }) {
-	const filters = [eq(accountTable.ownerId, ownerId)]
+	const filters = [eq(schema.account.ownerId, ownerId)]
 	if (accountId) {
-		filters.push(eq(transactionTable.accountId, accountId))
+		filters.push(eq(schema.transaction.accountId, accountId))
 	}
 	if (currencyId) {
-		filters.push(eq(transactionTable.currencyId, currencyId))
+		filters.push(eq(schema.transaction.currencyId, currencyId))
 	}
 	if (category) {
-		filters.push(eq(transactionTable.category, category))
+		filters.push(eq(schema.transaction.category, category))
 	}
 	if (transactionType) {
-		filters.push(eq(transactionTable.type, transactionType))
+		filters.push(eq(schema.transaction.type, transactionType))
 	}
 
 	const query = db
 		.select({
-			id: transactionTable.id,
-			date: transactionTable.date,
-			amount: sql<string>`CAST(${transactionTable.amount} / 100.0 as TEXT)`,
-			type: transactionTable.type,
-			currency: currencyTable.code,
-			account: accountTable.name,
-			accountType: accountTable.accountType,
-			category: transactionTable.category,
+			id: schema.transaction.id,
+			date: schema.transaction.date,
+			amount: sql<string>`CAST(${schema.transaction.amount} / 100.0 as TEXT)`,
+			type: schema.transaction.type,
+			currency: schema.currency.code,
+			account: schema.account.name,
+			accountType: schema.account.accountType,
+			category: schema.transaction.category,
 		})
-		.from(transactionTable)
+		.from(schema.transaction)
 		.innerJoin(
-			currencyTable,
-			eq(transactionTable.currencyId, currencyTable.id),
+			schema.currency,
+			eq(schema.transaction.currencyId, schema.currency.id),
 		)
 		.innerJoin(
-			accountTable,
-			eq(transactionTable.accountId, accountTable.id),
+			schema.account,
+			eq(schema.transaction.accountId, schema.account.id),
 		)
 		.where(and(...filters))
-		.orderBy(desc(transactionTable.date), desc(transactionTable.createdAt))
+		.orderBy(
+			desc(schema.transaction.date),
+			desc(schema.transaction.createdAt),
+		)
 
 	const total = await db.$count(query)
 	const transactions = await query
@@ -131,8 +131,8 @@ export async function deleteTransaction({
 	transactionId: string
 }) {
 	await db
-		.delete(transactionTable)
-		.where(eq(transactionTable.id, transactionId))
+		.delete(schema.transaction)
+		.where(eq(schema.transaction.id, transactionId))
 }
 
 export async function createTransaction({
@@ -150,7 +150,7 @@ export async function createTransaction({
 		category: TCategory
 	}
 }) {
-	await db.insert(transactionTable).values(data)
+	await db.insert(schema.transaction).values(data)
 }
 
 export async function updateTransaction({
@@ -171,7 +171,7 @@ export async function updateTransaction({
 	}
 }) {
 	await db
-		.update(transactionTable)
+		.update(schema.transaction)
 		.set(data)
-		.where(eq(transactionTable.id, transactionId))
+		.where(eq(schema.transaction.id, transactionId))
 }

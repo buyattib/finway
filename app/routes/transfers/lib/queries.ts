@@ -1,11 +1,7 @@
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 
-import {
-	currency as currencyTable,
-	account as accountTable,
-	transfer as transferTable,
-} from '~/database/schema'
+import * as schema from '~/database/schema'
 import { getBalances } from '~/lib/queries'
 import type { DB } from '~/lib/types'
 import { PAGE_SIZE } from '~/lib/constants'
@@ -49,30 +45,30 @@ export async function getTransfers({
 	toAccountId?: string
 	currencyId?: string
 }) {
-	const fromAccountAlias = alias(accountTable, 'fromAccount')
-	const toAccountAlias = alias(accountTable, 'toAccount')
+	const fromAccountAlias = alias(schema.account, 'fromAccount')
+	const toAccountAlias = alias(schema.account, 'toAccount')
 
 	const filters = [
 		eq(fromAccountAlias.ownerId, ownerId),
 		eq(toAccountAlias.ownerId, ownerId),
 	]
 	if (fromAccountId) {
-		filters.push(eq(transferTable.fromAccountId, fromAccountId))
+		filters.push(eq(schema.transfer.fromAccountId, fromAccountId))
 	}
 	if (toAccountId) {
-		filters.push(eq(transferTable.toAccountId, toAccountId))
+		filters.push(eq(schema.transfer.toAccountId, toAccountId))
 	}
 	if (currencyId) {
-		filters.push(eq(transferTable.currencyId, currencyId))
+		filters.push(eq(schema.transfer.currencyId, currencyId))
 	}
 
 	const query = db
 		.select({
-			id: transferTable.id,
+			id: schema.transfer.id,
 
-			date: transferTable.date,
-			amount: sql<string>`CAST(${transferTable.amount} / 100.0 as TEXT)`,
-			currency: currencyTable.code,
+			date: schema.transfer.date,
+			amount: sql<string>`CAST(${schema.transfer.amount} / 100.0 as TEXT)`,
+			currency: schema.currency.code,
 
 			fromAccount: fromAccountAlias.name,
 			fromAccountType: fromAccountAlias.accountType,
@@ -80,21 +76,21 @@ export async function getTransfers({
 			toAccount: toAccountAlias.name,
 			toAccountType: toAccountAlias.accountType,
 		})
-		.from(transferTable)
+		.from(schema.transfer)
 		.innerJoin(
-			currencyTable,
-			eq(transferTable.currencyId, currencyTable.id),
+			schema.currency,
+			eq(schema.transfer.currencyId, schema.currency.id),
 		)
 		.innerJoin(
 			fromAccountAlias,
-			eq(transferTable.fromAccountId, fromAccountAlias.id),
+			eq(schema.transfer.fromAccountId, fromAccountAlias.id),
 		)
 		.innerJoin(
 			toAccountAlias,
-			eq(transferTable.toAccountId, toAccountAlias.id),
+			eq(schema.transfer.toAccountId, toAccountAlias.id),
 		)
 		.where(and(...filters))
-		.orderBy(desc(transferTable.date), desc(transferTable.createdAt))
+		.orderBy(desc(schema.transfer.date), desc(schema.transfer.createdAt))
 
 	const total = await db.$count(query)
 	const transfers = await query
@@ -134,7 +130,7 @@ export async function deleteTransfer({
 	db: DB
 	transferId: string
 }) {
-	await db.delete(transferTable).where(eq(transferTable.id, transferId))
+	await db.delete(schema.transfer).where(eq(schema.transfer.id, transferId))
 }
 
 export async function createTransfer({
@@ -150,5 +146,5 @@ export async function createTransfer({
 		toAccountId: string
 	}
 }) {
-	await db.insert(transferTable).values(values)
+	await db.insert(schema.transfer).values(values)
 }
