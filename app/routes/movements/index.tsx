@@ -1,5 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { redirect, useSearchParams } from 'react-router'
+import { Link, redirect, useSearchParams } from 'react-router'
+import {
+	ArrowRightLeftIcon,
+	ChevronDownIcon,
+	PlusIcon,
+	ReceiptTextIcon,
+	RefreshCwIcon,
+} from 'lucide-react'
 
 import type { Route } from './+types'
 
@@ -9,6 +16,13 @@ import { dbContext, userContext } from '~/lib/context'
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { Title } from '~/components/ui/title'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '~/components/ui/tabs'
+import { Button } from '~/components/ui/button'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
 
 import { TransactionsTab } from './components/transactions-tab'
 import { TransfersTab } from './components/transfers-tab'
@@ -97,6 +111,37 @@ export default function Movements({ loaderData }: Route.ComponentProps) {
 				<Title id='movements-section' level='h3'>
 					{t('index.title')}
 				</Title>
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button variant='default'>
+							<PlusIcon aria-hidden />
+							<span className='sm:inline hidden'>
+								{t('index.createLabel')}
+							</span>
+							<ChevronDownIcon aria-hidden />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align='end'>
+						<DropdownMenuItem asChild>
+							<Link to='/app/transactions/create'>
+								<ReceiptTextIcon />
+								{t('index.createActions.transaction')}
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuItem asChild>
+							<Link to='/app/transfers/create'>
+								<ArrowRightLeftIcon />
+								{t('index.createActions.transfer')}
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuItem asChild>
+							<Link to='/app/exchanges/create'>
+								<RefreshCwIcon />
+								{t('index.createActions.exchange')}
+							</Link>
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</PageHeader>
 
 			<PageContent>
