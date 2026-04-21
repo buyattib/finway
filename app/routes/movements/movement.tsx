@@ -27,8 +27,8 @@ import {
 	MOVEMENT_TAB_TRANSACTIONS,
 	MOVEMENT_TAB_TRANSFERS,
 	MOVEMENT_TAB_EXCHANGES,
-	type TMovementTab,
 } from './lib/constants'
+import type { TMovementTab } from './lib/types'
 
 export async function action({ request, context, params }: Route.ActionArgs) {
 	const db = context.get(dbContext)

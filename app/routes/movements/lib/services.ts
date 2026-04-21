@@ -1,6 +1,20 @@
-import { getSelectData } from '~/lib/queries'
+import { getSelectData, getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 import type { DB } from '~/lib/types'
+
+export async function getMovementFormData({
+	db,
+	ownerId,
+}: {
+	db: DB
+	ownerId: string
+}) {
+	const [selectData, balances] = await Promise.all([
+		getSelectData(db, ownerId),
+		getBalances({ db, ownerId, parseBalance: true }),
+	])
+	return { selectData, balances }
+}
 
 import { getTransactions } from '~/routes/transactions/lib/queries'
 import type {
@@ -29,12 +43,14 @@ export async function getTransactionsTabData({
 			(searchParams.get('transactionType') as TTransactionType) ?? '',
 	}
 
-	const [{ transactions, pagination }, selectData] = await Promise.all([
-		getTransactions({ db, ownerId, page, ...filters }),
-		getSelectData(db, ownerId),
-	])
+	const { transactions, pagination } = await getTransactions({
+		db,
+		ownerId,
+		page,
+		...filters,
+	})
 
-	return { transactions, pagination, filters, selectData }
+	return { transactions, pagination, filters }
 }
 
 export async function getTransfersTabData({
@@ -54,16 +70,17 @@ export async function getTransfersTabData({
 		currencyId: searchParams.get('currencyId') ?? '',
 	}
 
-	const [{ transfers, total }, selectData] = await Promise.all([
-		getTransfers({ db, ownerId, page, ...filters }),
-		getSelectData(db, ownerId),
-	])
+	const { transfers, total } = await getTransfers({
+		db,
+		ownerId,
+		page,
+		...filters,
+	})
 
 	return {
 		transfers,
 		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
 		filters,
-		selectData,
 	}
 }
 
@@ -84,15 +101,16 @@ export async function getExchangesTabData({
 		toCurrencyId: searchParams.get('toCurrencyId') ?? '',
 	}
 
-	const [{ exchanges, total }, selectData] = await Promise.all([
-		getExchanges({ db, ownerId, page, ...filters }),
-		getSelectData(db, ownerId),
-	])
+	const { exchanges, total } = await getExchanges({
+		db,
+		ownerId,
+		page,
+		...filters,
+	})
 
 	return {
 		exchanges,
 		pagination: { page, pages: Math.ceil(total / PAGE_SIZE), total },
 		filters,
-		selectData,
 	}
 }

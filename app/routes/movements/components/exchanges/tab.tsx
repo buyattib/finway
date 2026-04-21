@@ -2,7 +2,7 @@ import { Form, useNavigation } from 'react-router'
 import { RefreshCwIcon, TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import type { Route } from '../+types'
+import type { Route } from '../../+types'
 
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
@@ -24,20 +24,22 @@ import { TablePagination } from '~/components/table-pagination'
 
 import { calculateRate } from '~/routes/exchanges/lib/utils'
 
-import { MOVEMENT_TAB_EXCHANGES } from '../lib/constants'
-import { ExchangesFilters } from './exchanges-filters'
+import { MOVEMENT_TAB_EXCHANGES } from '../../lib/constants'
+import { ExchangesFilters } from './filters'
 
-type Props = Extract<
+export type ExchangesTabProps = Extract<
 	Route.ComponentProps['loaderData'],
 	{ tab: typeof MOVEMENT_TAB_EXCHANGES }
->['exchanges']
+>['exchanges'] & {
+	formData: Route.ComponentProps['loaderData']['formData']
+}
 
 export function ExchangesTab({
 	exchanges,
 	pagination,
 	filters,
-	selectData,
-}: Props) {
+	formData,
+}: ExchangesTabProps) {
 	const navigation = useNavigation()
 	const { t, i18n } = useTranslation('exchanges')
 
@@ -45,9 +47,7 @@ export function ExchangesTab({
 		navigation.formMethod === 'POST' &&
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete' &&
-		navigation.formAction?.startsWith(
-			`/app/movements/${MOVEMENT_TAB_EXCHANGES}/`,
-		)
+		navigation.formAction?.startsWith(`/app/movements/exchanges/`)
 
 	const deletingId = navigation.formAction?.split('/').pop()
 
@@ -60,7 +60,10 @@ export function ExchangesTab({
 
 	return (
 		<div className='flex flex-col gap-4'>
-			<ExchangesFilters filters={filters} selectData={selectData} />
+			<ExchangesFilters
+				filters={filters}
+				selectData={formData.selectData}
+			/>
 
 			<div className='h-6'>
 				{isLoading && <Spinner size='md' className='mx-auto' />}
@@ -181,7 +184,7 @@ export function ExchangesTab({
 												<TableCell className='text-right'>
 													<Form
 														method='post'
-														action={`/app/movements/${MOVEMENT_TAB_EXCHANGES}/${id}`}
+														action={`/app/movements/exchanges/${id}`}
 													>
 														<Button
 															size='icon-xs'
@@ -246,7 +249,7 @@ export function ExchangesTab({
 										</Text>
 										<Form
 											method='post'
-											action={`/app/movements/${MOVEMENT_TAB_EXCHANGES}/${id}`}
+											action={`/app/movements/exchanges/${id}`}
 										>
 											<Button
 												size='icon-xs'

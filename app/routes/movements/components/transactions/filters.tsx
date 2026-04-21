@@ -2,7 +2,9 @@ import { useRef } from 'react'
 import { Form, useSubmit } from 'react-router'
 import { useTranslation } from 'react-i18next'
 
-import type { Route } from '../+types'
+import type { Route } from '../../+types'
+
+import type { TSelectData } from '~/lib/types'
 
 import { TransactionType } from '~/components/transaction-type'
 import { CurrencyIcon } from '~/components/currency-icon'
@@ -14,7 +16,7 @@ import {
 	TRANSACTION_TYPES,
 } from '~/routes/transactions/lib/constants'
 
-import { MOVEMENT_TAB_TRANSACTIONS } from '../lib/constants'
+import { MOVEMENT_TAB_TRANSACTIONS } from '../../lib/constants'
 
 type TransactionsTabData = Extract<
 	Route.ComponentProps['loaderData'],
@@ -26,7 +28,7 @@ export function TransactionsFilters({
 	selectData,
 }: {
 	filters: TransactionsTabData['filters']
-	selectData: TransactionsTabData['selectData']
+	selectData: TSelectData
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)

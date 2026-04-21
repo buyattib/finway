@@ -6,15 +6,21 @@ export default {
 		},
 		title: 'Movements',
 		createLabel: 'Create',
-		createActions: {
-			transaction: 'New transaction',
-			transfer: 'New transfer',
-			exchange: 'New exchange',
-		},
 		tabs: {
 			transactions: 'Transactions',
 			transfers: 'Transfers',
 			exchanges: 'Exchanges',
+		},
+	},
+	dialog: {
+		title: 'New movement',
+		description: 'Pick the kind of movement you want to record.',
+		entityLabel: 'Movement type',
+		entityPlaceholder: 'Select a movement type',
+		entities: {
+			transaction: 'Transaction',
+			transfer: 'Transfer',
+			exchange: 'Exchange',
 		},
 	},
 }

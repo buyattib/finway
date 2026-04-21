@@ -1,34 +1,24 @@
 import { useTranslation } from 'react-i18next'
-import { Link, redirect, useSearchParams } from 'react-router'
-import {
-	ArrowRightLeftIcon,
-	ChevronDownIcon,
-	PlusIcon,
-	ReceiptTextIcon,
-	RefreshCwIcon,
-} from 'lucide-react'
+import { redirect, useSearchParams } from 'react-router'
+import { PlusIcon } from 'lucide-react'
 
 import type { Route } from './+types'
 
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
+import { ACTION_CREATION } from '~/lib/constants'
 
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { Title } from '~/components/ui/title'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '~/components/ui/tabs'
 import { Button } from '~/components/ui/button'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
 
-import { TransactionsTab } from './components/transactions-tab'
-import { TransfersTab } from './components/transfers-tab'
-import { ExchangesTab } from './components/exchanges-tab'
+import { TransactionsTab } from './components/transactions/tab'
+import { TransfersTab } from './components/transfers/tab'
+import { ExchangesTab } from './components/exchanges/tab'
+import { MovementFormDialog } from './components/movement-form-dialog'
+
 import {
-	DEFAULT_MOVEMENT_TAB,
 	MOVEMENT_TABS,
 	MOVEMENT_TAB_EXCHANGES,
 	MOVEMENT_TAB_TRANSACTIONS,
@@ -38,7 +28,9 @@ import {
 	getTransactionsTabData,
 	getTransfersTabData,
 	getExchangesTabData,
+	getMovementFormData,
 } from './lib/services'
+import type { TMovementTab } from './lib/types'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -59,7 +51,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const tabParam = searchParams.get('tab')
 	const tab = MOVEMENT_TABS.find(t => t === tabParam)
 	if (!tab) {
-		searchParams.set('tab', DEFAULT_MOVEMENT_TAB)
+		searchParams.set('tab', MOVEMENT_TAB_TRANSACTIONS)
 		throw redirect(url.pathname + url.search)
 	}
 
@@ -68,13 +60,15 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		description: t('index.meta.description'),
 	}
 
+	const formData = await getMovementFormData({ db, ownerId: user.id })
+
 	if (tab === MOVEMENT_TAB_TRANSACTIONS) {
 		const data = await getTransactionsTabData({
 			db,
 			ownerId: user.id,
 			searchParams,
 		})
-		return { tab, meta, transactions: data }
+		return { tab, meta, formData, transactions: data }
 	}
 
 	if (tab === MOVEMENT_TAB_TRANSFERS) {
@@ -83,19 +77,22 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			ownerId: user.id,
 			searchParams,
 		})
-		return { tab, meta, transfers: data }
+		return { tab, meta, formData, transfers: data }
 	}
 
-	const data = await getExchangesTabData({
-		db,
-		ownerId: user.id,
-		searchParams,
-	})
-	return { tab, meta, exchanges: data }
+	if (tab === MOVEMENT_TAB_EXCHANGES) {
+		const data = await getExchangesTabData({
+			db,
+			ownerId: user.id,
+			searchParams,
+		})
+		return { tab, meta, formData, exchanges: data }
+	}
+
+	throw new Error('Invalid tab')
 }
 
 export default function Movements({ loaderData }: Route.ComponentProps) {
-	const { tab } = loaderData
 	const { t } = useTranslation('movements')
 	const [searchParams, setSearchParams] = useSearchParams()
 
@@ -111,41 +108,24 @@ export default function Movements({ loaderData }: Route.ComponentProps) {
 				<Title id='movements-section' level='h3'>
 					{t('index.title')}
 				</Title>
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
+				<MovementFormDialog
+					key={loaderData.tab}
+					action={ACTION_CREATION}
+					{...loaderData.formData}
+					defaultEntity={loaderData.tab as TMovementTab}
+					trigger={
 						<Button variant='default'>
 							<PlusIcon aria-hidden />
 							<span className='sm:inline hidden'>
 								{t('index.createLabel')}
 							</span>
-							<ChevronDownIcon aria-hidden />
 						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align='end'>
-						<DropdownMenuItem asChild>
-							<Link to='/app/transactions/create'>
-								<ReceiptTextIcon />
-								{t('index.createActions.transaction')}
-							</Link>
-						</DropdownMenuItem>
-						<DropdownMenuItem asChild>
-							<Link to='/app/transfers/create'>
-								<ArrowRightLeftIcon />
-								{t('index.createActions.transfer')}
-							</Link>
-						</DropdownMenuItem>
-						<DropdownMenuItem asChild>
-							<Link to='/app/exchanges/create'>
-								<RefreshCwIcon />
-								{t('index.createActions.exchange')}
-							</Link>
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+					}
+				/>
 			</PageHeader>
 
 			<PageContent>
-				<Tabs value={tab} onValueChange={onTabChange}>
+				<Tabs value={loaderData.tab} onValueChange={onTabChange}>
 					<TabsList className='w-full'>
 						<TabsTrigger value={MOVEMENT_TAB_TRANSACTIONS}>
 							{t('index.tabs.transactions')}
@@ -160,17 +140,26 @@ export default function Movements({ loaderData }: Route.ComponentProps) {
 
 					{loaderData.tab === MOVEMENT_TAB_TRANSACTIONS && (
 						<TabsContent value={MOVEMENT_TAB_TRANSACTIONS}>
-							<TransactionsTab {...loaderData.transactions} />
+							<TransactionsTab
+								{...loaderData.transactions}
+								formData={loaderData.formData}
+							/>
 						</TabsContent>
 					)}
 					{loaderData.tab === MOVEMENT_TAB_TRANSFERS && (
 						<TabsContent value={MOVEMENT_TAB_TRANSFERS}>
-							<TransfersTab {...loaderData.transfers} />
+							<TransfersTab
+								{...loaderData.transfers}
+								formData={loaderData.formData}
+							/>
 						</TabsContent>
 					)}
 					{loaderData.tab === MOVEMENT_TAB_EXCHANGES && (
 						<TabsContent value={MOVEMENT_TAB_EXCHANGES}>
-							<ExchangesTab {...loaderData.exchanges} />
+							<ExchangesTab
+								{...loaderData.exchanges}
+								formData={loaderData.formData}
+							/>
 						</TabsContent>
 					)}
 				</Tabs>

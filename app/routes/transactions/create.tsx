@@ -7,74 +7,14 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
-import { getBalances, getCurrencyById, getSelectData } from '~/lib/queries'
+import { getCurrencyById } from '~/lib/queries'
 import { ACTION_CREATION } from '~/lib/constants'
 
 import { getAccountById } from '~/routes/accounts/lib/queries'
 
-import {
-	TRANSACTION_CATEGORIES,
-	TRANSACTION_TYPE_EXPENSE,
-} from './lib/constants'
+import { TRANSACTION_TYPE_EXPENSE } from './lib/constants'
 import { createTransactionFormSchema } from './lib/schemas'
 import { createTransaction, getTransactionBalance } from './lib/queries'
-import { TransactionForm, type TInitialData } from './components/form'
-
-export function meta({ loaderData }: Route.MetaArgs) {
-	return [
-		{ title: loaderData?.meta.title },
-		{ property: 'og:title', content: loaderData?.meta.title },
-		{ name: 'description', content: loaderData?.meta.description },
-	]
-}
-
-export async function loader({ context, request }: Route.LoaderArgs) {
-	const user = context.get(userContext)
-	const db = context.get(dbContext)
-	const t = getServerT(context, 'transactions')
-
-	const url = new URL(request.url)
-	const accountIdParam = url.searchParams.get('accountId')
-	const currencyIdParam = url.searchParams.get('currencyId')
-
-	const [selectData, balances] = await Promise.all([
-		getSelectData(db, user.id),
-		getBalances({ db, ownerId: user.id, parseBalance: true }),
-	])
-
-	let accountId = selectData.accounts?.[0]?.id || ''
-	if (
-		accountIdParam &&
-		selectData.accounts.some(acc => acc.id === accountIdParam)
-	) {
-		accountId = accountIdParam
-	}
-
-	let currencyId = selectData.currencies[0].id
-	if (
-		currencyIdParam &&
-		selectData.currencies.filter(c => c.id === currencyIdParam)
-	) {
-		currencyId = currencyIdParam
-	}
-
-	return {
-		selectData,
-		balances,
-		initialData: {
-			type: TRANSACTION_TYPE_EXPENSE,
-			amount: '',
-			description: '',
-			accountId,
-			currencyId,
-			category: TRANSACTION_CATEGORIES[TRANSACTION_TYPE_EXPENSE][0],
-		} satisfies Partial<TInitialData>,
-		meta: {
-			title: t('form.create.meta.title'),
-			description: t('form.create.meta.description'),
-		},
-	}
-}
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
@@ -161,19 +101,4 @@ export async function action({ request, context }: Route.ActionArgs) {
 		type: 'success',
 		title: t('form.create.action.successToast'),
 	})
-}
-
-export default function CreateTransaction({
-	loaderData: { selectData, balances, initialData },
-	actionData,
-}: Route.ComponentProps) {
-	return (
-		<TransactionForm
-			action={ACTION_CREATION}
-			lastResult={actionData?.submission}
-			selectData={selectData}
-			balances={balances}
-			initialData={initialData}
-		/>
-	)
 }

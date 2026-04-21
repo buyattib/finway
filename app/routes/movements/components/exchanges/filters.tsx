@@ -2,13 +2,15 @@ import { useRef } from 'react'
 import { Form, useSubmit } from 'react-router'
 import { useTranslation } from 'react-i18next'
 
-import type { Route } from '../+types'
+import type { Route } from '../../+types'
+
+import type { TSelectData } from '~/lib/types'
 
 import { CurrencyIcon } from '~/components/currency-icon'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { Combobox } from '~/components/ui/combobox'
 
-import { MOVEMENT_TAB_EXCHANGES } from '../lib/constants'
+import { MOVEMENT_TAB_EXCHANGES } from '../../lib/constants'
 
 type ExchangesTabData = Extract<
 	Route.ComponentProps['loaderData'],
@@ -20,7 +22,7 @@ export function ExchangesFilters({
 	selectData,
 }: {
 	filters: ExchangesTabData['filters']
-	selectData: ExchangesTabData['selectData']
+	selectData: TSelectData
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)

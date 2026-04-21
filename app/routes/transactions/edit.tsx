@@ -7,7 +7,7 @@ import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
 
 import { dbContext, userContext } from '~/lib/context'
-import { getBalances, getCurrencyById, getSelectData } from '~/lib/queries'
+import { getCurrencyById } from '~/lib/queries'
 import { ACTION_EDITION } from '~/lib/constants'
 
 import { getAccountById } from '~/routes/accounts/lib/queries'
@@ -22,55 +22,6 @@ import {
 	getTransactionBalance,
 	updateTransaction,
 } from './lib/queries'
-import { TransactionForm } from './components/form'
-
-export function meta({ loaderData }: Route.MetaArgs) {
-	return [
-		{ title: loaderData?.meta.title },
-		{ property: 'og:title', content: loaderData?.meta.title },
-		{ name: 'description', content: loaderData?.meta.description },
-	]
-}
-
-export async function loader({
-	context,
-	params: { transactionId },
-}: Route.LoaderArgs) {
-	const user = context.get(userContext)
-	const db = context.get(dbContext)
-	const t = getServerT(context, 'transactions')
-
-	const transaction = await getTransactionById({ db, transactionId })
-
-	if (!transaction || transaction.account.ownerId !== user.id) {
-		throw new Response(t('form.edit.loader.notFoundError'), { status: 404 })
-	}
-
-	const {
-		account: _account,
-		amount: rawAmount,
-		...transactionData
-	} = transaction
-	const amount = (rawAmount / 100).toString()
-
-	const [selectData, balances] = await Promise.all([
-		getSelectData(db, user.id),
-		getBalances({ db, ownerId: user.id, parseBalance: true }),
-	])
-
-	return {
-		selectData,
-		balances,
-		initialData: {
-			...transactionData,
-			amount,
-		},
-		meta: {
-			title: t('form.edit.meta.title', { transactionId }),
-			description: t('form.edit.meta.description', { transactionId }),
-		},
-	}
-}
 
 export async function action({ request, context }: Route.ActionArgs) {
 	const user = context.get(userContext)
@@ -181,23 +132,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 		data: { ...values, amount },
 	})
 
-	return await redirectWithToast(`/app/transactions`, request, {
+	return await redirectWithToast(`/app/movements?tab=transactions`, request, {
 		type: 'success',
 		title: t('form.edit.action.successToast'),
 	})
-}
-
-export default function CreateTransaction({
-	loaderData: { selectData, balances, initialData },
-	actionData,
-}: Route.ComponentProps) {
-	return (
-		<TransactionForm
-			action={ACTION_EDITION}
-			lastResult={actionData?.submission}
-			selectData={selectData}
-			balances={balances}
-			initialData={initialData}
-		/>
-	)
 }

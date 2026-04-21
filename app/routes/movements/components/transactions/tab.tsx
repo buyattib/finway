@@ -1,10 +1,11 @@
-import { Form, Link, useNavigation } from 'react-router'
+import { Form, useNavigation } from 'react-router'
 import { ReceiptTextIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import type { Route } from '../+types'
+import type { Route } from '../../+types'
 
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
+import { ACTION_EDITION } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -23,20 +24,23 @@ import { TransactionType } from '~/components/transaction-type'
 import { EmptyState } from '~/components/empty-state'
 import { TablePagination } from '~/components/table-pagination'
 
-import { MOVEMENT_TAB_TRANSACTIONS } from '../lib/constants'
-import { TransactionsFilters } from './transactions-filters'
+import { MOVEMENT_TAB_TRANSACTIONS } from '../../lib/constants'
+import { TransactionsFilters } from './filters'
+import { MovementFormDialog } from '../movement-form-dialog'
 
-type Props = Extract<
+export type TransactionsTabProps = Extract<
 	Route.ComponentProps['loaderData'],
 	{ tab: typeof MOVEMENT_TAB_TRANSACTIONS }
->['transactions']
+>['transactions'] & {
+	formData: Route.ComponentProps['loaderData']['formData']
+}
 
 export function TransactionsTab({
 	transactions,
 	pagination,
 	filters,
-	selectData,
-}: Props) {
+	formData,
+}: TransactionsTabProps) {
 	const navigation = useNavigation()
 	const { t, i18n } = useTranslation(['transactions', 'constants'])
 
@@ -44,9 +48,7 @@ export function TransactionsTab({
 		navigation.formMethod === 'POST' &&
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete' &&
-		navigation.formAction?.startsWith(
-			`/app/movements/${MOVEMENT_TAB_TRANSACTIONS}/`,
-		)
+		navigation.formAction?.startsWith(`/app/movements/transactions/`)
 
 	const deletingId = navigation.formAction?.split('/').pop()
 
@@ -57,9 +59,30 @@ export function TransactionsTab({
 
 	const hasFilters = Object.values(filters).some(Boolean)
 
+	const EditModalForm = ({
+		transaction,
+	}: {
+		transaction: TransactionsTabProps['transactions'][number]
+	}) => (
+		<MovementFormDialog
+			action={ACTION_EDITION}
+			entity={MOVEMENT_TAB_TRANSACTIONS}
+			transaction={transaction}
+			{...formData}
+			trigger={
+				<Button size='icon-xs' variant='ghost' disabled={isDeleting}>
+					<SquarePenIcon />
+				</Button>
+			}
+		/>
+	)
+
 	return (
 		<div className='flex flex-col gap-4'>
-			<TransactionsFilters filters={filters} selectData={selectData} />
+			<TransactionsFilters
+				filters={filters}
+				selectData={formData.selectData}
+			/>
 
 			<div className='h-6'>
 				{isLoading && <Spinner size='md' className='mx-auto' />}
@@ -103,8 +126,8 @@ export function TransactionsTab({
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{transactions.map(
-									({
+								{transactions.map(transaction => {
+									const {
 										id,
 										date,
 										type,
@@ -113,116 +136,105 @@ export function TransactionsTab({
 										account,
 										accountType,
 										category,
-									}) => {
-										const symbol =
-											getCurrencySymbol(currency)
-										return (
-											<TableRow key={id}>
-												<TableCell className='text-muted-foreground'>
-													{formatDate(
-														new Date(date),
+									} = transaction
+									const symbol = getCurrencySymbol(currency)
+									return (
+										<TableRow key={id}>
+											<TableCell className='text-muted-foreground'>
+												{formatDate(
+													new Date(date),
+													i18n.language,
+												)}
+											</TableCell>
+											<TableCell>
+												<div className='flex items-center gap-2'>
+													<AccountTypeIcon
+														size='xs'
+														accountType={
+															accountType
+														}
+													/>
+													{account}
+												</div>
+											</TableCell>
+											<TableCell>
+												<span className='flex items-center gap-2 font-semibold text-foreground'>
+													<CurrencyIcon
+														currency={currency}
+														size='sm'
+													/>
+													{symbol}{' '}
+													{formatNumber(
+														amount,
 														i18n.language,
 													)}
-												</TableCell>
-												<TableCell>
-													<div className='flex items-center gap-2'>
-														<AccountTypeIcon
-															size='xs'
-															accountType={
-																accountType
-															}
-														/>
-														{account}
-													</div>
-												</TableCell>
-												<TableCell>
-													<span className='flex items-center gap-2 font-semibold text-foreground'>
-														<CurrencyIcon
-															currency={currency}
-															size='sm'
-														/>
-														{symbol}{' '}
-														{formatNumber(
-															amount,
-															i18n.language,
-														)}
-													</span>
-												</TableCell>
-												<TableCell>
-													<TransactionType
-														type='transaction'
-														variant='icon-text'
-														size='xs'
-														transactionType={type}
+												</span>
+											</TableCell>
+											<TableCell>
+												<TransactionType
+													type='transaction'
+													variant='icon-text'
+													size='xs'
+													transactionType={type}
+												/>
+											</TableCell>
+											<TableCell className='text-muted-foreground'>
+												{t(
+													`constants:categories.${category}.name`,
+												)}
+											</TableCell>
+											<TableCell className='text-right'>
+												<div className='flex items-center justify-end gap-2'>
+													<EditModalForm
+														transaction={
+															transaction
+														}
 													/>
-												</TableCell>
-												<TableCell className='text-muted-foreground'>
-													{t(
-														`constants:categories.${category}.name`,
-													)}
-												</TableCell>
-												<TableCell className='text-right'>
-													<div className='flex items-center justify-end gap-2'>
+													<Form
+														method='post'
+														action={`/app/movements/transactions/${id}`}
+													>
 														<Button
-															asChild
 															size='icon-xs'
-															variant='ghost'
+															variant='destructive-ghost'
+															type='submit'
+															name='intent'
+															value='delete'
 															disabled={
 																isDeleting
 															}
 														>
-															<Link
-																to={`/app/transactions/${id}/edit`}
-															>
-																<SquarePenIcon />
-															</Link>
-														</Button>
-														<Form
-															method='post'
-															action={`/app/movements/${MOVEMENT_TAB_TRANSACTIONS}/${id}`}
-														>
-															<Button
-																size='icon-xs'
-																variant='destructive-ghost'
-																type='submit'
-																name='intent'
-																value='delete'
-																disabled={
-																	isDeleting
-																}
-															>
-																{isDeleting &&
-																deletingId ===
-																	id ? (
-																	<Spinner
-																		aria-hidden
-																		size='sm'
-																	/>
-																) : (
-																	<TrashIcon
-																		aria-hidden
-																	/>
+															{isDeleting &&
+															deletingId ===
+																id ? (
+																<Spinner
+																	aria-hidden
+																	size='sm'
+																/>
+															) : (
+																<TrashIcon
+																	aria-hidden
+																/>
+															)}
+															<span className='sr-only'>
+																{t(
+																	'index.deleteAriaLabel',
 																)}
-																<span className='sr-only'>
-																	{t(
-																		'index.deleteAriaLabel',
-																	)}
-																</span>
-															</Button>
-														</Form>
-													</div>
-												</TableCell>
-											</TableRow>
-										)
-									},
-								)}
+															</span>
+														</Button>
+													</Form>
+												</div>
+											</TableCell>
+										</TableRow>
+									)
+								})}
 							</TableBody>
 						</Table>
 					</div>
 
 					<ul className='flex flex-col gap-2 min-w-0 xl:hidden'>
-						{transactions.map(
-							({
+						{transactions.map(transaction => {
+							const {
 								id,
 								date,
 								type,
@@ -231,7 +243,8 @@ export function TransactionsTab({
 								account,
 								accountType,
 								category,
-							}) => (
+							} = transaction
+							return (
 								<li
 									key={id}
 									className='flex flex-col gap-3 border rounded-xl p-4'
@@ -244,18 +257,9 @@ export function TransactionsTab({
 											)}
 										</Text>
 										<div className='flex items-center gap-2'>
-											<Button
-												asChild
-												size='icon-xs'
-												variant='ghost'
-												disabled={isDeleting}
-											>
-												<Link
-													to={`/app/transactions/${id}/edit`}
-												>
-													<SquarePenIcon />
-												</Link>
-											</Button>
+											<EditModalForm
+												transaction={transaction}
+											/>
 											<Form
 												method='post'
 												action={`/app/movements/${MOVEMENT_TAB_TRANSACTIONS}/${id}`}
@@ -324,8 +328,8 @@ export function TransactionsTab({
 										)}
 									</Text>
 								</li>
-							),
-						)}
+							)
+						})}
 					</ul>
 				</>
 			)}

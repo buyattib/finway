@@ -2,7 +2,7 @@ import { Form, useNavigation } from 'react-router'
 import { ArrowRightIcon, ArrowRightLeftIcon, TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import type { Route } from '../+types'
+import type { Route } from '../../+types'
 
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
@@ -22,20 +22,22 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import { EmptyState } from '~/components/empty-state'
 import { TablePagination } from '~/components/table-pagination'
 
-import { MOVEMENT_TAB_TRANSFERS } from '../lib/constants'
-import { TransfersFilters } from './transfers-filters'
+import { MOVEMENT_TAB_TRANSFERS } from '../../lib/constants'
+import { TransfersFilters } from './filters'
 
-type Props = Extract<
+export type TransfersTabProps = Extract<
 	Route.ComponentProps['loaderData'],
 	{ tab: typeof MOVEMENT_TAB_TRANSFERS }
->['transfers']
+>['transfers'] & {
+	formData: Route.ComponentProps['loaderData']['formData']
+}
 
 export function TransfersTab({
 	transfers,
 	pagination,
 	filters,
-	selectData,
-}: Props) {
+	formData,
+}: TransfersTabProps) {
 	const navigation = useNavigation()
 	const { t, i18n } = useTranslation('transfers')
 
@@ -43,9 +45,7 @@ export function TransfersTab({
 		navigation.formMethod === 'POST' &&
 		navigation.state === 'submitting' &&
 		navigation.formData?.get('intent') === 'delete' &&
-		navigation.formAction?.startsWith(
-			`/app/movements/${MOVEMENT_TAB_TRANSFERS}/`,
-		)
+		navigation.formAction?.startsWith(`/app/movements/transfers/`)
 
 	const deletingId = navigation.formAction?.split('/').pop()
 
@@ -58,7 +58,10 @@ export function TransfersTab({
 
 	return (
 		<div className='flex flex-col gap-4'>
-			<TransfersFilters filters={filters} selectData={selectData} />
+			<TransfersFilters
+				filters={filters}
+				selectData={formData.selectData}
+			/>
 
 			<div className='h-6'>
 				{isLoading && <Spinner size='md' className='mx-auto' />}
@@ -158,7 +161,7 @@ export function TransfersTab({
 												<TableCell className='text-right'>
 													<Form
 														method='post'
-														action={`/app/movements/${MOVEMENT_TAB_TRANSFERS}/${id}`}
+														action={`/app/movements/transfers/${id}`}
 													>
 														<Button
 															size='icon-xs'
@@ -223,7 +226,7 @@ export function TransfersTab({
 										</Text>
 										<Form
 											method='post'
-											action={`/app/movements/${MOVEMENT_TAB_TRANSFERS}/${id}`}
+											action={`/app/movements/transfers/${id}`}
 										>
 											<Button
 												size='icon-xs'
