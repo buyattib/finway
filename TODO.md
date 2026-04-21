@@ -1,4 +1,4 @@
-- unify transaction, transfer, exchange forms
+- unify transfer and exchange forms
 
 - cc statement payments
 
