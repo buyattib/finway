@@ -27,8 +27,11 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createTransferFormSchema } from '~/routes/transfers/lib/schemas'
 
+import { useFormSuccess } from '../../lib/use-form-success'
+
 type Props = {
 	lastResult?: SubmissionResult
+	onSuccess?: () => void
 } & Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
@@ -44,6 +47,7 @@ export function TransferForm({
 	selectData,
 	balances,
 	lastResult,
+	onSuccess,
 	...props
 }: Props) {
 	const location = useLocation()
@@ -74,6 +78,8 @@ export function TransferForm({
 	const isSubmitting =
 		navigation.formAction === formAction &&
 		navigation.state === 'submitting'
+
+	useFormSuccess(formAction, onSuccess)
 
 	const [form, fields] = useForm({
 		lastResult,

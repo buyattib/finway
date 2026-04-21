@@ -97,7 +97,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		data: { ...values, amount },
 	})
 
-	return await redirectWithToast(`/app/transactions`, request, {
+	return await redirectWithToast(`/app/movements?tab=transactions`, request, {
 		type: 'success',
 		title: t('form.create.action.successToast'),
 	})

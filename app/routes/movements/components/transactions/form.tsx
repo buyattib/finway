@@ -36,10 +36,12 @@ import {
 } from '~/routes/transactions/lib/constants'
 import type { TTransactionType } from '~/routes/transactions/lib/types'
 
+import { useFormSuccess } from '../../lib/use-form-success'
 import { type TransactionsTabProps } from './tab'
 
 type Props = {
 	lastResult?: SubmissionResult
+	onSuccess?: () => void
 } & Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
@@ -55,6 +57,7 @@ export function TransactionForm({
 	selectData,
 	balances,
 	lastResult,
+	onSuccess,
 	...props
 }: Props) {
 	const location = useLocation()
@@ -96,6 +99,8 @@ export function TransactionForm({
 	const isSubmitting =
 		navigation.formAction === formAction &&
 		navigation.state === 'submitting'
+
+	useFormSuccess(formAction, onSuccess)
 
 	const [form, fields] = useForm({
 		lastResult,

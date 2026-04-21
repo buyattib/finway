@@ -27,8 +27,11 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createExchangeFormSchema } from '~/routes/exchanges/lib/schemas'
 
+import { useFormSuccess } from '../../lib/use-form-success'
+
 type Props = {
 	lastResult?: SubmissionResult
+	onSuccess?: () => void
 } & Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
@@ -44,6 +47,7 @@ export function ExchangeForm({
 	selectData,
 	balances,
 	lastResult,
+	onSuccess,
 	...props
 }: Props) {
 	const location = useLocation()
@@ -75,6 +79,8 @@ export function ExchangeForm({
 	const isSubmitting =
 		navigation.formAction === formAction &&
 		navigation.state === 'submitting'
+
+	useFormSuccess(formAction, onSuccess)
 
 	const [form, fields] = useForm({
 		lastResult,

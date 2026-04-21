@@ -67,6 +67,8 @@ export function MovementFormDialog({
 			: props.entity,
 	)
 
+	const onSuccess = () => setOpen(false)
+
 	const entityOptions = [
 		{
 			value: MOVEMENT_TAB_TRANSACTIONS,
@@ -116,6 +118,7 @@ export function MovementFormDialog({
 					<TransactionForm
 						selectData={selectData}
 						balances={balances}
+						onSuccess={onSuccess}
 						{...(props.action === ACTION_EDITION
 							? {
 									action: props.action,
@@ -132,6 +135,7 @@ export function MovementFormDialog({
 						action={ACTION_CREATION}
 						selectData={selectData}
 						balances={balances}
+						onSuccess={onSuccess}
 					/>
 				)}
 
@@ -140,6 +144,7 @@ export function MovementFormDialog({
 						action={ACTION_CREATION}
 						selectData={selectData}
 						balances={balances}
+						onSuccess={onSuccess}
 					/>
 				)}
 			</DialogContent>
