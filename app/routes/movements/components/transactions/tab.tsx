@@ -35,35 +35,16 @@ export type TransactionsTabProps = Extract<
 	formData: Route.ComponentProps['loaderData']['formData']
 }
 
-export function TransactionsTab({
-	transactions,
-	pagination,
-	filters,
+function EditModalForm({
+	transaction,
 	formData,
-}: TransactionsTabProps) {
-	const navigation = useNavigation()
-	const { t, i18n } = useTranslation(['transactions', 'constants'])
-
-	const isDeleting =
-		navigation.formMethod === 'POST' &&
-		navigation.state === 'submitting' &&
-		navigation.formData?.get('intent') === 'delete' &&
-		navigation.formAction?.startsWith(`/app/movements/transactions/`)
-
-	const deletingId = navigation.formAction?.split('/').pop()
-
-	const isLoading =
-		navigation.state === 'loading' &&
-		navigation.location &&
-		navigation.location.search
-
-	const hasFilters = Object.values(filters).some(Boolean)
-
-	const EditModalForm = ({
-		transaction,
-	}: {
-		transaction: TransactionsTabProps['transactions'][number]
-	}) => (
+	isDeleting,
+}: {
+	transaction: TransactionsTabProps['transactions'][number]
+	formData: TransactionsTabProps['formData']
+	isDeleting: boolean
+}) {
+	return (
 		<MovementFormDialog
 			action={ACTION_EDITION}
 			entity={MOVEMENT_TAB_TRANSACTIONS}
@@ -76,6 +57,32 @@ export function TransactionsTab({
 			}
 		/>
 	)
+}
+
+export function TransactionsTab({
+	transactions,
+	pagination,
+	filters,
+	formData,
+}: TransactionsTabProps) {
+	const navigation = useNavigation()
+	const { t, i18n } = useTranslation(['transactions', 'constants'])
+
+	const isDeleting =
+		(navigation.formMethod === 'POST' &&
+			navigation.state === 'submitting' &&
+			navigation.formData?.get('intent') === 'delete' &&
+			navigation.formAction?.startsWith(`/app/movements/transactions/`)) ??
+		false
+
+	const deletingId = navigation.formAction?.split('/').pop()
+
+	const isLoading =
+		navigation.state === 'loading' &&
+		navigation.location &&
+		navigation.location.search
+
+	const hasFilters = Object.values(filters).some(Boolean)
 
 	return (
 		<div className='flex flex-col gap-4'>
@@ -189,6 +196,8 @@ export function TransactionsTab({
 														transaction={
 															transaction
 														}
+														formData={formData}
+														isDeleting={isDeleting}
 													/>
 													<Form
 														method='post'
@@ -259,6 +268,8 @@ export function TransactionsTab({
 										<div className='flex items-center gap-2'>
 											<EditModalForm
 												transaction={transaction}
+												formData={formData}
+												isDeleting={isDeleting}
 											/>
 											<Form
 												method='post'
