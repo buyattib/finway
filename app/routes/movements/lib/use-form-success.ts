@@ -1,24 +1,25 @@
 import { useEffect, useRef } from 'react'
-import { useNavigation } from 'react-router'
+import type { FetcherWithComponents } from 'react-router'
 
-export function useFormSuccess(formAction: string, onSuccess?: () => void) {
-	const navigation = useNavigation()
+export function useFetcherSuccess(
+	fetcher: FetcherWithComponents<{ submission?: { status?: string } }>,
+	onSuccess?: () => void,
+) {
 	const phaseRef = useRef<'idle' | 'submitting' | 'loading'>('idle')
 
 	useEffect(() => {
-		const isOurForm = navigation.formAction === formAction
-		if (navigation.state === 'submitting' && isOurForm) {
+		if (fetcher.state === 'submitting') {
 			phaseRef.current = 'submitting'
 		} else if (
-			navigation.state === 'loading' &&
+			fetcher.state === 'loading' &&
 			phaseRef.current === 'submitting'
 		) {
 			phaseRef.current = 'loading'
-		} else if (navigation.state === 'idle') {
-			if (phaseRef.current === 'loading') {
+		} else if (fetcher.state === 'idle') {
+			if (phaseRef.current === 'loading' && !fetcher.data?.submission) {
 				onSuccess?.()
 			}
 			phaseRef.current = 'idle'
 		}
-	}, [navigation.state, navigation.formAction, formAction, onSuccess])
+	}, [fetcher.state, fetcher.data, onSuccess])
 }

@@ -1,7 +1,6 @@
 import {
 	Link,
-	Form,
-	useNavigation,
+	useFetcher,
 	createSearchParams,
 	useLocation,
 } from 'react-router'
@@ -27,10 +26,9 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createTransferFormSchema } from '~/routes/transfers/lib/schemas'
 
-import { useFormSuccess } from '../../lib/use-form-success'
+import { useFetcherSuccess } from '../../lib/use-form-success'
 
 type Props = {
-	lastResult?: SubmissionResult
 	onSuccess?: () => void
 } & Route.ComponentProps['loaderData']['formData'] &
 	(
@@ -46,12 +44,11 @@ type Props = {
 export function TransferForm({
 	selectData,
 	balances,
-	lastResult,
 	onSuccess,
 	...props
 }: Props) {
 	const location = useLocation()
-	const navigation = useNavigation()
+	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
 	const { t, i18n } = useTranslation('transfers')
 
 	const { accounts, currencies } = selectData
@@ -75,14 +72,12 @@ export function TransferForm({
 		},
 	}[props.action]
 
-	const isSubmitting =
-		navigation.formAction === formAction &&
-		navigation.state === 'submitting'
+	const isSubmitting = fetcher.state === 'submitting'
 
-	useFormSuccess(formAction, onSuccess)
+	useFetcherSuccess(fetcher, onSuccess)
 
 	const [form, fields] = useForm({
-		lastResult,
+		lastResult: fetcher.data?.submission,
 		id: 'transfer-form',
 		shouldValidate: 'onBlur',
 		defaultValue,
@@ -122,7 +117,7 @@ export function TransferForm({
 
 	return (
 		<>
-			<Form
+			<fetcher.Form
 				{...getFormProps(form)}
 				method='post'
 				action={formAction}
@@ -193,7 +188,7 @@ export function TransferForm({
 						/>
 					</Text>
 				)}
-			</Form>
+			</fetcher.Form>
 
 			<div className='flex gap-2'>
 				<Button

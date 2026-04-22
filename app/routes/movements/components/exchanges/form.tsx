@@ -1,7 +1,6 @@
 import {
 	Link,
-	Form,
-	useNavigation,
+	useFetcher,
 	createSearchParams,
 	useLocation,
 } from 'react-router'
@@ -27,10 +26,9 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createExchangeFormSchema } from '~/routes/exchanges/lib/schemas'
 
-import { useFormSuccess } from '../../lib/use-form-success'
+import { useFetcherSuccess } from '../../lib/use-form-success'
 
 type Props = {
-	lastResult?: SubmissionResult
 	onSuccess?: () => void
 } & Route.ComponentProps['loaderData']['formData'] &
 	(
@@ -46,12 +44,11 @@ type Props = {
 export function ExchangeForm({
 	selectData,
 	balances,
-	lastResult,
 	onSuccess,
 	...props
 }: Props) {
 	const location = useLocation()
-	const navigation = useNavigation()
+	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
 	const { t, i18n } = useTranslation('exchanges')
 
 	const { accounts, currencies } = selectData
@@ -76,14 +73,12 @@ export function ExchangeForm({
 		},
 	}[props.action]
 
-	const isSubmitting =
-		navigation.formAction === formAction &&
-		navigation.state === 'submitting'
+	const isSubmitting = fetcher.state === 'submitting'
 
-	useFormSuccess(formAction, onSuccess)
+	useFetcherSuccess(fetcher, onSuccess)
 
 	const [form, fields] = useForm({
-		lastResult,
+		lastResult: fetcher.data?.submission,
 		id: 'exchange-form',
 		shouldValidate: 'onBlur',
 		defaultValue,
@@ -123,7 +118,7 @@ export function ExchangeForm({
 
 	return (
 		<>
-			<Form
+			<fetcher.Form
 				{...getFormProps(form)}
 				method='post'
 				action={formAction}
@@ -203,7 +198,7 @@ export function ExchangeForm({
 						/>
 					</Text>
 				)}
-			</Form>
+			</fetcher.Form>
 
 			<div className='flex gap-2'>
 				<Button
