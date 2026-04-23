@@ -34,7 +34,7 @@ import {
 	MOVEMENT_TAB_TRANSFERS,
 	MOVEMENT_TAB_EXCHANGES,
 } from './lib/constants'
-import { getMovementFormData } from './lib/services'
+import { getMovementFormData } from './lib/queries'
 import { MovementFormDialog } from './components/movement-form/dialog'
 
 export async function loader({ context, params }: Route.LoaderArgs) {

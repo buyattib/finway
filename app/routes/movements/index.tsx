@@ -27,7 +27,7 @@ import {
 	getTransfersTabData,
 	getExchangesTabData,
 	getMovementFormData,
-} from './lib/services'
+} from './lib/queries'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
