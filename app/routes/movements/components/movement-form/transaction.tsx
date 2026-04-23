@@ -4,6 +4,7 @@ import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from '../../+types'
+import type { Route as EditRoute } from '../../+types/edit'
 
 import { initializeDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
@@ -30,8 +31,6 @@ import {
 } from '~/routes/transactions/lib/constants'
 import type { TTransactionType } from '~/routes/transactions/lib/types'
 
-import { type TransactionsTabProps } from '../transactions/tab'
-
 type Props = Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
@@ -39,15 +38,11 @@ type Props = Route.ComponentProps['loaderData']['formData'] &
 		  }
 		| {
 				action: typeof ACTION_EDITION
-				transaction: TransactionsTabProps['transactions'][number]
+				transaction: EditRoute.ComponentProps['loaderData']['transaction']
 		  }
 	)
 
-export function TransactionForm({
-	selectData,
-	balances,
-	...props
-}: Props) {
+export function TransactionForm({ selectData, balances, ...props }: Props) {
 	const location = useLocation()
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
 	const { t, i18n } = useTranslation(['transactions', 'constants'])

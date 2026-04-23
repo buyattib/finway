@@ -32,6 +32,10 @@ export default [
 		...prefix('movements', [
 			route('', 'routes/movements/index.tsx', [
 				route(':movement/create', 'routes/movements/create.tsx'),
+				route(
+					':movement/:movementId/edit',
+					'routes/movements/edit.tsx',
+				),
 			]),
 			route(':movement/:movementId', 'routes/movements/movement.tsx'),
 		]),

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 
 import type { Route } from '../../+types'
+import type { Route as EditRoute } from '../../+types/edit'
 
 import type { Beautify } from '~/types/utils'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
@@ -31,12 +32,9 @@ import type { TMovementTab } from '../../lib/types'
 import { TransactionForm } from './transaction'
 import { TransferForm } from './transfer'
 import { ExchangeForm } from './exchange'
-import type { TransactionsTabProps } from '../transactions/tab'
-
-type FormData = Route.ComponentProps['loaderData']['formData']
 
 type Props = Beautify<
-	FormData & {
+	Route.ComponentProps['loaderData']['formData'] & {
 		entity: TMovementTab
 	} & (
 			| {
@@ -44,7 +42,7 @@ type Props = Beautify<
 			  }
 			| {
 					action: typeof ACTION_EDITION
-					transaction: TransactionsTabProps['transactions'][number]
+					transaction: EditRoute.ComponentProps['loaderData']['transaction']
 			  }
 		)
 >

@@ -1,5 +1,5 @@
-import { Form, useNavigation } from 'react-router'
-import { ReceiptTextIcon, TrashIcon } from 'lucide-react'
+import { Form, Link, useNavigation, useSearchParams } from 'react-router'
+import { ReceiptTextIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from '../../+types'
@@ -26,7 +26,7 @@ import { TablePagination } from '~/components/table-pagination'
 import { MOVEMENT_TAB_TRANSACTIONS } from '../../lib/constants'
 import { TransactionsFilters } from './filters'
 
-export type TransactionsTabProps = Extract<
+type TransactionsTabProps = Extract<
 	Route.ComponentProps['loaderData'],
 	{ tab: typeof MOVEMENT_TAB_TRANSACTIONS }
 >['transactions'] & {
@@ -40,13 +40,16 @@ export function TransactionsTab({
 	formData,
 }: TransactionsTabProps) {
 	const navigation = useNavigation()
+	const [searchParams] = useSearchParams()
 	const { t, i18n } = useTranslation(['transactions', 'constants'])
 
 	const isDeleting =
 		(navigation.formMethod === 'POST' &&
 			navigation.state === 'submitting' &&
 			navigation.formData?.get('intent') === 'delete' &&
-			navigation.formAction?.startsWith(`/app/movements/transactions/`)) ??
+			navigation.formAction?.startsWith(
+				`/app/movements/transactions/`,
+			)) ??
 		false
 
 	const deletingId = navigation.formAction?.split('/').pop()
@@ -166,6 +169,27 @@ export function TransactionsTab({
 											</TableCell>
 											<TableCell className='text-right'>
 												<div className='flex items-center justify-end gap-2'>
+													<Button
+														variant='ghost'
+														size='icon-xs'
+														asChild
+													>
+														<Link
+															to={{
+																pathname: `/app/movements/transactions/${id}/edit`,
+																search: searchParams.toString(),
+															}}
+														>
+															<SquarePenIcon
+																aria-hidden
+															/>
+															<span className='sr-only'>
+																{t(
+																	'index.deleteAriaLabel',
+																)}
+															</span>
+														</Link>
+													</Button>
 													<Form
 														method='post'
 														action={`/app/movements/transactions/${id}`}
