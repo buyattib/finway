@@ -1,11 +1,10 @@
 import { Form, useNavigation } from 'react-router'
-import { ReceiptTextIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
+import { ReceiptTextIcon, TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from '../../+types'
 
 import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
-import { ACTION_EDITION } from '~/lib/constants'
 
 import { Button } from '~/components/ui/button'
 import { Text } from '~/components/ui/text'
@@ -26,37 +25,12 @@ import { TablePagination } from '~/components/table-pagination'
 
 import { MOVEMENT_TAB_TRANSACTIONS } from '../../lib/constants'
 import { TransactionsFilters } from './filters'
-import { MovementFormDialog } from '../movement-form/dialog'
 
 export type TransactionsTabProps = Extract<
 	Route.ComponentProps['loaderData'],
 	{ tab: typeof MOVEMENT_TAB_TRANSACTIONS }
 >['transactions'] & {
 	formData: Route.ComponentProps['loaderData']['formData']
-}
-
-function EditModalForm({
-	transaction,
-	formData,
-	isDeleting,
-}: {
-	transaction: TransactionsTabProps['transactions'][number]
-	formData: TransactionsTabProps['formData']
-	isDeleting: boolean
-}) {
-	return (
-		<MovementFormDialog
-			action={ACTION_EDITION}
-			entity={MOVEMENT_TAB_TRANSACTIONS}
-			transaction={transaction}
-			{...formData}
-			trigger={
-				<Button size='icon-xs' variant='ghost' disabled={isDeleting}>
-					<SquarePenIcon />
-				</Button>
-			}
-		/>
-	)
 }
 
 export function TransactionsTab({
@@ -192,13 +166,6 @@ export function TransactionsTab({
 											</TableCell>
 											<TableCell className='text-right'>
 												<div className='flex items-center justify-end gap-2'>
-													<EditModalForm
-														transaction={
-															transaction
-														}
-														formData={formData}
-														isDeleting={isDeleting}
-													/>
 													<Form
 														method='post'
 														action={`/app/movements/transactions/${id}`}
@@ -266,11 +233,6 @@ export function TransactionsTab({
 											)}
 										</Text>
 										<div className='flex items-center gap-2'>
-											<EditModalForm
-												transaction={transaction}
-												formData={formData}
-												isDeleting={isDeleting}
-											/>
 											<Form
 												method='post'
 												action={`/app/movements/${MOVEMENT_TAB_TRANSACTIONS}/${id}`}

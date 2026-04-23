@@ -26,11 +26,7 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createTransferFormSchema } from '~/routes/transfers/lib/schemas'
 
-import { useFetcherSuccess } from '../../lib/hooks'
-
-type Props = {
-	onSuccess: () => void
-} & Route.ComponentProps['loaderData']['formData'] &
+type Props = Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
 				action: typeof ACTION_CREATION
@@ -44,7 +40,6 @@ type Props = {
 export function TransferForm({
 	selectData,
 	balances,
-	onSuccess,
 	...props
 }: Props) {
 	const location = useLocation()
@@ -73,8 +68,6 @@ export function TransferForm({
 	}[props.action]
 
 	const isSubmitting = fetcher.state === 'submitting'
-
-	useFetcherSuccess(fetcher, onSuccess)
 
 	const [form, fields] = useForm({
 		lastResult: fetcher.data?.submission,

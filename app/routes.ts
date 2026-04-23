@@ -30,11 +30,10 @@ export default [
 
 		// movements (wraps transactions/transfers/exchanges under tabs)
 		...prefix('movements', [
-			index('routes/movements/index.tsx'),
-			route(
-				':movement/:movementId',
-				'routes/movements/movement.tsx',
-			),
+			route('', 'routes/movements/index.tsx', [
+				route(':movement/create', 'routes/movements/create.tsx'),
+			]),
+			route(':movement/:movementId', 'routes/movements/movement.tsx'),
 		]),
 
 		// transactions

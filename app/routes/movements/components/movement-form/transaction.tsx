@@ -30,12 +30,9 @@ import {
 } from '~/routes/transactions/lib/constants'
 import type { TTransactionType } from '~/routes/transactions/lib/types'
 
-import { useFetcherSuccess } from '../../lib/hooks'
 import { type TransactionsTabProps } from '../transactions/tab'
 
-type Props = {
-	onSuccess: () => void
-} & Route.ComponentProps['loaderData']['formData'] &
+type Props = Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
 				action: typeof ACTION_CREATION
@@ -49,7 +46,6 @@ type Props = {
 export function TransactionForm({
 	selectData,
 	balances,
-	onSuccess,
 	...props
 }: Props) {
 	const location = useLocation()
@@ -89,8 +85,6 @@ export function TransactionForm({
 				}
 
 	const isSubmitting = fetcher.state === 'submitting'
-
-	useFetcherSuccess(fetcher, onSuccess)
 
 	const [form, fields] = useForm({
 		lastResult: fetcher.data?.submission,

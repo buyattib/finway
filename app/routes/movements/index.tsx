@@ -1,12 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { redirect, useSearchParams } from 'react-router'
+import { Link, Outlet, redirect, useSearchParams } from 'react-router'
 import { PlusIcon } from 'lucide-react'
 
 import type { Route } from './+types'
 
 import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
-import { ACTION_CREATION } from '~/lib/constants'
 
 import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { Title } from '~/components/ui/title'
@@ -16,7 +15,6 @@ import { Button } from '~/components/ui/button'
 import { TransactionsTab } from './components/transactions/tab'
 import { TransfersTab } from './components/transfers/tab'
 import { ExchangesTab } from './components/exchanges/tab'
-import { MovementFormDialog } from './components/movement-form/dialog'
 
 import {
 	MOVEMENT_TABS,
@@ -109,20 +107,19 @@ export default function Movements({
 				<Title id='movements-section' level='h3'>
 					{t('index.title')}
 				</Title>
-				<MovementFormDialog
-					key={data.tab}
-					action={ACTION_CREATION}
-					entity={data.tab}
-					{...formData}
-					trigger={
-						<Button variant='default'>
-							<PlusIcon aria-hidden />
-							<span className='sm:inline hidden'>
-								{t('index.createLabel')}
-							</span>
-						</Button>
-					}
-				/>
+				<Button variant='default' asChild>
+					<Link
+						to={{
+							pathname: `${data.tab}/create`,
+							search: searchParams.toString(),
+						}}
+					>
+						<PlusIcon aria-hidden />
+						<span className='sm:inline hidden'>
+							{t('index.createLabel')}
+						</span>
+					</Link>
+				</Button>
 			</PageHeader>
 
 			<PageContent>
@@ -165,6 +162,8 @@ export default function Movements({
 					)}
 				</Tabs>
 			</PageContent>
+
+			<Outlet />
 		</PageSection>
 	)
 }

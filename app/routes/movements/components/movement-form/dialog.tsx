@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate, useSearchParams } from 'react-router'
 import {
 	ArrowRightLeftIcon,
 	ReceiptTextIcon,
@@ -17,7 +17,6 @@ import {
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 } from '~/components/ui/dialog'
 import { Label } from '~/components/ui/label'
 import { Select } from '~/components/select'
@@ -37,11 +36,9 @@ import type { TransactionsTabProps } from '../transactions/tab'
 type FormData = Route.ComponentProps['loaderData']['formData']
 
 type Props = Beautify<
-	{
-		trigger: ReactNode
+	FormData & {
 		entity: TMovementTab
-	} & FormData &
-		(
+	} & (
 			| {
 					action: typeof ACTION_CREATION
 			  }
@@ -53,16 +50,20 @@ type Props = Beautify<
 >
 
 export function MovementFormDialog({
-	trigger,
 	selectData,
 	balances,
+	entity,
 	...props
 }: Props) {
 	const { t } = useTranslation('movements')
-	const [open, setOpen] = useState(false)
-	const [entity, setEntity] = useState<TMovementTab>(props.entity)
+	const navigate = useNavigate()
+	const [searchParams] = useSearchParams()
 
-	const onSuccess = () => setOpen(false)
+	const close = () =>
+		navigate({
+			pathname: '/app/movements',
+			search: searchParams.toString(),
+		})
 
 	const entityOptions = [
 		{
@@ -85,8 +86,7 @@ export function MovementFormDialog({
 	const isEditing = props.action === ACTION_EDITION
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>{trigger}</DialogTrigger>
+		<Dialog open onOpenChange={o => !o && close()}>
 			<DialogContent className='sm:max-w-xl max-h-[90vh] overflow-y-auto'>
 				<DialogHeader>
 					<DialogTitle>{t('dialog.title')}</DialogTitle>
@@ -102,7 +102,9 @@ export function MovementFormDialog({
 							options={entityOptions}
 							defaultValue={entity}
 							onValueChange={value =>
-								setEntity(value as TMovementTab)
+								navigate(`/app/movements/${value}/create`, {
+									replace: true,
+								})
 							}
 							placeholder={t('dialog.entityPlaceholder')}
 						/>
@@ -113,7 +115,6 @@ export function MovementFormDialog({
 					<TransactionForm
 						selectData={selectData}
 						balances={balances}
-						onSuccess={onSuccess}
 						{...(props.action === ACTION_EDITION
 							? {
 									action: props.action,
@@ -130,7 +131,6 @@ export function MovementFormDialog({
 						action={ACTION_CREATION}
 						selectData={selectData}
 						balances={balances}
-						onSuccess={onSuccess}
 					/>
 				)}
 
@@ -139,7 +139,6 @@ export function MovementFormDialog({
 						action={ACTION_CREATION}
 						selectData={selectData}
 						balances={balances}
-						onSuccess={onSuccess}
 					/>
 				)}
 			</DialogContent>
