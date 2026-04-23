@@ -31,7 +31,7 @@ import {
 import type { TTransactionType } from '~/routes/transactions/lib/types'
 
 import { useFetcherSuccess } from '../../lib/hooks'
-import { type TransactionsTabProps } from './tab'
+import { type TransactionsTabProps } from '../transactions/tab'
 
 type Props = {
 	onSuccess: () => void
@@ -55,8 +55,6 @@ export function TransactionForm({
 	const location = useLocation()
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
 	const { t, i18n } = useTranslation(['transactions', 'constants'])
-
-	console.log(fetcher.state)
 
 	const { accounts, currencies } = selectData
 

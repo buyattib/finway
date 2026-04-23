@@ -26,7 +26,7 @@ import { TablePagination } from '~/components/table-pagination'
 
 import { MOVEMENT_TAB_TRANSACTIONS } from '../../lib/constants'
 import { TransactionsFilters } from './filters'
-import { MovementFormDialog } from '../movement-form-dialog'
+import { MovementFormDialog } from '../movement-form/dialog'
 
 export type TransactionsTabProps = Extract<
 	Route.ComponentProps['loaderData'],

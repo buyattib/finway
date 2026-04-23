@@ -16,7 +16,7 @@ import { Button } from '~/components/ui/button'
 import { TransactionsTab } from './components/transactions/tab'
 import { TransfersTab } from './components/transfers/tab'
 import { ExchangesTab } from './components/exchanges/tab'
-import { MovementFormDialog } from './components/movement-form-dialog'
+import { MovementFormDialog } from './components/movement-form/dialog'
 
 import {
 	MOVEMENT_TABS,

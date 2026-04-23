@@ -6,7 +6,7 @@ import {
 	RefreshCwIcon,
 } from 'lucide-react'
 
-import type { Route } from '../+types'
+import type { Route } from '../../+types'
 
 import type { Beautify } from '~/types/utils'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
@@ -26,13 +26,13 @@ import {
 	MOVEMENT_TAB_EXCHANGES,
 	MOVEMENT_TAB_TRANSACTIONS,
 	MOVEMENT_TAB_TRANSFERS,
-} from '../lib/constants'
-import type { TMovementTab } from '../lib/types'
+} from '../../lib/constants'
+import type { TMovementTab } from '../../lib/types'
 
-import { TransactionForm } from './transactions/form'
-import { TransferForm } from './transfers/form'
-import { ExchangeForm } from './exchanges/form'
-import type { TransactionsTabProps } from './transactions/tab'
+import { TransactionForm } from './transaction'
+import { TransferForm } from './transfer'
+import { ExchangeForm } from './exchange'
+import type { TransactionsTabProps } from '../transactions/tab'
 
 type FormData = Route.ComponentProps['loaderData']['formData']
 
