@@ -23,4 +23,36 @@ export default {
 			exchange: 'Exchange',
 		},
 	},
+	create: {
+		transactions: {
+			action: {
+				successToast: 'Transaction created successfully',
+				accountNotFound: 'Account not found',
+				currencyNotFound: 'Currency not found',
+				insufficientBalance:
+					'Insufficient balance for the selected account and currency',
+				invalidActionError: 'Invalid action',
+			},
+		},
+		transfers: {
+			action: {
+				successToast: 'Transfer created successfully',
+				fromAccountNotFound: 'From account not found',
+				toAccountNotFound: 'To account not found',
+				currencyNotFound: 'Currency not found',
+				insufficientBalance:
+					'Insufficient balance in the selected currency on the from account',
+			},
+		},
+		exchanges: {
+			action: {
+				successToast: 'Exchange created successfully',
+				accountNotFound: 'Account not found',
+				fromCurrencyNotFound: 'From currency not found',
+				toCurrencyNotFound: 'To currency not found',
+				insufficientBalance:
+					'Insufficient balance in the selected from currency',
+			},
+		},
+	},
 }

@@ -58,19 +58,6 @@ export default {
 				'An exchange can only be done between different currencies',
 		},
 		create: {
-			meta: {
-				title: 'Create an exchange | Finway',
-				description: 'Create a currency exchange to track your money',
-			},
-			action: {
-				successToast: 'Exchange created successfully',
-				accountNotFound: 'Account not found',
-				fromCurrencyNotFound: 'From currency not found',
-				toCurrencyNotFound: 'To currency not found',
-				insufficientBalance:
-					'Insufficient balance in the selected from currency',
-			},
-			title: 'Create an exchange',
 			submitButton: 'Create',
 		},
 	},

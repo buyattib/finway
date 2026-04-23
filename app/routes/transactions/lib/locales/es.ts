@@ -70,21 +70,6 @@ export default {
 				'La categoría no es válida para el tipo de transacción seleccionado',
 		},
 		create: {
-			meta: {
-				title: 'Crear una transacción | Finway',
-				description:
-					'Crea una transacción para rastrear tus ingresos y gastos',
-			},
-			action: {
-				successToast: 'Transacción creada exitosamente',
-				accountNotFound: 'Cuenta no encontrada',
-				currencyNotFound: 'Moneda no encontrada',
-				categoryNotFound: 'Categoría de transacción no encontrada',
-				insufficientBalance:
-					'Saldo insuficiente para la cuenta y moneda seleccionadas',
-				invalidActionError: 'Acción inválida',
-			},
-			title: 'Crear una transacción',
 			submitButton: 'Crear',
 		},
 		edit: {

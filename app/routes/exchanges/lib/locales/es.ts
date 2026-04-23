@@ -61,20 +61,6 @@ export default {
 				'Un intercambio solo puede realizarse entre monedas diferentes',
 		},
 		create: {
-			meta: {
-				title: 'Crear un intercambio | Finway',
-				description:
-					'Crea un intercambio de moneda para rastrear tu dinero',
-			},
-			action: {
-				successToast: 'Intercambio creado exitosamente',
-				accountNotFound: 'Cuenta no encontrada',
-				fromCurrencyNotFound: 'Moneda de origen no encontrada',
-				toCurrencyNotFound: 'Moneda de destino no encontrada',
-				insufficientBalance:
-					'Saldo insuficiente en la moneda de origen seleccionada',
-			},
-			title: 'Crear un intercambio',
 			submitButton: 'Crear',
 		},
 	},

@@ -58,7 +58,7 @@ export function TransferForm({
 				toAccountId: '',
 			},
 			buttonLabel: t('form.create.submitButton'),
-			formAction: '/app/transfers/create',
+			formAction: '/app/movements/transfers/create',
 		},
 		[ACTION_EDITION]: {
 			defaultValue: {},

@@ -67,21 +67,6 @@ export default {
 				'Category is not valid for the selected transaction type',
 		},
 		create: {
-			meta: {
-				title: 'Create a transaction | Finway',
-				description:
-					'Create a transaction to track your income and expenses',
-			},
-			action: {
-				successToast: 'Transaction created successfully',
-				accountNotFound: 'Account not found',
-				currencyNotFound: 'Currency not found',
-				categoryNotFound: 'Transaction category not found',
-				insufficientBalance:
-					'Insufficient balance for the selected account and currency',
-				invalidActionError: 'Invalid action',
-			},
-			title: 'Create a transaction',
 			submitButton: 'Create',
 		},
 		edit: {

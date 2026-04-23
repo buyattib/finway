@@ -59,7 +59,7 @@ export function ExchangeForm({
 				accountId: '',
 			},
 			buttonLabel: t('form.create.submitButton'),
-			formAction: '/app/exchanges/create',
+			formAction: '/app/movements/exchanges/create',
 		},
 		[ACTION_EDITION]: {
 			defaultValue: {},

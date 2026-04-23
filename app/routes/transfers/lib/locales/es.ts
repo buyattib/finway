@@ -59,20 +59,6 @@ export default {
 				'Una transferencia solo puede realizarse entre cuentas diferentes',
 		},
 		create: {
-			meta: {
-				title: 'Crear una transferencia | Finway',
-				description:
-					'Crea una transferencia entre cuentas para rastrear tus movimientos de dinero',
-			},
-			action: {
-				successToast: 'Transferencia creada exitosamente',
-				fromAccountNotFound: 'Cuenta de origen no encontrada',
-				toAccountNotFound: 'Cuenta de destino no encontrada',
-				currencyNotFound: 'Moneda no encontrada',
-				insufficientBalance:
-					'Saldo insuficiente en la moneda seleccionada en la cuenta de origen',
-			},
-			title: 'Crear una transferencia',
 			submitButton: 'Crear',
 		},
 	},

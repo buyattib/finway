@@ -63,7 +63,7 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 							TRANSACTION_CATEGORIES[TRANSACTION_TYPE_EXPENSE][0],
 					},
 					buttonLabel: t('form.create.submitButton'),
-					formAction: '/app/transactions/create',
+					formAction: '/app/movements/transactions/create',
 				}
 			: {
 					defaultValue: {

@@ -42,18 +42,7 @@ export default [
 
 		// transactions
 		...prefix('transactions', [
-			route('create', 'routes/transactions/create.tsx'),
 			route(':transactionId/edit', 'routes/transactions/edit.tsx'),
-		]),
-
-		// transfers
-		...prefix('transfers', [
-			route('create', 'routes/transfers/create.tsx'),
-		]),
-
-		// exchanges
-		...prefix('exchanges', [
-			route('create', 'routes/exchanges/create.tsx'),
 		]),
 
 		// credit cards

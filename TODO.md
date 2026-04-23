@@ -1,6 +1,3 @@
-- use fetcher imperative submission to await it and close the modal after
-- think about handling modal state in the query parameters, maybe a different modal component for edition.
-
 - add a button to interchange accounts (currencies) in transfer (exchange) form.
 
 - unify transfer and exchange forms

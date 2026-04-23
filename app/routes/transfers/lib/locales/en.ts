@@ -56,20 +56,6 @@ export default {
 				'A transfer can only be done between different accounts',
 		},
 		create: {
-			meta: {
-				title: 'Create a transfer | Finway',
-				description:
-					'Create a transfer between accounts to track your money movements',
-			},
-			action: {
-				successToast: 'Transfer created successfully',
-				fromAccountNotFound: 'From account not found',
-				toAccountNotFound: 'To account not found',
-				currencyNotFound: 'Currency not found',
-				insufficientBalance:
-					'Insufficient balance in the selected currency on the from account',
-			},
-			title: 'Create a transfer',
 			submitButton: 'Create',
 		},
 	},

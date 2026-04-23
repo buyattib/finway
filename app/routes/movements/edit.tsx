@@ -5,24 +5,22 @@ import { ACTION_EDITION } from '~/lib/constants'
 
 import { getTransactionById } from '~/routes/transactions/lib/queries'
 
-import { MOVEMENT_TAB_TRANSACTIONS } from './lib/constants'
+import { MOVEMENT_TAB_TRANSACTIONS, MOVEMENT_TABS } from './lib/constants'
 import { getMovementFormData } from './lib/services'
 import { MovementFormDialog } from './components/movement-form/dialog'
 
-export async function loader({
-	context,
-	params: { movement, movementId },
-}: Route.LoaderArgs) {
+export async function loader({ context, params }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	if (movement !== MOVEMENT_TAB_TRANSACTIONS) {
+	const movement = MOVEMENT_TABS.find(t => t === params.movement)
+	if (!movement || movement !== MOVEMENT_TAB_TRANSACTIONS) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
 	const transaction = await getTransactionById({
 		db,
-		transactionId: movementId,
+		transactionId: params.movementId,
 	})
 	if (!transaction || transaction.account.ownerId !== user.id) {
 		throw new Response('Not Found', { status: 404 })
@@ -48,7 +46,7 @@ export default function MovementEdit({
 	return (
 		<MovementFormDialog
 			action={ACTION_EDITION}
-			entity={movement as typeof MOVEMENT_TAB_TRANSACTIONS}
+			entity={movement}
 			transaction={transaction}
 			{...formData}
 		/>

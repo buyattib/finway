@@ -85,7 +85,10 @@ export function MovementFormDialog({
 
 	return (
 		<Dialog open onOpenChange={o => !o && close()}>
-			<DialogContent className='sm:max-w-xl max-h-[90vh] overflow-y-auto'>
+			<DialogContent
+				className='sm:max-w-xl max-h-[90vh] overflow-y-auto'
+				onOpenAutoFocus={e => e.preventDefault()}
+			>
 				<DialogHeader>
 					<DialogTitle>{t('dialog.title')}</DialogTitle>
 					<DialogDescription>
