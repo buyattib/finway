@@ -26,10 +26,10 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createExchangeFormSchema } from '~/routes/exchanges/lib/schemas'
 
-import { useFetcherSuccess } from '../../lib/use-form-success'
+import { useFetcherSuccess } from '../../lib/hooks'
 
 type Props = {
-	onSuccess?: () => void
+	onSuccess: () => void
 } & Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {

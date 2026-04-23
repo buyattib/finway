@@ -1,9 +1,4 @@
-import {
-	Link,
-	useFetcher,
-	createSearchParams,
-	useLocation,
-} from 'react-router'
+import { Link, useFetcher, createSearchParams, useLocation } from 'react-router'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Trans, useTranslation } from 'react-i18next'
@@ -35,11 +30,11 @@ import {
 } from '~/routes/transactions/lib/constants'
 import type { TTransactionType } from '~/routes/transactions/lib/types'
 
-import { useFetcherSuccess } from '../../lib/use-form-success'
+import { useFetcherSuccess } from '../../lib/hooks'
 import { type TransactionsTabProps } from './tab'
 
 type Props = {
-	onSuccess?: () => void
+	onSuccess: () => void
 } & Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
@@ -60,6 +55,8 @@ export function TransactionForm({
 	const location = useLocation()
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
 	const { t, i18n } = useTranslation(['transactions', 'constants'])
+
+	console.log(fetcher.state)
 
 	const { accounts, currencies } = selectData
 
