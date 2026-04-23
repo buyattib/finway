@@ -30,7 +30,6 @@ import {
 	getExchangesTabData,
 	getMovementFormData,
 } from './lib/services'
-import type { TMovementTab } from './lib/types'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -92,7 +91,9 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	throw new Error('Invalid tab')
 }
 
-export default function Movements({ loaderData }: Route.ComponentProps) {
+export default function Movements({
+	loaderData: { formData, ...data },
+}: Route.ComponentProps) {
 	const { t } = useTranslation('movements')
 	const [searchParams, setSearchParams] = useSearchParams()
 
@@ -109,10 +110,10 @@ export default function Movements({ loaderData }: Route.ComponentProps) {
 					{t('index.title')}
 				</Title>
 				<MovementFormDialog
-					key={loaderData.tab}
+					key={data.tab}
 					action={ACTION_CREATION}
-					{...loaderData.formData}
-					defaultEntity={loaderData.tab as TMovementTab}
+					entity={data.tab}
+					{...formData}
 					trigger={
 						<Button variant='default'>
 							<PlusIcon aria-hidden />
@@ -125,7 +126,7 @@ export default function Movements({ loaderData }: Route.ComponentProps) {
 			</PageHeader>
 
 			<PageContent>
-				<Tabs value={loaderData.tab} onValueChange={onTabChange}>
+				<Tabs value={data.tab} onValueChange={onTabChange}>
 					<TabsList className='w-full'>
 						<TabsTrigger value={MOVEMENT_TAB_TRANSACTIONS}>
 							{t('index.tabs.transactions')}
@@ -138,27 +139,27 @@ export default function Movements({ loaderData }: Route.ComponentProps) {
 						</TabsTrigger>
 					</TabsList>
 
-					{loaderData.tab === MOVEMENT_TAB_TRANSACTIONS && (
+					{data.tab === MOVEMENT_TAB_TRANSACTIONS && (
 						<TabsContent value={MOVEMENT_TAB_TRANSACTIONS}>
 							<TransactionsTab
-								{...loaderData.transactions}
-								formData={loaderData.formData}
+								{...data.transactions}
+								formData={formData}
 							/>
 						</TabsContent>
 					)}
-					{loaderData.tab === MOVEMENT_TAB_TRANSFERS && (
+					{data.tab === MOVEMENT_TAB_TRANSFERS && (
 						<TabsContent value={MOVEMENT_TAB_TRANSFERS}>
 							<TransfersTab
-								{...loaderData.transfers}
-								formData={loaderData.formData}
+								{...data.transfers}
+								formData={formData}
 							/>
 						</TabsContent>
 					)}
-					{loaderData.tab === MOVEMENT_TAB_EXCHANGES && (
+					{data.tab === MOVEMENT_TAB_EXCHANGES && (
 						<TabsContent value={MOVEMENT_TAB_EXCHANGES}>
 							<ExchangesTab
-								{...loaderData.exchanges}
-								formData={loaderData.formData}
+								{...data.exchanges}
+								formData={formData}
 							/>
 						</TabsContent>
 					)}

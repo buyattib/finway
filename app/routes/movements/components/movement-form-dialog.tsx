@@ -39,15 +39,14 @@ type FormData = Route.ComponentProps['loaderData']['formData']
 type Props = Beautify<
 	{
 		trigger: ReactNode
+		entity: TMovementTab
 	} & FormData &
 		(
 			| {
 					action: typeof ACTION_CREATION
-					defaultEntity?: TMovementTab
 			  }
 			| {
 					action: typeof ACTION_EDITION
-					entity: typeof MOVEMENT_TAB_TRANSACTIONS
 					transaction: TransactionsTabProps['transactions'][number]
 			  }
 		)
@@ -61,11 +60,7 @@ export function MovementFormDialog({
 }: Props) {
 	const { t } = useTranslation('movements')
 	const [open, setOpen] = useState(false)
-	const [entity, setEntity] = useState<TMovementTab>(
-		props.action === ACTION_CREATION
-			? (props.defaultEntity ?? MOVEMENT_TAB_TRANSACTIONS)
-			: props.entity,
-	)
+	const [entity, setEntity] = useState<TMovementTab>(props.entity)
 
 	const onSuccess = () => setOpen(false)
 
