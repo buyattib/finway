@@ -9,6 +9,7 @@ import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from '../../+types'
+import type { Route as EditRoute } from '../../+types/edit'
 
 import { initializeDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
@@ -26,6 +27,11 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createExchangeFormSchema } from '~/routes/exchanges/lib/schemas'
 
+type ExchangeEditData = Extract<
+	EditRoute.ComponentProps['loaderData'],
+	{ exchange: unknown }
+>['exchange']
+
 type Props = Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
@@ -33,7 +39,7 @@ type Props = Route.ComponentProps['loaderData']['formData'] &
 		  }
 		| {
 				action: typeof ACTION_EDITION
-				exchange: { id: string }
+				exchange: ExchangeEditData
 		  }
 	)
 
@@ -42,31 +48,38 @@ export function ExchangeForm({
 	balances,
 	...props
 }: Props) {
-	const location = useLocation()
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
 	const { t, i18n } = useTranslation('exchanges')
+	const location = useLocation()
 
 	const { accounts, currencies } = selectData
 
-	const { defaultValue, buttonLabel, formAction } = {
-		[ACTION_CREATION]: {
-			defaultValue: {
-				date: initializeDate().toISOString(),
-				fromAmount: '0',
-				toAmount: '0',
-				fromCurrencyId: '',
-				toCurrencyId: '',
-				accountId: '',
-			},
-			buttonLabel: t('form.create.submitButton'),
-			formAction: '/app/movements/exchanges/create',
-		},
-		[ACTION_EDITION]: {
-			defaultValue: {},
-			buttonLabel: '', // t('form.edit.submitButton'),
-			formAction: location.pathname,
-		},
-	}[props.action]
+	const { defaultValue, buttonLabel, formAction } =
+		props.action === ACTION_CREATION
+			? {
+					defaultValue: {
+						date: initializeDate().toISOString(),
+						fromAmount: '0',
+						toAmount: '0',
+						fromCurrencyId: '',
+						toCurrencyId: '',
+						accountId: '',
+					},
+					buttonLabel: t('form.create.submitButton'),
+					formAction: '/app/movements/exchanges/create',
+				}
+			: {
+					defaultValue: {
+						date: props.exchange.date,
+						fromAmount: props.exchange.fromAmount,
+						toAmount: props.exchange.toAmount,
+						fromCurrencyId: props.exchange.fromCurrencyId,
+						toCurrencyId: props.exchange.toCurrencyId,
+						accountId: props.exchange.accountId,
+					},
+					buttonLabel: t('form.edit.submitButton'),
+					formAction: `/app/exchanges/${props.exchange.id}/edit`,
+				}
 
 	const isSubmitting = fetcher.state === 'submitting'
 

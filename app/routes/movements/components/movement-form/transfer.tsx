@@ -9,6 +9,7 @@ import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Trans, useTranslation } from 'react-i18next'
 
 import type { Route } from '../../+types'
+import type { Route as EditRoute } from '../../+types/edit'
 
 import { initializeDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
@@ -26,6 +27,11 @@ import { CurrencyIcon } from '~/components/currency-icon'
 
 import { createTransferFormSchema } from '~/routes/transfers/lib/schemas'
 
+type TransferEditData = Extract<
+	EditRoute.ComponentProps['loaderData'],
+	{ transfer: unknown }
+>['transfer']
+
 type Props = Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
@@ -33,7 +39,7 @@ type Props = Route.ComponentProps['loaderData']['formData'] &
 		  }
 		| {
 				action: typeof ACTION_EDITION
-				transfer: { id: string }
+				transfer: TransferEditData
 		  }
 	)
 
@@ -42,30 +48,36 @@ export function TransferForm({
 	balances,
 	...props
 }: Props) {
-	const location = useLocation()
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
 	const { t, i18n } = useTranslation('transfers')
+	const location = useLocation()
 
 	const { accounts, currencies } = selectData
 
-	const { defaultValue, buttonLabel, formAction } = {
-		[ACTION_CREATION]: {
-			defaultValue: {
-				date: initializeDate().toISOString(),
-				amount: '0',
-				currencyId: '',
-				fromAccountId: '',
-				toAccountId: '',
-			},
-			buttonLabel: t('form.create.submitButton'),
-			formAction: '/app/movements/transfers/create',
-		},
-		[ACTION_EDITION]: {
-			defaultValue: {},
-			buttonLabel: '', // t('form.edit.submitButton'),
-			formAction: location.pathname,
-		},
-	}[props.action]
+	const { defaultValue, buttonLabel, formAction } =
+		props.action === ACTION_CREATION
+			? {
+					defaultValue: {
+						date: initializeDate().toISOString(),
+						amount: '0',
+						currencyId: '',
+						fromAccountId: '',
+						toAccountId: '',
+					},
+					buttonLabel: t('form.create.submitButton'),
+					formAction: '/app/movements/transfers/create',
+				}
+			: {
+					defaultValue: {
+						date: props.transfer.date,
+						amount: props.transfer.amount,
+						currencyId: props.transfer.currencyId,
+						fromAccountId: props.transfer.fromAccountId,
+						toAccountId: props.transfer.toAccountId,
+					},
+					buttonLabel: t('form.edit.submitButton'),
+					formAction: `/app/transfers/${props.transfer.id}/edit`,
+				}
 
 	const isSubmitting = fetcher.state === 'submitting'
 

@@ -18,6 +18,7 @@ export default {
 		emptyTitle: 'Aún no has creado ninguna transferencia',
 		emptyFilteredMessage:
 			'No se encontraron transferencias con los filtros aplicados',
+		editAriaLabel: 'Editar transferencia',
 		deleteAriaLabel: 'Eliminar transferencia',
 		action: {
 			deleteErrorToast: 'No se pudo eliminar la transferencia',
@@ -60,6 +61,19 @@ export default {
 		},
 		create: {
 			submitButton: 'Crear',
+		},
+		edit: {
+			action: {
+				successToast: 'Transferencia editada exitosamente',
+				transferNotFound: 'Transferencia no encontrada',
+				fromAccountNotFound: 'Cuenta de origen no encontrada',
+				toAccountNotFound: 'Cuenta de destino no encontrada',
+				currencyNotFound: 'Moneda no encontrada',
+				insufficientBalance:
+					'Saldo insuficiente para la cuenta y moneda seleccionadas',
+				invalidActionError: 'Acción inválida',
+			},
+			submitButton: 'Actualizar',
 		},
 	},
 } satisfies typeof en

@@ -19,6 +19,7 @@ export default {
 		emptyTitle: 'Aún no has creado ningún intercambio',
 		emptyFilteredMessage:
 			'No se encontraron intercambios con los filtros aplicados',
+		editAriaLabel: 'Editar intercambio',
 		deleteAriaLabel: 'Eliminar intercambio',
 		action: {
 			deleteErrorToast: 'No se pudo eliminar el intercambio',
@@ -62,6 +63,19 @@ export default {
 		},
 		create: {
 			submitButton: 'Crear',
+		},
+		edit: {
+			action: {
+				successToast: 'Intercambio editado exitosamente',
+				exchangeNotFound: 'Intercambio no encontrado',
+				accountNotFound: 'Cuenta no encontrada',
+				fromCurrencyNotFound: 'Moneda de origen no encontrada',
+				toCurrencyNotFound: 'Moneda de destino no encontrada',
+				insufficientBalance:
+					'Saldo insuficiente en la moneda de origen seleccionada',
+				invalidActionError: 'Acción inválida',
+			},
+			submitButton: 'Actualizar',
 		},
 	},
 } satisfies typeof en

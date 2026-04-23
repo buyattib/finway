@@ -1,5 +1,5 @@
-import { Form, useNavigation } from 'react-router'
-import { RefreshCwIcon, TrashIcon } from 'lucide-react'
+import { Form, Link, useNavigation, useSearchParams } from 'react-router'
+import { RefreshCwIcon, SquarePenIcon, TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from '../../+types'
@@ -41,6 +41,7 @@ export function ExchangesTab({
 	formData,
 }: ExchangesTabProps) {
 	const navigation = useNavigation()
+	const [searchParams] = useSearchParams()
 	const { t, i18n } = useTranslation('exchanges')
 
 	const isDeleting =
@@ -182,39 +183,62 @@ export function ExchangesTab({
 													{rate}
 												</TableCell>
 												<TableCell className='text-right'>
-													<Form
-														method='post'
-														action={`/app/movements/exchanges/${id}`}
-													>
+													<div className='flex items-center justify-end gap-2'>
 														<Button
+															variant='ghost'
 															size='icon-xs'
-															variant='destructive-ghost'
-															type='submit'
-															name='intent'
-															value='delete'
-															disabled={
-																isDeleting
-															}
+															asChild
 														>
-															{isDeleting &&
-															deletingId ===
-																id ? (
-																<Spinner
-																	aria-hidden
-																	size='sm'
-																/>
-															) : (
-																<TrashIcon
+															<Link
+																to={{
+																	pathname: `/app/movements/exchanges/${id}/edit`,
+																	search: searchParams.toString(),
+																}}
+															>
+																<SquarePenIcon
 																	aria-hidden
 																/>
-															)}
-															<span className='sr-only'>
-																{t(
-																	'index.deleteAriaLabel',
-																)}
-															</span>
+																<span className='sr-only'>
+																	{t(
+																		'index.editAriaLabel',
+																	)}
+																</span>
+															</Link>
 														</Button>
-													</Form>
+														<Form
+															method='post'
+															action={`/app/movements/exchanges/${id}`}
+														>
+															<Button
+																size='icon-xs'
+																variant='destructive-ghost'
+																type='submit'
+																name='intent'
+																value='delete'
+																disabled={
+																	isDeleting
+																}
+															>
+																{isDeleting &&
+																deletingId ===
+																	id ? (
+																	<Spinner
+																		aria-hidden
+																		size='sm'
+																	/>
+																) : (
+																	<TrashIcon
+																		aria-hidden
+																	/>
+																)}
+																<span className='sr-only'>
+																	{t(
+																		'index.deleteAriaLabel',
+																	)}
+																</span>
+															</Button>
+														</Form>
+													</div>
 												</TableCell>
 											</TableRow>
 										)
@@ -247,32 +271,59 @@ export function ExchangesTab({
 												i18n.language,
 											)}
 										</Text>
-										<Form
-											method='post'
-											action={`/app/movements/exchanges/${id}`}
-										>
+										<div className='flex items-center gap-2'>
 											<Button
+												variant='ghost'
 												size='icon-xs'
-												variant='destructive-ghost'
-												type='submit'
-												name='intent'
-												value='delete'
-												disabled={isDeleting}
+												asChild
 											>
-												{isDeleting &&
-												deletingId === id ? (
-													<Spinner
+												<Link
+													to={{
+														pathname: `/app/movements/exchanges/${id}/edit`,
+														search: searchParams.toString(),
+													}}
+												>
+													<SquarePenIcon
 														aria-hidden
-														size='sm'
 													/>
-												) : (
-													<TrashIcon aria-hidden />
-												)}
-												<span className='sr-only'>
-													{t('index.deleteAriaLabel')}
-												</span>
+													<span className='sr-only'>
+														{t(
+															'index.editAriaLabel',
+														)}
+													</span>
+												</Link>
 											</Button>
-										</Form>
+											<Form
+												method='post'
+												action={`/app/movements/exchanges/${id}`}
+											>
+												<Button
+													size='icon-xs'
+													variant='destructive-ghost'
+													type='submit'
+													name='intent'
+													value='delete'
+													disabled={isDeleting}
+												>
+													{isDeleting &&
+													deletingId === id ? (
+														<Spinner
+															aria-hidden
+															size='sm'
+														/>
+													) : (
+														<TrashIcon
+															aria-hidden
+														/>
+													)}
+													<span className='sr-only'>
+														{t(
+															'index.deleteAriaLabel',
+														)}
+													</span>
+												</Button>
+											</Form>
+										</div>
 									</div>
 									<div className='flex items-center gap-2'>
 										<AccountTypeIcon

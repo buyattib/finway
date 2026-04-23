@@ -1,6 +1,18 @@
 import { z } from 'zod'
 import type { TFunction } from 'i18next'
 
+import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
+
+const ActionSchema = z.discriminatedUnion('action', [
+	z.object({
+		action: z.literal(ACTION_CREATION),
+	}),
+	z.object({
+		action: z.literal(ACTION_EDITION),
+		id: z.string(),
+	}),
+])
+
 export function createTransferFormSchema(t: TFunction<'transfers'>) {
 	const BaseTransferFormSchema = z.object({
 		date: z.iso.datetime(t('form.schema.dateRequired')),
@@ -18,13 +30,15 @@ export function createTransferFormSchema(t: TFunction<'transfers'>) {
 		toAccountId: z.string(t('form.schema.toAccountRequired')),
 	})
 
-	return BaseTransferFormSchema.extend({}).refine(
-		data => {
-			return data.fromAccountId !== data.toAccountId
-		},
-		{
-			message: t('form.schema.sameAccountError'),
-			path: ['toAccountId'],
-		},
-	)
+	return BaseTransferFormSchema.extend({})
+		.refine(
+			data => {
+				return data.fromAccountId !== data.toAccountId
+			},
+			{
+				message: t('form.schema.sameAccountError'),
+				path: ['toAccountId'],
+			},
+		)
+		.and(ActionSchema)
 }

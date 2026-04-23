@@ -31,6 +31,11 @@ import {
 } from '~/routes/transactions/lib/constants'
 import type { TTransactionType } from '~/routes/transactions/lib/types'
 
+type TransactionEditData = Extract<
+	EditRoute.ComponentProps['loaderData'],
+	{ transaction: unknown }
+>['transaction']
+
 type Props = Route.ComponentProps['loaderData']['formData'] &
 	(
 		| {
@@ -38,7 +43,7 @@ type Props = Route.ComponentProps['loaderData']['formData'] &
 		  }
 		| {
 				action: typeof ACTION_EDITION
-				transaction: EditRoute.ComponentProps['loaderData']['transaction']
+				transaction: TransactionEditData
 		  }
 	)
 

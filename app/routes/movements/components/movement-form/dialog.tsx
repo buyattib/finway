@@ -9,7 +9,6 @@ import {
 import type { Route } from '../../+types'
 import type { Route as EditRoute } from '../../+types/edit'
 
-import type { Beautify } from '~/types/utils'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 
 import {
@@ -33,26 +32,43 @@ import { TransactionForm } from './transaction'
 import { TransferForm } from './transfer'
 import { ExchangeForm } from './exchange'
 
-type Props = Beautify<
-	Route.ComponentProps['loaderData']['formData'] & {
-		entity: TMovementTab
-	} & (
-			| {
-					action: typeof ACTION_CREATION
-			  }
-			| {
-					action: typeof ACTION_EDITION
-					transaction: EditRoute.ComponentProps['loaderData']['transaction']
-			  }
-		)
->
+type EditLoaderData = EditRoute.ComponentProps['loaderData']
+type TransactionEditData = Extract<
+	EditLoaderData,
+	{ transaction: unknown }
+>['transaction']
+type TransferEditData = Extract<
+	EditLoaderData,
+	{ transfer: unknown }
+>['transfer']
+type ExchangeEditData = Extract<
+	EditLoaderData,
+	{ exchange: unknown }
+>['exchange']
 
-export function MovementFormDialog({
-	selectData,
-	balances,
-	entity,
-	...props
-}: Props) {
+type SharedProps = Route.ComponentProps['loaderData']['formData']
+
+type Props = SharedProps &
+	(
+		| { action: typeof ACTION_CREATION; entity: TMovementTab }
+		| {
+				action: typeof ACTION_EDITION
+				entity: typeof MOVEMENT_TAB_TRANSACTIONS
+				transaction: TransactionEditData
+		  }
+		| {
+				action: typeof ACTION_EDITION
+				entity: typeof MOVEMENT_TAB_TRANSFERS
+				transfer: TransferEditData
+		  }
+		| {
+				action: typeof ACTION_EDITION
+				entity: typeof MOVEMENT_TAB_EXCHANGES
+				exchange: ExchangeEditData
+		  }
+	)
+
+export function MovementFormDialog({ selectData, balances, ...props }: Props) {
 	const { t } = useTranslation('movements')
 	const navigate = useNavigate()
 	const [searchParams] = useSearchParams()
@@ -101,7 +117,7 @@ export function MovementFormDialog({
 						<Label>{t('dialog.entityLabel')}</Label>
 						<Select
 							options={entityOptions}
-							defaultValue={entity}
+							defaultValue={props.entity}
 							onValueChange={value =>
 								navigate(`/app/movements/${value}/create`, {
 									replace: true,
@@ -112,7 +128,7 @@ export function MovementFormDialog({
 					</div>
 				)}
 
-				{entity === MOVEMENT_TAB_TRANSACTIONS && (
+				{props.entity === MOVEMENT_TAB_TRANSACTIONS && (
 					<TransactionForm
 						selectData={selectData}
 						balances={balances}
@@ -127,19 +143,33 @@ export function MovementFormDialog({
 					/>
 				)}
 
-				{entity === MOVEMENT_TAB_TRANSFERS && (
+				{props.entity === MOVEMENT_TAB_TRANSFERS && (
 					<TransferForm
-						action={ACTION_CREATION}
 						selectData={selectData}
 						balances={balances}
+						{...(props.action === ACTION_EDITION
+							? {
+									action: props.action,
+									transfer: props.transfer,
+								}
+							: {
+									action: props.action,
+								})}
 					/>
 				)}
 
-				{entity === MOVEMENT_TAB_EXCHANGES && (
+				{props.entity === MOVEMENT_TAB_EXCHANGES && (
 					<ExchangeForm
-						action={ACTION_CREATION}
 						selectData={selectData}
 						balances={balances}
+						{...(props.action === ACTION_EDITION
+							? {
+									action: props.action,
+									exchange: props.exchange,
+								}
+							: {
+									action: props.action,
+								})}
 					/>
 				)}
 			</DialogContent>

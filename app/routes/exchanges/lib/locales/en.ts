@@ -16,6 +16,7 @@ export default {
 		},
 		emptyTitle: 'You have not created any exchanges yet',
 		emptyFilteredMessage: 'No exchanges found with applied filters',
+		editAriaLabel: 'Edit exchange',
 		deleteAriaLabel: 'Delete exchange',
 		action: {
 			deleteErrorToast: 'Could not delete exchange',
@@ -59,6 +60,19 @@ export default {
 		},
 		create: {
 			submitButton: 'Create',
+		},
+		edit: {
+			action: {
+				successToast: 'Exchange edited successfully',
+				exchangeNotFound: 'Exchange not found',
+				accountNotFound: 'Account not found',
+				fromCurrencyNotFound: 'From currency not found',
+				toCurrencyNotFound: 'To currency not found',
+				insufficientBalance:
+					'Insufficient balance in the selected from currency',
+				invalidActionError: 'Invalid action',
+			},
+			submitButton: 'Update',
 		},
 	},
 }

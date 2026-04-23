@@ -19,8 +19,11 @@ export async function getExchangeById({
 		where: (exchange, { eq }) => eq(exchange.id, exchangeId),
 		columns: {
 			id: true,
+			date: true,
 			accountId: true,
+			fromCurrencyId: true,
 			toCurrencyId: true,
+			fromAmount: true,
 			toAmount: true,
 		},
 		with: { account: { columns: { ownerId: true } } },
@@ -142,4 +145,26 @@ export async function createExchange({
 	}
 }) {
 	await db.insert(schema.exchange).values(values)
+}
+
+export async function updateExchange({
+	db,
+	exchangeId,
+	data,
+}: {
+	db: DB
+	exchangeId: string
+	data: {
+		date: string
+		fromAmount: number
+		toAmount: number
+		fromCurrencyId: string
+		toCurrencyId: string
+		accountId: string
+	}
+}) {
+	await db
+		.update(schema.exchange)
+		.set(data)
+		.where(eq(schema.exchange.id, exchangeId))
 }

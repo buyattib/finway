@@ -15,6 +15,7 @@ export default {
 		},
 		emptyTitle: 'You have not created any transfers yet',
 		emptyFilteredMessage: 'No transfers found with applied filters',
+		editAriaLabel: 'Edit transfer',
 		deleteAriaLabel: 'Delete transfer',
 		action: {
 			deleteErrorToast: 'Could not delete transfer',
@@ -57,6 +58,19 @@ export default {
 		},
 		create: {
 			submitButton: 'Create',
+		},
+		edit: {
+			action: {
+				successToast: 'Transfer edited successfully',
+				transferNotFound: 'Transfer not found',
+				fromAccountNotFound: 'From account not found',
+				toAccountNotFound: 'To account not found',
+				currencyNotFound: 'Currency not found',
+				insufficientBalance:
+					'Insufficient balance for the selected account and currency',
+				invalidActionError: 'Invalid action',
+			},
+			submitButton: 'Update',
 		},
 	},
 }

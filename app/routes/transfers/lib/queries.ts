@@ -19,9 +19,11 @@ export async function getTransferById({
 		where: (transfer, { eq }) => eq(transfer.id, transferId),
 		columns: {
 			id: true,
-			toAccountId: true,
-			currencyId: true,
+			date: true,
 			amount: true,
+			currencyId: true,
+			fromAccountId: true,
+			toAccountId: true,
 		},
 		with: {
 			fromAccount: { columns: { ownerId: true } },
@@ -147,4 +149,25 @@ export async function createTransfer({
 	}
 }) {
 	await db.insert(schema.transfer).values(values)
+}
+
+export async function updateTransfer({
+	db,
+	transferId,
+	data,
+}: {
+	db: DB
+	transferId: string
+	data: {
+		date: string
+		amount: number
+		currencyId: string
+		fromAccountId: string
+		toAccountId: string
+	}
+}) {
+	await db
+		.update(schema.transfer)
+		.set(data)
+		.where(eq(schema.transfer.id, transferId))
 }
