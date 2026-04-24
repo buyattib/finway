@@ -49,7 +49,8 @@ export function ExchangeForm({
 	...props
 }: Props) {
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
-	const { t, i18n } = useTranslation('exchanges')
+	const { t, i18n } = useTranslation('movements')
+	const { t: tSchema } = useTranslation('exchanges')
 	const location = useLocation()
 
 	const { accounts, currencies } = selectData
@@ -65,7 +66,7 @@ export function ExchangeForm({
 						toCurrencyId: '',
 						accountId: '',
 					},
-					buttonLabel: t('form.create.submitButton'),
+					buttonLabel: t('form.common.createSubmitButton'),
 					formAction: '/app/movements/exchanges/create',
 				}
 			: {
@@ -77,8 +78,8 @@ export function ExchangeForm({
 						toCurrencyId: props.exchange.toCurrencyId,
 						accountId: props.exchange.accountId,
 					},
-					buttonLabel: t('form.edit.submitButton'),
-					formAction: `/app/exchanges/${props.exchange.id}/edit`,
+					buttonLabel: t('form.common.editSubmitButton'),
+					formAction: `/app/movements/exchanges/${props.exchange.id}/edit`,
 				}
 
 	const isSubmitting = fetcher.state === 'submitting'
@@ -88,10 +89,10 @@ export function ExchangeForm({
 		id: 'exchange-form',
 		shouldValidate: 'onBlur',
 		defaultValue,
-		constraint: getZodConstraint(createExchangeFormSchema(t)),
+		constraint: getZodConstraint(createExchangeFormSchema(tSchema)),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: createExchangeFormSchema(t),
+				schema: createExchangeFormSchema(tSchema),
 			})
 		},
 	})
@@ -115,7 +116,7 @@ export function ExchangeForm({
 	)
 
 	const balanceDescription = selectedBalance
-		? t('form.availableBalance', {
+		? t('form.common.availableBalance', {
 				symbol: getCurrencySymbol(selectedBalance.currency),
 				amount: formatNumber(selectedBalance.balance, i18n.language),
 				currency: selectedBalance.currency,
@@ -141,54 +142,54 @@ export function ExchangeForm({
 
 				<ErrorList size='md' errors={form.errors} id={form.errorId} />
 
-				<DateField label={t('form.dateLabel')} field={fields.date} />
+				<DateField label={t('form.exchange.dateLabel')} field={fields.date} />
 
 				{accounts.length !== 0 ? (
 					<>
 						<ComboboxField
-							label={t('form.accountLabel')}
+							label={t('form.exchange.accountLabel')}
 							field={fields.accountId}
-							buttonPlaceholder={t('form.accountPlaceholder')}
+							buttonPlaceholder={t('form.exchange.accountPlaceholder')}
 							options={accountOptions}
 						/>
 
 						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 							<ComboboxField
-								label={t('form.fromCurrencyLabel')}
+								label={t('form.exchange.fromCurrencyLabel')}
 								field={fields.fromCurrencyId}
 								buttonPlaceholder={t(
-									'form.currencyPlaceholder',
+									'form.exchange.currencyPlaceholder',
 								)}
 								options={currencyOptions}
 							/>
 
 							<ComboboxField
-								label={t('form.toCurrencyLabel')}
+								label={t('form.exchange.toCurrencyLabel')}
 								field={fields.toCurrencyId}
 								buttonPlaceholder={t(
-									'form.currencyPlaceholder',
+									'form.exchange.currencyPlaceholder',
 								)}
 								options={currencyOptions}
 							/>
 						</div>
 
 						<AmountField
-							label={t('form.fromAmountLabel')}
+							label={t('form.exchange.fromAmountLabel')}
 							field={fields.fromAmount}
 							description={balanceDescription}
 							maxValue={selectedBalance?.balance}
 						/>
 
 						<AmountField
-							label={t('form.toAmountLabel')}
+							label={t('form.exchange.toAmountLabel')}
 							field={fields.toAmount}
 						/>
 					</>
 				) : (
 					<Text size='sm' theme='muted' alignment='center'>
 						<Trans
-							i18nKey='form.noAccountMessage'
-							ns='exchanges'
+							i18nKey='form.common.noAccountMessage'
+							ns='movements'
 							components={[
 								<Link
 									key='0'
@@ -212,7 +213,7 @@ export function ExchangeForm({
 					variant='outline'
 					{...form.reset.getButtonProps()}
 				>
-					{t('form.resetButton')}
+					{t('form.common.resetButton')}
 				</Button>
 				<Button
 					width='full'

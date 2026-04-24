@@ -32,7 +32,7 @@ export function TransactionsFilters({
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)
-	const { t } = useTranslation(['transactions', 'constants'])
+	const { t } = useTranslation(['movements', 'constants'])
 
 	const transactionTypeOptions = TRANSACTION_TYPES.map(i => ({
 		icon: (
@@ -82,28 +82,28 @@ export function TransactionsFilters({
 				options={accountOptions}
 				name='accountId'
 				defaultValue={filters.accountId}
-				buttonPlaceholder={t('filters.account')}
+				buttonPlaceholder={t('index.transactions.filters.account')}
 				onValueChange={onValueChange}
 			/>
 			<Combobox
 				options={currencyOptions}
 				name='currencyId'
 				defaultValue={filters.currencyId}
-				buttonPlaceholder={t('filters.currency')}
+				buttonPlaceholder={t('index.transactions.filters.currency')}
 				onValueChange={onValueChange}
 			/>
 			<Combobox
 				options={categoryOptions}
 				name='category'
 				defaultValue={filters.category}
-				buttonPlaceholder={t('filters.category')}
+				buttonPlaceholder={t('index.transactions.filters.category')}
 				onValueChange={onValueChange}
 			/>
 			<Combobox
 				options={transactionTypeOptions}
 				name='transactionType'
 				defaultValue={filters.transactionType}
-				buttonPlaceholder={t('filters.type')}
+				buttonPlaceholder={t('index.transactions.filters.type')}
 				onValueChange={onValueChange}
 			/>
 		</Form>

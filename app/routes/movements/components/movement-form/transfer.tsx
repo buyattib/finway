@@ -49,7 +49,8 @@ export function TransferForm({
 	...props
 }: Props) {
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
-	const { t, i18n } = useTranslation('transfers')
+	const { t, i18n } = useTranslation('movements')
+	const { t: tSchema } = useTranslation('transfers')
 	const location = useLocation()
 
 	const { accounts, currencies } = selectData
@@ -64,7 +65,7 @@ export function TransferForm({
 						fromAccountId: '',
 						toAccountId: '',
 					},
-					buttonLabel: t('form.create.submitButton'),
+					buttonLabel: t('form.common.createSubmitButton'),
 					formAction: '/app/movements/transfers/create',
 				}
 			: {
@@ -75,8 +76,8 @@ export function TransferForm({
 						fromAccountId: props.transfer.fromAccountId,
 						toAccountId: props.transfer.toAccountId,
 					},
-					buttonLabel: t('form.edit.submitButton'),
-					formAction: `/app/transfers/${props.transfer.id}/edit`,
+					buttonLabel: t('form.common.editSubmitButton'),
+					formAction: `/app/movements/transfers/${props.transfer.id}/edit`,
 				}
 
 	const isSubmitting = fetcher.state === 'submitting'
@@ -86,10 +87,10 @@ export function TransferForm({
 		id: 'transfer-form',
 		shouldValidate: 'onBlur',
 		defaultValue,
-		constraint: getZodConstraint(createTransferFormSchema(t)),
+		constraint: getZodConstraint(createTransferFormSchema(tSchema)),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: createTransferFormSchema(t),
+				schema: createTransferFormSchema(tSchema),
 			})
 		},
 	})
@@ -113,7 +114,7 @@ export function TransferForm({
 	)
 
 	const balanceDescription = selectedBalance
-		? t('form.availableBalance', {
+		? t('form.common.availableBalance', {
 				symbol: getCurrencySymbol(selectedBalance.currency),
 				amount: formatNumber(selectedBalance.balance, i18n.language),
 				currency: selectedBalance.currency,
@@ -139,35 +140,35 @@ export function TransferForm({
 
 				<ErrorList size='md' errors={form.errors} id={form.errorId} />
 
-				<DateField label={t('form.dateLabel')} field={fields.date} />
+				<DateField label={t('form.transfer.dateLabel')} field={fields.date} />
 
 				{accounts.length !== 0 ? (
 					<>
 						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 							<ComboboxField
-								label={t('form.fromAccountLabel')}
+								label={t('form.transfer.fromAccountLabel')}
 								field={fields.fromAccountId}
-								buttonPlaceholder={t('form.accountPlaceholder')}
+								buttonPlaceholder={t('form.transfer.accountPlaceholder')}
 								options={accountOptions}
 							/>
 
 							<ComboboxField
-								label={t('form.toAccountLabel')}
+								label={t('form.transfer.toAccountLabel')}
 								field={fields.toAccountId}
-								buttonPlaceholder={t('form.accountPlaceholder')}
+								buttonPlaceholder={t('form.transfer.accountPlaceholder')}
 								options={accountOptions}
 							/>
 						</div>
 
 						<ComboboxField
-							label={t('form.currencyLabel')}
+							label={t('form.transfer.currencyLabel')}
 							field={fields.currencyId}
-							buttonPlaceholder={t('form.currencyPlaceholder')}
+							buttonPlaceholder={t('form.transfer.currencyPlaceholder')}
 							options={currencyOptions}
 						/>
 
 						<AmountField
-							label={t('form.amountLabel')}
+							label={t('form.transfer.amountLabel')}
 							field={fields.amount}
 							description={balanceDescription}
 							maxValue={selectedBalance?.balance}
@@ -176,8 +177,8 @@ export function TransferForm({
 				) : (
 					<Text size='sm' theme='muted' alignment='center'>
 						<Trans
-							i18nKey='form.noAccountMessage'
-							ns='transfers'
+							i18nKey='form.common.noAccountMessage'
+							ns='movements'
 							components={[
 								<Link
 									key='0'
@@ -201,7 +202,7 @@ export function TransferForm({
 					variant='outline'
 					{...form.reset.getButtonProps()}
 				>
-					{t('form.resetButton')}
+					{t('form.common.resetButton')}
 				</Button>
 				<Button
 					width='full'

@@ -42,7 +42,7 @@ export function ExchangesTab({
 }: ExchangesTabProps) {
 	const navigation = useNavigation()
 	const [searchParams] = useSearchParams()
-	const { t, i18n } = useTranslation('exchanges')
+	const { t, i18n } = useTranslation('movements')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
@@ -75,8 +75,8 @@ export function ExchangesTab({
 					icon={RefreshCwIcon}
 					title={
 						hasFilters
-							? t('index.emptyFilteredMessage')
-							: t('index.emptyTitle')
+							? t('index.exchanges.emptyFilteredMessage')
+							: t('index.exchanges.emptyTitle')
 					}
 				/>
 			)}
@@ -88,20 +88,20 @@ export function ExchangesTab({
 							<TableHeader>
 								<TableRow>
 									<TableHead>
-										{t('index.table.date')}
+										{t('index.exchanges.table.date')}
 									</TableHead>
 									<TableHead>
-										{t('index.table.account')}
+										{t('index.exchanges.table.account')}
 									</TableHead>
 									<TableHead>
-										{t('index.table.from')}
+										{t('index.exchanges.table.from')}
 									</TableHead>
-									<TableHead>{t('index.table.to')}</TableHead>
+									<TableHead>{t('index.exchanges.table.to')}</TableHead>
 									<TableHead>
-										{t('index.table.rate')}
+										{t('index.exchanges.table.rate')}
 									</TableHead>
 									<TableHead className='text-right'>
-										{t('index.table.actions')}
+										{t('index.exchanges.table.actions')}
 									</TableHead>
 								</TableRow>
 							</TableHeader>
@@ -366,7 +366,7 @@ export function ExchangesTab({
 										</Text>
 									</div>
 									<Text size='xs' theme='muted'>
-										{t('index.table.rate')}:{' '}
+										{t('index.exchanges.table.rate')}:{' '}
 										{calculateRate({
 											fromAmount,
 											toAmount,

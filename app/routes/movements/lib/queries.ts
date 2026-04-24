@@ -2,6 +2,14 @@ import { getSelectData, getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 import type { DB } from '~/lib/types'
 
+import { getTransactions } from '~/routes/transactions/lib/queries'
+import type {
+	TCategory,
+	TTransactionType,
+} from '~/routes/transactions/lib/types'
+import { getTransfers } from '~/routes/transfers/lib/queries'
+import { getExchanges } from '~/routes/exchanges/lib/queries'
+
 export async function getMovementFormData({
 	db,
 	ownerId,
@@ -15,14 +23,6 @@ export async function getMovementFormData({
 	])
 	return { selectData, balances }
 }
-
-import { getTransactions } from '~/routes/transactions/lib/queries'
-import type {
-	TCategory,
-	TTransactionType,
-} from '~/routes/transactions/lib/types'
-import { getTransfers } from '~/routes/transfers/lib/queries'
-import { getExchanges } from '~/routes/exchanges/lib/queries'
 
 export async function getTransactionsTabData({
 	db,

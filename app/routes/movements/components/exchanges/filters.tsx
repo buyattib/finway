@@ -26,7 +26,7 @@ export function ExchangesFilters({
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)
-	const { t } = useTranslation('exchanges')
+	const { t } = useTranslation('movements')
 
 	const accountOptions = selectData.accounts.map(
 		({ id, name, accountType }) => ({
@@ -58,21 +58,21 @@ export function ExchangesFilters({
 				options={accountOptions}
 				name='accountId'
 				defaultValue={filters.accountId}
-				buttonPlaceholder={t('filters.account')}
+				buttonPlaceholder={t('index.exchanges.filters.account')}
 				onValueChange={onValueChange}
 			/>
 			<Combobox
 				options={currencyOptions}
 				name='fromCurrencyId'
 				defaultValue={filters.fromCurrencyId}
-				buttonPlaceholder={t('filters.fromCurrency')}
+				buttonPlaceholder={t('index.exchanges.filters.fromCurrency')}
 				onValueChange={onValueChange}
 			/>
 			<Combobox
 				options={currencyOptions}
 				name='toCurrencyId'
 				defaultValue={filters.toCurrencyId}
-				buttonPlaceholder={t('filters.toCurrency')}
+				buttonPlaceholder={t('index.exchanges.filters.toCurrency')}
 				onValueChange={onValueChange}
 			/>
 		</Form>

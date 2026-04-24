@@ -4,26 +4,27 @@ import { dbContext, userContext } from '~/lib/context'
 import { ACTION_EDITION } from '~/lib/constants'
 
 import { getTransactionById } from '~/routes/transactions/lib/queries'
+import { editTransactionAction } from '~/routes/transactions/lib/services'
 import { getTransferById } from '~/routes/transfers/lib/queries'
+import { editTransferAction } from '~/routes/transfers/lib/services'
 import { getExchangeById } from '~/routes/exchanges/lib/queries'
+import { editExchangeAction } from '~/routes/exchanges/lib/services'
 
 import {
 	MOVEMENT_TAB_TRANSACTIONS,
 	MOVEMENT_TAB_TRANSFERS,
 	MOVEMENT_TAB_EXCHANGES,
-	MOVEMENT_TABS,
 } from './lib/constants'
 import { getMovementFormData } from './lib/queries'
+import { assertMovementTab, assertNever } from './lib/utils'
 import { MovementFormDialog } from './components/movement-form/dialog'
 
 export async function loader({ context, params }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 
-	const movement = MOVEMENT_TABS.find(t => t === params.movement)
-	if (!movement) {
-		throw new Response('Not Found', { status: 404 })
-	}
+	assertMovementTab(params.movement)
+	const movement = params.movement
 
 	const formData = await getMovementFormData({ db, ownerId: user.id })
 
@@ -99,7 +100,28 @@ export async function loader({ context, params }: Route.LoaderArgs) {
 		}
 	}
 
-	throw new Response('Invalid movement')
+	assertNever(movement)
+}
+
+export async function action({ request, context, params }: Route.ActionArgs) {
+	const user = context.get(userContext)
+	const db = context.get(dbContext)
+
+	assertMovementTab(params.movement)
+
+	const formData = await request.formData()
+	const args = { db, user, request, context, formData }
+
+	switch (params.movement) {
+		case MOVEMENT_TAB_TRANSACTIONS:
+			return await editTransactionAction(args)
+		case MOVEMENT_TAB_TRANSFERS:
+			return await editTransferAction(args)
+		case MOVEMENT_TAB_EXCHANGES:
+			return await editExchangeAction(args)
+		default:
+			assertNever(params.movement)
+	}
 }
 
 export default function MovementEdit({ loaderData }: Route.ComponentProps) {

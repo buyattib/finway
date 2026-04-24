@@ -26,7 +26,7 @@ export function TransfersFilters({
 }) {
 	const submit = useSubmit()
 	const form = useRef<HTMLFormElement>(null)
-	const { t } = useTranslation('transfers')
+	const { t } = useTranslation('movements')
 
 	const accountOptions = selectData.accounts.map(
 		({ id, name, accountType }) => ({
@@ -58,21 +58,21 @@ export function TransfersFilters({
 				options={accountOptions}
 				name='fromAccountId'
 				defaultValue={filters.fromAccountId}
-				buttonPlaceholder={t('filters.fromAccount')}
+				buttonPlaceholder={t('index.transfers.filters.fromAccount')}
 				onValueChange={onValueChange}
 			/>
 			<Combobox
 				options={accountOptions}
 				name='toAccountId'
 				defaultValue={filters.toAccountId}
-				buttonPlaceholder={t('filters.toAccount')}
+				buttonPlaceholder={t('index.transfers.filters.toAccount')}
 				onValueChange={onValueChange}
 			/>
 			<Combobox
 				options={currencyOptions}
 				name='currencyId'
 				defaultValue={filters.currencyId}
-				buttonPlaceholder={t('filters.currency')}
+				buttonPlaceholder={t('index.transfers.filters.currency')}
 				onValueChange={onValueChange}
 			/>
 		</Form>

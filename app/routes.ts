@@ -40,21 +40,6 @@ export default [
 			route(':movement/:movementId', 'routes/movements/movement.tsx'),
 		]),
 
-		// transactions
-		...prefix('transactions', [
-			route(':transactionId/edit', 'routes/transactions/edit.tsx'),
-		]),
-
-		// transfers
-		...prefix('transfers', [
-			route(':transferId/edit', 'routes/transfers/edit.tsx'),
-		]),
-
-		// exchanges
-		...prefix('exchanges', [
-			route(':exchangeId/edit', 'routes/exchanges/edit.tsx'),
-		]),
-
 		// credit cards
 		...prefix('credit-cards', [
 			index('routes/credit-cards/cards/index.tsx'),

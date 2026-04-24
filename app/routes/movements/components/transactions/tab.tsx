@@ -41,7 +41,7 @@ export function TransactionsTab({
 }: TransactionsTabProps) {
 	const navigation = useNavigation()
 	const [searchParams] = useSearchParams()
-	const { t, i18n } = useTranslation(['transactions', 'constants'])
+	const { t, i18n } = useTranslation(['movements', 'constants'])
 
 	const isDeleting =
 		(navigation.formMethod === 'POST' &&
@@ -77,8 +77,8 @@ export function TransactionsTab({
 					icon={ReceiptTextIcon}
 					title={
 						hasFilters
-							? t('index.emptyFilteredMessage')
-							: t('index.emptyTitle')
+							? t('index.transactions.emptyFilteredMessage')
+							: t('index.transactions.emptyTitle')
 					}
 				/>
 			)}
@@ -90,22 +90,22 @@ export function TransactionsTab({
 							<TableHeader>
 								<TableRow>
 									<TableHead>
-										{t('index.table.date')}
+										{t('index.transactions.table.date')}
 									</TableHead>
 									<TableHead>
-										{t('index.table.account')}
+										{t('index.transactions.table.account')}
 									</TableHead>
 									<TableHead>
-										{t('index.table.amount')}
+										{t('index.transactions.table.amount')}
 									</TableHead>
 									<TableHead>
-										{t('index.table.type')}
+										{t('index.transactions.table.type')}
 									</TableHead>
 									<TableHead>
-										{t('index.table.category')}
+										{t('index.transactions.table.category')}
 									</TableHead>
 									<TableHead className='text-right'>
-										{t('index.table.actions')}
+										{t('index.transactions.table.actions')}
 									</TableHead>
 								</TableRow>
 							</TableHeader>

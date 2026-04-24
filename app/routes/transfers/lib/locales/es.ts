@@ -2,52 +2,14 @@ import type en from './en'
 
 export default {
 	index: {
-		meta: {
-			title: 'Transferencias | Finway',
-			description: 'Tus transferencias entre cuentas',
-		},
-		title: 'Transferencias',
-		addTransferLabel: 'Transferencia',
-		table: {
-			date: 'Fecha',
-			amount: 'Monto',
-			fromAccount: 'Cuenta de origen',
-			toAccount: 'Cuenta de destino',
-			actions: 'Acciones',
-		},
-		emptyTitle: 'Aún no has creado ninguna transferencia',
-		emptyFilteredMessage:
-			'No se encontraron transferencias con los filtros aplicados',
-		editAriaLabel: 'Editar transferencia',
-		deleteAriaLabel: 'Eliminar transferencia',
 		action: {
-			deleteErrorToast: 'No se pudo eliminar la transferencia',
-			deleteErrorToastDescription: 'Por favor intenta de nuevo',
 			notFoundError: 'Transferencia {{transferId}} no encontrada',
 			negativeBalanceError:
 				'No se puede eliminar la transferencia porque la cuenta tendría un saldo negativo',
 			successToast: 'Transferencia eliminada',
 		},
 	},
-	filters: {
-		fromAccount: 'Filtrar por cuenta de origen',
-		toAccount: 'Filtrar por cuenta de destino',
-		currency: 'Filtrar por moneda',
-	},
 	form: {
-		description:
-			'Las transferencias afectarán los saldos de tus cuentas y se usarán para rastrear tus finanzas.',
-		dateLabel: 'Fecha',
-		fromAccountLabel: 'Cuenta de origen',
-		toAccountLabel: 'Cuenta de destino',
-		accountPlaceholder: 'Selecciona una cuenta',
-		currencyLabel: 'Moneda',
-		currencyPlaceholder: 'Selecciona una moneda',
-		amountLabel: 'Monto',
-		availableBalance: 'Disponible: {{symbol}}{{amount}} {{currency}}',
-		resetButton: 'Restablecer',
-		noAccountMessage:
-			'Necesitas crear una cuenta primero. Hazlo <0>aquí</0>',
 		schema: {
 			dateRequired: 'La fecha es requerida',
 			amountRequired: 'El monto es requerido',
@@ -60,20 +22,22 @@ export default {
 				'Una transferencia solo puede realizarse entre cuentas diferentes',
 		},
 		create: {
-			submitButton: 'Crear',
+			successToast: 'Transferencia creada exitosamente',
+			fromAccountNotFound: 'Cuenta de origen no encontrada',
+			toAccountNotFound: 'Cuenta de destino no encontrada',
+			currencyNotFound: 'Moneda no encontrada',
+			insufficientBalance:
+				'Saldo insuficiente en la moneda seleccionada en la cuenta de origen',
 		},
 		edit: {
-			action: {
-				successToast: 'Transferencia editada exitosamente',
-				transferNotFound: 'Transferencia no encontrada',
-				fromAccountNotFound: 'Cuenta de origen no encontrada',
-				toAccountNotFound: 'Cuenta de destino no encontrada',
-				currencyNotFound: 'Moneda no encontrada',
-				insufficientBalance:
-					'Saldo insuficiente para la cuenta y moneda seleccionadas',
-				invalidActionError: 'Acción inválida',
-			},
-			submitButton: 'Actualizar',
+			successToast: 'Transferencia editada exitosamente',
+			transferNotFound: 'Transferencia no encontrada',
+			fromAccountNotFound: 'Cuenta de origen no encontrada',
+			toAccountNotFound: 'Cuenta de destino no encontrada',
+			currencyNotFound: 'Moneda no encontrada',
+			insufficientBalance:
+				'Saldo insuficiente para la cuenta y moneda seleccionadas',
+			invalidActionError: 'Acción inválida',
 		},
 	},
 } satisfies typeof en

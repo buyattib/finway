@@ -50,7 +50,8 @@ type Props = Route.ComponentProps['loaderData']['formData'] &
 export function TransactionForm({ selectData, balances, ...props }: Props) {
 	const location = useLocation()
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
-	const { t, i18n } = useTranslation(['transactions', 'constants'])
+	const { t, i18n } = useTranslation(['movements', 'constants'])
+	const { t: tSchema } = useTranslation('transactions')
 
 	const { accounts, currencies } = selectData
 
@@ -67,7 +68,7 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 						category:
 							TRANSACTION_CATEGORIES[TRANSACTION_TYPE_EXPENSE][0],
 					},
-					buttonLabel: t('form.create.submitButton'),
+					buttonLabel: t('form.common.createSubmitButton'),
 					formAction: '/app/movements/transactions/create',
 				}
 			: {
@@ -80,8 +81,8 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 						currencyId: props.transaction.currencyId,
 						category: props.transaction.category,
 					},
-					buttonLabel: t('form.edit.submitButton'),
-					formAction: `/app/transactions/${props.transaction.id}/edit`,
+					buttonLabel: t('form.common.editSubmitButton'),
+					formAction: `/app/movements/transactions/${props.transaction.id}/edit`,
 				}
 
 	const isSubmitting = fetcher.state === 'submitting'
@@ -91,10 +92,10 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 		id: 'transaction-form',
 		shouldValidate: 'onBlur',
 		defaultValue,
-		constraint: getZodConstraint(createTransactionFormSchema(t)),
+		constraint: getZodConstraint(createTransactionFormSchema(tSchema)),
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema: createTransactionFormSchema(t),
+				schema: createTransactionFormSchema(tSchema),
 			})
 		},
 	})
@@ -141,7 +142,7 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 
 	const balanceDescription =
 		fields.type.value === TRANSACTION_TYPE_EXPENSE && selectedBalance
-			? t('form.availableBalance', {
+			? t('form.common.availableBalance', {
 					symbol: getCurrencySymbol(selectedBalance.currency),
 					amount: formatNumber(
 						selectedBalance.balance,
@@ -175,33 +176,33 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 				<ErrorList size='md' errors={form.errors} id={form.errorId} />
 
 				<SelectField
-					label={t('form.transactionTypeLabel')}
+					label={t('form.transaction.transactionTypeLabel')}
 					field={fields.type}
-					placeholder={t('form.transactionTypePlaceholder')}
+					placeholder={t('form.transaction.transactionTypePlaceholder')}
 					items={transactionTypeOptions}
 				/>
 
 				{accounts.length !== 0 ? (
 					<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
 						<ComboboxField
-							label={t('form.accountLabel')}
+							label={t('form.transaction.accountLabel')}
 							field={fields.accountId}
-							buttonPlaceholder={t('form.accountPlaceholder')}
+							buttonPlaceholder={t('form.transaction.accountPlaceholder')}
 							options={accountOptions}
 						/>
 
 						<ComboboxField
-							label={t('form.currencyLabel')}
+							label={t('form.transaction.currencyLabel')}
 							field={fields.currencyId}
-							buttonPlaceholder={t('form.currencyPlaceholder')}
+							buttonPlaceholder={t('form.transaction.currencyPlaceholder')}
 							options={currencyOptions}
 						/>
 					</div>
 				) : (
 					<Text size='sm' theme='muted' alignment='center'>
 						<Trans
-							ns='transactions'
-							i18nKey='form.noAccountMessage'
+							ns='movements'
+							i18nKey='form.common.noAccountMessage'
 							components={[
 								<Link
 									key='0'
@@ -219,27 +220,27 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 				)}
 
 				<AmountField
-					label={t('form.amountLabel')}
+					label={t('form.transaction.amountLabel')}
 					field={fields.amount}
 					description={balanceDescription}
 					maxValue={selectedBalance?.balance}
 				/>
 
 				<ComboboxField
-					label={t('form.categoryLabel')}
+					label={t('form.transaction.categoryLabel')}
 					field={fields.category}
-					buttonPlaceholder={t('form.categoryPlaceholder')}
+					buttonPlaceholder={t('form.transaction.categoryPlaceholder')}
 					options={categoryOptions}
 				/>
 
 				<DateField
-					label={t('form.dateLabel')}
+					label={t('form.transaction.dateLabel')}
 					field={fields.date}
 					disableFuture
 				/>
 
 				<TextField
-					label={t('form.descriptionLabel')}
+					label={t('form.transaction.descriptionLabel')}
 					field={fields.description}
 				/>
 			</fetcher.Form>
@@ -250,7 +251,7 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 					variant='outline'
 					{...form.reset.getButtonProps()}
 				>
-					{t('form.resetButton')}
+					{t('form.common.resetButton')}
 				</Button>
 				<Button
 					width='full'

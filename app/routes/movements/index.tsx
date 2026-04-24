@@ -28,6 +28,7 @@ import {
 	getExchangesTabData,
 	getMovementFormData,
 } from './lib/queries'
+import { assertNever } from './lib/utils'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -86,7 +87,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		return { tab, meta, formData, exchanges: data }
 	}
 
-	throw new Error('Invalid tab')
+	assertNever(tab)
 }
 
 export default function Movements({

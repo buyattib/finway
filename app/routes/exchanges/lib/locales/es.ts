@@ -2,54 +2,14 @@ import type en from './en'
 
 export default {
 	index: {
-		meta: {
-			title: 'Intercambios | Finway',
-			description: 'Tus intercambios de moneda',
-		},
-		title: 'Intercambios',
-		addExchangeLabel: 'Intercambio',
-		table: {
-			date: 'Fecha',
-			account: 'Cuenta',
-			from: 'Desde',
-			to: 'Hacia',
-			rate: 'Tasa',
-			actions: 'Acciones',
-		},
-		emptyTitle: 'Aún no has creado ningún intercambio',
-		emptyFilteredMessage:
-			'No se encontraron intercambios con los filtros aplicados',
-		editAriaLabel: 'Editar intercambio',
-		deleteAriaLabel: 'Eliminar intercambio',
 		action: {
-			deleteErrorToast: 'No se pudo eliminar el intercambio',
-			deleteErrorToastDescription: 'Por favor intenta de nuevo',
 			notFoundError: 'Intercambio {{exchangeId}} no encontrado',
 			negativeBalanceError:
 				'No se puede eliminar el intercambio porque la cuenta tendría un saldo negativo',
 			successToast: 'Intercambio eliminado',
 		},
 	},
-	filters: {
-		account: 'Filtrar por cuenta',
-		fromCurrency: 'Filtrar por moneda de origen',
-		toCurrency: 'Filtrar por moneda de destino',
-	},
 	form: {
-		description:
-			'Los intercambios afectarán los saldos de tu cuenta y se usarán para rastrear tus finanzas.',
-		dateLabel: 'Fecha',
-		accountLabel: 'Cuenta',
-		accountPlaceholder: 'Selecciona una cuenta',
-		fromCurrencyLabel: 'Moneda de origen',
-		toCurrencyLabel: 'Moneda de destino',
-		currencyPlaceholder: 'Selecciona una moneda',
-		fromAmountLabel: 'Monto de origen',
-		availableBalance: 'Disponible: {{symbol}}{{amount}} {{currency}}',
-		toAmountLabel: 'Monto de destino',
-		resetButton: 'Restablecer',
-		noAccountMessage:
-			'Necesitas crear una cuenta primero. Hazlo <0>aquí</0>',
 		schema: {
 			dateRequired: 'La fecha es requerida',
 			amountRequired: 'El monto es requerido',
@@ -62,20 +22,22 @@ export default {
 				'Un intercambio solo puede realizarse entre monedas diferentes',
 		},
 		create: {
-			submitButton: 'Crear',
+			successToast: 'Intercambio creado exitosamente',
+			accountNotFound: 'Cuenta no encontrada',
+			fromCurrencyNotFound: 'Moneda de origen no encontrada',
+			toCurrencyNotFound: 'Moneda de destino no encontrada',
+			insufficientBalance:
+				'Saldo insuficiente en la moneda de origen seleccionada',
 		},
 		edit: {
-			action: {
-				successToast: 'Intercambio editado exitosamente',
-				exchangeNotFound: 'Intercambio no encontrado',
-				accountNotFound: 'Cuenta no encontrada',
-				fromCurrencyNotFound: 'Moneda de origen no encontrada',
-				toCurrencyNotFound: 'Moneda de destino no encontrada',
-				insufficientBalance:
-					'Saldo insuficiente en la moneda de origen seleccionada',
-				invalidActionError: 'Acción inválida',
-			},
-			submitButton: 'Actualizar',
+			successToast: 'Intercambio editado exitosamente',
+			exchangeNotFound: 'Intercambio no encontrado',
+			accountNotFound: 'Cuenta no encontrada',
+			fromCurrencyNotFound: 'Moneda de origen no encontrada',
+			toCurrencyNotFound: 'Moneda de destino no encontrada',
+			insufficientBalance:
+				'Saldo insuficiente en la moneda de origen seleccionada',
+			invalidActionError: 'Acción inválida',
 		},
 	},
 } satisfies typeof en

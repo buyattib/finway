@@ -45,7 +45,7 @@ export function TransfersTab({
 }: TransfersTabProps) {
 	const navigation = useNavigation()
 	const [searchParams] = useSearchParams()
-	const { t, i18n } = useTranslation('transfers')
+	const { t, i18n } = useTranslation('movements')
 
 	const isDeleting =
 		navigation.formMethod === 'POST' &&
@@ -78,8 +78,8 @@ export function TransfersTab({
 					icon={ArrowRightLeftIcon}
 					title={
 						hasFilters
-							? t('index.emptyFilteredMessage')
-							: t('index.emptyTitle')
+							? t('index.transfers.emptyFilteredMessage')
+							: t('index.transfers.emptyTitle')
 					}
 				/>
 			)}
@@ -91,19 +91,19 @@ export function TransfersTab({
 							<TableHeader>
 								<TableRow>
 									<TableHead>
-										{t('index.table.date')}
+										{t('index.transfers.table.date')}
 									</TableHead>
 									<TableHead>
-										{t('index.table.fromAccount')}
+										{t('index.transfers.table.fromAccount')}
 									</TableHead>
 									<TableHead>
-										{t('index.table.toAccount')}
+										{t('index.transfers.table.toAccount')}
 									</TableHead>
 									<TableHead>
-										{t('index.table.amount')}
+										{t('index.transfers.table.amount')}
 									</TableHead>
 									<TableHead className='text-right'>
-										{t('index.table.actions')}
+										{t('index.transfers.table.actions')}
 									</TableHead>
 								</TableRow>
 							</TableHeader>
