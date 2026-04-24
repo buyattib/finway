@@ -1,9 +1,4 @@
-import {
-	Link,
-	useFetcher,
-	createSearchParams,
-	useLocation,
-} from 'react-router'
+import { Link, useFetcher, createSearchParams, useLocation } from 'react-router'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Trans, useTranslation } from 'react-i18next'
@@ -43,11 +38,7 @@ type Props = Route.ComponentProps['loaderData']['formData'] &
 		  }
 	)
 
-export function TransferForm({
-	selectData,
-	balances,
-	...props
-}: Props) {
+export function TransferForm({ selectData, balances, ...props }: Props) {
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
 	const { t, i18n } = useTranslation('movements')
 	const { t: tSchema } = useTranslation('transfers')
@@ -66,7 +57,7 @@ export function TransferForm({
 						toAccountId: '',
 					},
 					buttonLabel: t('form.common.createSubmitButton'),
-					formAction: '/app/movements/transfers/create',
+					formAction: `/app/movements/transfers/create${location.search}`,
 				}
 			: {
 					defaultValue: {
@@ -77,7 +68,7 @@ export function TransferForm({
 						toAccountId: props.transfer.toAccountId,
 					},
 					buttonLabel: t('form.common.editSubmitButton'),
-					formAction: `/app/movements/transfers/${props.transfer.id}/edit`,
+					formAction: `/app/movements/transfers/${props.transfer.id}/edit${location.search}`,
 				}
 
 	const isSubmitting = fetcher.state === 'submitting'
@@ -140,7 +131,10 @@ export function TransferForm({
 
 				<ErrorList size='md' errors={form.errors} id={form.errorId} />
 
-				<DateField label={t('form.transfer.dateLabel')} field={fields.date} />
+				<DateField
+					label={t('form.transfer.dateLabel')}
+					field={fields.date}
+				/>
 
 				{accounts.length !== 0 ? (
 					<>
@@ -148,14 +142,18 @@ export function TransferForm({
 							<ComboboxField
 								label={t('form.transfer.fromAccountLabel')}
 								field={fields.fromAccountId}
-								buttonPlaceholder={t('form.transfer.accountPlaceholder')}
+								buttonPlaceholder={t(
+									'form.transfer.accountPlaceholder',
+								)}
 								options={accountOptions}
 							/>
 
 							<ComboboxField
 								label={t('form.transfer.toAccountLabel')}
 								field={fields.toAccountId}
-								buttonPlaceholder={t('form.transfer.accountPlaceholder')}
+								buttonPlaceholder={t(
+									'form.transfer.accountPlaceholder',
+								)}
 								options={accountOptions}
 							/>
 						</div>
@@ -163,7 +161,9 @@ export function TransferForm({
 						<ComboboxField
 							label={t('form.transfer.currencyLabel')}
 							field={fields.currencyId}
-							buttonPlaceholder={t('form.transfer.currencyPlaceholder')}
+							buttonPlaceholder={t(
+								'form.transfer.currencyPlaceholder',
+							)}
 							options={currencyOptions}
 						/>
 

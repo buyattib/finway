@@ -38,6 +38,9 @@ export async function createTransactionAction({
 }) {
 	const t = getServerT(context, 'transactions')
 
+	const url = new URL(request.url)
+	const search = url.search
+
 	const submission = parseWithZod(formData, {
 		schema: createTransactionFormSchema(t),
 	})
@@ -109,7 +112,7 @@ export async function createTransactionAction({
 
 	await createTransaction({ db, data: { ...values, amount } })
 
-	return await redirectWithToast(`/app/movements?tab=transactions`, request, {
+	return await redirectWithToast(`/app/movements${search}`, request, {
 		type: 'success',
 		title: t('form.create.successToast'),
 	})
@@ -129,6 +132,9 @@ export async function editTransactionAction({
 	formData: FormData
 }) {
 	const t = getServerT(context, 'transactions')
+
+	const url = new URL(request.url)
+	const search = url.search
 
 	const submission = parseWithZod(formData, {
 		schema: createTransactionFormSchema(t),
@@ -229,7 +235,7 @@ export async function editTransactionAction({
 		data: { ...values, amount },
 	})
 
-	return await redirectWithToast(`/app/movements?tab=transactions`, request, {
+	return await redirectWithToast(`/app/movements${search}`, request, {
 		type: 'success',
 		title: t('form.edit.successToast'),
 	})

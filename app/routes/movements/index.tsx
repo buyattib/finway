@@ -97,7 +97,7 @@ export default function Movements({
 	const [searchParams, setSearchParams] = useSearchParams()
 
 	const onTabChange = (value: string) => {
-		const next = new URLSearchParams(searchParams)
+		const next = new URLSearchParams({})
 		next.set('tab', value)
 		setSearchParams(next, { replace: true })
 	}

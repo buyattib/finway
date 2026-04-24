@@ -1,9 +1,4 @@
-import {
-	Link,
-	useFetcher,
-	createSearchParams,
-	useLocation,
-} from 'react-router'
+import { Link, useFetcher, createSearchParams, useLocation } from 'react-router'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Trans, useTranslation } from 'react-i18next'
@@ -43,11 +38,7 @@ type Props = Route.ComponentProps['loaderData']['formData'] &
 		  }
 	)
 
-export function ExchangeForm({
-	selectData,
-	balances,
-	...props
-}: Props) {
+export function ExchangeForm({ selectData, balances, ...props }: Props) {
 	const fetcher = useFetcher<{ submission?: SubmissionResult }>()
 	const { t, i18n } = useTranslation('movements')
 	const { t: tSchema } = useTranslation('exchanges')
@@ -67,7 +58,7 @@ export function ExchangeForm({
 						accountId: '',
 					},
 					buttonLabel: t('form.common.createSubmitButton'),
-					formAction: '/app/movements/exchanges/create',
+					formAction: `/app/movements/exchanges/create${location.search}`,
 				}
 			: {
 					defaultValue: {
@@ -79,7 +70,7 @@ export function ExchangeForm({
 						accountId: props.exchange.accountId,
 					},
 					buttonLabel: t('form.common.editSubmitButton'),
-					formAction: `/app/movements/exchanges/${props.exchange.id}/edit`,
+					formAction: `/app/movements/exchanges/${props.exchange.id}/edit${location.search}`,
 				}
 
 	const isSubmitting = fetcher.state === 'submitting'
@@ -142,14 +133,19 @@ export function ExchangeForm({
 
 				<ErrorList size='md' errors={form.errors} id={form.errorId} />
 
-				<DateField label={t('form.exchange.dateLabel')} field={fields.date} />
+				<DateField
+					label={t('form.exchange.dateLabel')}
+					field={fields.date}
+				/>
 
 				{accounts.length !== 0 ? (
 					<>
 						<ComboboxField
 							label={t('form.exchange.accountLabel')}
 							field={fields.accountId}
-							buttonPlaceholder={t('form.exchange.accountPlaceholder')}
+							buttonPlaceholder={t(
+								'form.exchange.accountPlaceholder',
+							)}
 							options={accountOptions}
 						/>
 

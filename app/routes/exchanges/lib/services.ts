@@ -37,6 +37,9 @@ export async function createExchangeAction({
 }) {
 	const t = getServerT(context, 'exchanges')
 
+	const url = new URL(request.url)
+	const search = url.search
+
 	const submission = parseWithZod(formData, {
 		schema: createExchangeFormSchema(t),
 	})
@@ -54,9 +57,7 @@ export async function createExchangeAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						accountId: [
-							t('form.create.accountNotFound'),
-						],
+						accountId: [t('form.create.accountNotFound')],
 					},
 				}),
 			},
@@ -64,15 +65,16 @@ export async function createExchangeAction({
 		)
 	}
 
-	const fromCurrency = await getCurrencyById({ db, currencyId: fromCurrencyId })
+	const fromCurrency = await getCurrencyById({
+		db,
+		currencyId: fromCurrencyId,
+	})
 	if (!fromCurrency) {
 		return data(
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						fromCurrencyId: [
-							t('form.create.fromCurrencyNotFound'),
-						],
+						fromCurrencyId: [t('form.create.fromCurrencyNotFound')],
 					},
 				}),
 			},
@@ -86,9 +88,7 @@ export async function createExchangeAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						toCurrencyId: [
-							t('form.create.toCurrencyNotFound'),
-						],
+						toCurrencyId: [t('form.create.toCurrencyNotFound')],
 					},
 				}),
 			},
@@ -107,9 +107,7 @@ export async function createExchangeAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						fromAmount: [
-							t('form.create.insufficientBalance'),
-						],
+						fromAmount: [t('form.create.insufficientBalance')],
 					},
 				}),
 			},
@@ -129,7 +127,7 @@ export async function createExchangeAction({
 		},
 	})
 
-	return await redirectWithToast(`/app/movements?tab=exchanges`, request, {
+	return await redirectWithToast(`/app/movements${search}`, request, {
 		type: 'success',
 		title: t('form.create.successToast'),
 	})
@@ -149,6 +147,9 @@ export async function editExchangeAction({
 	formData: FormData
 }) {
 	const t = getServerT(context, 'exchanges')
+
+	const url = new URL(request.url)
+	const search = url.search
 
 	const submission = parseWithZod(formData, {
 		schema: createExchangeFormSchema(t),
@@ -202,9 +203,7 @@ export async function editExchangeAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						fromCurrencyId: [
-							t('form.edit.fromCurrencyNotFound'),
-						],
+						fromCurrencyId: [t('form.edit.fromCurrencyNotFound')],
 					},
 				}),
 			},
@@ -263,7 +262,7 @@ export async function editExchangeAction({
 		data: { ...values, fromAmount, toAmount },
 	})
 
-	return await redirectWithToast(`/app/movements?tab=exchanges`, request, {
+	return await redirectWithToast(`/app/movements${search}`, request, {
 		type: 'success',
 		title: t('form.edit.successToast'),
 	})

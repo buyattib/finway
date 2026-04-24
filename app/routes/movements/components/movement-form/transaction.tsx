@@ -69,7 +69,7 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 							TRANSACTION_CATEGORIES[TRANSACTION_TYPE_EXPENSE][0],
 					},
 					buttonLabel: t('form.common.createSubmitButton'),
-					formAction: '/app/movements/transactions/create',
+					formAction: `/app/movements/transactions/create${location.search}`,
 				}
 			: {
 					defaultValue: {
@@ -82,7 +82,7 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 						category: props.transaction.category,
 					},
 					buttonLabel: t('form.common.editSubmitButton'),
-					formAction: `/app/movements/transactions/${props.transaction.id}/edit`,
+					formAction: `/app/movements/transactions/${props.transaction.id}/edit${location.search}`,
 				}
 
 	const isSubmitting = fetcher.state === 'submitting'
@@ -178,7 +178,9 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 				<SelectField
 					label={t('form.transaction.transactionTypeLabel')}
 					field={fields.type}
-					placeholder={t('form.transaction.transactionTypePlaceholder')}
+					placeholder={t(
+						'form.transaction.transactionTypePlaceholder',
+					)}
 					items={transactionTypeOptions}
 				/>
 
@@ -187,14 +189,18 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 						<ComboboxField
 							label={t('form.transaction.accountLabel')}
 							field={fields.accountId}
-							buttonPlaceholder={t('form.transaction.accountPlaceholder')}
+							buttonPlaceholder={t(
+								'form.transaction.accountPlaceholder',
+							)}
 							options={accountOptions}
 						/>
 
 						<ComboboxField
 							label={t('form.transaction.currencyLabel')}
 							field={fields.currencyId}
-							buttonPlaceholder={t('form.transaction.currencyPlaceholder')}
+							buttonPlaceholder={t(
+								'form.transaction.currencyPlaceholder',
+							)}
 							options={currencyOptions}
 						/>
 					</div>
@@ -229,7 +235,9 @@ export function TransactionForm({ selectData, balances, ...props }: Props) {
 				<ComboboxField
 					label={t('form.transaction.categoryLabel')}
 					field={fields.category}
-					buttonPlaceholder={t('form.transaction.categoryPlaceholder')}
+					buttonPlaceholder={t(
+						'form.transaction.categoryPlaceholder',
+					)}
 					options={categoryOptions}
 				/>
 

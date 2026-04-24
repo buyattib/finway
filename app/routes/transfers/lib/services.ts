@@ -37,6 +37,9 @@ export async function createTransferAction({
 }) {
 	const t = getServerT(context, 'transfers')
 
+	const url = new URL(request.url)
+	const search = url.search
+
 	const submission = parseWithZod(formData, {
 		schema: createTransferFormSchema(t),
 	})
@@ -53,9 +56,7 @@ export async function createTransferAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						fromAccountId: [
-							t('form.create.fromAccountNotFound'),
-						],
+						fromAccountId: [t('form.create.fromAccountNotFound')],
 					},
 				}),
 			},
@@ -69,9 +70,7 @@ export async function createTransferAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						toAccountId: [
-							t('form.create.toAccountNotFound'),
-						],
+						toAccountId: [t('form.create.toAccountNotFound')],
 					},
 				}),
 			},
@@ -85,9 +84,7 @@ export async function createTransferAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						currencyId: [
-							t('form.create.currencyNotFound'),
-						],
+						currencyId: [t('form.create.currencyNotFound')],
 					},
 				}),
 			},
@@ -106,9 +103,7 @@ export async function createTransferAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						amount: [
-							t('form.create.insufficientBalance'),
-						],
+						amount: [t('form.create.insufficientBalance')],
 					},
 				}),
 			},
@@ -127,7 +122,7 @@ export async function createTransferAction({
 		},
 	})
 
-	return await redirectWithToast(`/app/movements?tab=transfers`, request, {
+	return await redirectWithToast(`/app/movements${search}`, request, {
 		type: 'success',
 		title: t('form.create.successToast'),
 	})
@@ -147,6 +142,9 @@ export async function editTransferAction({
 	formData: FormData
 }) {
 	const t = getServerT(context, 'transfers')
+
+	const url = new URL(request.url)
+	const search = url.search
 
 	const submission = parseWithZod(formData, {
 		schema: createTransferFormSchema(t),
@@ -189,9 +187,7 @@ export async function editTransferAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						fromAccountId: [
-							t('form.edit.fromAccountNotFound'),
-						],
+						fromAccountId: [t('form.edit.fromAccountNotFound')],
 					},
 				}),
 			},
@@ -199,7 +195,10 @@ export async function editTransferAction({
 		)
 	}
 
-	const toAccount = await getAccountById({ db, accountId: values.toAccountId })
+	const toAccount = await getAccountById({
+		db,
+		accountId: values.toAccountId,
+	})
 	if (!toAccount || toAccount.ownerId !== user.id) {
 		return data(
 			{
@@ -213,7 +212,10 @@ export async function editTransferAction({
 		)
 	}
 
-	const currency = await getCurrencyById({ db, currencyId: values.currencyId })
+	const currency = await getCurrencyById({
+		db,
+		currencyId: values.currencyId,
+	})
 	if (!currency) {
 		return data(
 			{
@@ -261,7 +263,7 @@ export async function editTransferAction({
 		data: { ...values, amount },
 	})
 
-	return await redirectWithToast(`/app/movements?tab=transfers`, request, {
+	return await redirectWithToast(`/app/movements${search}`, request, {
 		type: 'success',
 		title: t('form.edit.successToast'),
 	})
