@@ -255,7 +255,7 @@ export const creditCardTransactionInstallment = sqliteTable(
 		amount: integer().notNull(),
 
 		statementId: text().notNull(),
-		creditCardTransactionId: text().notNull(),
+		creditCardTransactionId: text(),
 		transactionId: text().notNull(),
 	},
 	table => [
