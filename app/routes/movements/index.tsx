@@ -46,6 +46,13 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const searchParams = url.searchParams
 
+	function checkPagination(length: number, page: number) {
+		if (length !== 0 || page === 1) return
+
+		searchParams.set('page', '1')
+		throw redirect(`/app/movements?${searchParams.toString()}`)
+	}
+
 	const tabParam = searchParams.get('tab')
 	const tab = MOVEMENT_TABS.find(t => t === tabParam)
 	if (!tab) {
@@ -66,6 +73,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			ownerId: user.id,
 			searchParams,
 		})
+		checkPagination(data.transactions.length, data.pagination.page)
 		return { tab, meta, formData, transactions: data }
 	}
 
@@ -75,6 +83,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			ownerId: user.id,
 			searchParams,
 		})
+		checkPagination(data.transfers.length, data.pagination.page)
 		return { tab, meta, formData, transfers: data }
 	}
 
@@ -84,6 +93,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			ownerId: user.id,
 			searchParams,
 		})
+		checkPagination(data.exchanges.length, data.pagination.page)
 		return { tab, meta, formData, exchanges: data }
 	}
 

@@ -180,7 +180,10 @@ export function TransactionsTab({
 															</span>
 														</Link>
 													</Button>
-													<DeleteButton movement={MOVEMENT_TAB_TRANSACTIONS}
+													<DeleteButton
+														movement={
+															MOVEMENT_TAB_TRANSACTIONS
+														}
 														movementId={id}
 														ariaLabel={t(
 															'index.transactions.deleteAriaLabel',
@@ -220,7 +223,10 @@ export function TransactionsTab({
 											)}
 										</Text>
 										<div className='flex items-center gap-2'>
-											<DeleteButton movement={MOVEMENT_TAB_TRANSACTIONS}
+											<DeleteButton
+												movement={
+													MOVEMENT_TAB_TRANSACTIONS
+												}
 												movementId={id}
 												ariaLabel={t(
 													'index.transactions.deleteAriaLabel',

@@ -9,6 +9,7 @@ import type {
 } from '~/routes/transactions/lib/types'
 import { getTransfers } from '~/routes/transfers/lib/queries'
 import { getExchanges } from '~/routes/exchanges/lib/queries'
+import { redirect } from 'react-router'
 
 export async function getMovementFormData({
 	db,
