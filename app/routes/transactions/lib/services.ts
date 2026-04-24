@@ -13,10 +13,7 @@ import type { DB, UserAuth } from '~/lib/types'
 
 import { getAccountById } from '~/routes/accounts/lib/queries'
 
-import {
-	TRANSACTION_TYPE_EXPENSE,
-	TRANSACTION_TYPE_INCOME,
-} from './constants'
+import { TRANSACTION_TYPE_EXPENSE, TRANSACTION_TYPE_INCOME } from './constants'
 import { createTransactionFormSchema } from './schemas'
 import {
 	createTransaction,
@@ -63,9 +60,7 @@ export async function createTransactionAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						accountId: [
-							t('form.create.accountNotFound'),
-						],
+						accountId: [t('form.create.accountNotFound')],
 					},
 				}),
 			},
@@ -73,15 +68,16 @@ export async function createTransactionAction({
 		)
 	}
 
-	const currency = await getCurrencyById({ db, currencyId: values.currencyId })
+	const currency = await getCurrencyById({
+		db,
+		currencyId: values.currencyId,
+	})
 	if (!currency) {
 		return data(
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						currencyId: [
-							t('form.create.currencyNotFound'),
-						],
+						currencyId: [t('form.create.currencyNotFound')],
 					},
 				}),
 			},
@@ -103,9 +99,7 @@ export async function createTransactionAction({
 			{
 				submission: submission.reply({
 					fieldErrors: {
-						amount: [
-							t('form.create.insufficientBalance'),
-						],
+						amount: [t('form.create.insufficientBalance')],
 					},
 				}),
 			},
@@ -181,7 +175,10 @@ export async function editTransactionAction({
 		)
 	}
 
-	const currency = await getCurrencyById({ db, currencyId: values.currencyId })
+	const currency = await getCurrencyById({
+		db,
+		currencyId: values.currencyId,
+	})
 	if (!currency) {
 		return data(
 			{

@@ -1,9 +1,8 @@
-import { Form, Link, useNavigation, useSearchParams } from 'react-router'
+import { Link, useNavigation, useSearchParams } from 'react-router'
 import {
 	ArrowRightIcon,
 	ArrowRightLeftIcon,
 	SquarePenIcon,
-	TrashIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -28,6 +27,7 @@ import { EmptyState } from '~/components/empty-state'
 import { TablePagination } from '~/components/table-pagination'
 
 import { MOVEMENT_TAB_TRANSFERS } from '../../lib/constants'
+import { DeleteButton } from '../delete-button'
 import { TransfersFilters } from './filters'
 
 export type TransfersTabProps = Extract<
@@ -46,14 +46,6 @@ export function TransfersTab({
 	const navigation = useNavigation()
 	const [searchParams] = useSearchParams()
 	const { t, i18n } = useTranslation('movements')
-
-	const isDeleting =
-		navigation.formMethod === 'POST' &&
-		navigation.state === 'submitting' &&
-		navigation.formData?.get('intent') === 'delete' &&
-		navigation.formAction?.startsWith(`/app/movements/transfers/`)
-
-	const deletingId = navigation.formAction?.split('/').pop()
 
 	const isLoading =
 		navigation.state === 'loading' &&
@@ -187,39 +179,12 @@ export function TransfersTab({
 																</span>
 															</Link>
 														</Button>
-														<Form
-															method='post'
-															action={`/app/movements/transfers/${id}`}
-														>
-															<Button
-																size='icon-xs'
-																variant='destructive-ghost'
-																type='submit'
-																name='intent'
-																value='delete'
-																disabled={
-																	isDeleting
-																}
-															>
-																{isDeleting &&
-																deletingId ===
-																	id ? (
-																	<Spinner
-																		aria-hidden
-																		size='sm'
-																	/>
-																) : (
-																	<TrashIcon
-																		aria-hidden
-																	/>
-																)}
-																<span className='sr-only'>
-																	{t(
-																		'index.deleteAriaLabel',
-																	)}
-																</span>
-															</Button>
-														</Form>
+														<DeleteButton movement={MOVEMENT_TAB_TRANSFERS}
+															movementId={id}
+															ariaLabel={t(
+																'index.transfers.deleteAriaLabel',
+															)}
+														/>
 													</div>
 												</TableCell>
 											</TableRow>
@@ -275,36 +240,12 @@ export function TransfersTab({
 													</span>
 												</Link>
 											</Button>
-											<Form
-												method='post'
-												action={`/app/movements/transfers/${id}`}
-											>
-												<Button
-													size='icon-xs'
-													variant='destructive-ghost'
-													type='submit'
-													name='intent'
-													value='delete'
-													disabled={isDeleting}
-												>
-													{isDeleting &&
-													deletingId === id ? (
-														<Spinner
-															aria-hidden
-															size='sm'
-														/>
-													) : (
-														<TrashIcon
-															aria-hidden
-														/>
-													)}
-													<span className='sr-only'>
-														{t(
-															'index.deleteAriaLabel',
-														)}
-													</span>
-												</Button>
-											</Form>
+											<DeleteButton movement={MOVEMENT_TAB_TRANSFERS}
+												movementId={id}
+												ariaLabel={t(
+													'index.transfers.deleteAriaLabel',
+												)}
+											/>
 										</div>
 									</div>
 									<div className='flex items-center justify-between'>
