@@ -9,7 +9,7 @@ import { getSelectData } from '~/lib/queries'
 import {
 	TRANSACTION_CATEGORIES,
 	TRANSACTION_TYPE_EXPENSE,
-} from '~/routes/transactions/lib/constants'
+} from '~/features/transactions/constants'
 
 import { creditCardContext } from '../lib/context'
 import { creditCardTransactionAction } from '../lib/services'

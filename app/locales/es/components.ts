@@ -19,6 +19,7 @@ export default {
 		creditCards: 'Tarjetas de Crédito',
 		transfers: 'Transferencias',
 		exchanges: 'Intercambios',
+		movements: 'Movimientos',
 		logoutButton: 'Cerrar sesión',
 	},
 	creditCard: {

@@ -32,8 +32,6 @@ export function createAccountFormSchema(t: TFunction<'accounts'>) {
 		.and(ActionSchema)
 }
 
-export type AccountFormSchema = ReturnType<typeof createAccountFormSchema>
-
 export const DeleteAccountFormSchema = z.object({
 	accountId: z.string(),
 	intent: z.literal('delete'),

@@ -28,23 +28,16 @@ export default [
 			route('create', 'routes/accounts/create.tsx'),
 		]),
 
-		// transactions
-		...prefix('transactions', [
-			index('routes/transactions/index.tsx'),
-			route('create', 'routes/transactions/create.tsx'),
-			route(':transactionId/edit', 'routes/transactions/edit.tsx'),
-		]),
-
-		// transfers
-		...prefix('transfers', [
-			index('routes/transfers/index.tsx'),
-			route('create', 'routes/transfers/create.tsx'),
-		]),
-
-		// exchanges
-		...prefix('exchanges', [
-			index('routes/exchanges/index.tsx'),
-			route('create', 'routes/exchanges/create.tsx'),
+		// movements (wraps transactions/transfers/exchanges under tabs)
+		...prefix('movements', [
+			route('', 'routes/movements/index.tsx', [
+				route(':movement/create', 'routes/movements/create.tsx'),
+				route(
+					':movement/:movementId/edit',
+					'routes/movements/edit.tsx',
+				),
+			]),
+			route(':movement/:movementId', 'routes/movements/movement.tsx'),
 		]),
 
 		// credit cards

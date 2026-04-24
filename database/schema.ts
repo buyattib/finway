@@ -13,7 +13,7 @@ import { ACCOUNT_TYPES } from '~/routes/accounts/lib/constants'
 import {
 	ALL_TRANSACTION_CATEGORIES,
 	TRANSACTION_TYPES,
-} from '~/routes/transactions/lib/constants'
+} from '~/features/transactions/constants'
 
 const base = {
 	createdAt: text()

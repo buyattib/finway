@@ -13,7 +13,7 @@ import { TransactionType } from '~/components/transaction-type'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
+} from '~/features/transactions/constants'
 
 export function SummaryCards({
 	summary,

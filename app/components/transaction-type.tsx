@@ -11,8 +11,8 @@ import { cn } from '~/lib/utils'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
-import type { TTransactionType } from '~/routes/transactions/lib/types'
+} from '~/features/transactions/constants'
+import type { TTransactionType } from '~/features/transactions/types'
 
 const iconVariants = cva('', {
 	variants: {

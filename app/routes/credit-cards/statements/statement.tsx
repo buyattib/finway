@@ -23,7 +23,7 @@ import { TablePagination } from '~/components/table-pagination'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
+} from '~/features/transactions/constants'
 
 import {
 	getStatementById,

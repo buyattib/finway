@@ -4,9 +4,10 @@ import auth from '~/routes/auth/lib/locales/en'
 import emails from './emails'
 import accounts from '~/routes/accounts/lib/locales/en'
 import dashboard from '~/routes/dashboard/lib/locales/en'
-import exchanges from '~/routes/exchanges/lib/locales/en'
-import transfers from '~/routes/transfers/lib/locales/en'
-import transactions from '~/routes/transactions/lib/locales/en'
+import exchanges from '~/features/exchanges/locales/en'
+import transfers from '~/features/transfers/locales/en'
+import transactions from '~/features/transactions/locales/en'
+import movements from '~/routes/movements/lib/locales/en'
 import creditCards from '~/routes/credit-cards/lib/locales/en'
 import components from './components'
 import constants from './constants'
@@ -21,5 +22,6 @@ export default {
 	exchanges,
 	transfers,
 	transactions,
+	movements,
 	'credit-cards': creditCards,
 } satisfies ResourceLanguage

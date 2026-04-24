@@ -1,14 +1,9 @@
 import { and, eq, gte, lte, sql, desc } from 'drizzle-orm'
 
-import {
-	transaction as transactionTable,
-	account as accountTable,
-	currency as currencyTable,
-} from '~/database/schema'
-
+import * as schema from '~/database/schema'
 import type { DB } from '~/lib/types'
 
-import type { TTransactionType } from '~/routes/transactions/lib/types'
+import type { TTransactionType } from '~/features/transactions/types'
 
 import type { CurrencyResponse } from './types'
 
@@ -32,31 +27,31 @@ export async function getMonthTransactions({
 
 	return db
 		.select({
-			currencyId: transactionTable.currencyId,
-			currency: currencyTable.code,
-			amount: sql<string>`CAST(SUM(${transactionTable.amount}) / 100.0 AS TEXT)`.as(
+			currencyId: schema.transaction.currencyId,
+			currency: schema.currency.code,
+			amount: sql<string>`CAST(SUM(${schema.transaction.amount}) / 100.0 AS TEXT)`.as(
 				'amount',
 			),
 		})
-		.from(transactionTable)
+		.from(schema.transaction)
 		.innerJoin(
-			accountTable,
+			schema.account,
 			and(
-				eq(accountTable.id, transactionTable.accountId),
-				eq(accountTable.ownerId, ownerId),
+				eq(schema.account.id, schema.transaction.accountId),
+				eq(schema.account.ownerId, ownerId),
 			),
 		)
 		.innerJoin(
-			currencyTable,
-			eq(currencyTable.id, transactionTable.currencyId),
+			schema.currency,
+			eq(schema.currency.id, schema.transaction.currencyId),
 		)
 		.where(
 			and(
-				eq(transactionTable.type, transactionType),
-				gte(transactionTable.date, monthStart.toISOString()),
-				lte(transactionTable.date, monthEnd.toISOString()),
+				eq(schema.transaction.type, transactionType),
+				gte(schema.transaction.date, monthStart.toISOString()),
+				lte(schema.transaction.date, monthEnd.toISOString()),
 			),
 		)
-		.groupBy(transactionTable.currencyId)
+		.groupBy(schema.transaction.currencyId)
 		.orderBy(desc(sql`amount`))
 }

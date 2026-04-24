@@ -1,20 +1,13 @@
 import { and, eq, sql, desc } from 'drizzle-orm'
 import { unionAll } from 'drizzle-orm/sqlite-core'
 
-import {
-	user as userTable,
-	currency as currencyTable,
-	account as accountTable,
-	transfer as transferTable,
-	exchange as exchangeTable,
-	transaction as transactionTable,
-} from '~/database/schema'
+import * as schema from '~/database/schema'
 import type { Beautify } from '~/types/utils'
 
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
+} from '~/features/transactions/constants'
 import type { DB, TCurrency } from './types'
 
 type CurrencyBalance = {
@@ -59,114 +52,116 @@ export async function getBalances({
 }: Args) {
 	const transactionBalances = db
 		.select({
-			accountId: sql`${accountTable.id}`.as('accountId'),
-			currencyId: sql`${currencyTable.id}`.as('currencyId'),
-			currency: currencyTable.code,
+			accountId: sql`${schema.account.id}`.as('accountId'),
+			currencyId: sql`${schema.currency.id}`.as('currencyId'),
+			currency: schema.currency.code,
 			balance: sql<number>`SUM(
 				CASE
-					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_INCOME} THEN ${transactionTable.amount}
-					WHEN ${transactionTable.type} = ${TRANSACTION_TYPE_EXPENSE} THEN -${transactionTable.amount}
+					WHEN ${schema.transaction.type} = ${TRANSACTION_TYPE_INCOME} THEN ${schema.transaction.amount}
+					WHEN ${schema.transaction.type} = ${TRANSACTION_TYPE_EXPENSE} THEN -${schema.transaction.amount}
 					ELSE 0
 				END
 			)`.as('balance'),
 		})
-		.from(accountTable)
-		.crossJoin(currencyTable)
+		.from(schema.account)
+		.crossJoin(schema.currency)
 		.leftJoin(
-			transactionTable,
+			schema.transaction,
 			and(
-				eq(accountTable.id, transactionTable.accountId),
-				eq(currencyTable.id, transactionTable.currencyId),
+				eq(schema.account.id, schema.transaction.accountId),
+				eq(schema.currency.id, schema.transaction.currencyId),
 			),
 		)
-		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(accountTable.id, currencyTable.id)
+		.where(eq(schema.account.ownerId, ownerId))
+		.groupBy(schema.account.id, schema.currency.id)
 
 	const outgoingTransferBalances = db
 		.select({
-			accountId: sql`${accountTable.id}`.as('accountId'),
-			currencyId: sql`${currencyTable.id}`.as('currencyId'),
-			currency: currencyTable.code,
-			balance: sql<number>`COALESCE(-SUM(${transferTable.amount}), 0)`.as(
-				'balance',
-			),
+			accountId: sql`${schema.account.id}`.as('accountId'),
+			currencyId: sql`${schema.currency.id}`.as('currencyId'),
+			currency: schema.currency.code,
+			balance:
+				sql<number>`COALESCE(-SUM(${schema.transfer.amount}), 0)`.as(
+					'balance',
+				),
 		})
-		.from(accountTable)
-		.crossJoin(currencyTable)
+		.from(schema.account)
+		.crossJoin(schema.currency)
 		.leftJoin(
-			transferTable,
+			schema.transfer,
 			and(
-				eq(accountTable.id, transferTable.fromAccountId),
-				eq(currencyTable.id, transferTable.currencyId),
+				eq(schema.account.id, schema.transfer.fromAccountId),
+				eq(schema.currency.id, schema.transfer.currencyId),
 			),
 		)
-		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(accountTable.id, currencyTable.id)
+		.where(eq(schema.account.ownerId, ownerId))
+		.groupBy(schema.account.id, schema.currency.id)
 
 	const incomingTransferBalances = db
 		.select({
-			accountId: sql`${accountTable.id}`.as('accountId'),
-			currencyId: sql`${currencyTable.id}`.as('currencyId'),
-			currency: currencyTable.code,
-			balance: sql<number>`COALESCE(SUM(${transferTable.amount}), 0)`.as(
-				'balance',
-			),
+			accountId: sql`${schema.account.id}`.as('accountId'),
+			currencyId: sql`${schema.currency.id}`.as('currencyId'),
+			currency: schema.currency.code,
+			balance:
+				sql<number>`COALESCE(SUM(${schema.transfer.amount}), 0)`.as(
+					'balance',
+				),
 		})
-		.from(accountTable)
-		.crossJoin(currencyTable)
+		.from(schema.account)
+		.crossJoin(schema.currency)
 		.leftJoin(
-			transferTable,
+			schema.transfer,
 			and(
-				eq(accountTable.id, transferTable.toAccountId),
-				eq(currencyTable.id, transferTable.currencyId),
+				eq(schema.account.id, schema.transfer.toAccountId),
+				eq(schema.currency.id, schema.transfer.currencyId),
 			),
 		)
-		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(accountTable.id, currencyTable.id)
+		.where(eq(schema.account.ownerId, ownerId))
+		.groupBy(schema.account.id, schema.currency.id)
 
 	const outgoingExchangeBalances = db
 		.select({
-			accountId: sql`${accountTable.id}`.as('accountId'),
-			currencyId: sql`${currencyTable.id}`.as('currencyId'),
-			currency: currencyTable.code,
+			accountId: sql`${schema.account.id}`.as('accountId'),
+			currencyId: sql`${schema.currency.id}`.as('currencyId'),
+			currency: schema.currency.code,
 			balance:
-				sql<number>`COALESCE(-SUM(${exchangeTable.fromAmount}), 0)`.as(
+				sql<number>`COALESCE(-SUM(${schema.exchange.fromAmount}), 0)`.as(
 					'balance',
 				),
 		})
-		.from(accountTable)
-		.crossJoin(currencyTable)
+		.from(schema.account)
+		.crossJoin(schema.currency)
 		.leftJoin(
-			exchangeTable,
+			schema.exchange,
 			and(
-				eq(accountTable.id, exchangeTable.accountId),
-				eq(currencyTable.id, exchangeTable.fromCurrencyId),
+				eq(schema.account.id, schema.exchange.accountId),
+				eq(schema.currency.id, schema.exchange.fromCurrencyId),
 			),
 		)
-		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(accountTable.id, currencyTable.id)
+		.where(eq(schema.account.ownerId, ownerId))
+		.groupBy(schema.account.id, schema.currency.id)
 
 	const incomingExchangeBalances = db
 		.select({
-			accountId: sql`${accountTable.id}`.as('accountId'),
-			currencyId: sql`${currencyTable.id}`.as('currencyId'),
-			currency: currencyTable.code,
+			accountId: sql`${schema.account.id}`.as('accountId'),
+			currencyId: sql`${schema.currency.id}`.as('currencyId'),
+			currency: schema.currency.code,
 			balance:
-				sql<number>`COALESCE(SUM(${exchangeTable.toAmount}), 0)`.as(
+				sql<number>`COALESCE(SUM(${schema.exchange.toAmount}), 0)`.as(
 					'balance',
 				),
 		})
-		.from(accountTable)
-		.crossJoin(currencyTable)
+		.from(schema.account)
+		.crossJoin(schema.currency)
 		.leftJoin(
-			exchangeTable,
+			schema.exchange,
 			and(
-				eq(accountTable.id, exchangeTable.accountId),
-				eq(currencyTable.id, exchangeTable.toCurrencyId),
+				eq(schema.account.id, schema.exchange.accountId),
+				eq(schema.currency.id, schema.exchange.toCurrencyId),
 			),
 		)
-		.where(eq(accountTable.ownerId, ownerId))
-		.groupBy(accountTable.id, currencyTable.id)
+		.where(eq(schema.account.ownerId, ownerId))
+		.groupBy(schema.account.id, schema.currency.id)
 
 	const allBalances = unionAll(
 		transactionBalances,
@@ -262,9 +257,9 @@ export async function getUserByEmail({ db, email }: { db: DB; email: string }) {
 
 export async function createUser({ db, email }: { db: DB; email: string }) {
 	const [user] = await db
-		.insert(userTable)
+		.insert(schema.user)
 		.values({ email })
-		.returning({ id: userTable.id, email: userTable.email })
+		.returning({ id: schema.user.id, email: schema.user.email })
 
 	return user
 }
