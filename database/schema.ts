@@ -256,6 +256,7 @@ export const creditCardTransactionInstallment = sqliteTable(
 
 		statementId: text().notNull(),
 		creditCardTransactionId: text().notNull(),
+		transactionId: text().notNull(),
 	},
 	table => [
 		foreignKey({
@@ -268,11 +269,19 @@ export const creditCardTransactionInstallment = sqliteTable(
 			columns: [table.statementId],
 			foreignColumns: [creditCardStatement.id],
 		}).onDelete('cascade'),
+		foreignKey({
+			name: 'credit_card_transaction_installments_transactions_fk',
+			columns: [table.transactionId],
+			foreignColumns: [transaction.id],
+		}).onDelete('cascade'),
 		index(
 			'credit_card_transaction_installments_creditCardTransactionId_idx',
 		).on(table.creditCardTransactionId),
 		index('credit_card_transaction_installments_statementId_idx').on(
 			table.statementId,
+		),
+		index('credit_card_transaction_installments_transactionId_idx').on(
+			table.transactionId,
 		),
 	],
 )
@@ -363,6 +372,10 @@ export const creditCardTransactionInstallmentRelations = relations(
 		statement: one(creditCardStatement, {
 			fields: [creditCardTransactionInstallment.statementId],
 			references: [creditCardStatement.id],
+		}),
+		transaction: one(transaction, {
+			fields: [creditCardTransactionInstallment.transactionId],
+			references: [transaction.id],
 		}),
 	}),
 )
