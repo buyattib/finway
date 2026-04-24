@@ -4,9 +4,8 @@ import type { DB } from '~/lib/types'
 
 import { getTransactions } from '~/features/transactions/queries'
 import type { TCategory, TTransactionType } from '~/features/transactions/types'
-import { getTransfers } from '~/routes/transfers/lib/queries'
-import { getExchanges } from '~/routes/exchanges/lib/queries'
-import { redirect } from 'react-router'
+import { getTransfers } from '~/features/transfers/queries'
+import { getExchanges } from '~/features/exchanges/queries'
 
 export async function getMovementFormData({
 	db,

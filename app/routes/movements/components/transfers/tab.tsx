@@ -1,4 +1,4 @@
-import { Link, useNavigation, useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { ArrowRightIcon, ArrowRightLeftIcon, SquarePenIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -16,7 +16,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
-import { Spinner } from '~/components/ui/spinner'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { EmptyState } from '~/components/empty-state'
@@ -39,14 +38,8 @@ export function TransfersTab({
 	filters,
 	formData,
 }: TransfersTabProps) {
-	const navigation = useNavigation()
 	const [searchParams] = useSearchParams()
 	const { t, i18n } = useTranslation('movements')
-
-	const isLoading =
-		navigation.state === 'loading' &&
-		navigation.location &&
-		navigation.location.search
 
 	const hasFilters = Object.values(filters).some(Boolean)
 
@@ -56,10 +49,6 @@ export function TransfersTab({
 				filters={filters}
 				selectData={formData.selectData}
 			/>
-
-			<div className='h-6'>
-				{isLoading && <Spinner size='md' className='mx-auto' />}
-			</div>
 
 			{transfers.length === 0 && (
 				<EmptyState

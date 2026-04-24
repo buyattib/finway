@@ -17,6 +17,7 @@ export function DeleteButton({
 }) {
 	const fetcher = useFetcher()
 	const isDeleting = fetcher.state !== 'idle'
+
 	return (
 		<fetcher.Form
 			method='post'

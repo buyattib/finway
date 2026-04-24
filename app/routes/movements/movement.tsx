@@ -5,8 +5,8 @@ import type { Route } from './+types/movement'
 import { dbContext, userContext } from '~/lib/context'
 
 import { deleteTransactionAction } from '~/features/transactions/services'
-import { deleteTransferAction } from '~/routes/transfers/lib/services'
-import { deleteExchangeAction } from '~/routes/exchanges/lib/services'
+import { deleteTransferAction } from '~/features/transfers/services'
+import { deleteExchangeAction } from '~/features/exchanges/services'
 
 import {
 	MOVEMENT_TAB_TRANSACTIONS,

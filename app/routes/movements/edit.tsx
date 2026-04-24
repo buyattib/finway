@@ -5,10 +5,10 @@ import { ACTION_EDITION } from '~/lib/constants'
 
 import { getTransactionById } from '~/features/transactions/queries'
 import { editTransactionAction } from '~/features/transactions/services'
-import { getTransferById } from '~/routes/transfers/lib/queries'
-import { editTransferAction } from '~/routes/transfers/lib/services'
-import { getExchangeById } from '~/routes/exchanges/lib/queries'
-import { editExchangeAction } from '~/routes/exchanges/lib/services'
+import { getTransferById } from '~/features/transfers/queries'
+import { editTransferAction } from '~/features/transfers/services'
+import { getExchangeById } from '~/features/exchanges/queries'
+import { editExchangeAction } from '~/features/exchanges/services'
 
 import {
 	MOVEMENT_TAB_TRANSACTIONS,

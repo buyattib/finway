@@ -20,7 +20,7 @@ import {
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { createExchangeFormSchema } from '~/routes/exchanges/lib/schemas'
+import { createExchangeFormSchema } from '~/features/exchanges/schemas'
 
 type ExchangeEditData = Extract<
 	EditRoute.ComponentProps['loaderData'],
