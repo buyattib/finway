@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import type { Route as EditRoute } from '../+types/edit'
 
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
-import { ACCOUNT_TYPES } from '../lib/constants'
+import { USER_SELECTABLE_ACCOUNT_TYPES } from '../lib/constants'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -124,7 +124,7 @@ export function AccountForm({
 						label={t('form.accountTypeLabel')}
 						field={fields.accountType}
 						placeholder={t('form.accountTypePlaceholder')}
-						items={ACCOUNT_TYPES.map(i => ({
+						items={USER_SELECTABLE_ACCOUNT_TYPES.map(i => ({
 							icon: <AccountTypeIcon size='sm' accountType={i} />,
 							value: i,
 							label: t(`constants:accountType.${i}`),
