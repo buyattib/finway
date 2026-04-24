@@ -183,15 +183,15 @@ export const creditCard = sqliteTable(
 		expiryYear: text().notNull(),
 		institution: text().notNull(),
 
-		ownerId: text().notNull(),
+		accountId: text().notNull(),
 	},
 	table => [
 		foreignKey({
-			name: 'credit_cards_users_fk',
-			columns: [table.ownerId],
-			foreignColumns: [user.id],
+			name: 'credit_cards_accounts_fk',
+			columns: [table.accountId],
+			foreignColumns: [account.id],
 		}).onDelete('cascade'),
-		index('credit_cards_ownerId_idx').on(table.ownerId),
+		index('credit_cards_accountId_idx').on(table.accountId),
 	],
 )
 
@@ -320,7 +320,11 @@ export const exchangeRelations = relations(exchange, ({ one }) => ({
 	}),
 }))
 
-export const creditCardRelations = relations(creditCard, ({ many }) => ({
+export const creditCardRelations = relations(creditCard, ({ one, many }) => ({
+	account: one(account, {
+		fields: [creditCard.accountId],
+		references: [account.id],
+	}),
 	statements: many(creditCardStatement),
 }))
 

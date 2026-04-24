@@ -17,6 +17,7 @@ import type { DB } from '~/lib/types'
 import { addMonth, initializeDate, subtractMonth } from '~/lib/utils'
 
 import type { TCategory, TTransactionType } from '~/features/transactions/types'
+import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
 // cc
 
@@ -42,9 +43,18 @@ export async function createCreditCard({
 	})
 
 	return await db.transaction(async tx => {
+		const [{ id: accountId }] = await tx
+			.insert(schema.account)
+			.values({
+				name: '',
+				accountType: ACCOUNT_TYPE_CREDIT_CARD,
+				ownerId,
+			})
+			.returning({ id: schema.account.id })
+
 		const [{ id: creditCardId }] = await tx
 			.insert(schema.creditCard)
-			.values({ ...creditCardData, ownerId })
+			.values({ ...creditCardData, accountId })
 			.returning({ id: schema.creditCard.id })
 
 		await tx.insert(schema.creditCardStatement).values({
@@ -100,7 +110,12 @@ export async function getCreditCardById({
 			expiryMonth: true,
 			expiryYear: true,
 			institution: true,
-			ownerId: true,
+			accountId: true,
+		},
+		with: {
+			account: {
+				columns: { ownerId: true },
+			},
 		},
 	})
 }
@@ -122,7 +137,11 @@ export async function getCreditCards({
 			institution: schema.creditCard.institution,
 		})
 		.from(schema.creditCard)
-		.where(eq(schema.creditCard.ownerId, ownerId))
+		.innerJoin(
+			schema.account,
+			eq(schema.creditCard.accountId, schema.account.id),
+		)
+		.where(eq(schema.account.ownerId, ownerId))
 		.orderBy(desc(schema.creditCard.createdAt))
 }
 
@@ -142,7 +161,7 @@ export async function validateExistingCreditCard({
 	excludeId?: string
 }) {
 	const filters = [
-		eq(schema.creditCard.ownerId, ownerId),
+		eq(schema.account.ownerId, ownerId),
 		eq(schema.creditCard.last4, last4),
 		eq(schema.creditCard.brand, brand),
 		eq(schema.creditCard.institution, institution),
@@ -150,7 +169,15 @@ export async function validateExistingCreditCard({
 	if (excludeId) {
 		filters.push(ne(schema.creditCard.id, excludeId))
 	}
-	return db.$count(schema.creditCard, and(...filters))
+	const [row] = await db
+		.select({ c: count() })
+		.from(schema.creditCard)
+		.innerJoin(
+			schema.account,
+			eq(schema.creditCard.accountId, schema.account.id),
+		)
+		.where(and(...filters))
+	return row.c
 }
 
 // statements

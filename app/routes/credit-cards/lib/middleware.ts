@@ -21,7 +21,7 @@ export const creditCardMiddleware: MiddlewareFunction = async ({
 	}
 
 	const creditCard = await getCreditCardById({ db, creditCardId })
-	if (!creditCard || creditCard.ownerId !== user.id) {
+	if (!creditCard || creditCard.account.ownerId !== user.id) {
 		throw new Response(t('details.loader.notFoundError'), { status: 404 })
 	}
 
@@ -35,7 +35,7 @@ export const creditCardMiddleware: MiddlewareFunction = async ({
 		throw new Error('There is a problem with your credit card statements')
 	}
 
-	const { ownerId: _ownerId, ...creditCardData } = creditCard
+	const { account: _account, ...creditCardData } = creditCard
 
 	context.set(creditCardContext, {
 		creditCard: creditCardData,

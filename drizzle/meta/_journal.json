@@ -183,6 +183,27 @@
       "when": 1776537386391,
       "tag": "0025_update_income_category",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1777071511856,
+      "tag": "0026_add_cc_account_relation",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "6",
+      "when": 1777071561047,
+      "tag": "0027_create_cc_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "6",
+      "when": 1777072153537,
+      "tag": "0028_update_cc_account_fk",
+      "breakpoints": true
     }
   ]
 }
