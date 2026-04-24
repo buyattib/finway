@@ -33,8 +33,8 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import {
 	TRANSACTION_CATEGORIES,
 	TRANSACTION_TYPES,
-} from '~/routes/transactions/lib/constants'
-import type { TTransactionType } from '~/routes/transactions/lib/types'
+} from '~/features/transactions/constants'
+import type { TTransactionType } from '~/features/transactions/types'
 
 import { creditCardTransactionFormSchema } from '../../lib/schemas'
 import { CC_INSTALLMENT_OPTIONS } from '../../lib/constants'

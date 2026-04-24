@@ -3,7 +3,7 @@ import type { Route } from './+types/create'
 import { dbContext, userContext } from '~/lib/context'
 import { ACTION_CREATION } from '~/lib/constants'
 
-import { createTransactionAction } from '~/routes/transactions/lib/services'
+import { createTransactionAction } from '~/features/transactions/services'
 import { createTransferAction } from '~/routes/transfers/lib/services'
 import { createExchangeAction } from '~/routes/exchanges/lib/services'
 

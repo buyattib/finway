@@ -23,13 +23,13 @@ import { TransactionType } from '~/components/transaction-type'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 
-import { createTransactionFormSchema } from '~/routes/transactions/lib/schemas'
+import { createTransactionFormSchema } from '~/features/transactions/schemas'
 import {
 	TRANSACTION_TYPES,
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_CATEGORIES,
-} from '~/routes/transactions/lib/constants'
-import type { TTransactionType } from '~/routes/transactions/lib/types'
+} from '~/features/transactions/constants'
+import type { TTransactionType } from '~/features/transactions/types'
 
 type TransactionEditData = Extract<
 	EditRoute.ComponentProps['loaderData'],

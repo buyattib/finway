@@ -7,7 +7,7 @@ import type { Beautify } from '~/types/utils'
 import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
-} from '~/routes/transactions/lib/constants'
+} from '~/features/transactions/constants'
 import type { DB, TCurrency } from './types'
 
 type CurrencyBalance = {
@@ -80,9 +80,10 @@ export async function getBalances({
 			accountId: sql`${schema.account.id}`.as('accountId'),
 			currencyId: sql`${schema.currency.id}`.as('currencyId'),
 			currency: schema.currency.code,
-			balance: sql<number>`COALESCE(-SUM(${schema.transfer.amount}), 0)`.as(
-				'balance',
-			),
+			balance:
+				sql<number>`COALESCE(-SUM(${schema.transfer.amount}), 0)`.as(
+					'balance',
+				),
 		})
 		.from(schema.account)
 		.crossJoin(schema.currency)
@@ -101,9 +102,10 @@ export async function getBalances({
 			accountId: sql`${schema.account.id}`.as('accountId'),
 			currencyId: sql`${schema.currency.id}`.as('currencyId'),
 			currency: schema.currency.code,
-			balance: sql<number>`COALESCE(SUM(${schema.transfer.amount}), 0)`.as(
-				'balance',
-			),
+			balance:
+				sql<number>`COALESCE(SUM(${schema.transfer.amount}), 0)`.as(
+					'balance',
+				),
 		})
 		.from(schema.account)
 		.crossJoin(schema.currency)

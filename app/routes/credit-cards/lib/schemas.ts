@@ -6,7 +6,7 @@ import {
 	ALL_TRANSACTION_CATEGORIES,
 	TRANSACTION_CATEGORIES,
 	TRANSACTION_TYPES,
-} from '~/routes/transactions/lib/constants'
+} from '~/features/transactions/constants'
 
 import { CC_BRANDS } from './constants'
 

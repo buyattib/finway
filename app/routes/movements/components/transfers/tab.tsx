@@ -1,9 +1,5 @@
 import { Link, useNavigation, useSearchParams } from 'react-router'
-import {
-	ArrowRightIcon,
-	ArrowRightLeftIcon,
-	SquarePenIcon,
-} from 'lucide-react'
+import { ArrowRightIcon, ArrowRightLeftIcon, SquarePenIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from '../../+types'
@@ -174,12 +170,15 @@ export function TransfersTab({
 																/>
 																<span className='sr-only'>
 																	{t(
-																		'index.editAriaLabel',
+																		'index.transfers.editAriaLabel',
 																	)}
 																</span>
 															</Link>
 														</Button>
-														<DeleteButton movement={MOVEMENT_TAB_TRANSFERS}
+														<DeleteButton
+															movement={
+																MOVEMENT_TAB_TRANSFERS
+															}
 															movementId={id}
 															ariaLabel={t(
 																'index.transfers.deleteAriaLabel',
@@ -235,12 +234,15 @@ export function TransfersTab({
 													/>
 													<span className='sr-only'>
 														{t(
-															'index.editAriaLabel',
+															'index.transfers.editAriaLabel',
 														)}
 													</span>
 												</Link>
 											</Button>
-											<DeleteButton movement={MOVEMENT_TAB_TRANSFERS}
+											<DeleteButton
+												movement={
+													MOVEMENT_TAB_TRANSFERS
+												}
 												movementId={id}
 												ariaLabel={t(
 													'index.transfers.deleteAriaLabel',

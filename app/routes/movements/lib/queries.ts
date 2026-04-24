@@ -2,11 +2,8 @@ import { getSelectData, getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 import type { DB } from '~/lib/types'
 
-import { getTransactions } from '~/routes/transactions/lib/queries'
-import type {
-	TCategory,
-	TTransactionType,
-} from '~/routes/transactions/lib/types'
+import { getTransactions } from '~/features/transactions/queries'
+import type { TCategory, TTransactionType } from '~/features/transactions/types'
 import { getTransfers } from '~/routes/transfers/lib/queries'
 import { getExchanges } from '~/routes/exchanges/lib/queries'
 import { redirect } from 'react-router'

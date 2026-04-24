@@ -16,10 +16,7 @@ import * as schema from '~/database/schema'
 import type { DB } from '~/lib/types'
 import { addMonth, initializeDate, subtractMonth } from '~/lib/utils'
 
-import type {
-	TCategory,
-	TTransactionType,
-} from '~/routes/transactions/lib/types'
+import type { TCategory, TTransactionType } from '~/features/transactions/types'
 
 // cc
 
@@ -263,7 +260,8 @@ export async function updateStatementClosingDate({
 			.innerJoin(
 				schema.creditCardTransactionInstallment,
 				eq(
-					schema.creditCardTransactionInstallment.creditCardTransactionId,
+					schema.creditCardTransactionInstallment
+						.creditCardTransactionId,
 					schema.creditCardTransaction.id,
 				),
 			)
@@ -286,7 +284,8 @@ export async function updateStatementClosingDate({
 			.innerJoin(
 				schema.creditCardTransaction,
 				eq(
-					schema.creditCardTransactionInstallment.creditCardTransactionId,
+					schema.creditCardTransactionInstallment
+						.creditCardTransactionId,
 					schema.creditCardTransaction.id,
 				),
 			)
@@ -468,7 +467,10 @@ export async function getStatementTotalsByCurrency({
 			eq(schema.creditCardTransaction.currencyId, schema.currency.id),
 		)
 		.where(
-			eq(schema.creditCardTransactionInstallment.statementId, statementId),
+			eq(
+				schema.creditCardTransactionInstallment.statementId,
+				statementId,
+			),
 		)
 		.groupBy(schema.currency.code, schema.creditCardTransaction.type)
 }
@@ -666,7 +668,8 @@ export async function updateCreditCardTransaction({
 			.delete(schema.creditCardTransactionInstallment)
 			.where(
 				eq(
-					schema.creditCardTransactionInstallment.creditCardTransactionId,
+					schema.creditCardTransactionInstallment
+						.creditCardTransactionId,
 					creditCardTransactionId,
 				),
 			)
@@ -766,7 +769,9 @@ export async function getTransactionInstallments({
 				transactionId,
 			),
 		)
-		.orderBy(desc(schema.creditCardTransactionInstallment.installmentNumber))
+		.orderBy(
+			desc(schema.creditCardTransactionInstallment.installmentNumber),
+		)
 }
 
 export async function getStatementInstallments({
@@ -796,7 +801,8 @@ export async function getStatementInstallments({
 				schema.creditCardTransactionInstallment,
 				eq(
 					schema.creditCardTransaction.id,
-					schema.creditCardTransactionInstallment.creditCardTransactionId,
+					schema.creditCardTransactionInstallment
+						.creditCardTransactionId,
 				),
 			),
 		})
@@ -813,7 +819,10 @@ export async function getStatementInstallments({
 			eq(schema.creditCardTransaction.currencyId, schema.currency.id),
 		)
 		.where(
-			eq(schema.creditCardTransactionInstallment.statementId, statementId),
+			eq(
+				schema.creditCardTransactionInstallment.statementId,
+				statementId,
+			),
 		)
 		.orderBy(
 			desc(schema.creditCardTransaction.date),

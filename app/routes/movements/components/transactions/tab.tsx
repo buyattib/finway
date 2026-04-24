@@ -175,7 +175,7 @@ export function TransactionsTab({
 															/>
 															<span className='sr-only'>
 																{t(
-																	'index.deleteAriaLabel',
+																	'index.transactions.editAriaLabel',
 																)}
 															</span>
 														</Link>

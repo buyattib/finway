@@ -4,7 +4,7 @@ import type { Route } from './+types/movement'
 
 import { dbContext, userContext } from '~/lib/context'
 
-import { deleteTransactionAction } from '~/routes/transactions/lib/services'
+import { deleteTransactionAction } from '~/features/transactions/services'
 import { deleteTransferAction } from '~/routes/transfers/lib/services'
 import { deleteExchangeAction } from '~/routes/exchanges/lib/services'
 

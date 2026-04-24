@@ -89,7 +89,9 @@ export function ExchangesTab({
 									<TableHead>
 										{t('index.exchanges.table.from')}
 									</TableHead>
-									<TableHead>{t('index.exchanges.table.to')}</TableHead>
+									<TableHead>
+										{t('index.exchanges.table.to')}
+									</TableHead>
 									<TableHead>
 										{t('index.exchanges.table.rate')}
 									</TableHead>
@@ -193,12 +195,15 @@ export function ExchangesTab({
 																/>
 																<span className='sr-only'>
 																	{t(
-																		'index.editAriaLabel',
+																		'index.exchanges.editAriaLabel',
 																	)}
 																</span>
 															</Link>
 														</Button>
-														<DeleteButton movement={MOVEMENT_TAB_EXCHANGES}
+														<DeleteButton
+															movement={
+																MOVEMENT_TAB_EXCHANGES
+															}
 															movementId={id}
 															ariaLabel={t(
 																'index.exchanges.deleteAriaLabel',
@@ -254,12 +259,15 @@ export function ExchangesTab({
 													/>
 													<span className='sr-only'>
 														{t(
-															'index.editAriaLabel',
+															'index.exchanges.editAriaLabel',
 														)}
 													</span>
 												</Link>
 											</Button>
-											<DeleteButton movement={MOVEMENT_TAB_EXCHANGES}
+											<DeleteButton
+												movement={
+													MOVEMENT_TAB_EXCHANGES
+												}
 												movementId={id}
 												ariaLabel={t(
 													'index.exchanges.deleteAriaLabel',

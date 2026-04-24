@@ -14,7 +14,7 @@ import { Combobox } from '~/components/ui/combobox'
 import {
 	ALL_TRANSACTION_CATEGORIES,
 	TRANSACTION_TYPES,
-} from '~/routes/transactions/lib/constants'
+} from '~/features/transactions/constants'
 
 import { MOVEMENT_TAB_TRANSACTIONS } from '../../lib/constants'
 

@@ -3,7 +3,7 @@ import { and, eq, gte, lte, sql, desc } from 'drizzle-orm'
 import * as schema from '~/database/schema'
 import type { DB } from '~/lib/types'
 
-import type { TTransactionType } from '~/routes/transactions/lib/types'
+import type { TTransactionType } from '~/features/transactions/types'
 
 import type { CurrencyResponse } from './types'
 
