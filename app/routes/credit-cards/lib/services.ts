@@ -58,7 +58,7 @@ export async function creditCardTransactionAction({
 		})
 		if (
 			!existingTransaction ||
-			existingTransaction.creditCard.id !== creditCard.id
+			existingTransaction.accountId !== creditCard.accountId
 		) {
 			return data(
 				{
@@ -112,7 +112,7 @@ export async function creditCardTransactionAction({
 
 		await createCreditCardTransaction({
 			db,
-			creditCardId: creditCard.id,
+			accountId: creditCard.accountId,
 			transactionData: {
 				...values,
 				amount,
@@ -130,7 +130,7 @@ export async function creditCardTransactionAction({
 
 		await updateCreditCardTransaction({
 			db,
-			creditCardTransactionId: id,
+			transactionId: id,
 			transactionData: {
 				...values,
 				amount,

@@ -31,14 +31,14 @@ export async function loader({
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
 	const {
-		creditCard: { id, brand, last4 },
+		creditCard: { brand, last4, accountId },
 	} = context.get(creditCardContext)
 
 	const transaction = await getCreditCardTransactionById({
 		db,
 		transactionId,
 	})
-	if (!transaction || transaction.creditCard.id !== id) {
+	if (!transaction || transaction.accountId !== accountId) {
 		throw new Response(t('transaction.edit.loader.notFoundError'), {
 			status: 404,
 		})

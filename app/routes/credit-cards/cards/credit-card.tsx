@@ -74,11 +74,11 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const statements = _statements.map(s => {
 		const totalsByCurrency = s.installments.reduce<Map<TCurrency, number>>(
 			(acc, tx) => {
-				const code = tx.creditCardTransaction.currency.code
+				const code = tx.transaction.currency.code
 				const signed = {
 					[TRANSACTION_TYPE_EXPENSE]: tx.amount,
 					[TRANSACTION_TYPE_INCOME]: -tx.amount,
-				}[tx.creditCardTransaction.type]
+				}[tx.transaction.type]
 				acc.set(code, (acc.get(code) ?? 0) + signed)
 				return acc
 			},
