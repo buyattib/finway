@@ -5,7 +5,7 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { dbContext, userContext } from '~/lib/context'
 import { ACTION_EDITION } from '~/lib/constants'
 
-import { AccountForm } from './components/form'
+import { AccountFormDialog } from './components/account-form-dialog'
 import { getAccountById } from './lib/queries'
 import { accountAction } from './lib/services'
 
@@ -52,13 +52,11 @@ export async function action({ context, request }: Route.ActionArgs) {
 
 export default function EditAccount({
 	loaderData: { initialData },
-	actionData,
 }: Route.ComponentProps) {
 	return (
-		<AccountForm
+		<AccountFormDialog
 			action={ACTION_EDITION}
 			initialData={initialData}
-			lastResult={actionData?.submission}
 		/>
 	)
 }

@@ -22,10 +22,11 @@ export default [
 
 		// accounts
 		...prefix('accounts', [
-			index('routes/accounts/index.tsx'),
+			route('', 'routes/accounts/index.tsx', [
+				route('create', 'routes/accounts/create.tsx'),
+				route(':accountId/edit', 'routes/accounts/edit.tsx'),
+			]),
 			route(':accountId', 'routes/accounts/account.tsx'),
-			route(':accountId/edit', 'routes/accounts/edit.tsx'),
-			route('create', 'routes/accounts/create.tsx'),
 		]),
 
 		// movements (wraps transactions/transfers/exchanges under tabs)

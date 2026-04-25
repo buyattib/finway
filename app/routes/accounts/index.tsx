@@ -1,11 +1,5 @@
 import { useEffect } from 'react'
-import {
-	createSearchParams,
-	Form,
-	Link,
-	useNavigation,
-	useSubmit,
-} from 'react-router'
+import { createSearchParams, Form, Link, Outlet, useSubmit } from 'react-router'
 import {
 	BanknoteArrowDownIcon,
 	EllipsisIcon,
@@ -34,7 +28,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
-import { Spinner } from '~/components/ui/spinner'
 import { EmptyState } from '~/components/empty-state'
 
 import { getBalancesByAccount, getAccounts } from './lib/queries'
@@ -86,7 +79,6 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 export default function Accounts({
 	loaderData: { accounts, search },
 }: Route.ComponentProps) {
-	const navigation = useNavigation()
 	const submit = useSubmit()
 	const { t, i18n } = useTranslation(['accounts', 'constants'])
 
@@ -97,11 +89,6 @@ export default function Accounts({
 			searchField.value = search ?? ''
 		}
 	}, [search])
-
-	const isSearching =
-		navigation.location &&
-		navigation.location.search &&
-		navigation.location.search.includes('search')
 
 	return (
 		<PageSection id='accounts-section'>
@@ -139,10 +126,6 @@ export default function Accounts({
 					/>
 				</Form>
 
-				<div className='h-4'>
-					{isSearching && <Spinner size='sm' className='mx-auto' />}
-				</div>
-
 				{accounts.length === 0 && (
 					<EmptyState
 						icon={WalletIcon}
@@ -164,14 +147,14 @@ export default function Accounts({
 					/>
 				)}
 
-				<ul className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'>
+				<ul className='flex flex-col gap-5'>
 					{accounts.map(
 						({ id, name, description, accountType, balances }) => (
 							<li
 								key={id}
-								className='relative flex flex-col gap-4 border rounded-xl p-5'
+								className='relative flex flex-col gap-5 border rounded-xl p-6'
 							>
-								<div className='flex items-start gap-3 pr-10'>
+								<div className='flex items-center gap-4 pr-10'>
 									<AccountTypeIcon
 										accountType={accountType}
 									/>
@@ -304,6 +287,8 @@ export default function Accounts({
 					)}
 				</ul>
 			</PageContent>
+
+			<Outlet />
 		</PageSection>
 	)
 }

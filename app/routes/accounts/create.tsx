@@ -5,7 +5,7 @@ import { getServerT } from '~/utils-server/i18n.server'
 import { ACTION_CREATION } from '~/lib/constants'
 
 import type { TAccountType } from './lib/types'
-import { AccountForm } from './components/form'
+import { AccountFormDialog } from './components/account-form-dialog'
 import { accountAction } from './lib/services'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -39,13 +39,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function CreateAccount({
-	actionData,
 	loaderData: { initialData, redirectTo },
 }: Route.ComponentProps) {
 	return (
-		<AccountForm
+		<AccountFormDialog
 			action={ACTION_CREATION}
-			lastResult={actionData?.submission}
 			initialData={initialData}
 			redirectTo={redirectTo}
 		/>
