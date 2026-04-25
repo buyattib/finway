@@ -1,12 +1,6 @@
 import { useEffect } from 'react'
 import { createSearchParams, Form, Link, Outlet, useSubmit } from 'react-router'
-import {
-	BanknoteArrowDownIcon,
-	EllipsisIcon,
-	PlusIcon,
-	SquarePenIcon,
-	WalletIcon,
-} from 'lucide-react'
+import { PlusIcon, WalletIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
@@ -22,15 +16,10 @@ import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { Input } from '~/components/ui/input'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
 import { EmptyState } from '~/components/empty-state'
 
 import { getBalancesByAccount, getAccounts } from './lib/queries'
+import { AccountActions } from './components/account-actions'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -61,9 +50,9 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 	const accounts = _accounts.map(acc => ({
 		...acc,
-		balances: balancesByAccount[acc.id]
-			.filter(({ balance }) => Number(balance) > 0)
-			.slice(0, 3),
+		balances: balancesByAccount[acc.id].filter(
+			({ balance }) => Number(balance) > 0,
+		),
 	}))
 
 	return {
@@ -159,11 +148,9 @@ export default function Accounts({
 										accountType={accountType}
 									/>
 									<div className='flex flex-col gap-0.5'>
-										<Link to={id}>
-											<Title id={id} level='h5'>
-												{name}
-											</Title>
-										</Link>
+										<Title id={id} level='h5'>
+											{name}
+										</Title>
 										<Text size='sm' theme='primary'>
 											{t(
 												`constants:accountType.${accountType}`,
@@ -249,39 +236,7 @@ export default function Accounts({
 									</ul>
 								)}
 
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button
-											size='icon-sm'
-											variant='ghost'
-											className='absolute top-4 right-4'
-										>
-											<EllipsisIcon />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent>
-										<DropdownMenuItem>
-											<SquarePenIcon />
-											<Link to={`${id}/edit`}>
-												{t('index.editAction')}
-											</Link>
-										</DropdownMenuItem>
-										<DropdownMenuItem>
-											<BanknoteArrowDownIcon />
-											<Link
-												to={{
-													pathname:
-														'../transactions/create',
-													search: createSearchParams({
-														accountId: id,
-													}).toString(),
-												}}
-											>
-												{t('index.transactionAction')}
-											</Link>
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
+								<AccountActions id={id} name={name} />
 							</li>
 						),
 					)}

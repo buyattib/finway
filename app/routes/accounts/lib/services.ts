@@ -3,14 +3,18 @@ import { parseWithZod } from '@conform-to/zod/v4'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 
 import { getServerT } from '~/utils-server/i18n.server'
-import { redirectWithToast } from '~/utils-server/toast.server'
+import {
+	createToastHeaders,
+	redirectWithToast,
+} from '~/utils-server/toast.server'
 import { dbContext, userContext } from '~/lib/context'
 import type { TFormAction } from '~/lib/types'
 import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 
-import { createAccountFormSchema } from './schemas'
+import { createAccountFormSchema, DeleteAccountFormSchema } from './schemas'
 import {
 	createAccount,
+	deleteAccount,
 	getAccountById,
 	getDuplicateAccountCount,
 	updateAccount,
@@ -93,14 +97,14 @@ export async function accountAction({
 	if (submission.value.action === ACTION_CREATION) {
 		const { action: _action, redirectTo, ...accountData } = submission.value
 
-		const accountId = await createAccount({
+		await createAccount({
 			db,
 			ownerId: user.id,
 			...accountData,
 		})
 
 		return await redirectWithToast(
-			safeRedirect(redirectTo || `/app/accounts/${accountId}`),
+			safeRedirect(redirectTo || '/app/accounts'),
 			request,
 			{
 				type: 'success',
@@ -112,8 +116,47 @@ export async function accountAction({
 	const { action: _action, id, ...body } = submission.value
 	await updateAccount({ db, id, ...body })
 
-	return await redirectWithToast(`/app/accounts/${id}`, request, {
+	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',
 		title: t('form.edit.action.successToast'),
+	})
+}
+
+export async function deleteAccountAction({
+	request,
+	context,
+}: {
+	request: Request
+	context: Readonly<RouterContextProvider>
+}) {
+	const user = context.get(userContext)
+	const db = context.get(dbContext)
+	const t = getServerT(context, 'accounts')
+
+	const formData = await request.formData()
+	const submission = parseWithZod(formData, {
+		schema: DeleteAccountFormSchema,
+	})
+
+	if (submission.status !== 'success') {
+		const toastHeaders = await createToastHeaders(request, {
+			type: 'error',
+			title: t('delete.action.errorToast'),
+			description: t('delete.action.errorToastDescription'),
+		})
+		return data({}, { headers: toastHeaders })
+	}
+
+	const { accountId } = submission.value
+	const account = await getAccountById({ db, accountId })
+	if (!account || account.ownerId !== user.id) {
+		throw new Response(t('delete.action.notFoundError'), { status: 404 })
+	}
+
+	await deleteAccount({ db, accountId })
+
+	return await redirectWithToast('/app/accounts', request, {
+		type: 'success',
+		title: t('delete.action.successToast', { name: account.name }),
 	})
 }

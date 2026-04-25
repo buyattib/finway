@@ -12,6 +12,14 @@ export default {
 		noBalances: 'No balances yet',
 		editAction: 'Edit',
 		transactionAction: 'Transaction',
+		deleteAction: 'Delete',
+		deleteConfirm: {
+			title: 'Delete account "{{name}}"?',
+			description:
+				'This cannot be undone and will also delete all transactions, transfers and exchanges associated with it.',
+			cancel: 'Cancel',
+			confirm: 'Delete',
+		},
 	},
 	form: {
 		description:
@@ -59,25 +67,12 @@ export default {
 			submitButton: 'Update',
 		},
 	},
-	details: {
-		meta: {
-			title: 'Account {{name}} | Finway',
-			notFoundTitle: 'Account {{accountId}} not found | Finway',
-			description: 'Account {{name}}',
-		},
-		loader: {
-			notFoundError: 'Account not found',
-		},
+	delete: {
 		action: {
 			notFoundError: 'Account not found',
 			successToast: 'Account {{name}} deleted',
-			deleteErrorToast: 'Could not delete account',
-			deleteErrorToastDescription: 'Please try again',
+			errorToast: 'Could not delete account',
+			errorToastDescription: 'Please try again',
 		},
-		deleteAriaLabel: 'Delete account {{name}}',
-		deleteTooltip:
-			'Deleting an account cannot be undone and it deletes all transactions, transfers or exchanges associated with it.',
-		currencyBalancesTitle: 'Currency balances',
-		emptyBalances: "You don't have any activity in this account yet.",
 	},
 }
