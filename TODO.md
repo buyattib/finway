@@ -1,4 +1,6 @@
-- work on accounts form (modal, unify action in a service)
+
+- element focus on modals (tab)
+
 
 - cc statement payments (a transfer with a fk to the statement)
 - should we display cc transactions with normal txs?
