@@ -92,7 +92,17 @@ export async function updateCreditCard({
 
 export async function deleteCreditCard({ db, id }: { db: DB; id: string }) {
 	await db.transaction(async tx => {
-		tx.delete(schema.creditCard).where(eq(schema.creditCard.id, id))
+		const cc = await tx.query.creditCard.findFirst({
+			where: (c, { eq }) => eq(c.id, id),
+			columns: { accountId: true },
+		})
+		if (!cc) throw new Error('Credit card not found')
+
+		// Deleting the account cascades to the credit card, its statements,
+		// its transactions, and all installments.
+		await tx
+			.delete(schema.account)
+			.where(eq(schema.account.id, cc.accountId))
 	})
 }
 
