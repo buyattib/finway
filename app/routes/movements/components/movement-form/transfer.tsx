@@ -2,6 +2,7 @@ import { Link, useFetcher, createSearchParams, useLocation } from 'react-router'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'
 import { getFormProps, useForm, type SubmissionResult } from '@conform-to/react'
 import { Trans, useTranslation } from 'react-i18next'
+import { ArrowLeftRightIcon } from 'lucide-react'
 
 import type { Route } from '../../+types'
 import type { Route as EditRoute } from '../../+types/edit'
@@ -86,6 +87,19 @@ export function TransferForm({ selectData, balances, ...props }: Props) {
 		},
 	})
 
+	const switchAccounts = () => {
+		const from = fields.fromAccountId.value ?? ''
+		const to = fields.toAccountId.value ?? ''
+		form.update({
+			name: fields.fromAccountId.name,
+			value: to,
+		})
+		form.update({
+			name: fields.toAccountId.name,
+			value: from,
+		})
+	}
+
 	const accountOptions = accounts.map(({ id, name, accountType }) => ({
 		icon: <AccountTypeIcon accountType={accountType} size='sm' />,
 		value: id,
@@ -138,7 +152,7 @@ export function TransferForm({ selectData, balances, ...props }: Props) {
 
 				{accounts.length !== 0 ? (
 					<>
-						<div className='flex flex-col sm:flex-row sm:items-center sm:gap-2'>
+						<div className='flex flex-col sm:flex-row sm:items-start sm:gap-2'>
 							<ComboboxField
 								label={t('form.transfer.fromAccountLabel')}
 								field={fields.fromAccountId}
@@ -147,6 +161,26 @@ export function TransferForm({ selectData, balances, ...props }: Props) {
 								)}
 								options={accountOptions}
 							/>
+
+							<div className='flex flex-col gap-1 self-center sm:self-auto'>
+								<span
+									aria-hidden
+									className='hidden sm:block text-sm leading-none select-none invisible'
+								>
+									.
+								</span>
+								<Button
+									type='button'
+									variant='outline'
+									size='icon'
+									aria-label={t(
+										'form.transfer.swapAccountsLabel',
+									)}
+									onClick={switchAccounts}
+								>
+									<ArrowLeftRightIcon aria-hidden />
+								</Button>
+							</div>
 
 							<ComboboxField
 								label={t('form.transfer.toAccountLabel')}
