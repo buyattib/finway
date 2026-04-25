@@ -1,4 +1,3 @@
-- add categories for delivery and takeouts
 - add a button to interchange accounts (currencies) in transfer (exchange) form.
 
 

@@ -3,6 +3,7 @@ import {
 	BanknoteIcon,
 	BitcoinIcon,
 	ChartCandlestick,
+	CreditCardIcon,
 	LandmarkIcon,
 	WalletIcon,
 	type LucideProps,
@@ -16,6 +17,7 @@ import {
 	ACCOUNT_TYPE_DIGITAL_WALLET,
 	ACCOUNT_TYPE_CRYPTO_WALLET,
 	ACCOUNT_TYPE_BROKER,
+	ACCOUNT_TYPE_CREDIT_CARD,
 } from '~/routes/accounts/lib/constants'
 import type { TAccountType } from '~/routes/accounts/lib/types'
 
@@ -72,6 +74,10 @@ const ACCOUNT_TYPE_VALUES = {
 	[ACCOUNT_TYPE_BROKER]: {
 		icon: ChartCandlestick,
 		color: 'bg-lemon-yellow',
+	},
+	[ACCOUNT_TYPE_CREDIT_CARD]: {
+		icon: CreditCardIcon,
+		color: 'bg-red',
 	},
 }
 

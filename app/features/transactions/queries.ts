@@ -1,10 +1,12 @@
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, ne, sql } from 'drizzle-orm'
 
 import * as schema from '~/database/schema'
 
 import { getBalances } from '~/lib/queries'
 import { PAGE_SIZE } from '~/lib/constants'
 import type { DB } from '~/lib/types'
+
+import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
 import type { TCategory, TTransactionType } from './types'
 
@@ -50,7 +52,10 @@ export async function getTransactions({
 	category: TCategory
 	transactionType: TTransactionType | ''
 }) {
-	const filters = [eq(schema.account.ownerId, ownerId)]
+	const filters = [
+		eq(schema.account.ownerId, ownerId),
+		ne(schema.account.accountType, ACCOUNT_TYPE_CREDIT_CARD),
+	]
 	if (accountId) {
 		filters.push(eq(schema.transaction.accountId, accountId))
 	}
