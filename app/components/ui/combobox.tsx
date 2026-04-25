@@ -63,7 +63,7 @@ export function Combobox({
 	return (
 		<>
 			<input type='hidden' id={id} name={name} value={value} />
-			<Popover open={open} onOpenChange={setOpen}>
+			<Popover open={open} onOpenChange={setOpen} modal>
 				<PopoverTrigger asChild>
 					<Button
 						{...buttonProps}
