@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { createSearchParams, Form, Link, Outlet, useSubmit } from 'react-router'
+import { Form, Link, Outlet, useSubmit } from 'react-router'
 import { PlusIcon, WalletIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -189,36 +189,20 @@ export default function Accounts({
 											}) => {
 												const symbol =
 													getCurrencySymbol(currency)
-												const [, currencyId] =
-													bId.split('-')
 												return (
 													<li
 														key={bId}
 														className='flex items-center justify-between gap-2'
 													>
-														<Link
-															to={{
-																pathname:
-																	'../transactions/create',
-																search: createSearchParams(
-																	{
-																		accountId:
-																			id,
-																		currencyId,
-																	},
-																).toString(),
-															}}
-														>
-															<Text className='flex items-center gap-2'>
-																<CurrencyIcon
-																	currency={
-																		currency
-																	}
-																	size='sm'
-																/>
-																{currency}
-															</Text>
-														</Link>
+														<Text className='flex items-center gap-2'>
+															<CurrencyIcon
+																currency={
+																	currency
+																}
+																size='sm'
+															/>
+															{currency}
+														</Text>
 														<Text
 															weight='bold'
 															size='lg'
