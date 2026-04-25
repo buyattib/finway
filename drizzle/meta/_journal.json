@@ -232,6 +232,13 @@
       "when": 1777073713538,
       "tag": "0032_make_cc_tx_installment_nullable",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1777084191140,
+      "tag": "0033_remove_cc_transactions",
+      "breakpoints": true
     }
   ]
 }
