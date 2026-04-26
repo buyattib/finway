@@ -105,7 +105,7 @@ export function ExpensesByCategoryChart({
 			<CardContent>
 				<ChartContainer
 					config={chartConfig}
-					className='aspect-auto min-h-80 w-full'
+					className='min-h-80 w-full'
 				>
 					<BarChart
 						accessibilityLayer
@@ -121,6 +121,7 @@ export function ExpensesByCategoryChart({
 									value,
 									i18n.language,
 									{
+										minimumFractionDigits: 0,
 										maximumFractionDigits: 0,
 									},
 								)}`
@@ -132,6 +133,7 @@ export function ExpensesByCategoryChart({
 							width={120}
 							tickLine={false}
 							axisLine={false}
+							reversed
 						/>
 						<ChartTooltip
 							cursor={false}
@@ -153,6 +155,7 @@ export function ExpensesByCategoryChart({
 							dataKey='amount'
 							fill='var(--color-amount)'
 							radius={4}
+							maxBarSize={32}
 						/>
 					</BarChart>
 				</ChartContainer>

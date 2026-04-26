@@ -14,7 +14,7 @@ export default {
 		},
 		expensesByCategory: {
 			title: 'Expenses by category (this month)',
-			empty: 'No expenses',
+			empty: 'No expenses this month yet',
 		},
 	},
 }

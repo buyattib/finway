@@ -16,7 +16,7 @@ export default {
 		},
 		expensesByCategory: {
 			title: 'Gastos por categoría (este mes)',
-			empty: 'Sin gastos',
+			empty: 'Sin gastos este mes aún',
 		},
 	},
 } satisfies typeof en
