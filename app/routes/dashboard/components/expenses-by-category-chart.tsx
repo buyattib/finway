@@ -133,7 +133,6 @@ export function ExpensesByCategoryChart({
 							width={80}
 							tickLine={false}
 							axisLine={false}
-							reversed
 						/>
 						<ChartTooltip
 							cursor={false}
