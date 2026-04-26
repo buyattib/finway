@@ -1,4 +1,4 @@
-- dashboard stats for categories
+- Improve the expenses by category chart to include installments
 
 - cc statement payments (a transfer with a fk to the statement)
 

@@ -11,6 +11,7 @@ import {
 import { PageSection } from '~/components/ui/page'
 
 import {
+	getMonthlyCreditCardExpenses,
 	getMonthTransactions,
 	getMonthTransactionsByCategory,
 } from './lib/queries'
@@ -62,6 +63,9 @@ export async function loader({ context }: Route.LoaderArgs) {
 		ownerId: user.id,
 		transactionType: TRANSACTION_TYPE_EXPENSE,
 	})
+
+	const test = await getMonthlyCreditCardExpenses({ db, ownerId: user.id })
+	console.log(test)
 
 	return {
 		meta: {

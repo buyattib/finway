@@ -7,6 +7,7 @@ import type { TTransactionType } from '~/features/transactions/types'
 import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
 import type { CategoryResponse, CurrencyResponse } from './types'
+import { TRANSACTION_TYPE_EXPENSE } from '~/features/transactions/constants'
 
 type Args = {
 	db: DB
@@ -104,4 +105,52 @@ export async function getMonthTransactionsByCategory({
 		)
 		.groupBy(schema.transaction.category, schema.transaction.currencyId)
 		.orderBy(desc(sql`SUM(${schema.transaction.amount})`))
+}
+
+export async function getMonthlyCreditCardExpenses({
+	db,
+	ownerId,
+}: {
+	db: DB
+	ownerId: string
+}) {
+	const monthExpr = sql<string>`strftime('%m', ${schema.creditCardStatement.dueDate})`
+	const yearExpr = sql<string>`strftime('%Y', ${schema.creditCardStatement.dueDate})`
+
+	return db
+		.select({
+			month: monthExpr.as('month'),
+			year: yearExpr.as('year'),
+			amount: sql<string>`CAST(SUM(${schema.creditCardTransactionInstallment.amount}) / 100.0 AS TEXT)`.as(
+				'amount',
+			),
+		})
+		.from(schema.creditCardTransactionInstallment)
+		.innerJoin(
+			schema.creditCardStatement,
+			eq(
+				schema.creditCardStatement.id,
+				schema.creditCardTransactionInstallment.statementId,
+			),
+		)
+		.innerJoin(
+			schema.transaction,
+			eq(
+				schema.transaction.id,
+				schema.creditCardTransactionInstallment.transactionId,
+			),
+		)
+		.innerJoin(
+			schema.creditCard,
+			eq(schema.creditCard.id, schema.creditCardStatement.creditCardId),
+		)
+		.innerJoin(
+			schema.account,
+			and(
+				eq(schema.account.id, schema.creditCard.accountId),
+				eq(schema.account.ownerId, ownerId),
+			),
+		)
+		.where(eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE))
+		.groupBy(yearExpr, monthExpr)
 }
