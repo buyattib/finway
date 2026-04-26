@@ -1,11 +1,7 @@
-
-- element focus on modals (tab)
-
+- dashboard stats for categories
 
 - cc statement payments (a transfer with a fk to the statement)
-- should we display cc transactions with normal txs?
 
-- dashboard stats for categories
 - improve agents.md
 - Consolidated balance in one currency (external api to fetch fx)
 - Recurring transactions

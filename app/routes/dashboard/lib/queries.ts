@@ -5,7 +5,7 @@ import type { DB } from '~/lib/types'
 
 import type { TTransactionType } from '~/features/transactions/types'
 
-import type { CurrencyResponse } from './types'
+import type { CategoryResponse, CurrencyResponse } from './types'
 
 type Args = {
 	db: DB
@@ -14,16 +14,19 @@ type Args = {
 	group: 'currency'
 }
 
+function getMonthRange() {
+	const now = new Date()
+	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
+	const monthEnd = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0))
+	return { monthStart, monthEnd }
+}
+
 export async function getMonthTransactions({
 	db,
 	ownerId,
 	transactionType,
 }: Args): Promise<Array<CurrencyResponse>> {
-	const now = new Date()
-	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
-	const monthEnd = new Date(
-		Date.UTC(now.getFullYear(), now.getMonth() + 1, 0),
-	)
+	const { monthStart, monthEnd } = getMonthRange()
 
 	return db
 		.select({
@@ -56,7 +59,7 @@ export async function getMonthTransactions({
 		.orderBy(desc(sql`amount`))
 }
 
-export async function getExpensesByCategory({
+export async function getMonthTransactionsByCategory({
 	db,
 	ownerId,
 	transactionType,
@@ -64,15 +67,14 @@ export async function getExpensesByCategory({
 	db: DB
 	ownerId: string
 	transactionType: TTransactionType
-}) {
-	const now = new Date()
-	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
-	const monthEnd = new Date(
-		Date.UTC(now.getFullYear(), now.getMonth() + 1, 0),
-	)
+}): Promise<Array<CategoryResponse>> {
+	const { monthStart, monthEnd } = getMonthRange()
 
 	return db
 		.select({
+			category: schema.transaction.category,
+			currencyId: schema.transaction.currencyId,
+			currency: schema.currency.code,
 			amount: sql<string>`CAST(SUM(${schema.transaction.amount}) / 100.0 AS TEXT)`.as(
 				'amount',
 			),
@@ -97,4 +99,5 @@ export async function getExpensesByCategory({
 			),
 		)
 		.groupBy(schema.transaction.category, schema.transaction.currencyId)
+		.orderBy(desc(sql`amount`))
 }

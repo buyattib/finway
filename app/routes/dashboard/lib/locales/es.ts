@@ -14,5 +14,9 @@ export default {
 			noExpenses: 'Sin gastos',
 			noIncomes: 'Sin ingresos',
 		},
+		expensesByCategory: {
+			title: 'Gastos por categoría (este mes)',
+			empty: 'Sin gastos',
+		},
 	},
 } satisfies typeof en

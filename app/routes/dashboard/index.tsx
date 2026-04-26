@@ -10,8 +10,12 @@ import {
 
 import { PageSection } from '~/components/ui/page'
 
-import { getMonthTransactions } from './lib/queries'
+import {
+	getMonthTransactions,
+	getMonthTransactionsByCategory,
+} from './lib/queries'
 import { SummaryCards } from './components/summary-cards'
+import { ExpensesByCategoryChart } from './components/expenses-by-category-chart'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -53,6 +57,11 @@ export async function loader({ context }: Route.LoaderArgs) {
 			group: 'currency',
 		}),
 	}
+	const monthExpensesByCategory = await getMonthTransactionsByCategory({
+		db,
+		ownerId: user.id,
+		transactionType: TRANSACTION_TYPE_EXPENSE,
+	})
 
 	return {
 		meta: {
@@ -60,15 +69,17 @@ export async function loader({ context }: Route.LoaderArgs) {
 			description: t('index.meta.description'),
 		},
 		summary,
+		monthExpensesByCategory,
 	}
 }
 
 export default function Dashboard({
-	loaderData: { summary },
+	loaderData: { summary, monthExpensesByCategory },
 }: Route.ComponentProps) {
 	return (
 		<PageSection>
 			<SummaryCards summary={summary} />
+			<ExpensesByCategoryChart data={monthExpensesByCategory} />
 		</PageSection>
 	)
 }
