@@ -1,207 +1,29 @@
-import { Link, Form, data, useNavigation, useLocation } from 'react-router'
-import { SquarePenIcon, TrashIcon } from 'lucide-react'
-import { parseWithZod } from '@conform-to/zod/v4'
-import { useTranslation } from 'react-i18next'
 import type { Route } from './+types/account'
 
-import {
-	createToastHeaders,
-	redirectWithToast,
-} from '~/utils-server/toast.server'
+import { redirectWithToast } from '~/utils-server/toast.server'
 import { getServerT } from '~/utils-server/i18n.server'
-
 import { dbContext, userContext } from '~/lib/context'
-import { formatNumber, getCurrencySymbol } from '~/lib/utils'
-import { getBalances } from '~/lib/queries'
 
 import { deleteAccount, getAccountById } from './lib/queries'
 
-import { Spinner } from '~/components/ui/spinner'
-import { Title } from '~/components/ui/title'
-import { Text } from '~/components/ui/text'
-import { Button } from '~/components/ui/button'
-import { PageSection, PageHeader } from '~/components/ui/page'
-import { AccountTypeIcon } from '~/components/account-type-icon'
-import { CurrencyIcon } from '~/components/currency-icon'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from '~/components/ui/tooltip'
-
-import { DeleteAccountFormSchema } from './lib/schemas'
-
-export function meta({ loaderData }: Route.MetaArgs) {
-	const title = loaderData?.account
-		? loaderData.meta.title
-		: loaderData?.meta.notFoundTitle
-	return [
-		{ title },
-		{ property: 'og:title', content: title },
-		{ name: 'description', content: loaderData?.meta.description ?? title },
-	]
-}
-
-export async function loader({
+export async function action({
+	request,
 	context,
 	params: { accountId },
-}: Route.LoaderArgs) {
-	const db = context.get(dbContext)
-	const user = context.get(userContext)
-	const t = getServerT(context, 'accounts')
-
-	const account = await getAccountById({ db, accountId })
-	if (!account || account.ownerId !== user.id) {
-		throw new Response(t('details.loader.notFoundError'), { status: 404 })
-	}
-
-	const balances = await getBalances({ db, ownerId: user.id, accountId })
-
-	const { ownerId: _ownerId, ...accountData } = account
-
-	return {
-		account: { ...accountData, balances },
-		meta: {
-			title: t('details.meta.title', { name: account.name }),
-			notFoundTitle: t('details.meta.notFoundTitle', { accountId }),
-			description: t('details.meta.description', { name: account.name }),
-		},
-	}
-}
-
-export async function action({ request, context }: Route.ActionArgs) {
+}: Route.ActionArgs) {
 	const user = context.get(userContext)
 	const db = context.get(dbContext)
 	const t = getServerT(context, 'accounts')
 
-	const formData = await request.formData()
-	const submission = parseWithZod(formData, {
-		schema: DeleteAccountFormSchema,
-	})
-
-	if (submission.status !== 'success') {
-		const toastHeaders = await createToastHeaders(request, {
-			type: 'error',
-			title: t('details.action.deleteErrorToast'),
-			description: t('details.action.deleteErrorToastDescription'),
-		})
-
-		return data({}, { headers: toastHeaders })
-	}
-
-	const { accountId } = submission.value
 	const account = await getAccountById({ db, accountId })
 	if (!account || account.ownerId !== user.id) {
-		throw new Response(t('details.action.notFoundError'), { status: 404 })
+		throw new Response(t('delete.action.notFoundError'), { status: 404 })
 	}
 
 	await deleteAccount({ db, accountId })
 
 	return await redirectWithToast('/app/accounts', request, {
 		type: 'success',
-		title: t('details.action.successToast', { name: account.name }),
+		title: t('delete.action.successToast', { name: account.name }),
 	})
-}
-
-export default function AccountDetails({
-	loaderData: {
-		account: { id, name, description, accountType, balances },
-	},
-}: Route.ComponentProps) {
-	const location = useLocation()
-	const navigation = useNavigation()
-	const { t, i18n } = useTranslation(['accounts', 'constants'])
-	const isDeleting =
-		navigation.formMethod === 'POST' &&
-		navigation.formAction === location.pathname &&
-		navigation.state === 'submitting'
-
-	return (
-		<PageSection id={id}>
-			<PageHeader className='flex-wrap gap-4'>
-				<div className='flex items-center gap-4 min-w-0'>
-					<AccountTypeIcon accountType={accountType} />
-					<div className='flex flex-col gap-2 min-w-0'>
-						<Title id={id} level='h1' className='truncate'>
-							{name}
-						</Title>
-						<Text size='sm' theme='primary'>
-							{t(`constants:accountType.${accountType}`)}
-						</Text>
-					</div>
-				</div>
-				<div className='flex items-center gap-2 shrink-0'>
-					<Button size='icon' variant='outline' asChild>
-						<Link to='edit'>
-							<SquarePenIcon />
-						</Link>
-					</Button>
-					<Tooltip>
-						<Form method='post'>
-							<input type='hidden' name='accountId' value={id} />
-							<TooltipTrigger asChild>
-								<Button
-									size='icon'
-									variant='destructive-outline'
-									type='submit'
-									name='intent'
-									value='delete'
-									disabled={isDeleting}
-								>
-									{isDeleting ? (
-										<Spinner size='sm' />
-									) : (
-										<TrashIcon aria-hidden />
-									)}
-									<span className='sr-only'>
-										{t('details.deleteAriaLabel', {
-											name,
-										})}
-									</span>
-								</Button>
-							</TooltipTrigger>
-						</Form>
-						<TooltipContent>
-							{t('details.deleteTooltip')}
-						</TooltipContent>
-					</Tooltip>
-				</div>
-			</PageHeader>
-			<Text theme='muted'>{description}</Text>
-
-			<PageSection id={`${id}-balances`}>
-				<div className='border-b border-b-accent py-2'>
-					<Title id={`${id}-balances`} level='h3'>
-						{t('details.currencyBalancesTitle')}
-					</Title>
-				</div>
-				{balances.length === 0 ? (
-					<Text alignment='center'>{t('details.emptyBalances')}</Text>
-				) : (
-					<ul className='flex flex-col gap-2' aria-labelledby={id}>
-						{balances.map(({ currencyId, balance, currency }) => {
-							const symbol = getCurrencySymbol(currency)
-							return (
-								<li
-									key={currencyId}
-									className='flex items-center justify-between gap-4 p-4 border border-muted rounded-md'
-								>
-									<Text className='flex items-center gap-2'>
-										<CurrencyIcon
-											currency={currency}
-											size='md'
-										/>
-										{t(`constants:currency.${currency}`)}
-									</Text>
-									<Text>
-										{`${symbol} ${formatNumber(balance, i18n.language)}`}
-									</Text>
-								</li>
-							)
-						})}
-					</ul>
-				)}
-			</PageSection>
-		</PageSection>
-	)
 }

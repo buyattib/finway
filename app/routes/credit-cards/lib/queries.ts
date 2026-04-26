@@ -17,6 +17,7 @@ import type { DB } from '~/lib/types'
 import { addMonth, initializeDate, subtractMonth } from '~/lib/utils'
 
 import type { TCategory, TTransactionType } from '~/features/transactions/types'
+import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
 // cc
 
@@ -42,9 +43,18 @@ export async function createCreditCard({
 	})
 
 	return await db.transaction(async tx => {
+		const [{ id: accountId }] = await tx
+			.insert(schema.account)
+			.values({
+				name: '',
+				accountType: ACCOUNT_TYPE_CREDIT_CARD,
+				ownerId,
+			})
+			.returning({ id: schema.account.id })
+
 		const [{ id: creditCardId }] = await tx
 			.insert(schema.creditCard)
-			.values({ ...creditCardData, ownerId })
+			.values({ ...creditCardData, accountId })
 			.returning({ id: schema.creditCard.id })
 
 		await tx.insert(schema.creditCardStatement).values({
@@ -81,7 +91,19 @@ export async function updateCreditCard({
 }
 
 export async function deleteCreditCard({ db, id }: { db: DB; id: string }) {
-	await db.delete(schema.creditCard).where(eq(schema.creditCard.id, id))
+	await db.transaction(async tx => {
+		const cc = await tx.query.creditCard.findFirst({
+			where: (c, { eq }) => eq(c.id, id),
+			columns: { accountId: true },
+		})
+		if (!cc) throw new Error('Credit card not found')
+
+		// Deleting the account cascades to the credit card, its statements,
+		// its transactions, and all installments.
+		await tx
+			.delete(schema.account)
+			.where(eq(schema.account.id, cc.accountId))
+	})
 }
 
 export async function getCreditCardById({
@@ -100,7 +122,12 @@ export async function getCreditCardById({
 			expiryMonth: true,
 			expiryYear: true,
 			institution: true,
-			ownerId: true,
+			accountId: true,
+		},
+		with: {
+			account: {
+				columns: { ownerId: true },
+			},
 		},
 	})
 }
@@ -122,7 +149,11 @@ export async function getCreditCards({
 			institution: schema.creditCard.institution,
 		})
 		.from(schema.creditCard)
-		.where(eq(schema.creditCard.ownerId, ownerId))
+		.innerJoin(
+			schema.account,
+			eq(schema.creditCard.accountId, schema.account.id),
+		)
+		.where(eq(schema.account.ownerId, ownerId))
 		.orderBy(desc(schema.creditCard.createdAt))
 }
 
@@ -142,7 +173,7 @@ export async function validateExistingCreditCard({
 	excludeId?: string
 }) {
 	const filters = [
-		eq(schema.creditCard.ownerId, ownerId),
+		eq(schema.account.ownerId, ownerId),
 		eq(schema.creditCard.last4, last4),
 		eq(schema.creditCard.brand, brand),
 		eq(schema.creditCard.institution, institution),
@@ -150,7 +181,15 @@ export async function validateExistingCreditCard({
 	if (excludeId) {
 		filters.push(ne(schema.creditCard.id, excludeId))
 	}
-	return db.$count(schema.creditCard, and(...filters))
+	const [row] = await db
+		.select({ c: count() })
+		.from(schema.creditCard)
+		.innerJoin(
+			schema.account,
+			eq(schema.creditCard.accountId, schema.account.id),
+		)
+		.where(and(...filters))
+	return row.c
 }
 
 // statements
@@ -249,52 +288,46 @@ export async function updateStatementClosingDate({
 			.set({ closingDate })
 			.where(eq(schema.creditCardStatement.id, statementId))
 
-		const ccTransactionInstallmentCount = tx
+		const txInstallmentCount = tx
 			.select({
-				id: schema.creditCardTransaction.id,
+				id: schema.transaction.id,
 				installmentCount: count(
 					schema.creditCardTransactionInstallment.id,
 				).as('installmentCount'),
 			})
-			.from(schema.creditCardTransaction)
+			.from(schema.transaction)
 			.innerJoin(
 				schema.creditCardTransactionInstallment,
 				eq(
-					schema.creditCardTransactionInstallment
-						.creditCardTransactionId,
-					schema.creditCardTransaction.id,
+					schema.creditCardTransactionInstallment.transactionId,
+					schema.transaction.id,
 				),
 			)
-			.groupBy(schema.creditCardTransaction.id)
-			.as('ccTransactionInstallmentCount')
+			.groupBy(schema.transaction.id)
+			.as('txInstallmentCount')
 
 		const statementIds = [statementId]
 		if (nextStatementId) statementIds.push(nextStatementId)
 
-		// Get all cc transaction ids that have an installment in the statement
-		const statementsCCTransactions = await tx
+		// Get all transactions that have an installment in the statement
+		const statementsTransactions = await tx
 			.selectDistinct({
-				id: schema.creditCardTransaction.id,
-				date: schema.creditCardTransaction.date,
-				amount: schema.creditCardTransaction.amount,
-				installmentCount:
-					ccTransactionInstallmentCount.installmentCount,
+				id: schema.transaction.id,
+				date: schema.transaction.date,
+				amount: schema.transaction.amount,
+				installmentCount: txInstallmentCount.installmentCount,
 			})
 			.from(schema.creditCardTransactionInstallment)
 			.innerJoin(
-				schema.creditCardTransaction,
+				schema.transaction,
 				eq(
-					schema.creditCardTransactionInstallment
-						.creditCardTransactionId,
-					schema.creditCardTransaction.id,
+					schema.creditCardTransactionInstallment.transactionId,
+					schema.transaction.id,
 				),
 			)
 			.innerJoin(
-				ccTransactionInstallmentCount,
-				eq(
-					ccTransactionInstallmentCount.id,
-					schema.creditCardTransaction.id,
-				),
+				txInstallmentCount,
+				eq(txInstallmentCount.id, schema.transaction.id),
 			)
 			.where(
 				inArray(
@@ -303,13 +336,13 @@ export async function updateStatementClosingDate({
 				),
 			)
 
-		if (!statementsCCTransactions.length) return
+		if (!statementsTransactions.length) return
 
-		// Delete all installments from cc transactions which have an installment in the statement
+		// Delete all installments from transactions which have an installment in the statement
 		await tx.delete(schema.creditCardTransactionInstallment).where(
 			inArray(
-				schema.creditCardTransactionInstallment.creditCardTransactionId,
-				statementsCCTransactions.map(t => t.id),
+				schema.creditCardTransactionInstallment.transactionId,
+				statementsTransactions.map(t => t.id),
 			),
 		)
 
@@ -319,7 +352,7 @@ export async function updateStatementClosingDate({
 			amount,
 			date,
 			installmentCount,
-		} of statementsCCTransactions) {
+		} of statementsTransactions) {
 			const installments = await makeTransactionInstallments({
 				db: tx,
 				creditCardId,
@@ -331,7 +364,7 @@ export async function updateStatementClosingDate({
 			await tx.insert(schema.creditCardTransactionInstallment).values(
 				installments.map(i => ({
 					...i,
-					creditCardTransactionId: id,
+					transactionId: id,
 				})),
 			)
 		}
@@ -420,7 +453,7 @@ export async function getCreditCardStatements({
 			installments: {
 				columns: { amount: true },
 				with: {
-					creditCardTransaction: {
+					transaction: {
 						columns: { type: true },
 						with: {
 							currency: { columns: { code: true } },
@@ -452,19 +485,19 @@ export async function getStatementTotalsByCurrency({
 		.select({
 			currencyCode: schema.currency.code,
 			total: sum(schema.creditCardTransactionInstallment.amount),
-			type: schema.creditCardTransaction.type,
+			type: schema.transaction.type,
 		})
 		.from(schema.creditCardTransactionInstallment)
 		.innerJoin(
-			schema.creditCardTransaction,
+			schema.transaction,
 			eq(
-				schema.creditCardTransactionInstallment.creditCardTransactionId,
-				schema.creditCardTransaction.id,
+				schema.creditCardTransactionInstallment.transactionId,
+				schema.transaction.id,
 			),
 		)
 		.innerJoin(
 			schema.currency,
-			eq(schema.creditCardTransaction.currencyId, schema.currency.id),
+			eq(schema.transaction.currencyId, schema.currency.id),
 		)
 		.where(
 			eq(
@@ -472,7 +505,7 @@ export async function getStatementTotalsByCurrency({
 				statementId,
 			),
 		)
-		.groupBy(schema.currency.code, schema.creditCardTransaction.type)
+		.groupBy(schema.currency.code, schema.transaction.type)
 }
 
 export async function getLatestStatement({
@@ -598,12 +631,12 @@ export async function makeTransactionInstallments({
 
 export async function createCreditCardTransaction({
 	db,
-	creditCardId,
+	accountId,
 	transactionData,
 	installments,
 }: {
 	db: DB
-	creditCardId: string
+	accountId: string
 	transactionData: {
 		date: string
 		type: TTransactionType
@@ -619,18 +652,18 @@ export async function createCreditCardTransaction({
 	}>
 }) {
 	await db.transaction(async tx => {
-		const [{ id: creditCardTransactionId }] = await tx
-			.insert(schema.creditCardTransaction)
+		const [{ id: transactionId }] = await tx
+			.insert(schema.transaction)
 			.values({
 				...transactionData,
-				creditCardId,
+				accountId,
 			})
-			.returning({ id: schema.creditCardTransaction.id })
+			.returning({ id: schema.transaction.id })
 
 		await tx.insert(schema.creditCardTransactionInstallment).values(
 			installments.map(i => ({
 				...i,
-				creditCardTransactionId,
+				transactionId,
 			})),
 		)
 	})
@@ -638,12 +671,12 @@ export async function createCreditCardTransaction({
 
 export async function updateCreditCardTransaction({
 	db,
-	creditCardTransactionId,
+	transactionId,
 	transactionData,
 	installments,
 }: {
 	db: DB
-	creditCardTransactionId: string
+	transactionId: string
 	transactionData: {
 		date: string
 		type: TTransactionType
@@ -660,24 +693,23 @@ export async function updateCreditCardTransaction({
 }) {
 	await db.transaction(async tx => {
 		await tx
-			.update(schema.creditCardTransaction)
+			.update(schema.transaction)
 			.set(transactionData)
-			.where(eq(schema.creditCardTransaction.id, creditCardTransactionId))
+			.where(eq(schema.transaction.id, transactionId))
 
 		await tx
 			.delete(schema.creditCardTransactionInstallment)
 			.where(
 				eq(
-					schema.creditCardTransactionInstallment
-						.creditCardTransactionId,
-					creditCardTransactionId,
+					schema.creditCardTransactionInstallment.transactionId,
+					transactionId,
 				),
 			)
 
 		await tx.insert(schema.creditCardTransactionInstallment).values(
 			installments.map(i => ({
 				...i,
-				creditCardTransactionId,
+				transactionId,
 			})),
 		)
 	})
@@ -685,14 +717,14 @@ export async function updateCreditCardTransaction({
 
 export async function deleteCreditCardTransaction({
 	db,
-	creditCardTransactionId,
+	transactionId,
 }: {
 	db: DB
-	creditCardTransactionId: string
+	transactionId: string
 }) {
 	await db
-		.delete(schema.creditCardTransaction)
-		.where(eq(schema.creditCardTransaction.id, creditCardTransactionId))
+		.delete(schema.transaction)
+		.where(eq(schema.transaction.id, transactionId))
 }
 
 export async function getCreditCardTransactionById({
@@ -702,7 +734,7 @@ export async function getCreditCardTransactionById({
 	db: DB
 	transactionId: string
 }) {
-	return db.query.creditCardTransaction.findFirst({
+	return db.query.transaction.findFirst({
 		where: (tx, { eq }) => eq(tx.id, transactionId),
 		columns: {
 			id: true,
@@ -712,11 +744,9 @@ export async function getCreditCardTransactionById({
 			description: true,
 			currencyId: true,
 			category: true,
+			accountId: true,
 		},
 		with: {
-			creditCard: {
-				columns: { id: true },
-			},
 			currency: {
 				columns: { code: true },
 			},
@@ -735,7 +765,7 @@ export async function getTransactionInstallmentCount({
 	return db.$count(
 		schema.creditCardTransactionInstallment,
 		eq(
-			schema.creditCardTransactionInstallment.creditCardTransactionId,
+			schema.creditCardTransactionInstallment.transactionId,
 			transactionId,
 		),
 	)
@@ -765,7 +795,7 @@ export async function getTransactionInstallments({
 		)
 		.where(
 			eq(
-				schema.creditCardTransactionInstallment.creditCardTransactionId,
+				schema.creditCardTransactionInstallment.transactionId,
 				transactionId,
 			),
 		)
@@ -791,32 +821,31 @@ export async function getStatementInstallments({
 			installmentNumber:
 				schema.creditCardTransactionInstallment.installmentNumber,
 			amount: schema.creditCardTransactionInstallment.amount,
-			transactionId: schema.creditCardTransaction.id,
-			transactionDate: schema.creditCardTransaction.date,
-			transactionType: schema.creditCardTransaction.type,
-			transactionDescription: schema.creditCardTransaction.description,
-			category: schema.creditCardTransaction.category,
+			transactionId: schema.transaction.id,
+			transactionDate: schema.transaction.date,
+			transactionType: schema.transaction.type,
+			transactionDescription: schema.transaction.description,
+			category: schema.transaction.category,
 			currencyCode: schema.currency.code,
 			totalInstallments: db.$count(
 				schema.creditCardTransactionInstallment,
 				eq(
-					schema.creditCardTransaction.id,
-					schema.creditCardTransactionInstallment
-						.creditCardTransactionId,
+					schema.transaction.id,
+					schema.creditCardTransactionInstallment.transactionId,
 				),
 			),
 		})
 		.from(schema.creditCardTransactionInstallment)
 		.innerJoin(
-			schema.creditCardTransaction,
+			schema.transaction,
 			eq(
-				schema.creditCardTransactionInstallment.creditCardTransactionId,
-				schema.creditCardTransaction.id,
+				schema.creditCardTransactionInstallment.transactionId,
+				schema.transaction.id,
 			),
 		)
 		.innerJoin(
 			schema.currency,
-			eq(schema.creditCardTransaction.currencyId, schema.currency.id),
+			eq(schema.transaction.currencyId, schema.currency.id),
 		)
 		.where(
 			eq(
@@ -825,8 +854,8 @@ export async function getStatementInstallments({
 			),
 		)
 		.orderBy(
-			desc(schema.creditCardTransaction.date),
-			desc(schema.creditCardTransaction.createdAt),
+			desc(schema.transaction.date),
+			desc(schema.transaction.createdAt),
 		)
 
 	const total = await db.$count(installmentsQuery)

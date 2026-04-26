@@ -15,6 +15,14 @@ export default {
 		noBalances: 'Sin balances aún',
 		editAction: 'Editar',
 		transactionAction: 'Transacción',
+		deleteAction: 'Eliminar',
+		deleteConfirm: {
+			title: '¿Eliminar la cuenta "{{name}}"?',
+			description:
+				'Esta acción no se puede deshacer y también eliminará todas las transacciones, transferencias e intercambios asociados.',
+			cancel: 'Cancelar',
+			confirm: 'Eliminar',
+		},
 	},
 	form: {
 		description:
@@ -61,25 +69,12 @@ export default {
 			submitButton: 'Actualizar',
 		},
 	},
-	details: {
-		meta: {
-			title: 'Cuenta {{name}} | Finway',
-			notFoundTitle: 'Cuenta {{accountId}} no encontrada | Finway',
-			description: 'Cuenta {{name}}',
-		},
-		loader: {
-			notFoundError: 'Cuenta no encontrada',
-		},
+	delete: {
 		action: {
 			notFoundError: 'Cuenta no encontrada',
 			successToast: 'Cuenta {{name}} eliminada',
-			deleteErrorToast: 'No se pudo eliminar la cuenta',
-			deleteErrorToastDescription: 'Por favor intenta de nuevo',
+			errorToast: 'No se pudo eliminar la cuenta',
+			errorToastDescription: 'Por favor intenta de nuevo',
 		},
-		deleteAriaLabel: 'Eliminar cuenta {{name}}',
-		deleteTooltip:
-			'Eliminar una cuenta no se puede deshacer y elimina todas las transacciones, transferencias o intercambios asociados.',
-		currencyBalancesTitle: 'Balances por moneda',
-		emptyBalances: 'Aún no tienes actividad en esta cuenta.',
 	},
 } satisfies typeof en

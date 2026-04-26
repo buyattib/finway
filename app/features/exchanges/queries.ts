@@ -1,10 +1,12 @@
-import { and, eq, desc, sql } from 'drizzle-orm'
+import { and, eq, desc, ne, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 
 import * as schema from '~/database/schema'
 import { getBalances } from '~/lib/queries'
 import type { DB } from '~/lib/types'
 import { PAGE_SIZE } from '~/lib/constants'
+
+import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
 // fetch --------
 
@@ -48,7 +50,10 @@ export async function getExchanges({
 	const fromCurrencyAlias = alias(schema.currency, 'fromCurrency')
 	const toCurrencyAlias = alias(schema.currency, 'toCurrency')
 
-	const filters = [eq(schema.account.ownerId, ownerId)]
+	const filters = [
+		eq(schema.account.ownerId, ownerId),
+		ne(schema.account.accountType, ACCOUNT_TYPE_CREDIT_CARD),
+	]
 	if (accountId) {
 		filters.push(eq(schema.exchange.accountId, accountId))
 	}

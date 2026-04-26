@@ -183,6 +183,62 @@
       "when": 1776537386391,
       "tag": "0025_update_income_category",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1777071511856,
+      "tag": "0026_add_cc_account_relation",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "6",
+      "when": 1777071561047,
+      "tag": "0027_create_cc_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "6",
+      "when": 1777072153537,
+      "tag": "0028_update_cc_account_fk",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "6",
+      "when": 1777072941672,
+      "tag": "0029_add_installment_transaction_fk",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "6",
+      "when": 1777073027286,
+      "tag": "0030_migrate_cc_transactions",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "6",
+      "when": 1777073366640,
+      "tag": "0031_non_nullable_transaction",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1777073713538,
+      "tag": "0032_make_cc_tx_installment_nullable",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1777084191140,
+      "tag": "0033_remove_cc_transactions",
+      "breakpoints": true
     }
   ]
 }

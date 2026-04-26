@@ -6,6 +6,7 @@ export type TCreditCardContext = {
 		expiryMonth: string
 		expiryYear: string
 		institution: string
+		accountId: string
 	}
 	currentStatement: {
 		id: string

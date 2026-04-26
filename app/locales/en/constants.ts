@@ -5,6 +5,7 @@ export default {
 		'digital-wallet': 'Digital Wallet',
 		'crypto-wallet': 'Crypto Wallet',
 		broker: 'Broker',
+		'credit-card': 'Credit Card',
 	},
 	transactionType: {
 		EXPENSE: 'Expense',

@@ -1,8 +1,10 @@
-- add categories for delivery and takeouts
-- add a button to interchange accounts (currencies) in transfer (exchange) form.
+
+- element focus on modals (tab)
 
 
-- cc statement payments (account behind cc? unify cc transactions to regular txs?)
+- cc statement payments (a transfer with a fk to the statement)
+- should we display cc transactions with normal txs?
+
 - dashboard stats for categories
 - improve agents.md
 - Consolidated balance in one currency (external api to fetch fx)

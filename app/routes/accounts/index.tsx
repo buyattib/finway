@@ -1,18 +1,6 @@
 import { useEffect } from 'react'
-import {
-	createSearchParams,
-	Form,
-	Link,
-	useNavigation,
-	useSubmit,
-} from 'react-router'
-import {
-	BanknoteArrowDownIcon,
-	EllipsisIcon,
-	PlusIcon,
-	SquarePenIcon,
-	WalletIcon,
-} from 'lucide-react'
+import { Form, Link, Outlet, useSubmit } from 'react-router'
+import { PlusIcon, WalletIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { Route } from './+types'
@@ -28,16 +16,10 @@ import { PageSection, PageHeader, PageContent } from '~/components/ui/page'
 import { AccountTypeIcon } from '~/components/account-type-icon'
 import { CurrencyIcon } from '~/components/currency-icon'
 import { Input } from '~/components/ui/input'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
-import { Spinner } from '~/components/ui/spinner'
 import { EmptyState } from '~/components/empty-state'
 
 import { getBalancesByAccount, getAccounts } from './lib/queries'
+import { AccountActions } from './components/account-actions'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -68,9 +50,9 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
 	const accounts = _accounts.map(acc => ({
 		...acc,
-		balances: balancesByAccount[acc.id]
-			.filter(({ balance }) => Number(balance) > 0)
-			.slice(0, 3),
+		balances: balancesByAccount[acc.id].filter(
+			({ balance }) => Number(balance) > 0,
+		),
 	}))
 
 	return {
@@ -86,7 +68,6 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 export default function Accounts({
 	loaderData: { accounts, search },
 }: Route.ComponentProps) {
-	const navigation = useNavigation()
 	const submit = useSubmit()
 	const { t, i18n } = useTranslation(['accounts', 'constants'])
 
@@ -97,11 +78,6 @@ export default function Accounts({
 			searchField.value = search ?? ''
 		}
 	}, [search])
-
-	const isSearching =
-		navigation.location &&
-		navigation.location.search &&
-		navigation.location.search.includes('search')
 
 	return (
 		<PageSection id='accounts-section'>
@@ -139,10 +115,6 @@ export default function Accounts({
 					/>
 				</Form>
 
-				<div className='h-4'>
-					{isSearching && <Spinner size='sm' className='mx-auto' />}
-				</div>
-
 				{accounts.length === 0 && (
 					<EmptyState
 						icon={WalletIcon}
@@ -164,23 +136,21 @@ export default function Accounts({
 					/>
 				)}
 
-				<ul className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'>
+				<ul className='flex flex-col gap-5'>
 					{accounts.map(
 						({ id, name, description, accountType, balances }) => (
 							<li
 								key={id}
-								className='relative flex flex-col gap-4 border rounded-xl p-5'
+								className='relative flex flex-col gap-5 border rounded-xl p-6'
 							>
-								<div className='flex items-start gap-3 pr-10'>
+								<div className='flex items-center gap-4 pr-10'>
 									<AccountTypeIcon
 										accountType={accountType}
 									/>
 									<div className='flex flex-col gap-0.5'>
-										<Link to={id}>
-											<Title id={id} level='h5'>
-												{name}
-											</Title>
-										</Link>
+										<Title id={id} level='h5'>
+											{name}
+										</Title>
 										<Text size='sm' theme='primary'>
 											{t(
 												`constants:accountType.${accountType}`,
@@ -219,36 +189,20 @@ export default function Accounts({
 											}) => {
 												const symbol =
 													getCurrencySymbol(currency)
-												const [, currencyId] =
-													bId.split('-')
 												return (
 													<li
 														key={bId}
 														className='flex items-center justify-between gap-2'
 													>
-														<Link
-															to={{
-																pathname:
-																	'../transactions/create',
-																search: createSearchParams(
-																	{
-																		accountId:
-																			id,
-																		currencyId,
-																	},
-																).toString(),
-															}}
-														>
-															<Text className='flex items-center gap-2'>
-																<CurrencyIcon
-																	currency={
-																		currency
-																	}
-																	size='sm'
-																/>
-																{currency}
-															</Text>
-														</Link>
+														<Text className='flex items-center gap-2'>
+															<CurrencyIcon
+																currency={
+																	currency
+																}
+																size='sm'
+															/>
+															{currency}
+														</Text>
 														<Text
 															weight='bold'
 															size='lg'
@@ -266,44 +220,14 @@ export default function Accounts({
 									</ul>
 								)}
 
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button
-											size='icon-sm'
-											variant='ghost'
-											className='absolute top-4 right-4'
-										>
-											<EllipsisIcon />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent>
-										<DropdownMenuItem>
-											<SquarePenIcon />
-											<Link to={`${id}/edit`}>
-												{t('index.editAction')}
-											</Link>
-										</DropdownMenuItem>
-										<DropdownMenuItem>
-											<BanknoteArrowDownIcon />
-											<Link
-												to={{
-													pathname:
-														'../transactions/create',
-													search: createSearchParams({
-														accountId: id,
-													}).toString(),
-												}}
-											>
-												{t('index.transactionAction')}
-											</Link>
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
+								<AccountActions id={id} name={name} />
 							</li>
 						),
 					)}
 				</ul>
 			</PageContent>
+
+			<Outlet />
 		</PageSection>
 	)
 }

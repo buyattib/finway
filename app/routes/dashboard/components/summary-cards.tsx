@@ -54,7 +54,7 @@ export function SummaryCards({
 	]
 
 	return (
-		<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+		<div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
 			{cards.map(({ title, icon, data, empty }) => {
 				return (
 					<Card
@@ -79,7 +79,7 @@ export function SummaryCards({
 										return (
 											<li
 												key={currencyId}
-												className='flex items-center justify-between gap-2'
+												className='flex flex-row items-center justify-between gap-2'
 											>
 												<Text className='flex items-center gap-2'>
 													<CurrencyIcon
@@ -88,7 +88,11 @@ export function SummaryCards({
 													/>
 													{currency}
 												</Text>
-												<Text weight='bold' size='xl'>
+												<Text
+													weight='bold'
+													size='lg'
+													className='whitespace-nowrap'
+												>
 													{symbol}{' '}
 													{formatNumber(
 														amount,

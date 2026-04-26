@@ -55,3 +55,46 @@ export async function getMonthTransactions({
 		.groupBy(schema.transaction.currencyId)
 		.orderBy(desc(sql`amount`))
 }
+
+export async function getExpensesByCategory({
+	db,
+	ownerId,
+	transactionType,
+}: {
+	db: DB
+	ownerId: string
+	transactionType: TTransactionType
+}) {
+	const now = new Date()
+	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
+	const monthEnd = new Date(
+		Date.UTC(now.getFullYear(), now.getMonth() + 1, 0),
+	)
+
+	return db
+		.select({
+			amount: sql<string>`CAST(SUM(${schema.transaction.amount}) / 100.0 AS TEXT)`.as(
+				'amount',
+			),
+		})
+		.from(schema.transaction)
+		.innerJoin(
+			schema.account,
+			and(
+				eq(schema.account.id, schema.transaction.accountId),
+				eq(schema.account.ownerId, ownerId),
+			),
+		)
+		.innerJoin(
+			schema.currency,
+			eq(schema.currency.id, schema.transaction.currencyId),
+		)
+		.where(
+			and(
+				eq(schema.transaction.type, transactionType),
+				gte(schema.transaction.date, monthStart.toISOString()),
+				lte(schema.transaction.date, monthEnd.toISOString()),
+			),
+		)
+		.groupBy(schema.transaction.category, schema.transaction.currencyId)
+}

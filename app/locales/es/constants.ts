@@ -7,6 +7,7 @@ export default {
 		'digital-wallet': 'Billetera Digital',
 		'crypto-wallet': 'Billetera Cripto',
 		broker: 'Bróker',
+		'credit-card': 'Tarjeta de Crédito',
 	},
 	transactionType: {
 		EXPENSE: 'Gasto',

@@ -330,7 +330,7 @@ export function ComboboxField({
 				{...comboboxProps}
 				id={id}
 				name={fieldProps.name}
-				defaultValue={defaultValue}
+				value={control.value ?? ''}
 				onValueChange={control.change}
 				buttonProps={{
 					disabled,

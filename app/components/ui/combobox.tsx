@@ -25,6 +25,7 @@ export type ComboboxProps = {
 	id?: string
 	name?: string
 	onValueChange?: (value: string) => void
+	value?: string
 	defaultValue?: string
 	buttonPlaceholder?: string
 	inputPlaceholder?: string
@@ -37,6 +38,7 @@ export function Combobox({
 	id,
 	name,
 	onValueChange,
+	value: valueProp,
 	defaultValue,
 	buttonPlaceholder,
 	inputPlaceholder,
@@ -44,7 +46,10 @@ export function Combobox({
 	buttonProps,
 }: ComboboxProps) {
 	const [open, setOpen] = React.useState(false)
-	const [value, setValue] = React.useState(defaultValue ?? '')
+	const [internalValue, setInternalValue] = React.useState(defaultValue ?? '')
+
+	const isControlled = valueProp !== undefined
+	const value = isControlled ? valueProp : internalValue
 
 	const selected = options.find(option => option.value === value)
 	const buttonDisplay = selected ? (
@@ -58,7 +63,7 @@ export function Combobox({
 	return (
 		<>
 			<input type='hidden' id={id} name={name} value={value} />
-			<Popover open={open} onOpenChange={setOpen}>
+			<Popover open={open} onOpenChange={setOpen} modal>
 				<PopoverTrigger asChild>
 					<Button
 						{...buttonProps}
@@ -93,9 +98,11 @@ export function Combobox({
 													? ''
 													: currentValue
 
-											flushSync(() => {
-												setValue(newValue)
-											})
+											if (!isControlled) {
+												flushSync(() => {
+													setInternalValue(newValue)
+												})
+											}
 											onValueChange?.(newValue)
 											setOpen(false)
 										}}

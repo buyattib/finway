@@ -8,6 +8,7 @@ import {
 	TRANSACTION_TYPE_EXPENSE,
 	TRANSACTION_TYPE_INCOME,
 } from '~/features/transactions/constants'
+import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 import type { DB, TCurrency } from './types'
 
 type CurrencyBalance = {
@@ -216,7 +217,11 @@ export async function getBalances({
 
 export async function getSelectData(db: DB, ownerId: string) {
 	const accounts = await db.query.account.findMany({
-		where: (account, { eq }) => eq(account.ownerId, ownerId),
+		where: (account, { eq, and, ne }) =>
+			and(
+				eq(account.ownerId, ownerId),
+				ne(account.accountType, ACCOUNT_TYPE_CREDIT_CARD),
+			),
 		orderBy: (account, { desc }) => [desc(account.createdAt)],
 		columns: { id: true, name: true, accountType: true },
 	})

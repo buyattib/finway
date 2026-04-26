@@ -53,7 +53,7 @@ export async function loader({
 		db,
 		transactionId,
 	})
-	if (!transaction || transaction.creditCard.id !== creditCard.id) {
+	if (!transaction || transaction.accountId !== creditCard.accountId) {
 		throw new Response(t('transaction.details.loader.notFoundError'), {
 			status: 404,
 		})
@@ -110,7 +110,7 @@ export async function action({
 			db,
 			transactionId,
 		})
-		if (!transaction || transaction.creditCard.id !== creditCard.id) {
+		if (!transaction || transaction.accountId !== creditCard.accountId) {
 			const toastHeaders = await createToastHeaders(request, {
 				type: 'error',
 				title: t('details.action.transactionNotFoundToast'),
@@ -120,7 +120,7 @@ export async function action({
 
 		await deleteCreditCardTransaction({
 			db,
-			creditCardTransactionId: transactionId,
+			transactionId,
 		})
 
 		return await redirectWithToast(

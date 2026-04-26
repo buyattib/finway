@@ -1,0 +1,2 @@
+ALTER TABLE `credit_card_transaction_installments` ADD `transactionId` text REFERENCES transactions(id);--> statement-breakpoint
+CREATE INDEX `credit_card_transaction_installments_transactionId_idx` ON `credit_card_transaction_installments` (`transactionId`);
