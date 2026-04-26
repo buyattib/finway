@@ -1,9 +1,10 @@
-import { and, eq, gte, lte, sql, desc } from 'drizzle-orm'
+import { and, eq, gte, lte, sql, desc, ne } from 'drizzle-orm'
 
 import * as schema from '~/database/schema'
 import type { DB } from '~/lib/types'
 
 import type { TTransactionType } from '~/features/transactions/types'
+import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
 import type { CategoryResponse, CurrencyResponse } from './types'
 
@@ -17,7 +18,9 @@ type Args = {
 function getMonthRange() {
 	const now = new Date()
 	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
-	const monthEnd = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0))
+	const monthEnd = new Date(
+		Date.UTC(now.getFullYear(), now.getMonth() + 1, 0),
+	)
 	return { monthStart, monthEnd }
 }
 
@@ -56,7 +59,7 @@ export async function getMonthTransactions({
 			),
 		)
 		.groupBy(schema.transaction.currencyId)
-		.orderBy(desc(sql`amount`))
+		.orderBy(desc(sql`SUM(${schema.transaction.amount})`))
 }
 
 export async function getMonthTransactionsByCategory({
@@ -85,6 +88,7 @@ export async function getMonthTransactionsByCategory({
 			and(
 				eq(schema.account.id, schema.transaction.accountId),
 				eq(schema.account.ownerId, ownerId),
+				ne(schema.account.accountType, ACCOUNT_TYPE_CREDIT_CARD),
 			),
 		)
 		.innerJoin(
@@ -99,5 +103,5 @@ export async function getMonthTransactionsByCategory({
 			),
 		)
 		.groupBy(schema.transaction.category, schema.transaction.currencyId)
-		.orderBy(desc(sql`amount`))
+		.orderBy(desc(sql`SUM(${schema.transaction.amount})`))
 }

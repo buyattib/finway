@@ -130,7 +130,7 @@ export function ExpensesByCategoryChart({
 						<YAxis
 							type='category'
 							dataKey='label'
-							width={120}
+							width={80}
 							tickLine={false}
 							axisLine={false}
 							reversed
