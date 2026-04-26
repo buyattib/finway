@@ -101,9 +101,7 @@ export function MovementFormDialog({ selectData, balances, ...props }: Props) {
 
 	return (
 		<Dialog open onOpenChange={o => !o && close()}>
-			<DialogContent
-				className='top-0 left-0 translate-x-0 translate-y-0 w-screen h-dvh max-w-none max-h-dvh rounded-none border-0 overflow-y-auto sm:top-[50%] sm:left-[50%] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:h-auto sm:max-w-xl sm:max-h-[90vh] sm:rounded-lg sm:border'
-			>
+			<DialogContent className='top-0 left-0 translate-x-0 translate-y-0 w-screen h-dvh max-w-none max-h-dvh rounded-none border-0 overflow-y-auto sm:top-[50%] sm:left-[50%] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:h-auto sm:max-w-xl sm:max-h-[90vh] sm:rounded-lg sm:border'>
 				<DialogHeader>
 					<DialogTitle>{t('dialog.title')}</DialogTitle>
 					<DialogDescription>
