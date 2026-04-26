@@ -31,14 +31,14 @@ export async function getMonthTransactions({
 	transactionType,
 }: Args): Promise<Array<CurrencyResponse>> {
 	const { monthStart, monthEnd } = getMonthRange()
+	const sumExpr = sql<number>`SUM(${schema.transaction.amount}) / 100.0`
+	const amountExpr = sql<string>`CAST(${sumExpr} AS TEXT)`
 
 	return db
 		.select({
 			currencyId: schema.transaction.currencyId,
 			currency: schema.currency.code,
-			amount: sql<string>`CAST(SUM(${schema.transaction.amount}) / 100.0 AS TEXT)`.as(
-				'amount',
-			),
+			amount: amountExpr.as('amount'),
 		})
 		.from(schema.transaction)
 		.innerJoin(
@@ -60,7 +60,7 @@ export async function getMonthTransactions({
 			),
 		)
 		.groupBy(schema.transaction.currencyId)
-		.orderBy(desc(sql`SUM(${schema.transaction.amount})`))
+		.orderBy(desc(sumExpr))
 }
 
 export async function getMonthTransactionsByCategory({
@@ -73,15 +73,15 @@ export async function getMonthTransactionsByCategory({
 	transactionType: TTransactionType
 }): Promise<Array<CategoryResponse>> {
 	const { monthStart, monthEnd } = getMonthRange()
+	const sumExpr = sql<number>`SUM(${schema.transaction.amount}) / 100.0`
+	const amountExpr = sql<string>`CAST(${sumExpr} AS TEXT)`
 
 	return db
 		.select({
 			category: schema.transaction.category,
 			currencyId: schema.transaction.currencyId,
 			currency: schema.currency.code,
-			amount: sql<string>`CAST(SUM(${schema.transaction.amount}) / 100.0 AS TEXT)`.as(
-				'amount',
-			),
+			amount: amountExpr.as('amount'),
 		})
 		.from(schema.transaction)
 		.innerJoin(
@@ -104,7 +104,7 @@ export async function getMonthTransactionsByCategory({
 			),
 		)
 		.groupBy(schema.transaction.category, schema.transaction.currencyId)
-		.orderBy(desc(sql`SUM(${schema.transaction.amount})`))
+		.orderBy(desc(sumExpr))
 }
 
 export async function getMonthlyCreditCardExpenses({
@@ -114,16 +114,20 @@ export async function getMonthlyCreditCardExpenses({
 	db: DB
 	ownerId: string
 }) {
+	// TODO: add currency
 	const monthExpr = sql<string>`strftime('%m', ${schema.creditCardStatement.dueDate})`
 	const yearExpr = sql<string>`strftime('%Y', ${schema.creditCardStatement.dueDate})`
+
+	const sumExpr = sql<number>`SUM(${schema.creditCardTransactionInstallment.amount}) / 100.0`
+	const amountExpr = sql<string>`CAST(${sumExpr} AS TEXT)`
 
 	return db
 		.select({
 			month: monthExpr.as('month'),
 			year: yearExpr.as('year'),
-			amount: sql<string>`CAST(SUM(${schema.creditCardTransactionInstallment.amount}) / 100.0 AS TEXT)`.as(
-				'amount',
-			),
+			amount: amountExpr.as('amount'),
+			currencyId: schema.currency.id,
+			currency: schema.currency.code,
 		})
 		.from(schema.creditCardTransactionInstallment)
 		.innerJoin(
@@ -141,6 +145,10 @@ export async function getMonthlyCreditCardExpenses({
 			),
 		)
 		.innerJoin(
+			schema.currency,
+			eq(schema.currency.id, schema.transaction.currencyId),
+		)
+		.innerJoin(
 			schema.creditCard,
 			eq(schema.creditCard.id, schema.creditCardStatement.creditCardId),
 		)
@@ -152,5 +160,6 @@ export async function getMonthlyCreditCardExpenses({
 			),
 		)
 		.where(eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE))
-		.groupBy(yearExpr, monthExpr)
+		.groupBy(yearExpr, monthExpr, schema.transaction.currencyId)
+		.orderBy(desc(sumExpr))
 }
