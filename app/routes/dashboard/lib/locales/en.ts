@@ -8,9 +8,11 @@ export default {
 			totalBalances: 'Total balances',
 			monthExpenses: 'This month expenses',
 			monthIncomes: 'This month incomes',
+			creditCardDebt: 'Credit card debt',
 			noBalances: 'No balances',
 			noExpenses: 'No expenses',
 			noIncomes: 'No incomes',
+			noCreditCardDebt: 'No credit card debt',
 		},
 		expensesByCategory: {
 			title: 'Expenses by category (this month)',

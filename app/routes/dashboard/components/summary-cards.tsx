@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { WalletIcon } from 'lucide-react'
+import { CreditCardIcon, WalletIcon } from 'lucide-react'
 
 import type { Route } from '../+types'
 
@@ -51,10 +51,16 @@ export function SummaryCards({
 			data: summary.monthIncomes,
 			empty: t('index.summaryCards.noIncomes'),
 		},
+		{
+			title: t('index.summaryCards.creditCardDebt'),
+			icon: <CreditCardIcon />,
+			data: summary.creditCardDebt,
+			empty: t('index.summaryCards.noCreditCardDebt'),
+		},
 	]
 
 	return (
-		<div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+		<div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
 			{cards.map(({ title, icon, data, empty }) => {
 				return (
 					<Card

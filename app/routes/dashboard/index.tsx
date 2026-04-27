@@ -58,6 +58,20 @@ export async function loader({ context }: Route.LoaderArgs) {
 			transactionType: TRANSACTION_TYPE_INCOME,
 			group: 'currency',
 		}),
+		creditCardDebt: (
+			await getBalances({
+				db,
+				ownerId: user.id,
+				group: 'currency',
+				accountKind: 'cc',
+			})
+		)
+			.filter(({ balance }) => Number(balance) < 0)
+			.map(({ currency, currencyId, balance }) => ({
+				currencyId,
+				currency,
+				amount: (-Number(balance)).toString(),
+			})),
 	}
 	const monthExpensesByCategory = await getMonthTransactionsByCategory({
 		db,

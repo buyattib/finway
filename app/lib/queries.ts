@@ -25,7 +25,7 @@ type Args = {
 	currencyId?: string
 	parseBalance?: boolean
 	group?: 'account' | 'currency'
-	includeCreditCard?: boolean
+	accountKind?: 'cc' | 'non-cc' | 'all'
 }
 
 export async function getBalances(
@@ -51,14 +51,15 @@ export async function getBalances({
 	currencyId,
 	parseBalance = true,
 	group = 'account',
-	includeCreditCard = false,
+	accountKind = 'non-cc',
 }: Args) {
-	const accountFilter = and(
-		eq(schema.account.ownerId, ownerId),
-		includeCreditCard
-			? undefined
-			: ne(schema.account.accountType, ACCOUNT_TYPE_CREDIT_CARD),
-	)
+	const kindFilter = {
+		cc: eq(schema.account.accountType, ACCOUNT_TYPE_CREDIT_CARD),
+		'non-cc': ne(schema.account.accountType, ACCOUNT_TYPE_CREDIT_CARD),
+		all: undefined,
+	}[accountKind]
+
+	const accountFilter = and(eq(schema.account.ownerId, ownerId), kindFilter)
 
 	const transactionBalances = db
 		.select({
