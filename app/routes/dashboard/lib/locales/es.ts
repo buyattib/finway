@@ -18,5 +18,9 @@ export default {
 			title: 'Gastos por categoría (este mes)',
 			empty: 'Sin gastos este mes aún',
 		},
+		monthlyCreditCardExpenses: {
+			title: 'Gastos de tarjeta de crédito por mes',
+			empty: 'Sin gastos de tarjeta de crédito aún',
+		},
 	},
 } satisfies typeof en

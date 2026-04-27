@@ -1,4 +1,4 @@
-import { and, eq, gte, lte, sql, desc, ne } from 'drizzle-orm'
+import { and, eq, gte, lte, sql, desc, asc, ne } from 'drizzle-orm'
 
 import * as schema from '~/database/schema'
 import type { DB } from '~/lib/types'
@@ -6,7 +6,6 @@ import type { DB } from '~/lib/types'
 import type { TTransactionType } from '~/features/transactions/types'
 import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
-import type { CategoryResponse, CurrencyResponse } from './types'
 import { TRANSACTION_TYPE_EXPENSE } from '~/features/transactions/constants'
 
 type Args = {
@@ -29,7 +28,7 @@ export async function getMonthTransactions({
 	db,
 	ownerId,
 	transactionType,
-}: Args): Promise<Array<CurrencyResponse>> {
+}: Args) {
 	const { monthStart, monthEnd } = getMonthRange()
 	const sumExpr = sql<number>`SUM(${schema.transaction.amount}) / 100.0`
 	const amountExpr = sql<string>`CAST(${sumExpr} AS TEXT)`
@@ -72,7 +71,7 @@ export async function getMonthTransactionsByCategory({
 	db: DB
 	ownerId: string
 	transactionType: TTransactionType
-}): Promise<Array<CategoryResponse>> {
+}) {
 	const { monthStart, monthEnd } = getMonthRange()
 	const sumExpr = sql<number>`SUM(${schema.transaction.amount}) / 100.0`
 	const amountExpr = sql<string>`CAST(${sumExpr} AS TEXT)`
@@ -115,7 +114,6 @@ export async function getMonthlyCreditCardExpenses({
 	db: DB
 	ownerId: string
 }) {
-	// TODO: add currency
 	const monthExpr = sql<string>`strftime('%m', ${schema.creditCardStatement.dueDate})`
 	const yearExpr = sql<string>`strftime('%Y', ${schema.creditCardStatement.dueDate})`
 
@@ -161,6 +159,6 @@ export async function getMonthlyCreditCardExpenses({
 			),
 		)
 		.where(eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE))
-		.groupBy(yearExpr, monthExpr, schema.transaction.currencyId)
-		.orderBy(desc(sumExpr))
+		.groupBy(yearExpr, monthExpr, schema.currency.id)
+		.orderBy(asc(yearExpr), asc(monthExpr))
 }

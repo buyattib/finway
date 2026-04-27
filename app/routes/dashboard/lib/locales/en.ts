@@ -16,5 +16,9 @@ export default {
 			title: 'Expenses by category (this month)',
 			empty: 'No expenses this month yet',
 		},
+		monthlyCreditCardExpenses: {
+			title: 'Credit card expenses by month',
+			empty: 'No credit card expenses yet',
+		},
 	},
 }

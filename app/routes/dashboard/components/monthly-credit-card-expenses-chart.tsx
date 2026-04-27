@@ -5,7 +5,12 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import type { Route } from '../+types'
 
 import type { TCurrency } from '~/lib/types'
-import { formatNumber, getCurrencySymbol } from '~/lib/utils'
+import {
+	formatDate,
+	formatNumber,
+	getCurrencySymbol,
+	initializeDate,
+} from '~/lib/utils'
 
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
@@ -25,19 +30,23 @@ const chartConfig = {
 	},
 } satisfies ChartConfig
 
-export function ExpensesByCategoryChart({
+export function MonthlyCreditCardExpensesChart({
 	data,
 }: {
-	data: Route.ComponentProps['loaderData']['monthExpensesByCategory']
+	data: Route.ComponentProps['loaderData']['monthlyCreditCardExpenses']
 }) {
-	const { t, i18n } = useTranslation(['dashboard', 'constants'])
+	const { t, i18n } = useTranslation(['dashboard'])
 
 	const dataByCurrency = data.reduce<
 		Record<
 			string,
 			{
 				code: TCurrency
-				rows: Array<{ category: string; label: string; amount: number }>
+				rows: Array<{
+					key: string
+					label: string
+					amount: number
+				}>
 			}
 		>
 	>((acc, row) => {
@@ -45,9 +54,18 @@ export function ExpensesByCategoryChart({
 			code: row.currency,
 			rows: [],
 		}
+		const date = initializeDate({
+			year: Number(row.year),
+			month: Number(row.month) - 1,
+			day: 1,
+		})
+		const label = formatDate(date, i18n.language, {
+			day: undefined,
+			month: 'short',
+		})
 		bucket.rows.push({
-			category: row.category,
-			label: t(`constants:categories.${row.category}.name`),
+			key: `${row.year}-${row.month}`,
+			label,
 			amount: Number(row.amount),
 		})
 		acc[row.currencyId] = bucket
@@ -72,12 +90,12 @@ export function ExpensesByCategoryChart({
 			<Card>
 				<CardHeader>
 					<CardTitle>
-						{t('dashboard:index.expensesByCategory.title')}
+						{t('dashboard:index.monthlyCreditCardExpenses.title')}
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<Text alignment='center' className='italic'>
-						{t('dashboard:index.expensesByCategory.empty')}
+						{t('dashboard:index.monthlyCreditCardExpenses.empty')}
 					</Text>
 				</CardContent>
 			</Card>
@@ -92,7 +110,7 @@ export function ExpensesByCategoryChart({
 		<Card>
 			<CardHeader className='flex flex-row items-center justify-between gap-2'>
 				<CardTitle>
-					{t('dashboard:index.expensesByCategory.title')}
+					{t('dashboard:index.monthlyCreditCardExpenses.title')}
 				</CardTitle>
 				<div className='w-32'>
 					<Select
@@ -110,12 +128,17 @@ export function ExpensesByCategoryChart({
 					<BarChart
 						accessibilityLayer
 						data={chartData}
-						layout='vertical'
 						margin={{ left: 16, right: 16 }}
 					>
-						<CartesianGrid horizontal={false} />
+						<CartesianGrid vertical={false} />
 						<XAxis
+							dataKey='label'
+							tickLine={false}
+							axisLine={false}
+						/>
+						<YAxis
 							type='number'
+							width={80}
 							tickFormatter={value =>
 								`${symbol} ${formatNumber(
 									value,
@@ -126,13 +149,6 @@ export function ExpensesByCategoryChart({
 									},
 								)}`
 							}
-						/>
-						<YAxis
-							type='category'
-							dataKey='label'
-							width={80}
-							tickLine={false}
-							axisLine={false}
 						/>
 						<ChartTooltip
 							cursor={false}
@@ -154,7 +170,7 @@ export function ExpensesByCategoryChart({
 							dataKey='amount'
 							fill='var(--color-amount)'
 							radius={4}
-							maxBarSize={32}
+							maxBarSize={48}
 						/>
 					</BarChart>
 				</ChartContainer>

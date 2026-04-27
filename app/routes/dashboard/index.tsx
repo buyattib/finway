@@ -17,6 +17,7 @@ import {
 } from './lib/queries'
 import { SummaryCards } from './components/summary-cards'
 import { ExpensesByCategoryChart } from './components/expenses-by-category-chart'
+import { MonthlyCreditCardExpensesChart } from './components/monthly-credit-card-expenses-chart'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	return [
@@ -64,8 +65,10 @@ export async function loader({ context }: Route.LoaderArgs) {
 		transactionType: TRANSACTION_TYPE_EXPENSE,
 	})
 
-	const test = await getMonthlyCreditCardExpenses({ db, ownerId: user.id })
-	console.log(test)
+	const monthlyCreditCardExpenses = await getMonthlyCreditCardExpenses({
+		db,
+		ownerId: user.id,
+	})
 
 	return {
 		meta: {
@@ -74,16 +77,18 @@ export async function loader({ context }: Route.LoaderArgs) {
 		},
 		summary,
 		monthExpensesByCategory,
+		monthlyCreditCardExpenses,
 	}
 }
 
 export default function Dashboard({
-	loaderData: { summary, monthExpensesByCategory },
+	loaderData: { summary, monthExpensesByCategory, monthlyCreditCardExpenses },
 }: Route.ComponentProps) {
 	return (
 		<PageSection>
 			<SummaryCards summary={summary} />
 			<ExpensesByCategoryChart data={monthExpensesByCategory} />
+			<MonthlyCreditCardExpensesChart data={monthlyCreditCardExpenses} />
 		</PageSection>
 	)
 }
