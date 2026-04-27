@@ -1,4 +1,4 @@
-import { and, eq, sql, desc } from 'drizzle-orm'
+import { and, eq, ne, sql, desc } from 'drizzle-orm'
 import { unionAll } from 'drizzle-orm/sqlite-core'
 
 import * as schema from '~/database/schema'
@@ -25,6 +25,7 @@ type Args = {
 	currencyId?: string
 	parseBalance?: boolean
 	group?: 'account' | 'currency'
+	includeCreditCard?: boolean
 }
 
 export async function getBalances(
@@ -50,7 +51,15 @@ export async function getBalances({
 	currencyId,
 	parseBalance = true,
 	group = 'account',
+	includeCreditCard = false,
 }: Args) {
+	const accountFilter = and(
+		eq(schema.account.ownerId, ownerId),
+		includeCreditCard
+			? undefined
+			: ne(schema.account.accountType, ACCOUNT_TYPE_CREDIT_CARD),
+	)
+
 	const transactionBalances = db
 		.select({
 			accountId: sql`${schema.account.id}`.as('accountId'),
@@ -73,7 +82,7 @@ export async function getBalances({
 				eq(schema.currency.id, schema.transaction.currencyId),
 			),
 		)
-		.where(eq(schema.account.ownerId, ownerId))
+		.where(accountFilter)
 		.groupBy(schema.account.id, schema.currency.id)
 
 	const outgoingTransferBalances = db
@@ -95,7 +104,7 @@ export async function getBalances({
 				eq(schema.currency.id, schema.transfer.currencyId),
 			),
 		)
-		.where(eq(schema.account.ownerId, ownerId))
+		.where(accountFilter)
 		.groupBy(schema.account.id, schema.currency.id)
 
 	const incomingTransferBalances = db
@@ -117,7 +126,7 @@ export async function getBalances({
 				eq(schema.currency.id, schema.transfer.currencyId),
 			),
 		)
-		.where(eq(schema.account.ownerId, ownerId))
+		.where(accountFilter)
 		.groupBy(schema.account.id, schema.currency.id)
 
 	const outgoingExchangeBalances = db
@@ -139,7 +148,7 @@ export async function getBalances({
 				eq(schema.currency.id, schema.exchange.fromCurrencyId),
 			),
 		)
-		.where(eq(schema.account.ownerId, ownerId))
+		.where(accountFilter)
 		.groupBy(schema.account.id, schema.currency.id)
 
 	const incomingExchangeBalances = db
@@ -161,7 +170,7 @@ export async function getBalances({
 				eq(schema.currency.id, schema.exchange.toCurrencyId),
 			),
 		)
-		.where(eq(schema.account.ownerId, ownerId))
+		.where(accountFilter)
 		.groupBy(schema.account.id, schema.currency.id)
 
 	const allBalances = unionAll(
