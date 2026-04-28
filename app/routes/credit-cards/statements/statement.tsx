@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, Outlet } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeftIcon, SquarePenIcon } from 'lucide-react'
 
@@ -14,6 +14,7 @@ import { PAGE_SIZE } from '~/lib/constants'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
+import { Badge } from '~/components/ui/badge'
 import { PageSection, PageHeader } from '~/components/ui/page'
 import { TransactionType } from '~/components/transaction-type'
 import { CreditCard } from '~/components/credit-card'
@@ -21,15 +22,13 @@ import { CurrencyIcon } from '~/components/currency-icon'
 import { TablePagination } from '~/components/table-pagination'
 
 import {
-	TRANSACTION_TYPE_EXPENSE,
-	TRANSACTION_TYPE_INCOME,
-} from '~/features/transactions/constants'
-
-import {
 	getStatementById,
 	getStatementInstallments,
+	getStatementStatus,
 	getStatementTotalsByCurrency,
 } from '../lib/queries'
+import { reduceStatementTotals } from '../lib/utils'
+import { STATEMENT_STATUS_PAID } from '../lib/constants'
 import { creditCardContext } from '../lib/context'
 import { EditStatementModal } from './components/edit-statement-modal'
 
@@ -75,6 +74,13 @@ export async function loader({
 		getStatementTotalsByCurrency({ db, statementId }),
 	])
 
+	const owed = reduceStatementTotals(currencyTotals)
+	const status = await getStatementStatus({
+		db,
+		statementId,
+		owed,
+	})
+
 	return {
 		creditCard: {
 			id: creditCard.id,
@@ -89,24 +95,11 @@ export async function loader({
 			closingDate: statement.closingDate,
 			dueDate: statement.dueDate,
 		},
-		totals: Array.from(
-			currencyTotals.reduce<Map<TCurrency, number>>((acc, row) => {
-				const amount = Number(row.total)
-				const signed = {
-					[TRANSACTION_TYPE_EXPENSE]: amount,
-					[TRANSACTION_TYPE_INCOME]: -amount,
-				}[row.type]
-				acc.set(
-					row.currencyCode,
-					(acc.get(row.currencyCode) ?? 0) + signed,
-				)
-				return acc
-			}, new Map()),
-			([currencyCode, amount]) => ({
-				currencyCode,
-				total: String(amount / 100),
-			}),
-		),
+		status,
+		totals: owed.map(o => ({
+			currencyCode: o.currencyCode,
+			total: String(o.amountCents / 100),
+		})),
 		installments: installments.map(i => ({
 			...i,
 			amount: String(i.amount / 100),
@@ -122,13 +115,28 @@ export async function loader({
 }
 
 export default function StatementDetails({
-	loaderData: { creditCard, statement, totals, installments, pagination },
+	loaderData: {
+		creditCard,
+		statement,
+		status,
+		totals,
+		installments,
+		pagination,
+	},
 }: Route.ComponentProps) {
 	const { t, i18n } = useTranslation(['credit-cards', 'constants'])
 	const [editOpen, setEditOpen] = useState(false)
 
+	const badgeVariant = (
+		{
+			paid: 'default',
+			pending: 'secondary',
+		} as const
+	)[status]
+
 	return (
 		<>
+			<Outlet />
 			<div className='flex items-center gap-2'>
 				<Button asChild variant='link' width='fit' size='icon'>
 					<Link to={`/app/credit-cards/${creditCard.id}`}>
@@ -193,12 +201,28 @@ export default function StatementDetails({
 										currency={currencyCode as TCurrency}
 										size='sm'
 									/>
-									{getCurrencySymbol(currencyCode)}{' '}
+									{getCurrencySymbol(
+										currencyCode as TCurrency,
+									)}{' '}
 									{formatNumber(total, i18n.language)}
 								</Text>
 							))}
 						</div>
 					)}
+
+					<div className='flex flex-row items-center justify-between gap-2 border-t pt-3'>
+						<Badge className='text-sm' variant={badgeVariant}>
+							{t(`constants:statement-status.${status}`)}
+						</Badge>
+
+						{status !== STATEMENT_STATUS_PAID && (
+							<Button size='sm' variant='default' asChild>
+								<Link to='pay'>
+									{t('statement.payment.payButton')}
+								</Link>
+							</Button>
+						)}
+					</div>
 				</div>
 			</div>
 

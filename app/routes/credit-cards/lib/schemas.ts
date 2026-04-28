@@ -78,6 +78,15 @@ export function editStatementFormSchema(t: TFunction<'credit-cards'>) {
 		)
 }
 
+export function payStatementFormSchema(t: TFunction<'credit-cards'>) {
+	return z.object({
+		date: z.iso.datetime(t('statement.payment.schema.dateRequired')),
+		fromAccountId: z.string(
+			t('statement.payment.schema.fromAccountRequired'),
+		),
+	})
+}
+
 export function creditCardTransactionFormSchema(t: TFunction<'credit-cards'>) {
 	return z
 		.object({

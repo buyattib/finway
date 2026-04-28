@@ -1,3 +1,4 @@
+
 - new form to sync balance (arqueo de caja): backend creates a tx to fix the difference
 
 - Move the language, theme, email to a settings page. Logout in the side nav, maybe remove header?

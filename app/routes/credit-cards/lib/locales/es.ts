@@ -66,6 +66,32 @@ export default {
 					'La fecha de vencimiento debe ser anterior a la del resumen siguiente',
 			},
 		},
+		payment: {
+			payButton: 'Pagar resumen',
+			payTitle: 'Pagar resumen',
+			payDescription:
+				'Registra una transferencia desde una de tus cuentas para saldar este resumen por completo.',
+			fromAccountLabel: 'Pagar desde',
+			fromAccountPlaceholder: 'Selecciona una cuenta',
+			dateLabel: 'Fecha',
+			cancelButton: 'Cancelar',
+			submitButton: 'Pagar',
+			paidOnLabel: 'Pagado el',
+			paidFromLabel: 'Desde',
+			schema: {
+				dateRequired: 'La fecha es requerida',
+				fromAccountRequired: 'La cuenta de origen es requerida',
+			},
+			action: {
+				notFoundError: 'Resumen no encontrado',
+				alreadyPaidError: 'El resumen ya está pagado',
+				nothingOwedError: 'No hay deuda en este resumen',
+				fromAccountNotFound: 'Cuenta de origen no encontrada',
+				insufficientBalance:
+					'La cuenta no tiene saldo suficiente en esta moneda',
+				paySuccessToast: 'Resumen pagado',
+			},
+		},
 	},
 	form: {
 		description:

@@ -19,6 +19,9 @@ import { addMonth, initializeDate, subtractMonth } from '~/lib/utils'
 import type { TCategory, TTransactionType } from '~/features/transactions/types'
 import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
+import { STATEMENT_STATUS_PAID, STATEMENT_STATUS_PENDING } from './constants'
+import type { TReducedStatementTotals, TStatementStatus } from './types'
+
 // cc
 
 export async function createCreditCard({
@@ -483,6 +486,7 @@ export async function getStatementTotalsByCurrency({
 }) {
 	return db
 		.select({
+			currencyId: schema.currency.id,
 			currencyCode: schema.currency.code,
 			total: sum(schema.creditCardTransactionInstallment.amount),
 			type: schema.transaction.type,
@@ -505,7 +509,11 @@ export async function getStatementTotalsByCurrency({
 				statementId,
 			),
 		)
-		.groupBy(schema.currency.code, schema.transaction.type)
+		.groupBy(
+			schema.currency.id,
+			schema.currency.code,
+			schema.transaction.type,
+		)
 }
 
 export async function getLatestStatement({
@@ -563,6 +571,103 @@ export async function getAdjacentStatements({
 	])
 
 	return { previous, next }
+}
+
+// statement payments
+
+export async function getStatementTotalPaymentByCurrency({
+	db,
+	statementId,
+}: {
+	db: DB
+	statementId: string
+}) {
+	return db
+		.select({
+			currencyId: schema.transfer.currencyId,
+			amount: sum(schema.transfer.amount),
+		})
+		.from(schema.creditCardStatementPayment)
+		.innerJoin(
+			schema.creditCardStatement,
+			eq(
+				schema.creditCardStatement.id,
+				schema.creditCardStatementPayment.statementId,
+			),
+		)
+		.innerJoin(
+			schema.transfer,
+			eq(
+				schema.transfer.id,
+				schema.creditCardStatementPayment.transferId,
+			),
+		)
+		.where(eq(schema.creditCardStatementPayment.statementId, statementId))
+		.groupBy(schema.transfer.currencyId)
+}
+
+export async function getStatementStatus({
+	db,
+	statementId,
+	owed: owedTotals,
+}: {
+	db: DB
+	statementId: string
+	owed: TReducedStatementTotals
+}): Promise<TStatementStatus> {
+	const statementTotalPaymentByCurrency =
+		await getStatementTotalPaymentByCurrency({ db, statementId })
+
+	const paymentsByCurrency = new Map<string, number>()
+	for (const st of statementTotalPaymentByCurrency) {
+		const amount = Number(st.amount ?? 0)
+		paymentsByCurrency.set(st.currencyId, amount)
+	}
+
+	for (const owed of owedTotals) {
+		const payment = paymentsByCurrency.get(owed.currencyId)
+		if (!payment || payment !== owed.amountCents)
+			return STATEMENT_STATUS_PENDING
+	}
+
+	return STATEMENT_STATUS_PAID
+}
+
+export async function payStatement({
+	db,
+	statementId,
+	date,
+	fromAccountId,
+	toAccountId,
+	payments,
+}: {
+	db: DB
+	statementId: string
+	date: string
+	fromAccountId: string
+	toAccountId: string
+	payments: { amount: number; currencyId: string }[]
+}) {
+	await db.transaction(async tx => {
+		const transfers = await tx
+			.insert(schema.transfer)
+			.values(
+				payments.map(({ amount, currencyId }) => ({
+					date,
+					amount,
+					currencyId,
+					fromAccountId,
+					toAccountId,
+				})),
+			)
+			.returning({ id: schema.transfer.id })
+
+		await tx
+			.insert(schema.creditCardStatementPayment)
+			.values(
+				transfers.map(({ id }) => ({ statementId, transferId: id })),
+			)
+	})
 }
 
 // cc transactions

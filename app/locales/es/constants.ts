@@ -17,6 +17,18 @@ export default {
 		EXPENSE: 'Cargo',
 		INCOME: 'Reembolso',
 	},
+	currency: {
+		USD: 'Dólar Estadounidense (USD)',
+		EUR: 'Euro (EUR)',
+		ARS: 'Peso Argentino (ARS)',
+		USDT: 'Tether (USDT)',
+		USDC: 'USD Coin (USDC)',
+		DAI: 'Dai (DAI)',
+	},
+	'statement-status': {
+		paid: 'Pagado',
+		pending: 'Pendiente',
+	},
 	categories: {
 		housing: {
 			name: 'Vivienda',
@@ -101,13 +113,5 @@ export default {
 			name: 'Pago de Deudas',
 			description: 'Capital de préstamos, interéses tarjeta de crédito',
 		},
-	},
-	currency: {
-		USD: 'Dólar Estadounidense (USD)',
-		EUR: 'Euro (EUR)',
-		ARS: 'Peso Argentino (ARS)',
-		USDT: 'Tether (USDT)',
-		USDC: 'USD Coin (USDC)',
-		DAI: 'Dai (DAI)',
 	},
 } satisfies typeof en
