@@ -334,7 +334,6 @@ export const creditCardStatementRelations = relations(
 			references: [creditCard.id],
 		}),
 		installments: many(creditCardTransactionInstallment),
-		payments: many(creditCardStatementPayment),
 	}),
 )
 
