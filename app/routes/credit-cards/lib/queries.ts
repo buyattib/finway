@@ -6,16 +6,22 @@ import {
 	gt,
 	lt,
 	lte,
+	sql,
 	sum,
 	ne,
 	inArray,
 	count,
 } from 'drizzle-orm'
+import { unionAll } from 'drizzle-orm/sqlite-core'
 
 import * as schema from '~/database/schema'
 import type { DB } from '~/lib/types'
 import { addMonth, initializeDate, subtractMonth } from '~/lib/utils'
 
+import {
+	TRANSACTION_TYPE_EXPENSE,
+	TRANSACTION_TYPE_INCOME,
+} from '~/features/transactions/constants'
 import type { TCategory, TTransactionType } from '~/features/transactions/types'
 import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
@@ -475,6 +481,115 @@ export async function getCreditCardStatements({
 	)
 
 	return { statements, total }
+}
+
+export async function getCreditCardStatementStatuses({
+	db,
+	creditCardId,
+}: {
+	db: DB
+	creditCardId: string
+}): Promise<Record<string, TStatementStatus>> {
+	const owed = db
+		.select({
+			statementId: sql<string>`${schema.creditCardStatement.id}`.as(
+				'statementId',
+			),
+			currencyId: sql<string>`${schema.transaction.currencyId}`.as(
+				'currencyId',
+			),
+			amount: sql<number>`SUM(
+				CASE
+					WHEN ${schema.transaction.type} = ${TRANSACTION_TYPE_EXPENSE} THEN ${schema.creditCardTransactionInstallment.amount}
+					WHEN ${schema.transaction.type} = ${TRANSACTION_TYPE_INCOME} THEN -${schema.creditCardTransactionInstallment.amount}
+					ELSE 0
+				END
+			)`.as('amount'),
+		})
+		.from(schema.creditCardTransactionInstallment)
+		.innerJoin(
+			schema.creditCardStatement,
+			and(
+				eq(
+					schema.creditCardStatement.id,
+					schema.creditCardTransactionInstallment.statementId,
+				),
+				eq(schema.creditCardStatement.creditCardId, creditCardId),
+			),
+		)
+		.innerJoin(
+			schema.transaction,
+			eq(
+				schema.creditCardTransactionInstallment.transactionId,
+				schema.transaction.id,
+			),
+		)
+		.groupBy(
+			schema.creditCardTransactionInstallment.statementId,
+			schema.transaction.currencyId,
+		)
+
+	const paid = db
+		.select({
+			statementId: sql<string>`${schema.creditCardStatement.id}`.as(
+				'statementId',
+			),
+			currencyId: sql<string>`${schema.transfer.currencyId}`.as(
+				'currencyId',
+			),
+			amount: sql<number>`-SUM(${schema.transfer.amount})`.as('amount'),
+		})
+		.from(schema.creditCardStatementPayment)
+		.innerJoin(
+			schema.creditCardStatement,
+			and(
+				eq(
+					schema.creditCardStatement.id,
+					schema.creditCardStatementPayment.statementId,
+				),
+				eq(schema.creditCardStatement.creditCardId, creditCardId),
+			),
+		)
+		.innerJoin(
+			schema.transfer,
+			eq(
+				schema.transfer.id,
+				schema.creditCardStatementPayment.transferId,
+			),
+		)
+		.groupBy(
+			schema.creditCardStatementPayment.statementId,
+			schema.transfer.currencyId,
+		)
+
+	const combined = unionAll(owed, paid).as('combined')
+
+	const perCurrency = db
+		.select({
+			statementId: sql<string>`${combined.statementId}`.as('statementId'),
+			currencyId: sql<string>`${combined.currencyId}`.as('currencyId'),
+			balance: sql<number>`SUM(${combined.amount})`.as('balance'),
+		})
+		.from(combined)
+		.groupBy(sql`${combined.statementId}`, sql`${combined.currencyId}`)
+		.as('perCurrency')
+
+	const statements = await db
+		.select({
+			statementId: sql<string>`${perCurrency.statementId}`.as(
+				'statementId',
+			),
+			status: sql<TStatementStatus>`
+	            CASE WHEN SUM(ABS(${perCurrency.balance})) = 0
+	                THEN ${STATEMENT_STATUS_PAID}
+	                ELSE ${STATEMENT_STATUS_PENDING}
+	            END
+	        `.as('status'),
+		})
+		.from(perCurrency)
+		.groupBy(sql`${perCurrency.statementId}`)
+
+	return Object.fromEntries(statements.map(s => [s.statementId, s.status]))
 }
 
 export async function getStatementTotalsByCurrency({
