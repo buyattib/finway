@@ -15,6 +15,18 @@ export default {
 		EXPENSE: 'Charge',
 		INCOME: 'Refund',
 	},
+	currency: {
+		USD: 'US Dollar (USD)',
+		EUR: 'Euro (EUR)',
+		ARS: 'Argentine Peso (ARS)',
+		USDT: 'Tether (USDT)',
+		USDC: 'USD Coin (USDC)',
+		DAI: 'Dai (DAI)',
+	},
+	'statement-status': {
+		paid: 'Paid',
+		pending: 'Pending',
+	},
 	categories: {
 		housing: {
 			name: 'Housing',
@@ -94,13 +106,5 @@ export default {
 			name: 'Debt Payments',
 			description: 'Loan principal, credit card interest',
 		},
-	},
-	currency: {
-		USD: 'US Dollar (USD)',
-		EUR: 'Euro (EUR)',
-		ARS: 'Argentine Peso (ARS)',
-		USDT: 'Tether (USDT)',
-		USDC: 'USD Coin (USDC)',
-		DAI: 'Dai (DAI)',
 	},
 }

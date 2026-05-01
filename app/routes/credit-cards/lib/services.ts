@@ -10,12 +10,17 @@ import { ACTION_CREATION, ACTION_EDITION } from '~/lib/constants'
 
 import { creditCardTransactionFormSchema } from './schemas'
 import { creditCardContext } from './context'
+import { STATEMENT_STATUS_PAID } from './constants'
 import {
 	createCreditCardTransaction,
 	getCreditCardTransactionById,
+	getStatementById,
+	getStatementStatus,
+	getStatementTotalsByCurrency,
 	makeTransactionInstallments,
 	updateCreditCardTransaction,
 } from './queries'
+import { reduceStatementTotals } from './utils'
 
 export async function creditCardTransactionAction({
 	request,
@@ -148,4 +153,48 @@ export async function creditCardTransactionAction({
 		type: 'success',
 		title: msg,
 	})
+}
+
+export async function validateStatementPayment({
+	context,
+	request,
+	statementId,
+}: {
+	context: Readonly<RouterContextProvider>
+	request: Request
+	statementId: string
+}) {
+	const t = getServerT(context, 'credit-cards')
+	const db = context.get(dbContext)
+	const { creditCard } = context.get(creditCardContext)
+
+	const statement = await getStatementById({ db, statementId })
+	if (!statement || statement.creditCardId !== creditCard.id) {
+		throw await redirectWithToast('..', request, {
+			type: 'error',
+			title: t('statement.payment.action.notFoundError'),
+		})
+	}
+
+	const owed = reduceStatementTotals(
+		await getStatementTotalsByCurrency({ db, statementId }),
+	)
+	const status = await getStatementStatus({ db, statementId, owed })
+
+	if (status === STATEMENT_STATUS_PAID) {
+		throw await redirectWithToast('..', request, {
+			type: 'error',
+			title: t('statement.payment.action.alreadyPaidError'),
+		})
+	}
+
+	const payments = owed.filter(o => o.amountCents > 0)
+	if (payments.length === 0) {
+		throw await redirectWithToast('..', request, {
+			type: 'error',
+			title: t('statement.payment.action.nothingOwedError'),
+		})
+	}
+
+	return { statement, payments }
 }

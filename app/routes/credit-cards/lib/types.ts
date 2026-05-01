@@ -1,3 +1,13 @@
+import type {
+	STATEMENT_STATUS_PAID,
+	STATEMENT_STATUS_PENDING,
+} from './constants'
+import type { reduceStatementTotals } from './utils'
+
+export type TStatementStatus =
+	| typeof STATEMENT_STATUS_PAID
+	| typeof STATEMENT_STATUS_PENDING
+
 export type TCreditCardContext = {
 	creditCard: {
 		id: string
@@ -14,3 +24,5 @@ export type TCreditCardContext = {
 		dueDate: string
 	}
 }
+
+export type TReducedStatementTotals = ReturnType<typeof reduceStatementTotals>

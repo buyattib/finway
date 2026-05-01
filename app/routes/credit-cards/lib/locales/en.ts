@@ -44,7 +44,8 @@ export default {
 			dueDate: 'Due Date',
 			editButton: 'Edit',
 			editTitle: 'Edit Statement Dates',
-			editDescription: 'Update the closing and due dates for this statement.',
+			editDescription:
+				'Update the closing and due dates for this statement.',
 			editCancelButton: 'Cancel',
 			editSubmitButton: 'Save',
 			installmentsTitle: 'Installments ({{total}})',
@@ -61,6 +62,32 @@ export default {
 					'Due date must be after the previous statement due date',
 				dueDateBeforeNext:
 					'Due date must be before the next statement due date',
+			},
+		},
+		payment: {
+			payButton: 'Pay statement',
+			payTitle: 'Pay statement',
+			payDescription:
+				'Record a transfer from one of your accounts to settle this statement in full.',
+			fromAccountLabel: 'Pay from',
+			fromAccountPlaceholder: 'Select an account',
+			dateLabel: 'Date',
+			cancelButton: 'Cancel',
+			submitButton: 'Pay',
+			paidOnLabel: 'Paid on',
+			paidFromLabel: 'From',
+			schema: {
+				dateRequired: 'Date is required',
+				fromAccountRequired: 'Source account is required',
+			},
+			action: {
+				notFoundError: 'Statement not found',
+				alreadyPaidError: 'Statement is already paid',
+				nothingOwedError: 'Nothing owed on this statement',
+				fromAccountNotFound: 'Source account not found',
+				insufficientBalance:
+					'Account does not have enough balance in this currency',
+				paySuccessToast: 'Statement paid',
 			},
 		},
 	},

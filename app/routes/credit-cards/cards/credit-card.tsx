@@ -26,6 +26,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Title } from '~/components/ui/title'
 import { Text } from '~/components/ui/text'
 import { Button } from '~/components/ui/button'
+import { Badge } from '~/components/ui/badge'
 import { PageSection, PageHeader } from '~/components/ui/page'
 import {
 	Tooltip,
@@ -42,7 +43,15 @@ import {
 } from '~/features/transactions/constants'
 
 import { creditCardContext } from '../lib/context'
-import { getCreditCardStatements, deleteCreditCard } from '../lib/queries'
+import {
+	getCreditCardStatements,
+	deleteCreditCard,
+	getCreditCardStatementStatuses,
+} from '../lib/queries'
+import {
+	STATEMENT_STATUS_PAID,
+	STATEMENT_STATUS_PENDING,
+} from '../lib/constants'
 
 export function meta({ loaderData }: Route.MetaArgs) {
 	const title = loaderData?.meta.title
@@ -71,6 +80,11 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		pageSize: PAGE_SIZE,
 	})
 
+	const statementStatuses = await getCreditCardStatementStatuses({
+		db,
+		creditCardId: creditCard.id,
+	})
+
 	const statements = _statements.map(s => {
 		const totalsByCurrency = s.installments.reduce<Map<TCurrency, number>>(
 			(acc, tx) => {
@@ -89,6 +103,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 			id: s.id,
 			closingDate: s.closingDate,
 			dueDate: s.dueDate,
+			status: statementStatuses[s.id],
 			totals: Array.from(totalsByCurrency, ([currencyCode, amount]) => ({
 				currencyCode,
 				total: String(amount / 100),
@@ -142,7 +157,7 @@ export default function CreditCardDetails({
 	const location = useLocation()
 	const navigation = useNavigation()
 	const navigate = useNavigate()
-	const { t, i18n } = useTranslation('credit-cards')
+	const { t, i18n } = useTranslation(['credit-cards', 'constants'])
 
 	const isLoading =
 		navigation.state === 'loading' &&
@@ -250,7 +265,13 @@ export default function CreditCardDetails({
 					) : (
 						<ul className='flex flex-col gap-2'>
 							{statements.map(
-								({ id, closingDate, dueDate, totals }) => (
+								({
+									id,
+									closingDate,
+									dueDate,
+									totals,
+									status,
+								}) => (
 									<li
 										key={id}
 										className='rounded-lg border p-3 hover:bg-muted/50 transition-colors cursor-pointer'
@@ -282,6 +303,24 @@ export default function CreditCardDetails({
 												</Text>
 											</div>
 											<div className='flex flex-col gap-1 lg:items-end'>
+												{status && (
+													<Badge
+														variant={
+															(
+																{
+																	[STATEMENT_STATUS_PAID]:
+																		'default',
+																	[STATEMENT_STATUS_PENDING]:
+																		'secondary',
+																} as const
+															)[status]
+														}
+													>
+														{t(
+															`constants:statement-status.${status}`,
+														)}
+													</Badge>
+												)}
 												{totals.length > 0 ? (
 													totals.map(
 														({
