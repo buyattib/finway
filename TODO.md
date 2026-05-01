@@ -1,11 +1,9 @@
-- keep working on statements payments
+- keep working on statements payments (payments list for a card, remove payments)
 
+- Improve the expenses by category chart to include installments
+- Move the language, theme, email to a settings page. Logout in the side nav, maybe remove header? Save preferences to db?
 - new form to sync balance (arqueo de caja): backend creates a tx to fix the difference
 
-- Move the language, theme, email to a settings page. Logout in the side nav, maybe remove header?
-- Improve the expenses by category chart to include installments
-
-- improve agents.md
 - Consolidated balance in one currency (external api to fetch fx)
 - Recurring transactions
 - Tag system for categories
