@@ -7,12 +7,7 @@ import type { DateRange } from 'react-day-picker'
 import type { loader } from '../resources/expenses-by-category'
 
 import type { TCurrency } from '~/lib/types'
-import {
-	formatDate,
-	formatNumber,
-	getCurrencySymbol,
-	initializeDate,
-} from '~/lib/utils'
+import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
@@ -153,25 +148,18 @@ export function ExpensesByCategoryChart({
 								className='justify-start px-2.5 font-normal'
 							>
 								<CalendarIcon />
-								{selectedDate?.from ? (
-									selectedDate.to ? (
-										<>
-											{formatDate(
-												selectedDate.from,
-												i18n.language,
-											)}{' '}
-											-{' '}
-											{formatDate(
-												selectedDate.to,
-												i18n.language,
-											)}
-										</>
-									) : (
-										formatDate(
+								{selectedDate?.from && selectedDate?.to ? (
+									<>
+										{formatDate(
 											selectedDate.from,
 											i18n.language,
-										)
-									)
+										)}{' '}
+										-{' '}
+										{formatDate(
+											selectedDate.to,
+											i18n.language,
+										)}
+									</>
 								) : (
 									<span>
 										{t('index.expensesByCategory.pickDate')}
@@ -181,34 +169,12 @@ export function ExpensesByCategoryChart({
 						</PopoverTrigger>
 						<PopoverContent className='w-auto p-0' align='start'>
 							<Calendar
+								timeZone='utc'
 								mode='range'
 								numberOfMonths={2}
 								defaultMonth={selectedDate?.from}
 								selected={selectedDate}
-								disabled={{ after: initializeDate() }}
-								onSelect={dateRange => {
-									if (!dateRange)
-										return handleDateChange(dateRange)
-
-									const utcDateRange = {
-										from: dateRange.from
-											? initializeDate({
-													year: dateRange.from.getFullYear(),
-													month: dateRange.from.getMonth(),
-													day: dateRange.from.getDate(),
-												})
-											: undefined,
-										to: dateRange.to
-											? initializeDate({
-													year: dateRange.to.getFullYear(),
-													month: dateRange.to.getMonth(),
-													day: dateRange.to.getDate(),
-												})
-											: undefined,
-									}
-
-									handleDateChange(utcDateRange)
-								}}
+								onSelect={handleDateChange}
 							/>
 						</PopoverContent>
 					</Popover>
