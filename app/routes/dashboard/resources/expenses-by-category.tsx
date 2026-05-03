@@ -3,7 +3,10 @@ import type { Route } from './+types/expenses-by-category'
 import { dbContext, userContext } from '~/lib/context'
 import { TRANSACTION_TYPE_EXPENSE } from '~/features/transactions/constants'
 
-import { getMonthTransactionsByCategory } from '../lib/queries'
+import {
+	getMonthTransactionCurrencies,
+	getMonthTransactionsByCategory,
+} from '../lib/queries'
 
 export async function loader({ context, request }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
@@ -20,12 +23,23 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		throw new Response('currencyId is required', { status: 400 })
 	}
 
-	return await getMonthTransactionsByCategory({
-		db,
-		ownerId: user.id,
-		transactionType: TRANSACTION_TYPE_EXPENSE,
-		currencyId,
-		from,
-		to,
-	})
+	const [currencies, transactionsByCategory] = await Promise.all([
+		getMonthTransactionCurrencies({
+			db,
+			ownerId: user.id,
+			transactionType: TRANSACTION_TYPE_EXPENSE,
+			from,
+			to,
+		}),
+		getMonthTransactionsByCategory({
+			db,
+			ownerId: user.id,
+			transactionType: TRANSACTION_TYPE_EXPENSE,
+			currencyId,
+			from,
+			to,
+		}),
+	])
+
+	return { currencies, data: transactionsByCategory }
 }

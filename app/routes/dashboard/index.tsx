@@ -139,11 +139,7 @@ export default function Dashboard({
 	return (
 		<PageSection>
 			<SummaryCards summary={summary} />
-			<ExpensesByCategoryChart
-				currencies={expenseByCategoryChart.currencies}
-				initialData={expenseByCategoryChart.data}
-				initialDateRange={expenseByCategoryChart.dateRange}
-			/>
+			<ExpensesByCategoryChart initialData={expenseByCategoryChart} />
 			<MonthlyCreditCardExpensesChart
 				currencies={ccExpensesChart.currencies}
 				initialData={ccExpensesChart.data}

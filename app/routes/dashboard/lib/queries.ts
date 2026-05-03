@@ -65,9 +65,13 @@ export async function getMonthTransactionCurrencies({
 	db: DB
 	ownerId: string
 	transactionType: TTransactionType
-	from: string
-	to: string
+	from: string | null
+	to: string | null
 }) {
+	const filters = [eq(schema.transaction.type, transactionType)]
+	if (from) filters.push(gte(schema.transaction.date, from))
+	if (to) filters.push(lte(schema.transaction.date, to))
+
 	return db
 		.selectDistinct({
 			currencyId: schema.transaction.currencyId,
@@ -85,13 +89,7 @@ export async function getMonthTransactionCurrencies({
 			schema.currency,
 			eq(schema.currency.id, schema.transaction.currencyId),
 		)
-		.where(
-			and(
-				eq(schema.transaction.type, transactionType),
-				gte(schema.transaction.date, from),
-				lte(schema.transaction.date, to),
-			),
-		)
+		.where(and(...filters))
 }
 
 export async function getCreditCardExpenseCurrencies({

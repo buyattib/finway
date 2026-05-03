@@ -18,7 +18,7 @@ export default {
 		},
 		expensesByCategory: {
 			title: 'Gastos por categoría',
-			empty: 'Sin gastos este mes aún',
+			empty: 'Sin gastos',
 			pickDate: 'Elegir fecha',
 		},
 		monthlyCreditCardExpenses: {
