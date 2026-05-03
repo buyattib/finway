@@ -7,7 +7,12 @@ import type { DateRange } from 'react-day-picker'
 import type { loader } from '../resources/expenses-by-category'
 
 import type { TCurrency } from '~/lib/types'
-import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
+import {
+	formatDate,
+	formatNumber,
+	getCurrencySymbol,
+	initializeDate,
+} from '~/lib/utils'
 
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
@@ -180,7 +185,30 @@ export function ExpensesByCategoryChart({
 								numberOfMonths={2}
 								defaultMonth={selectedDate?.from}
 								selected={selectedDate}
-								onSelect={handleDateChange}
+								disabled={{ after: initializeDate() }}
+								onSelect={dateRange => {
+									if (!dateRange)
+										return handleDateChange(dateRange)
+
+									const utcDateRange = {
+										from: dateRange.from
+											? initializeDate({
+													year: dateRange.from.getFullYear(),
+													month: dateRange.from.getMonth(),
+													day: dateRange.from.getDate(),
+												})
+											: undefined,
+										to: dateRange.to
+											? initializeDate({
+													year: dateRange.to.getFullYear(),
+													month: dateRange.to.getMonth(),
+													day: dateRange.to.getDate(),
+												})
+											: undefined,
+									}
+
+									handleDateChange(utcDateRange)
+								}}
 							/>
 						</PopoverContent>
 					</Popover>
