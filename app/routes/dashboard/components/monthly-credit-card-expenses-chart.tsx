@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { useFetcher } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import type { Route } from '../+types'
+import type { loader } from '../resources/monthly-cc-expenses'
 
 import type { TCurrency } from '~/lib/types'
 import {
@@ -30,93 +31,92 @@ const chartConfig = {
 	},
 } satisfies ChartConfig
 
-export function MonthlyCreditCardExpensesChart({
-	data,
-}: {
-	data: Route.ComponentProps['loaderData']['monthlyCreditCardExpenses']
-}) {
-	const { t, i18n } = useTranslation(['dashboard'])
+type ChartData = Awaited<ReturnType<typeof loader>>
 
-	const dataByCurrency = data.reduce<
-		Record<
-			string,
-			{
-				code: TCurrency
-				rows: Array<{
-					key: string
-					label: string
-					amount: number
-				}>
-			}
-		>
-	>((acc, row) => {
-		const bucket = acc[row.currencyId] ?? {
-			code: row.currency,
-			rows: [],
-		}
+type CurrencyOption = {
+	currencyId: string
+	currency: TCurrency
+}
+
+function toChartRows(data: ChartData, language: string) {
+	return data.map(row => {
 		const date = initializeDate({
 			year: Number(row.year),
 			month: Number(row.month) - 1,
 			day: 1,
 		})
-		const label = formatDate(date, i18n.language, {
-			day: undefined,
-			month: 'short',
-		})
-		bucket.rows.push({
-			key: `${row.year}-${row.month}`,
-			label,
-			amount: Number(row.amount),
-		})
-		acc[row.currencyId] = bucket
-		return acc
-	}, {})
-
-	const currencyOptions = Object.keys(dataByCurrency).map(id => {
-		const code = dataByCurrency[id].code
 		return {
-			value: id,
-			label: code,
-			icon: <CurrencyIcon currency={code} size='sm' />,
+			key: `${row.year}-${row.month}`,
+			label: formatDate(date, language, {
+				day: undefined,
+				month: 'short',
+			}),
+			amount: Number(row.amount),
 		}
 	})
+}
+
+export function MonthlyCreditCardExpensesChart({
+	currencies,
+	initialData,
+}: {
+	currencies: CurrencyOption[]
+	initialData: ChartData
+}) {
+	const { t, i18n } = useTranslation('dashboard')
+	const fetcher = useFetcher<typeof loader>()
+
+	const currencyOptions = currencies.map(({ currencyId, currency }) => ({
+		value: currencyId,
+		label: currency,
+		icon: <CurrencyIcon currency={currency} size='sm' />,
+	}))
 
 	const [selectedCurrency, setSelectedCurrency] = useState<string>(
-		currencyOptions[0]?.value ?? '',
+		currencyOptions[0]?.value,
 	)
+	const selectedCode = currencies.find(
+		c => c.currencyId === selectedCurrency,
+	)?.currency
+	const symbol = selectedCode ? getCurrencySymbol(selectedCode) : undefined
 
-	if (!selectedCurrency) {
+	if (!selectedCurrency || !symbol) {
 		return (
 			<Card>
 				<CardHeader>
 					<CardTitle>
-						{t('dashboard:index.monthlyCreditCardExpenses.title')}
+						{t('index.monthlyCreditCardExpenses.title')}
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<Text alignment='center' className='italic'>
-						{t('dashboard:index.monthlyCreditCardExpenses.empty')}
+						{t('index.monthlyCreditCardExpenses.empty')}
 					</Text>
 				</CardContent>
 			</Card>
 		)
 	}
 
-	const selectedData = dataByCurrency[selectedCurrency]
-	const chartData = selectedData.rows
-	const symbol = getCurrencySymbol(selectedData.code)
+	const handleCurrencyChange = (currencyId: string) => {
+		setSelectedCurrency(currencyId)
+		fetcher.load(
+			`/app/dashboard/monthly-cc-expenses?currencyId=${currencyId}`,
+		)
+	}
+
+	const chartData = toChartRows(fetcher.data ?? initialData, i18n.language)
 
 	return (
 		<Card>
 			<CardHeader className='flex flex-row items-center justify-between gap-2'>
 				<CardTitle>
-					{t('dashboard:index.monthlyCreditCardExpenses.title')}
+					{t('index.monthlyCreditCardExpenses.title')}
 				</CardTitle>
 				<div className='w-32'>
 					<Select
 						options={currencyOptions}
 						defaultValue={selectedCurrency}
-						onValueChange={setSelectedCurrency}
+						onValueChange={handleCurrencyChange}
 					/>
 				</div>
 			</CardHeader>
@@ -135,6 +135,10 @@ export function MonthlyCreditCardExpensesChart({
 							dataKey='label'
 							tickLine={false}
 							axisLine={false}
+							interval={0}
+							angle={-45}
+							textAnchor='end'
+							height={60}
 						/>
 						<YAxis
 							type='number'

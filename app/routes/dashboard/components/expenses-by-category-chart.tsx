@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { useFetcher } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import type { Route } from '../+types'
+import type { loader } from '../resources/expenses-by-category'
 
 import type { TCurrency } from '~/lib/types'
 import { formatNumber, getCurrencySymbol } from '~/lib/utils'
@@ -25,80 +26,74 @@ const chartConfig = {
 	},
 } satisfies ChartConfig
 
+type ChartData = Awaited<ReturnType<typeof loader>>
+
+type CurrencyOption = {
+	currencyId: string
+	currency: TCurrency
+}
+
 export function ExpensesByCategoryChart({
-	data,
+	currencies,
+	initialData,
 }: {
-	data: Route.ComponentProps['loaderData']['monthExpensesByCategory']
+	currencies: CurrencyOption[]
+	initialData: ChartData
 }) {
 	const { t, i18n } = useTranslation(['dashboard', 'constants'])
+	const fetcher = useFetcher<typeof loader>()
 
-	const dataByCurrency = data.reduce<
-		Record<
-			string,
-			{
-				code: TCurrency
-				rows: Array<{ category: string; label: string; amount: number }>
-			}
-		>
-	>((acc, row) => {
-		const bucket = acc[row.currencyId] ?? {
-			code: row.currency,
-			rows: [],
-		}
-		bucket.rows.push({
-			category: row.category,
-			label: t(`constants:categories.${row.category}.name`),
-			amount: Number(row.amount),
-		})
-		acc[row.currencyId] = bucket
-		return acc
-	}, {})
-
-	const currencyOptions = Object.keys(dataByCurrency).map(id => {
-		const code = dataByCurrency[id].code
-		return {
-			value: id,
-			label: code,
-			icon: <CurrencyIcon currency={code} size='sm' />,
-		}
-	})
+	const currencyOptions = currencies.map(({ currencyId, currency }) => ({
+		value: currencyId,
+		label: currency,
+		icon: <CurrencyIcon currency={currency} size='sm' />,
+	}))
 
 	const [selectedCurrency, setSelectedCurrency] = useState<string>(
-		currencyOptions[0]?.value ?? '',
+		currencyOptions[0]?.value,
 	)
+	const selectedCode = currencies.find(
+		c => c.currencyId === selectedCurrency,
+	)?.currency
+	const symbol = selectedCode ? getCurrencySymbol(selectedCode) : undefined
 
-	if (!selectedCurrency) {
+	if (!selectedCurrency || !symbol) {
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>
-						{t('dashboard:index.expensesByCategory.title')}
-					</CardTitle>
+					<CardTitle>{t('index.expensesByCategory.title')}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<Text alignment='center' className='italic'>
-						{t('dashboard:index.expensesByCategory.empty')}
+						{t('index.expensesByCategory.empty')}
 					</Text>
 				</CardContent>
 			</Card>
 		)
 	}
 
-	const selectedData = dataByCurrency[selectedCurrency]
-	const chartData = selectedData.rows
-	const symbol = getCurrencySymbol(selectedData.code)
+	const handleCurrencyChange = (currencyId: string) => {
+		setSelectedCurrency(currencyId)
+		fetcher.load(
+			`/app/dashboard/expenses-by-category?currencyId=${currencyId}`,
+		)
+	}
+
+	const chartData = (fetcher.data ?? initialData).map(row => ({
+		category: row.category,
+		label: t(`constants:categories.${row.category}.name`),
+		amount: Number(row.amount),
+	}))
 
 	return (
 		<Card>
 			<CardHeader className='flex flex-row items-center justify-between gap-2'>
-				<CardTitle>
-					{t('dashboard:index.expensesByCategory.title')}
-				</CardTitle>
+				<CardTitle>{t('index.expensesByCategory.title')}</CardTitle>
 				<div className='w-32'>
 					<Select
 						options={currencyOptions}
 						defaultValue={selectedCurrency}
-						onValueChange={setSelectedCurrency}
+						onValueChange={handleCurrencyChange}
 					/>
 				</div>
 			</CardHeader>

@@ -63,7 +63,7 @@ export async function getMonthTransactions({
 		.orderBy(desc(sumExpr))
 }
 
-export async function getMonthTransactionsByCategory({
+export async function getMonthTransactionCurrencies({
 	db,
 	ownerId,
 	transactionType,
@@ -71,6 +71,90 @@ export async function getMonthTransactionsByCategory({
 	db: DB
 	ownerId: string
 	transactionType: TTransactionType
+}) {
+	const { monthStart, monthEnd } = getMonthRange()
+
+	return db
+		.selectDistinct({
+			currencyId: schema.transaction.currencyId,
+			currency: schema.currency.code,
+		})
+		.from(schema.transaction)
+		.innerJoin(
+			schema.account,
+			and(
+				eq(schema.account.id, schema.transaction.accountId),
+				eq(schema.account.ownerId, ownerId),
+			),
+		)
+		.innerJoin(
+			schema.currency,
+			eq(schema.currency.id, schema.transaction.currencyId),
+		)
+		.where(
+			and(
+				eq(schema.transaction.type, transactionType),
+				gte(schema.transaction.date, monthStart.toISOString()),
+				lte(schema.transaction.date, monthEnd.toISOString()),
+			),
+		)
+}
+
+export async function getCreditCardExpenseCurrencies({
+	db,
+	ownerId,
+}: {
+	db: DB
+	ownerId: string
+}) {
+	return db
+		.selectDistinct({
+			currencyId: schema.currency.id,
+			currency: schema.currency.code,
+		})
+		.from(schema.creditCardTransactionInstallment)
+		.innerJoin(
+			schema.creditCardStatement,
+			eq(
+				schema.creditCardStatement.id,
+				schema.creditCardTransactionInstallment.statementId,
+			),
+		)
+		.innerJoin(
+			schema.transaction,
+			eq(
+				schema.transaction.id,
+				schema.creditCardTransactionInstallment.transactionId,
+			),
+		)
+		.innerJoin(
+			schema.currency,
+			eq(schema.currency.id, schema.transaction.currencyId),
+		)
+		.innerJoin(
+			schema.creditCard,
+			eq(schema.creditCard.id, schema.creditCardStatement.creditCardId),
+		)
+		.innerJoin(
+			schema.account,
+			and(
+				eq(schema.account.id, schema.creditCard.accountId),
+				eq(schema.account.ownerId, ownerId),
+			),
+		)
+		.where(eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE))
+}
+
+export async function getMonthTransactionsByCategory({
+	db,
+	ownerId,
+	transactionType,
+	currencyId,
+}: {
+	db: DB
+	ownerId: string
+	transactionType: TTransactionType
+	currencyId: string
 }) {
 	const { monthStart, monthEnd } = getMonthRange()
 	const sumExpr = sql<number>`SUM(${schema.transaction.amount}) / 100.0`
@@ -100,6 +184,7 @@ export async function getMonthTransactionsByCategory({
 				eq(schema.transaction.type, transactionType),
 				gte(schema.transaction.date, monthStart.toISOString()),
 				lte(schema.transaction.date, monthEnd.toISOString()),
+				eq(schema.transaction.currencyId, currencyId),
 			),
 		)
 		.groupBy(schema.transaction.category, schema.transaction.currencyId)
@@ -109,9 +194,11 @@ export async function getMonthTransactionsByCategory({
 export async function getMonthlyCreditCardExpenses({
 	db,
 	ownerId,
+	currencyId,
 }: {
 	db: DB
 	ownerId: string
+	currencyId: string
 }) {
 	const monthExpr = sql<string>`strftime('%m', ${schema.creditCardStatement.dueDate})`
 	const yearExpr = sql<string>`strftime('%Y', ${schema.creditCardStatement.dueDate})`
@@ -157,7 +244,12 @@ export async function getMonthlyCreditCardExpenses({
 				eq(schema.account.ownerId, ownerId),
 			),
 		)
-		.where(eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE))
+		.where(
+			and(
+				eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE),
+				eq(schema.currency.id, currencyId),
+			),
+		)
 		.groupBy(yearExpr, monthExpr, schema.currency.id)
 		.orderBy(asc(yearExpr), asc(monthExpr))
 }

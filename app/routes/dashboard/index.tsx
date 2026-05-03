@@ -11,8 +11,10 @@ import {
 import { PageSection } from '~/components/ui/page'
 
 import {
+	getCreditCardExpenseCurrencies,
 	getMonthlyCreditCardExpenses,
 	getMonthTransactions,
+	getMonthTransactionCurrencies,
 	getMonthTransactionsByCategory,
 } from './lib/queries'
 import { SummaryCards } from './components/summary-cards'
@@ -73,16 +75,33 @@ export async function loader({ context }: Route.LoaderArgs) {
 				amount: (-Number(balance)).toString(),
 			})),
 	}
-	const monthExpensesByCategory = await getMonthTransactionsByCategory({
-		db,
-		ownerId: user.id,
-		transactionType: TRANSACTION_TYPE_EXPENSE,
-	})
 
-	const monthlyCreditCardExpenses = await getMonthlyCreditCardExpenses({
-		db,
-		ownerId: user.id,
-	})
+	const [txCurrencies, ccCurrencies] = await Promise.all([
+		getMonthTransactionCurrencies({
+			db,
+			ownerId: user.id,
+			transactionType: TRANSACTION_TYPE_EXPENSE,
+		}),
+		getCreditCardExpenseCurrencies({
+			db,
+			ownerId: user.id,
+		}),
+	])
+
+	const [monthExpensesByCategory, monthlyCreditCardExpenses] =
+		await Promise.all([
+			getMonthTransactionsByCategory({
+				db,
+				ownerId: user.id,
+				transactionType: TRANSACTION_TYPE_EXPENSE,
+				currencyId: txCurrencies?.[0]?.currencyId,
+			}),
+			getMonthlyCreditCardExpenses({
+				db,
+				ownerId: user.id,
+				currencyId: ccCurrencies?.[0]?.currencyId,
+			}),
+		])
 
 	return {
 		meta: {
@@ -90,19 +109,31 @@ export async function loader({ context }: Route.LoaderArgs) {
 			description: t('index.meta.description'),
 		},
 		summary,
-		monthExpensesByCategory,
-		monthlyCreditCardExpenses,
+		expenseByCategoryChart: {
+			currencies: txCurrencies,
+			data: monthExpensesByCategory,
+		},
+		ccExpensesChart: {
+			currencies: ccCurrencies,
+			data: monthlyCreditCardExpenses,
+		},
 	}
 }
 
 export default function Dashboard({
-	loaderData: { summary, monthExpensesByCategory, monthlyCreditCardExpenses },
+	loaderData: { summary, expenseByCategoryChart, ccExpensesChart },
 }: Route.ComponentProps) {
 	return (
 		<PageSection>
 			<SummaryCards summary={summary} />
-			<ExpensesByCategoryChart data={monthExpensesByCategory} />
-			<MonthlyCreditCardExpensesChart data={monthlyCreditCardExpenses} />
+			<ExpensesByCategoryChart
+				currencies={expenseByCategoryChart.currencies}
+				initialData={expenseByCategoryChart.data}
+			/>
+			<MonthlyCreditCardExpensesChart
+				currencies={ccExpensesChart.currencies}
+				initialData={ccExpensesChart.data}
+			/>
 		</PageSection>
 	)
 }
