@@ -150,6 +150,7 @@ export function ExpensesByCategoryChart({
 							<Calendar
 								timeZone='utc'
 								mode='range'
+								showOutsideDays={false}
 								numberOfMonths={2}
 								defaultMonth={selectedDate?.from}
 								selected={selectedDate}
