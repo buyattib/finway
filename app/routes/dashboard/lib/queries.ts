@@ -89,7 +89,6 @@ export async function getMonthTransactionsByCategory({
 			and(
 				eq(schema.account.id, schema.transaction.accountId),
 				eq(schema.account.ownerId, ownerId),
-				ne(schema.account.accountType, ACCOUNT_TYPE_CREDIT_CARD),
 			),
 		)
 		.innerJoin(

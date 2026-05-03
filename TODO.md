@@ -1,6 +1,5 @@
 - keep working on statements payments (payments list for a card, remove payments)
 
-- Improve the expenses by category chart to include installments
 
 - Move the language, theme, email to a settings page. Logout in the side nav, maybe remove header? Save preferences to db?
 
