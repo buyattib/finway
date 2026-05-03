@@ -8,14 +8,7 @@ import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
 import { TRANSACTION_TYPE_EXPENSE } from '~/features/transactions/constants'
 
-type Args = {
-	db: DB
-	ownerId: string
-	transactionType: TTransactionType
-	group: 'currency'
-}
-
-function getMonthRange() {
+export function getMonthRange() {
 	const now = new Date()
 	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
 	const monthEnd = new Date(
@@ -28,8 +21,16 @@ export async function getMonthTransactions({
 	db,
 	ownerId,
 	transactionType,
-}: Args) {
-	const { monthStart, monthEnd } = getMonthRange()
+	from,
+	to,
+}: {
+	db: DB
+	ownerId: string
+	transactionType: TTransactionType
+	group: 'currency'
+	from: string
+	to: string
+}) {
 	const sumExpr = sql<number>`SUM(${schema.transaction.amount}) / 100.0`
 	const amountExpr = sql<string>`CAST(${sumExpr} AS TEXT)`
 
@@ -55,8 +56,8 @@ export async function getMonthTransactions({
 		.where(
 			and(
 				eq(schema.transaction.type, transactionType),
-				gte(schema.transaction.date, monthStart.toISOString()),
-				lte(schema.transaction.date, monthEnd.toISOString()),
+				gte(schema.transaction.date, from),
+				lte(schema.transaction.date, to),
 			),
 		)
 		.groupBy(schema.transaction.currencyId)
@@ -67,13 +68,15 @@ export async function getMonthTransactionCurrencies({
 	db,
 	ownerId,
 	transactionType,
+	from,
+	to,
 }: {
 	db: DB
 	ownerId: string
 	transactionType: TTransactionType
+	from: string
+	to: string
 }) {
-	const { monthStart, monthEnd } = getMonthRange()
-
 	return db
 		.selectDistinct({
 			currencyId: schema.transaction.currencyId,
@@ -94,8 +97,8 @@ export async function getMonthTransactionCurrencies({
 		.where(
 			and(
 				eq(schema.transaction.type, transactionType),
-				gte(schema.transaction.date, monthStart.toISOString()),
-				lte(schema.transaction.date, monthEnd.toISOString()),
+				gte(schema.transaction.date, from),
+				lte(schema.transaction.date, to),
 			),
 		)
 }
@@ -150,13 +153,19 @@ export async function getMonthTransactionsByCategory({
 	ownerId,
 	transactionType,
 	currencyId,
+	from,
+	to,
 }: {
 	db: DB
 	ownerId: string
 	transactionType: TTransactionType
 	currencyId: string
+	from?: string
+	to?: string
 }) {
 	const { monthStart, monthEnd } = getMonthRange()
+	const dateFrom = from ?? monthStart.toISOString()
+	const dateTo = to ?? monthEnd.toISOString()
 	const sumExpr = sql<number>`SUM(${schema.transaction.amount}) / 100.0`
 	const amountExpr = sql<string>`CAST(${sumExpr} AS TEXT)`
 
@@ -182,8 +191,8 @@ export async function getMonthTransactionsByCategory({
 		.where(
 			and(
 				eq(schema.transaction.type, transactionType),
-				gte(schema.transaction.date, monthStart.toISOString()),
-				lte(schema.transaction.date, monthEnd.toISOString()),
+				gte(schema.transaction.date, dateFrom),
+				lte(schema.transaction.date, dateTo),
 				eq(schema.transaction.currencyId, currencyId),
 			),
 		)

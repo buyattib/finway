@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useFetcher } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import type { DateRange } from 'react-day-picker'
 
 import type { loader } from '../resources/expenses-by-category'
 
 import type { TCurrency } from '~/lib/types'
-import { formatNumber, getCurrencySymbol } from '~/lib/utils'
+import { formatDate, formatNumber, getCurrencySymbol } from '~/lib/utils'
 
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card'
 import { Text } from '~/components/ui/text'
@@ -16,8 +17,22 @@ import {
 	ChartTooltipContent,
 	type ChartConfig,
 } from '~/components/ui/chart'
-import { Select } from '~/components/select'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/ui/select'
 import { CurrencyIcon } from '~/components/currency-icon'
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '~/components/ui/popover'
+import { Button } from '~/components/ui/button'
+import { CalendarIcon } from 'lucide-react'
+import { Calendar } from '~/components/ui/calendar'
 
 const chartConfig = {
 	amount: {
@@ -36,9 +51,11 @@ type CurrencyOption = {
 export function ExpensesByCategoryChart({
 	currencies,
 	initialData,
+	initialDateRange,
 }: {
 	currencies: CurrencyOption[]
 	initialData: ChartData
+	initialDateRange: { from: string; to: string }
 }) {
 	const { t, i18n } = useTranslation(['dashboard', 'constants'])
 	const fetcher = useFetcher<typeof loader>()
@@ -49,6 +66,10 @@ export function ExpensesByCategoryChart({
 		icon: <CurrencyIcon currency={currency} size='sm' />,
 	}))
 
+	const [selectedDate, setSelectedDate] = useState<DateRange | undefined>({
+		from: new Date(initialDateRange.from),
+		to: new Date(initialDateRange.to),
+	})
 	const [selectedCurrency, setSelectedCurrency] = useState<string>(
 		currencyOptions[0]?.value,
 	)
@@ -87,14 +108,68 @@ export function ExpensesByCategoryChart({
 
 	return (
 		<Card>
-			<CardHeader className='flex flex-row items-center justify-between gap-2'>
+			<CardHeader className='flex flex-col md:flex-row md:items-center md:justify-between gap-2'>
 				<CardTitle>{t('index.expensesByCategory.title')}</CardTitle>
-				<div className='w-32'>
+
+				<div className='flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:w-fit w-full'>
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								variant='outline'
+								id='date-picker-range'
+								className='justify-start px-2.5 font-normal'
+							>
+								<CalendarIcon />
+								{selectedDate?.from ? (
+									selectedDate.to ? (
+										<>
+											{formatDate(
+												selectedDate.from,
+												i18n.language,
+											)}{' '}
+											-{' '}
+											{formatDate(
+												selectedDate.to,
+												i18n.language,
+											)}
+										</>
+									) : (
+										formatDate(
+											selectedDate.from,
+											i18n.language,
+										)
+									)
+								) : (
+									<span>Pick a date</span>
+								)}
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className='w-auto p-0' align='start'>
+							<Calendar
+								mode='range'
+								defaultMonth={selectedDate?.from}
+								selected={selectedDate}
+								onSelect={setSelectedDate}
+								numberOfMonths={2}
+							/>
+						</PopoverContent>
+					</Popover>
+
 					<Select
-						options={currencyOptions}
-						defaultValue={selectedCurrency}
+						value={selectedCurrency}
 						onValueChange={handleCurrencyChange}
-					/>
+					>
+						<SelectTrigger className='md:w-fit w-full'>
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							{currencyOptions.map(({ value, label, icon }) => (
+								<SelectItem key={value} value={value}>
+									{icon} {label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
 			</CardHeader>
 			<CardContent>

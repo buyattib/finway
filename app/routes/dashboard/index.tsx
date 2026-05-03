@@ -13,6 +13,7 @@ import { PageSection } from '~/components/ui/page'
 import {
 	getCreditCardExpenseCurrencies,
 	getMonthlyCreditCardExpenses,
+	getMonthRange,
 	getMonthTransactions,
 	getMonthTransactionCurrencies,
 	getMonthTransactionsByCategory,
@@ -34,6 +35,9 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const t = getServerT(context, 'dashboard')
 
+	const { monthStart, monthEnd } = getMonthRange()
+	const [from, to] = [monthStart.toISOString(), monthEnd.toISOString()]
+
 	const summary = {
 		balances: (
 			await getBalances({
@@ -53,12 +57,16 @@ export async function loader({ context }: Route.LoaderArgs) {
 			ownerId: user.id,
 			transactionType: TRANSACTION_TYPE_EXPENSE,
 			group: 'currency',
+			from,
+			to,
 		}),
 		monthIncomes: await getMonthTransactions({
 			db,
 			ownerId: user.id,
 			transactionType: TRANSACTION_TYPE_INCOME,
 			group: 'currency',
+			from,
+			to,
 		}),
 		creditCardDebt: (
 			await getBalances({
@@ -81,6 +89,8 @@ export async function loader({ context }: Route.LoaderArgs) {
 			db,
 			ownerId: user.id,
 			transactionType: TRANSACTION_TYPE_EXPENSE,
+			from,
+			to,
 		}),
 		getCreditCardExpenseCurrencies({
 			db,
@@ -95,6 +105,8 @@ export async function loader({ context }: Route.LoaderArgs) {
 				ownerId: user.id,
 				transactionType: TRANSACTION_TYPE_EXPENSE,
 				currencyId: txCurrencies?.[0]?.currencyId,
+				from,
+				to,
 			}),
 			getMonthlyCreditCardExpenses({
 				db,
@@ -112,6 +124,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		expenseByCategoryChart: {
 			currencies: txCurrencies,
 			data: monthExpensesByCategory,
+			dateRange: { from, to },
 		},
 		ccExpensesChart: {
 			currencies: ccCurrencies,
@@ -129,6 +142,7 @@ export default function Dashboard({
 			<ExpensesByCategoryChart
 				currencies={expenseByCategoryChart.currencies}
 				initialData={expenseByCategoryChart.data}
+				initialDateRange={expenseByCategoryChart.dateRange}
 			/>
 			<MonthlyCreditCardExpensesChart
 				currencies={ccExpensesChart.currencies}
