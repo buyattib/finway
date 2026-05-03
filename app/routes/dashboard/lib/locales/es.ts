@@ -17,8 +17,9 @@ export default {
 			noCreditCardDebt: 'Sin deuda de tarjeta de crédito',
 		},
 		expensesByCategory: {
-			title: 'Gastos por categoría (este mes, incl. tarjeta de crédito)',
+			title: 'Gastos por categoría',
 			empty: 'Sin gastos este mes aún',
+			pickDate: 'Elegir fecha',
 		},
 		monthlyCreditCardExpenses: {
 			title: 'Gastos de tarjeta de crédito por mes',

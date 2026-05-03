@@ -15,8 +15,9 @@ export default {
 			noCreditCardDebt: 'No credit card debt',
 		},
 		expensesByCategory: {
-			title: 'Spending by category (this month, incl. credit card)',
+			title: 'Spending by category',
 			empty: 'No expenses this month yet',
+			pickDate: 'Pick a date',
 		},
 		monthlyCreditCardExpenses: {
 			title: 'Credit card expenses by month',

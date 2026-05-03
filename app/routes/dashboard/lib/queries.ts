@@ -3,19 +3,10 @@ import { and, eq, gte, lte, sql, desc, asc, ne } from 'drizzle-orm'
 import * as schema from '~/database/schema'
 import type { DB } from '~/lib/types'
 
-import type { TTransactionType } from '~/features/transactions/types'
 import { ACCOUNT_TYPE_CREDIT_CARD } from '~/routes/accounts/lib/constants'
 
+import type { TTransactionType } from '~/features/transactions/types'
 import { TRANSACTION_TYPE_EXPENSE } from '~/features/transactions/constants'
-
-export function getMonthRange() {
-	const now = new Date()
-	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
-	const monthEnd = new Date(
-		Date.UTC(now.getFullYear(), now.getMonth() + 1, 0),
-	)
-	return { monthStart, monthEnd }
-}
 
 export async function getMonthTransactions({
 	db,
@@ -160,14 +151,18 @@ export async function getMonthTransactionsByCategory({
 	ownerId: string
 	transactionType: TTransactionType
 	currencyId: string
-	from?: string
-	to?: string
+	from: string | null
+	to: string | null
 }) {
-	const { monthStart, monthEnd } = getMonthRange()
-	const dateFrom = from ?? monthStart.toISOString()
-	const dateTo = to ?? monthEnd.toISOString()
 	const sumExpr = sql<number>`SUM(${schema.transaction.amount}) / 100.0`
 	const amountExpr = sql<string>`CAST(${sumExpr} AS TEXT)`
+
+	const filters = [
+		eq(schema.transaction.type, transactionType),
+		eq(schema.transaction.currencyId, currencyId),
+	]
+	if (from) filters.push(gte(schema.transaction.date, from))
+	if (to) filters.push(lte(schema.transaction.date, to))
 
 	return db
 		.select({
@@ -188,14 +183,7 @@ export async function getMonthTransactionsByCategory({
 			schema.currency,
 			eq(schema.currency.id, schema.transaction.currencyId),
 		)
-		.where(
-			and(
-				eq(schema.transaction.type, transactionType),
-				gte(schema.transaction.date, dateFrom),
-				lte(schema.transaction.date, dateTo),
-				eq(schema.transaction.currencyId, currencyId),
-			),
-		)
+		.where(and(...filters))
 		.groupBy(schema.transaction.category, schema.transaction.currencyId)
 		.orderBy(desc(sumExpr))
 }

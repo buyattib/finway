@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useFetcher } from 'react-router'
+import { createSearchParams, useFetcher } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import type { DateRange } from 'react-day-picker'
@@ -73,6 +73,7 @@ export function ExpensesByCategoryChart({
 	const [selectedCurrency, setSelectedCurrency] = useState<string>(
 		currencyOptions[0]?.value,
 	)
+
 	const selectedCode = currencies.find(
 		c => c.currencyId === selectedCurrency,
 	)?.currency
@@ -93,11 +94,38 @@ export function ExpensesByCategoryChart({
 		)
 	}
 
+	const getSearchParams = ({
+		dateRange,
+		currencyId,
+	}: {
+		dateRange: DateRange | undefined
+		currencyId: string
+	}) => {
+		const from = dateRange?.from?.toISOString()
+		const to = dateRange?.to?.toISOString()
+
+		return createSearchParams({
+			currencyId,
+			...(from && { from }),
+			...(to && { to }),
+		})
+	}
+
 	const handleCurrencyChange = (currencyId: string) => {
 		setSelectedCurrency(currencyId)
-		fetcher.load(
-			`/app/dashboard/expenses-by-category?currencyId=${currencyId}`,
-		)
+
+		const params = getSearchParams({ dateRange: selectedDate, currencyId })
+		fetcher.load(`/app/dashboard/expenses-by-category?${params.toString()}`)
+	}
+
+	const handleDateChange = (dateRange: DateRange | undefined) => {
+		setSelectedDate(dateRange)
+
+		const params = getSearchParams({
+			dateRange,
+			currencyId: selectedCurrency,
+		})
+		fetcher.load(`/app/dashboard/expenses-by-category?${params.toString()}`)
 	}
 
 	const chartData = (fetcher.data ?? initialData).map(row => ({
@@ -140,17 +168,19 @@ export function ExpensesByCategoryChart({
 										)
 									)
 								) : (
-									<span>Pick a date</span>
+									<span>
+										{t('index.expensesByCategory.pickDate')}
+									</span>
 								)}
 							</Button>
 						</PopoverTrigger>
 						<PopoverContent className='w-auto p-0' align='start'>
 							<Calendar
 								mode='range'
+								numberOfMonths={2}
 								defaultMonth={selectedDate?.from}
 								selected={selectedDate}
-								onSelect={setSelectedDate}
-								numberOfMonths={2}
+								onSelect={handleDateChange}
 							/>
 						</PopoverContent>
 					</Popover>

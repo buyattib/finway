@@ -10,7 +10,11 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 
 	const url = new URL(request.url)
-	const currencyId = url.searchParams.get('currencyId')
+	const searchParams = url.searchParams
+
+	const currencyId = searchParams.get('currencyId')
+	const from = searchParams.get('from')
+	const to = searchParams.get('to')
 
 	if (!currencyId) {
 		throw new Response('currencyId is required', { status: 400 })
@@ -21,5 +25,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 		ownerId: user.id,
 		transactionType: TRANSACTION_TYPE_EXPENSE,
 		currencyId,
+		from,
+		to,
 	})
 }

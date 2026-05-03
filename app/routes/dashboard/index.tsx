@@ -13,11 +13,11 @@ import { PageSection } from '~/components/ui/page'
 import {
 	getCreditCardExpenseCurrencies,
 	getMonthlyCreditCardExpenses,
-	getMonthRange,
 	getMonthTransactions,
 	getMonthTransactionCurrencies,
 	getMonthTransactionsByCategory,
 } from './lib/queries'
+import { getMonthRange } from './lib/utils'
 import { SummaryCards } from './components/summary-cards'
 import { ExpensesByCategoryChart } from './components/expenses-by-category-chart'
 import { MonthlyCreditCardExpensesChart } from './components/monthly-credit-card-expenses-chart'
