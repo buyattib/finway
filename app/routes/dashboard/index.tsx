@@ -11,10 +11,13 @@ import {
 import { PageSection } from '~/components/ui/page'
 
 import {
+	getCreditCardExpenseCurrencies,
 	getMonthlyCreditCardExpenses,
 	getMonthTransactions,
+	getMonthTransactionCurrencies,
 	getMonthTransactionsByCategory,
 } from './lib/queries'
+import { getMonthsRange } from './lib/utils'
 import { SummaryCards } from './components/summary-cards'
 import { ExpensesByCategoryChart } from './components/expenses-by-category-chart'
 import { MonthlyCreditCardExpensesChart } from './components/monthly-credit-card-expenses-chart'
@@ -31,6 +34,13 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const db = context.get(dbContext)
 	const user = context.get(userContext)
 	const t = getServerT(context, 'dashboard')
+
+	const { monthStart, monthEnd } = getMonthsRange()
+	const [from, to] = [monthStart.toISOString(), monthEnd.toISOString()]
+
+	const { monthStart: ccStart } = getMonthsRange(-6)
+	const { monthEnd: ccEnd } = getMonthsRange(6)
+	const [ccFrom, ccTo] = [ccStart.toISOString(), ccEnd.toISOString()]
 
 	const summary = {
 		balances: (
@@ -51,12 +61,16 @@ export async function loader({ context }: Route.LoaderArgs) {
 			ownerId: user.id,
 			transactionType: TRANSACTION_TYPE_EXPENSE,
 			group: 'currency',
+			from,
+			to,
 		}),
 		monthIncomes: await getMonthTransactions({
 			db,
 			ownerId: user.id,
 			transactionType: TRANSACTION_TYPE_INCOME,
 			group: 'currency',
+			from,
+			to,
 		}),
 		creditCardDebt: (
 			await getBalances({
@@ -73,16 +87,41 @@ export async function loader({ context }: Route.LoaderArgs) {
 				amount: (-Number(balance)).toString(),
 			})),
 	}
-	const monthExpensesByCategory = await getMonthTransactionsByCategory({
-		db,
-		ownerId: user.id,
-		transactionType: TRANSACTION_TYPE_EXPENSE,
-	})
 
-	const monthlyCreditCardExpenses = await getMonthlyCreditCardExpenses({
-		db,
-		ownerId: user.id,
-	})
+	const [txCurrencies, ccCurrencies] = await Promise.all([
+		getMonthTransactionCurrencies({
+			db,
+			ownerId: user.id,
+			transactionType: TRANSACTION_TYPE_EXPENSE,
+			from,
+			to,
+		}),
+		getCreditCardExpenseCurrencies({
+			db,
+			ownerId: user.id,
+			from: ccFrom,
+			to: ccTo,
+		}),
+	])
+
+	const [monthExpensesByCategory, monthlyCreditCardExpenses] =
+		await Promise.all([
+			getMonthTransactionsByCategory({
+				db,
+				ownerId: user.id,
+				transactionType: TRANSACTION_TYPE_EXPENSE,
+				currencyId: txCurrencies?.[0]?.currencyId,
+				from,
+				to,
+			}),
+			getMonthlyCreditCardExpenses({
+				db,
+				ownerId: user.id,
+				currencyId: ccCurrencies?.[0]?.currencyId,
+				from: ccFrom,
+				to: ccTo,
+			}),
+		])
 
 	return {
 		meta: {
@@ -90,19 +129,27 @@ export async function loader({ context }: Route.LoaderArgs) {
 			description: t('index.meta.description'),
 		},
 		summary,
-		monthExpensesByCategory,
-		monthlyCreditCardExpenses,
+		expenseByCategoryChart: {
+			currencies: txCurrencies,
+			data: monthExpensesByCategory,
+			dateRange: { from, to },
+		},
+		ccExpensesChart: {
+			currencies: ccCurrencies,
+			data: monthlyCreditCardExpenses,
+			dateRange: { from: ccFrom, to: ccTo },
+		},
 	}
 }
 
 export default function Dashboard({
-	loaderData: { summary, monthExpensesByCategory, monthlyCreditCardExpenses },
+	loaderData: { summary, expenseByCategoryChart, ccExpensesChart },
 }: Route.ComponentProps) {
 	return (
 		<PageSection>
 			<SummaryCards summary={summary} />
-			<ExpensesByCategoryChart data={monthExpensesByCategory} />
-			<MonthlyCreditCardExpensesChart data={monthlyCreditCardExpenses} />
+			<ExpensesByCategoryChart initialData={expenseByCategoryChart} />
+			<MonthlyCreditCardExpensesChart initialData={ccExpensesChart} />
 		</PageSection>
 	)
 }

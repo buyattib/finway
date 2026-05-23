@@ -18,7 +18,16 @@ export default [
 
 	route('app', 'components/layouts/private.tsx', [
 		index('routes/app.tsx'),
-		route('dashboard', 'routes/dashboard/index.tsx'),
+		route('dashboard', 'routes/dashboard/index.tsx', [
+			route(
+				'expenses-by-category',
+				'routes/dashboard/resources/expenses-by-category.tsx',
+			),
+			route(
+				'monthly-cc-expenses',
+				'routes/dashboard/resources/monthly-cc-expenses.tsx',
+			),
+		]),
 
 		// accounts
 		...prefix('accounts', [
