@@ -838,10 +838,11 @@ export async function makeTransactionInstallments({
 	}
 
 	const baseAmount = Math.floor(amount / installmentCount)
+	const remainder = amount - baseAmount * installmentCount
 
 	const installments = statements.map((statement, i) => ({
 		installmentNumber: i + 1,
-		amount: baseAmount,
+		amount: baseAmount + (i < remainder ? 1 : 0),
 		statementId: statement.id,
 	}))
 
