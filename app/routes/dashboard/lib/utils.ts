@@ -1,8 +1,14 @@
-export function getMonthRange() {
+export function getMonthsRange(months = 0) {
 	const now = new Date()
-	const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
-	const monthEnd = new Date(
-		Date.UTC(now.getFullYear(), now.getMonth() + 1, 0),
+	const start = new Date(
+		Date.UTC(now.getFullYear(), now.getMonth() + Math.min(months, 0), 1),
 	)
-	return { monthStart, monthEnd }
+	const end = new Date(
+		Date.UTC(
+			now.getFullYear(),
+			now.getMonth() + Math.max(months, 0) + 1,
+			0,
+		),
+	)
+	return { monthStart: start, monthEnd: end }
 }

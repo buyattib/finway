@@ -17,7 +17,7 @@ import {
 	getMonthTransactionCurrencies,
 	getMonthTransactionsByCategory,
 } from './lib/queries'
-import { getMonthRange } from './lib/utils'
+import { getMonthsRange } from './lib/utils'
 import { SummaryCards } from './components/summary-cards'
 import { ExpensesByCategoryChart } from './components/expenses-by-category-chart'
 import { MonthlyCreditCardExpensesChart } from './components/monthly-credit-card-expenses-chart'
@@ -35,8 +35,12 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const user = context.get(userContext)
 	const t = getServerT(context, 'dashboard')
 
-	const { monthStart, monthEnd } = getMonthRange()
+	const { monthStart, monthEnd } = getMonthsRange()
 	const [from, to] = [monthStart.toISOString(), monthEnd.toISOString()]
+
+	const { monthStart: ccStart } = getMonthsRange(-6)
+	const { monthEnd: ccEnd } = getMonthsRange(6)
+	const [ccFrom, ccTo] = [ccStart.toISOString(), ccEnd.toISOString()]
 
 	const summary = {
 		balances: (
@@ -95,6 +99,8 @@ export async function loader({ context }: Route.LoaderArgs) {
 		getCreditCardExpenseCurrencies({
 			db,
 			ownerId: user.id,
+			from: ccFrom,
+			to: ccTo,
 		}),
 	])
 
@@ -112,6 +118,8 @@ export async function loader({ context }: Route.LoaderArgs) {
 				db,
 				ownerId: user.id,
 				currencyId: ccCurrencies?.[0]?.currencyId,
+				from: ccFrom,
+				to: ccTo,
 			}),
 		])
 
@@ -129,6 +137,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 		ccExpensesChart: {
 			currencies: ccCurrencies,
 			data: monthlyCreditCardExpenses,
+			dateRange: { from: ccFrom, to: ccTo },
 		},
 	}
 }
@@ -140,10 +149,7 @@ export default function Dashboard({
 		<PageSection>
 			<SummaryCards summary={summary} />
 			<ExpensesByCategoryChart initialData={expenseByCategoryChart} />
-			<MonthlyCreditCardExpensesChart
-				currencies={ccExpensesChart.currencies}
-				initialData={ccExpensesChart.data}
-			/>
+			<MonthlyCreditCardExpensesChart initialData={ccExpensesChart} />
 		</PageSection>
 	)
 }

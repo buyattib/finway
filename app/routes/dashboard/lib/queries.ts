@@ -95,10 +95,18 @@ export async function getMonthTransactionCurrencies({
 export async function getCreditCardExpenseCurrencies({
 	db,
 	ownerId,
+	from,
+	to,
 }: {
 	db: DB
 	ownerId: string
+	from: string | null
+	to: string | null
 }) {
+	const filters = [eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE)]
+	if (from) filters.push(gte(schema.creditCardStatement.dueDate, from))
+	if (to) filters.push(lte(schema.creditCardStatement.dueDate, to))
+
 	return db
 		.selectDistinct({
 			currencyId: schema.currency.id,
@@ -134,7 +142,7 @@ export async function getCreditCardExpenseCurrencies({
 				eq(schema.account.ownerId, ownerId),
 			),
 		)
-		.where(eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE))
+		.where(and(...filters))
 }
 
 export async function getMonthTransactionsByCategory({
@@ -190,16 +198,27 @@ export async function getMonthlyCreditCardExpenses({
 	db,
 	ownerId,
 	currencyId,
+	from,
+	to,
 }: {
 	db: DB
 	ownerId: string
 	currencyId: string
+	from: string | null
+	to: string | null
 }) {
 	const monthExpr = sql<string>`strftime('%m', ${schema.creditCardStatement.dueDate})`
 	const yearExpr = sql<string>`strftime('%Y', ${schema.creditCardStatement.dueDate})`
 
 	const sumExpr = sql<number>`SUM(${schema.creditCardTransactionInstallment.amount}) / 100.0`
 	const amountExpr = sql<string>`CAST(${sumExpr} AS TEXT)`
+
+	const filters = [
+		eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE),
+		eq(schema.currency.id, currencyId),
+	]
+	if (from) filters.push(gte(schema.creditCardStatement.dueDate, from))
+	if (to) filters.push(lte(schema.creditCardStatement.dueDate, to))
 
 	return db
 		.select({
@@ -239,12 +258,7 @@ export async function getMonthlyCreditCardExpenses({
 				eq(schema.account.ownerId, ownerId),
 			),
 		)
-		.where(
-			and(
-				eq(schema.transaction.type, TRANSACTION_TYPE_EXPENSE),
-				eq(schema.currency.id, currencyId),
-			),
-		)
+		.where(and(...filters))
 		.groupBy(yearExpr, monthExpr, schema.currency.id)
 		.orderBy(asc(yearExpr), asc(monthExpr))
 }

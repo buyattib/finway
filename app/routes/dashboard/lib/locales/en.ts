@@ -22,6 +22,7 @@ export default {
 		monthlyCreditCardExpenses: {
 			title: 'Credit card expenses by month',
 			empty: 'No credit card expenses yet',
+			pickDate: 'Pick a date',
 		},
 	},
 }
