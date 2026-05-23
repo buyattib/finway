@@ -1,3 +1,5 @@
+import { useSearchParams } from 'react-router'
+
 import {
 	Pagination,
 	PaginationContent,
@@ -13,20 +15,28 @@ type TablePaginationProps = {
 }
 
 export function TablePagination({ page, pages }: TablePaginationProps) {
+	const [searchParams] = useSearchParams()
+
 	if (pages <= 1) return null
+
+	const buildSearch = (p: number) => {
+		const params = new URLSearchParams(searchParams)
+		params.set('page', String(p))
+		return `?${params.toString()}`
+	}
 
 	return (
 		<Pagination>
 			<PaginationContent>
 				<PaginationItem>
 					<PaginationPrevious
-						to={{ search: `?page=${page === 1 ? 1 : page - 1}` }}
+						to={{ search: buildSearch(Math.max(1, page - 1)) }}
 					/>
 				</PaginationItem>
 				{Array.from(Array(pages).keys()).map(v => (
 					<PaginationItem key={v}>
 						<PaginationLink
-							to={{ search: `?page=${v + 1}` }}
+							to={{ search: buildSearch(v + 1) }}
 							isActive={page === v + 1}
 						>
 							{v + 1}
@@ -36,7 +46,7 @@ export function TablePagination({ page, pages }: TablePaginationProps) {
 				<PaginationItem>
 					<PaginationNext
 						to={{
-							search: `?page=${page === pages ? pages : page + 1}`,
+							search: buildSearch(Math.min(pages, page + 1)),
 						}}
 					/>
 				</PaginationItem>
